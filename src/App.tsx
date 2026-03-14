@@ -117,6 +117,7 @@ function FloatingImage({ src, alt, size = "md" }: { src: string; alt: string; si
         <img
           src={src}
           alt={alt}
+          loading="lazy"
           className={`w-full h-full object-contain ${hasRealImage ? "rounded-lg" : ""}`}
           style={{
             filter: hover
