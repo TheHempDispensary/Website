@@ -31,7 +31,7 @@ function saveCart(cart: CartItem[]) {
 }
 
 const API_URL = import.meta.env.VITE_API_URL || "https://thd-inventory-api.fly.dev";
-const LOYALTY_API_URL = "https://rapidly-legislature-paperbacks-lecture.trycloudflare.com";
+const LOYALTY_API_URL = API_URL;
 
 interface Product {
   id: string;
