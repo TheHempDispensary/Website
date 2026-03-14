@@ -30,7 +30,7 @@ function saveCart(cart: CartItem[]) {
   localStorage.setItem("hemp-cart", JSON.stringify(cart));
 }
 
-const API_URL = import.meta.env.VITE_API_URL || "https://hemp-dispensary-api.fly.dev";
+const API_URL = import.meta.env.VITE_API_URL || "https://thd-inventory-api.fly.dev";
 const LOYALTY_API_URL = "https://rapidly-legislature-paperbacks-lecture.trycloudflare.com";
 
 interface Product {
