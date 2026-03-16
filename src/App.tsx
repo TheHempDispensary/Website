@@ -30,8 +30,8 @@ function saveCart(cart: CartItem[]) {
   localStorage.setItem("hemp-cart", JSON.stringify(cart));
 }
 
-const API_URL = import.meta.env.VITE_API_URL || "https://hemp-dispensary-api.fly.dev";
-const LOYALTY_API_URL = "https://rapidly-legislature-paperbacks-lecture.trycloudflare.com";
+const API_URL = import.meta.env.VITE_API_URL || "https://thd-inventory-api.fly.dev";
+const LOYALTY_API_URL = API_URL;
 
 interface Product {
   id: string;
@@ -117,6 +117,7 @@ function FloatingImage({ src, alt, size = "md" }: { src: string; alt: string; si
         <img
           src={src}
           alt={alt}
+          loading="lazy"
           className={`w-full h-full object-contain ${hasRealImage ? "rounded-lg" : ""}`}
           style={{
             filter: hover
