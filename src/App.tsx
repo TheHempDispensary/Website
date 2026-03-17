@@ -2362,10 +2362,6 @@ function App() {
     return preferred.filter((c) => productsByCategory[c]?.length > 0);
   }, [productsByCategory]);
 
-  if (loading) {
-    return (<div className="min-h-screen bg-black flex flex-col items-center justify-center"><img src="/logo.png" alt="The Hemp Dispensary" className="h-20 w-auto animate-pulse mb-4" /><p className="text-gray-400">Loading products...</p></div>);
-  }
-
   const shell = (content: React.ReactNode) => (
     <div className="min-h-screen bg-black">
       <AnnouncementBar />
@@ -2380,7 +2376,9 @@ function App() {
   if (route.startsWith("#/product/")) return shell(<ProductDetail productId={route.replace("#/product/", "")} onAddToCart={addToCart} />);
   if (route.startsWith("#/shop")) {
     const catSlug = route.replace("#/shop/", "").replace("#/shop", "");
-    return shell(<ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} />);
+    return shell(loading
+      ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.png" alt="The Hemp Dispensary" className="h-20 w-auto animate-pulse mb-4" /><p className="text-gray-400 text-lg italic">Remedy Your Way</p></div>
+      : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} />);
   }
   if (route === "#/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />);
   if (route === "#/about") return shell(<AboutPage />);
@@ -2398,7 +2396,9 @@ function App() {
       <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} />
       <HeroSection />
       <Testimonials />
-      {homeCategories.map((cat) => (
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-24"><img src="/logo.png" alt="The Hemp Dispensary" className="h-20 w-auto animate-pulse mb-4" /><p className="text-gray-400 text-lg italic">Remedy Your Way</p></div>
+      ) : homeCategories.map((cat) => (
         <ProductCarousel key={cat} title={cat} products={productsByCategory[cat] || []} onViewAll={() => navigate(`/shop/${cat.toLowerCase()}`)} />
       ))}
       <AboutSection />
