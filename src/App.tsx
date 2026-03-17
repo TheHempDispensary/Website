@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, Package, X, ArrowLeft, MapPin, Clock, Phone, Mail, ChevronLeft, ChevronRight, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2 } from "lucide-react";
+import { Search, ShoppingCart, Package, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2 } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -144,80 +144,6 @@ function FloatingImage({ src, alt, size = "md" }: { src: string; alt: string; si
         }}
       />
     </div>
-  );
-}
-
-function ProductCarousel({ products, title, onViewAll }: { products: Product[]; title: string; onViewAll: () => void }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-
-  const checkScroll = () => {
-    if (!scrollRef.current) return;
-    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-    setCanScrollLeft(scrollLeft > 10);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-  };
-
-  useEffect(() => {
-    checkScroll();
-    const el = scrollRef.current;
-    if (el) el.addEventListener("scroll", checkScroll);
-    return () => { if (el) el.removeEventListener("scroll", checkScroll); };
-  }, [products]);
-
-  const scroll = (dir: "left" | "right") => {
-    if (!scrollRef.current) return;
-    const amount = scrollRef.current.clientWidth * 0.8;
-    scrollRef.current.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
-  };
-
-  if (products.length === 0) return null;
-
-  return (
-    <section className="py-12 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-10">{title}</h2>
-      </div>
-      <div className="relative w-full px-2 sm:px-4">
-        {canScrollLeft && (
-          <button onClick={() => scroll("left")} className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/70 hover:bg-green-700 text-white p-3 rounded-full transition-colors backdrop-blur-sm">
-            <ChevronLeft className="h-6 w-6" />
-          </button>
-        )}
-        <div ref={scrollRef} className="flex gap-3 sm:gap-4 overflow-x-auto scroll-smooth pb-4" style={{ scrollbarWidth: "none", msOverflowStyle: "none", scrollSnapType: "x mandatory" }}>
-          {products.map((product) => (
-            <div key={product.id} className="flex-none w-[calc(50%-6px)] sm:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)]" style={{ scrollSnapAlign: "start" }}>
-              <div className="cursor-pointer group" onClick={() => navigate(`/product/${product.id}`)}>
-                <div className="bg-[#000000] rounded-2xl p-3 sm:p-4 transition-all duration-300 h-full flex flex-col">
-                  <div className="h-24 sm:h-28 lg:h-32 flex items-center justify-center mb-2 sm:mb-3 flex-none overflow-hidden">
-                    <FloatingImage src={product.image_url || placeholderUrl(product.name)} alt={product.name} size="sm" />
-                  </div>
-                  <div className="flex-1 flex flex-col min-h-0">
-                    {!product.available && <span className="inline-block bg-red-600 text-white text-xs font-bold px-2 py-1 rounded mb-1">SOLD OUT</span>}
-                    <h3 className="text-white text-xs sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1 sm:mb-2 group-hover:text-green-400 transition-colors">{product.online_name || product.name}</h3>
-                    <div className="flex items-center justify-between mt-auto">
-                      <span className="text-green-400 font-bold text-base sm:text-lg">{formatPrice(product.price)}</span>
-                      {product.is_age_restricted && <span className="text-amber-400 text-xs font-bold bg-amber-400/10 px-2 py-0.5 rounded">21+</span>}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        {canScrollRight && (
-          <button onClick={() => scroll("right")} className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/70 hover:bg-green-700 text-white p-3 rounded-full transition-colors backdrop-blur-sm">
-            <ChevronRight className="h-6 w-6" />
-          </button>
-        )}
-      </div>
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="text-center mt-6">
-          <button onClick={onViewAll} className="border border-green-600 text-green-400 hover:bg-green-600 hover:text-white px-8 py-3 rounded-full font-medium transition-all duration-300">Show All Products</button>
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -2398,9 +2324,26 @@ function App() {
       <Testimonials />
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24"><img src="/logo.png" alt="The Hemp Dispensary" className="h-20 w-auto animate-pulse mb-4" /><p className="text-gray-400 text-lg italic">Remedy Your Way</p></div>
-      ) : homeCategories.map((cat) => (
-        <ProductCarousel key={cat} title={cat} products={productsByCategory[cat] || []} onViewAll={() => navigate(`/shop/${cat.toLowerCase()}`)} />
-      ))}
+      ) : homeCategories.map((cat) => {
+        const catProducts = (productsByCategory[cat] || []).filter(p => p.image_url && !p.image_url.includes('placehold.co'));
+        const displayProducts = catProducts.length >= 4 ? catProducts.slice(0, 4) : (productsByCategory[cat] || []).slice(0, 4);
+        if (displayProducts.length === 0) return null;
+        return (
+          <section key={cat} className="py-10">
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-3xl md:text-4xl font-bold text-white">{cat}</h2>
+                <button onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="border border-green-600 text-green-400 hover:bg-green-600 hover:text-white px-6 py-2 rounded-full font-medium transition-all duration-300 text-sm">View All</button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {displayProducts.map((product) => (
+                  <ProductGridCard key={product.id} product={product} />
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      })}
       <AboutSection />
       <MusicSection />
       <LocationSection />
