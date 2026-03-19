@@ -148,13 +148,14 @@ function FloatingImage({ src, alt, size = "md" }: { src: string; alt: string; si
 }
 
 function ProductGridCard({ product }: { product: Product }) {
+  if (product.stock <= 0) return null;
   return (
     <div className="cursor-pointer group" onClick={() => navigate(`/product/${product.id}`)}>
       <div className="bg-[#000000] rounded-2xl p-4 transition-all duration-300 hover:shadow-lg hover:shadow-green-900/20">
         <div className="h-48 flex items-center justify-center mb-3">
           <FloatingImage src={product.image_url || placeholderUrl(product.name)} alt={product.name} size="sm" />
         </div>
-        {!product.available && <span className="inline-block bg-red-600 text-white text-xs font-bold px-2 py-1 rounded mb-2">SOLD OUT</span>}
+        {product.stock <= 5 && <span className="inline-block bg-amber-600 text-white text-xs font-bold px-2 py-1 rounded mb-2">Only {Math.floor(product.stock)} remaining</span>}
         <h3 className="text-white text-sm font-medium leading-tight line-clamp-2 min-h-[2.5rem] mb-2 group-hover:text-green-400 transition-colors">{product.online_name || product.name}</h3>
         <div className="flex items-center justify-between">
           <span className="text-green-400 font-bold text-lg">{formatPrice(product.price)}</span>
@@ -226,10 +227,10 @@ function ProductDetail({ productId, onAddToCart }: { productId: string; onAddToC
             )}
             <div className="mb-6">
               <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Availability</h3>
-              {product.available ? (
+              {product.stock > 0 ? (
                 <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-green-400 font-medium">In Stock ({product.stock} available)</span>
+                  <div className={`h-3 w-3 rounded-full ${product.stock <= 5 ? 'bg-amber-500 animate-pulse' : 'bg-green-500 animate-pulse'}`}></div>
+                  <span className={`font-medium ${product.stock <= 5 ? 'text-amber-400' : 'text-green-400'}`}>{product.stock <= 5 ? `Only ${Math.floor(product.stock)} remaining` : `In Stock (${Math.floor(product.stock)} available)`}</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
@@ -708,10 +709,10 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
     const q = query.toLowerCase();
     const words = q.split(/\s+/).filter(Boolean);
     return products.filter((p) => {
+      if (p.stock <= 0) return false;
       const name = p.name.toLowerCase();
       const desc = (p.description || "").toLowerCase();
       const online = (p.online_name || "").toLowerCase();
-      // Match if ALL words appear in name, description, or online_name
       return words.every(w => name.includes(w) || desc.includes(w) || online.includes(w));
     }).slice(0, 20);
   }, [query, products]);
@@ -749,7 +750,7 @@ function ShopPage({ products, categories, selectedCategory }: { products: Produc
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {
-    let items = products;
+    let items = products.filter((p) => p.stock > 0);
     if (selectedCategory && selectedCategory !== "all") {
       items = items.filter((p) => p.categories.some((c) => c.toLowerCase() === selectedCategory.toLowerCase()));
     }
@@ -2327,8 +2328,9 @@ function App() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24"><img src="/logo.png" alt="The Hemp Dispensary" className="h-20 w-auto animate-pulse mb-4" /><p className="text-gray-400 text-lg italic">Remedy Your Way</p></div>
       ) : homeCategories.map((cat) => {
-        const catProducts = (productsByCategory[cat] || []).filter(p => p.image_url && !p.image_url.includes('placehold.co'));
-        const displayProducts = catProducts.length >= 4 ? catProducts.slice(0, 4) : (productsByCategory[cat] || []).slice(0, 4);
+        const inStock = (productsByCategory[cat] || []).filter(p => p.stock > 0);
+        const catProducts = inStock.filter(p => p.image_url && !p.image_url.includes('placehold.co'));
+        const displayProducts = catProducts.length >= 4 ? catProducts.slice(0, 4) : inStock.slice(0, 4);
         if (displayProducts.length === 0) return null;
         return (
           <section key={cat} className="py-10">
