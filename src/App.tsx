@@ -118,9 +118,8 @@ function FloatingImage({ src, alt, size = "md" }: { src: string; alt: string; si
           src={src}
           alt={alt}
           loading="lazy"
-          className={`w-full h-full ${hasRealImage ? "object-cover rounded-lg" : "object-contain"}`}
+          className={`w-full h-full object-contain ${hasRealImage ? "rounded-lg" : ""}`}
           style={{
-            background: hasRealImage ? "#000" : undefined,
             filter: hover
               ? hasRealImage ? "none" : "drop-shadow(0 30px 50px rgba(34, 197, 94, 0.4)) drop-shadow(0 10px 20px rgba(34, 197, 94, 0.2))"
               : hasRealImage
