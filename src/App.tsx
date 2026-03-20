@@ -2272,9 +2272,28 @@ function App() {
   }, [updateCart]);
 
   useEffect(() => {
+    // Load from localStorage cache first for instant display
+    try {
+      const cached = localStorage.getItem("thd-products-cache");
+      if (cached) {
+        const { products: cp, categories: cc, timestamp: ct } = JSON.parse(cached);
+        if (Date.now() - ct < 600000) { // 10 min local cache
+          setProducts(cp);
+          setCategories(cc);
+          setLoading(false);
+        }
+      }
+    } catch { /* ignore parse errors */ }
+
+    // Always fetch fresh data in background
     fetch(`${API_URL}/api/ecommerce/products?limit=1000`)
       .then((r) => r.json())
-      .then((data: ProductsResponse) => { setProducts(data.products); setCategories(data.categories); setLoading(false); })
+      .then((data: ProductsResponse) => {
+        setProducts(data.products);
+        setCategories(data.categories);
+        setLoading(false);
+        try { localStorage.setItem("thd-products-cache", JSON.stringify({ products: data.products, categories: data.categories, timestamp: Date.now() })); } catch { /* quota */ }
+      })
       .catch((err) => { console.error("Failed to load products:", err); setLoading(false); });
   }, []);
 
