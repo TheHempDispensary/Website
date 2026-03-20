@@ -287,7 +287,7 @@ function AnnouncementBar() {
 }
 
 function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSearch: () => void; onCartOpen: () => void }) {
-  const categories = ["EVERYDAY", "PREMIUM", "ESSENTIAL", "SMALLS", "SNOWCAPS", "CONCENTRATES", "EDIBLES", "VAPOR", "TOPICALS", "TINCTURES", "ACCESSORIES"];
+  const categories = ["FLOWER", "CONCENTRATES", "EDIBLES", "VAPOR", "TOPICALS", "TINCTURES", "ACCESSORIES"];
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   return (
     <header className="bg-black/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-800">
@@ -327,7 +327,7 @@ function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSear
         <nav className="hidden md:block overflow-x-auto" style={{ scrollbarWidth: "none" }}>
           <div className="flex items-center justify-center gap-1 pb-2">
             {categories.map((cat) => (
-              <a key={cat} href={`#/shop/${["EVERYDAY","PREMIUM","ESSENTIAL","SMALLS","SNOWCAPS"].includes(cat) ? `leaflife - ${cat.toLowerCase()}` : cat.toLowerCase()}`} className="px-4 py-2 text-xs font-semibold text-gray-400 hover:text-green-400 whitespace-nowrap transition-colors tracking-wider">{cat}</a>
+              <a key={cat} href={`#/shop/${cat.toLowerCase()}`} className="px-4 py-2 text-xs font-semibold text-gray-400 hover:text-green-400 whitespace-nowrap transition-colors tracking-wider">{cat}</a>
             ))}
           </div>
         </nav>
@@ -337,7 +337,7 @@ function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSear
         <div className="md:hidden border-t border-gray-800 bg-black/98 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-3 py-3 grid grid-cols-2 gap-1">
             {categories.map((cat) => (
-              <a key={cat} href={`#/shop/${["EVERYDAY","PREMIUM","ESSENTIAL","SMALLS","SNOWCAPS"].includes(cat) ? `leaflife - ${cat.toLowerCase()}` : cat.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-sm font-medium text-gray-300 hover:text-green-400 hover:bg-gray-900/50 rounded-lg transition-colors tracking-wider">{cat}</a>
+              <a key={cat} href={`#/shop/${cat.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-sm font-medium text-gray-300 hover:text-green-400 hover:bg-gray-900/50 rounded-lg transition-colors tracking-wider">{cat}</a>
             ))}
             <a href="#/games" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-sm font-medium text-gray-300 hover:text-purple-400 hover:bg-gray-900/50 rounded-lg transition-colors tracking-wider flex items-center gap-2 sm:hidden"><Gamepad2 className="h-4 w-4" /> GAMES</a>
           </div>
@@ -668,10 +668,7 @@ function SiteFooter() {
             <h4 className="font-semibold text-white mb-3">Shop</h4>
             <ul className="space-y-2 text-sm">
               <li><a href="#/shop" className="hover:text-green-400 transition-colors">All Products</a></li>
-              <li><a href="#/shop/leaflife - everyday" className="hover:text-green-400 transition-colors">Everyday</a></li>
-              <li><a href="#/shop/leaflife - premium" className="hover:text-green-400 transition-colors">Premium</a></li>
-              <li><a href="#/shop/leaflife - essential" className="hover:text-green-400 transition-colors">Essential</a></li>
-              <li><a href="#/shop/leaflife - smalls" className="hover:text-green-400 transition-colors">Smalls</a></li>
+              <li><a href="#/shop/flower" className="hover:text-green-400 transition-colors">Flower</a></li>
               <li><a href="#/shop/concentrates" className="hover:text-green-400 transition-colors">Concentrates</a></li>
               <li><a href="#/shop/edibles" className="hover:text-green-400 transition-colors">Edibles</a></li>
             </ul>
@@ -2287,7 +2284,7 @@ function App() {
   }, [products]);
 
   const homeCategories = useMemo(() => {
-    const preferred = ["LEAFLIFE - EVERYDAY", "LEAFLIFE - PREMIUM", "LEAFLIFE - ESSENTIAL", "LEAFLIFE - SMALLS", "LEAFLIFE - SNOWCAPS", "Concentrates", "Edibles", "Flower", "Topicals", "Tinctures", "Vapor", "Accessories", "Pets"];
+    const preferred = ["Flower", "Concentrates", "Edibles", "Topicals", "Tinctures", "Vapor", "Accessories", "Pets"];
     return preferred.filter((c) => productsByCategory[c]?.length > 0);
   }, [productsByCategory]);
 
