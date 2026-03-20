@@ -287,7 +287,7 @@ function AnnouncementBar() {
 }
 
 function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSearch: () => void; onCartOpen: () => void }) {
-  const categories = ["EVERYDAY", "PREMIUM", "ESSENTIAL", "SMALLS", "SNOWCAPS", "CONCENTRATES", "EDIBLES", "VAPOR", "TOPICALS", "TINCTURES", "ACCESSORIES"];
+  const categories = ["FLOWER", "CONCENTRATES", "EDIBLES", "VAPOR", "TOPICALS", "TINCTURES", "ACCESSORIES"];
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   return (
     <header className="bg-black/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-800">
