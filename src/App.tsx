@@ -2205,6 +2205,59 @@ function ScratchCardGame() {
   const scratchedPixels = useRef(0);
   const totalPixels = useRef(0);
 
+  // Auth gating state
+  const [scratchPhone, setScratchPhone] = useState("");
+  const [scratchAuthed, setScratchAuthed] = useState(false);
+  const [scratchAuthName, setScratchAuthName] = useState("");
+  const [scratchAuthLoading, setScratchAuthLoading] = useState(false);
+  const [scratchAuthError, setScratchAuthError] = useState("");
+  const [scratchCooldown, setScratchCooldown] = useState(false);
+  const [shared, setShared] = useState(false);
+
+  // Check cooldown on mount / after auth
+  useEffect(() => {
+    if (scratchAuthed && scratchPhone) {
+      const key = `thd-scratch-${scratchPhone}`;
+      const lastPlay = localStorage.getItem(key);
+      if (lastPlay && Date.now() - Number(lastPlay) < 86400000) {
+        setScratchCooldown(true);
+      }
+    }
+  }, [scratchAuthed, scratchPhone]);
+
+  const handleScratchAuth = async () => {
+    if (!scratchPhone) return;
+    setScratchAuthLoading(true);
+    setScratchAuthError("");
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/lookup?phone=${encodeURIComponent(scratchPhone)}`, { signal: controller.signal });
+      clearTimeout(timeout);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.found) {
+          const name = data.customer ? `${data.customer.first_name} ${data.customer.last_name || ""}`.trim() : (data.name || data.first_name || "Member");
+          setScratchAuthName(name);
+          setScratchAuthed(true);
+          // Check cooldown
+          const key = `thd-scratch-${scratchPhone}`;
+          const lastPlay = localStorage.getItem(key);
+          if (lastPlay && Date.now() - Number(lastPlay) < 86400000) {
+            setScratchCooldown(true);
+          }
+        } else {
+          setScratchAuthError("No rewards account found. Sign up at the Rewards page first!");
+        }
+      } else {
+        setScratchAuthError("Could not verify your account. Please try again.");
+      }
+    } catch {
+      setScratchAuthError("Connection error. Please try again.");
+    }
+    setScratchAuthLoading(false);
+  };
+
   const prizes = [
     { text: "10% OFF", emoji: "\u{1F389}", desc: "Use code HEMP10 at checkout" },
     { text: "15% OFF", emoji: "\u{1F38A}", desc: "Use code HEMP15 at checkout" },
@@ -2271,6 +2324,10 @@ function ScratchCardGame() {
     if (pct > 55 && !revealed) {
       setRevealed(true);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Record play time for 24h cooldown
+      if (scratchPhone) {
+        localStorage.setItem(`thd-scratch-${scratchPhone}`, String(Date.now()));
+      }
     }
   };
 
@@ -2280,33 +2337,78 @@ function ScratchCardGame() {
   const handleTouchStart = (e: React.TouchEvent) => { setHasStarted(true); const t = e.touches[0]; scratch(t.clientX, t.clientY); };
   const handleTouchMove = (e: React.TouchEvent) => { e.preventDefault(); const t = e.touches[0]; scratch(t.clientX, t.clientY); };
 
-  const resetCard = () => {
-    setRevealed(false); setHasStarted(false); setScratchPercent(0); scratchedPixels.current = 0;
-    const p = prizes[Math.floor(Math.random() * prizes.length)];
-    setPrize(p.text); setPrizeEmoji(p.emoji);
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.globalCompositeOperation = "source-over";
-    const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    grad.addColorStop(0, "#126A44"); grad.addColorStop(0.5, "#126A44"); grad.addColorStop(1, "#126A44");
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = "rgba(255,255,255,0.08)"; ctx.lineWidth = 1;
-    for (let i = -canvas.height; i < canvas.width; i += 12) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + canvas.height, canvas.height); ctx.stroke(); }
-    ctx.fillStyle = "rgba(255,255,255,0.5)"; ctx.font = "bold 18px sans-serif"; ctx.textAlign = "center";
-    ctx.fillText("SCRATCH HERE", canvas.width / 2, canvas.height / 2 - 10);
-    ctx.font = "14px sans-serif"; ctx.fillText("to reveal your prize!", canvas.width / 2, canvas.height / 2 + 15);
-    ctx.font = "24px serif"; ctx.fillText("\u{1F33F} \u{1F33F} \u{1F33F}", canvas.width / 2, canvas.height - 20);
+  const handleShareWin = () => {
+    const shareText = `I just won ${prize} at The Hemp Dispensary! Use code FIRST20 for 20% off your first order \u2192 https://its420here.com`;
+    if (navigator.share) {
+      navigator.share({ title: "I won at The Hemp Dispensary!", text: shareText, url: "https://its420here.com" }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(shareText).then(() => setShared(true)).catch(() => {});
+    }
   };
 
   const currentPrize = prizes.find(p => p.text === prize);
 
+  // Auth gate
+  if (!scratchAuthed) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-12">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-[#231F20] mb-2">Scratch & Win!</h1>
+          <p className="text-[#231F20]/40">Enter your rewards number to play</p>
+        </div>
+        <div className="bg-white rounded-2xl border border-[#231F20]/15 p-8 text-center max-w-md mx-auto">
+          <Gift className="h-12 w-12 text-[#58BA49] mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-[#231F20] mb-2">Rewards Members Only</h2>
+          <p className="text-[#231F20]/50 text-sm mb-6">Enter your rewards phone number to unlock your daily scratch card. Not a member? <a href="#/loyalty" className="text-[#58BA49] underline">Sign up free</a></p>
+          <input type="tel" placeholder="(555) 555-5555" value={scratchPhone} onChange={(e) => setScratchPhone(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleScratchAuth()}
+            className="w-full px-4 py-3 rounded-xl border border-[#231F20]/15 text-[#231F20] text-center text-lg mb-4 focus:outline-none focus:border-[#B3D335]" />
+          {scratchAuthError && <p className="text-red-500 text-sm mb-3">{scratchAuthError}</p>}
+          <button onClick={handleScratchAuth} disabled={scratchAuthLoading || !scratchPhone}
+            className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-xl font-semibold transition-colors disabled:opacity-50">
+            {scratchAuthLoading ? "Verifying..." : "Unlock My Scratch Card"}
+          </button>
+        </div>
+        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3">
+          {prizes.map((p, i) => (
+            <div key={i} className="bg-white border border-[#231F20]/10 rounded-lg p-3 text-center">
+              <span className="text-2xl">{p.emoji}</span>
+              <p className="text-xs text-[#231F20]/50 mt-1 font-medium">{p.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Cooldown gate
+  if (scratchCooldown) {
+    const key = `thd-scratch-${scratchPhone}`;
+    const lastPlay = Number(localStorage.getItem(key) || "0");
+    const nextPlay = lastPlay + 86400000;
+    const hoursLeft = Math.max(0, Math.ceil((nextPlay - Date.now()) / 3600000));
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-12">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-[#231F20] mb-2">Scratch & Win!</h1>
+          <p className="text-[#231F20]/40">Welcome back, {scratchAuthName}!</p>
+        </div>
+        <div className="bg-white rounded-2xl border border-[#231F20]/15 p-8 text-center max-w-md mx-auto">
+          <Clock className="h-12 w-12 text-[#D9A32C] mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-[#231F20] mb-2">Come Back Tomorrow!</h2>
+          <p className="text-[#231F20]/50 text-sm mb-4">You already played today. Your next scratch card unlocks in <span className="font-bold text-[#231F20]">{hoursLeft} hour{hoursLeft !== 1 ? "s" : ""}</span>.</p>
+          <p className="text-[#231F20]/40 text-xs mb-6">Make a purchase to earn an extra scratch card!</p>
+          <button onClick={() => navigate("/shop")} className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-xl font-semibold transition-colors">Shop Now</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2">Scratch & Win!</h1>
-        <p className="text-[#231F20]/40">Scratch the card below to reveal your prize</p>
+        <h1 className="text-4xl font-bold text-[#231F20] mb-2">Scratch & Win!</h1>
+        <p className="text-[#231F20]/40">Welcome, {scratchAuthName}! Scratch the card below to reveal your prize</p>
       </div>
       <div className="bg-[#231F20] rounded-2xl border border-[#231F20] p-8 text-center">
         <div className="relative inline-block rounded-xl overflow-hidden border-4 border-[#B3D335] shadow-lg shadow-[#B3D335]/30" style={{ width: 320, height: 200 }}>
@@ -2326,9 +2428,18 @@ function ScratchCardGame() {
         </div>
         {hasStarted && !revealed && <div className="mt-4"><div className="w-64 mx-auto bg-[#231F20]/10 rounded-full h-2"><div className="bg-[#B3D335] h-2 rounded-full transition-all" style={{ width: `${scratchPercent}%` }} /></div><p className="text-xs text-[#231F20]/50 mt-1">{Math.round(scratchPercent)}% scratched</p></div>}
         {revealed && (
-          <div className="mt-6 animate-pulse">
-            <p className="text-[#B3D335] text-lg font-semibold mb-4">Congratulations! You won {prize}!</p>
-            <button onClick={resetCard} className="px-6 py-2 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-full font-medium transition-all">Try Again</button>
+          <div className="mt-6">
+            <p className="text-[#B3D335] text-lg font-semibold mb-4 animate-pulse">Congratulations, {scratchAuthName}! You won {prize}!</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button onClick={handleShareWin}
+                className="px-6 py-2 bg-[#58BA49] hover:bg-[#3D8C32] text-white rounded-full font-medium transition-all">
+                {shared ? "Copied!" : "Share your win \u{1F389}"}
+              </button>
+              <button onClick={() => navigate("/loyalty")}
+                className="px-6 py-2 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-full font-medium transition-all">
+                Check Rewards Balance
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -2589,12 +2700,23 @@ function RollAJointGame() {
             <div className="text-6xl mb-4">{"\uD83C\uDF89"}</div>
             <h2 className="text-2xl font-bold text-[#B3D335] mb-2">Round {round} Complete!</h2>
             <p className="text-[#231F20]/40 mb-2">Bud Puppet rolled a perfect {selectedStrain?.name} joint!</p>
-            <p className="text-[#FFCB08] font-bold text-xl mb-6">+{100 + round * 10} points!</p>
+            <p className="text-[#FFCB08] font-bold text-xl mb-2">+{100 + round * 10} game points!</p>
+            <div className="bg-[#B3D335]/10 border border-[#B3D335]/30 rounded-xl p-4 mb-6 inline-block">
+              <p className="text-[#58BA49] font-semibold text-sm mb-1">{"\u{1F3C6}"} Bonus Rewards Points Earned!</p>
+              <p className="text-[#231F20] font-bold text-2xl">{score >= 500 ? "+25" : "+10"} <span className="text-sm font-normal text-[#231F20]/50">rewards points</span></p>
+              <p className="text-[#231F20]/40 text-xs mt-1">{score >= 500 ? "High score bonus!" : "Complete more rounds for 25 pts!"}</p>
+            </div>
             <BudPuppet size={100} action="celebrate" className="mx-auto mb-6" />
-            <button onClick={nextRound}
-              className="px-8 py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-full font-bold text-lg transition-all shadow-lg shadow-[#B3D335]/50">
-              Next Round
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button onClick={nextRound}
+                className="px-8 py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-full font-bold text-lg transition-all shadow-lg shadow-[#B3D335]/50">
+                Next Round
+              </button>
+              <button onClick={() => navigate("/loyalty")}
+                className="px-6 py-3 border-2 border-[#B3D335] text-[#B3D335] hover:bg-[#B3D335] hover:text-[#231F20] rounded-full font-semibold transition-all">
+                Check Rewards Balance
+              </button>
+            </div>
           </div>
         )}
       </div>
