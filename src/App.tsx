@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, Package, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, MessageCircle, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench } from "lucide-react";
+import { Search, ShoppingCart, Package, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, MessageCircle, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, Instagram, Heart, DollarSign, Target } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -1808,20 +1808,62 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
 }
 
 
-/* ======================== LOYALTY PAGE (Preserved) ======================== */
+/* ======================== LOYALTY PAGE (Full Upgrade) ======================== */
+
+interface LoyaltyTransaction { type: string; points: number; description: string; created_at: string; }
+interface LoyaltyCustomer { id: number; first_name: string; last_name: string; phone: string; email: string; points_balance: number; lifetime_points: number; birthday: string; }
+
+const VIP_TIERS = [
+  { name: "Budding", min: 0, max: 249, multiplier: "1x", color: "#B3D335", icon: Leaf, benefits: ["1 point per $1 spent", "Birthday bonus: 100 pts", "Access to all redemptions"] },
+  { name: "Grower", min: 250, max: 499, multiplier: "1.25x", color: "#58BA49", icon: TrendingUp, benefits: ["1.25x points on every purchase", "Birthday bonus: 150 pts", "Early access to new drops"] },
+  { name: "Premium", min: 500, max: 999, multiplier: "1.5x", color: "#3D8C32", icon: Award, benefits: ["1.5x points on every purchase", "Birthday bonus: 250 pts", "Early access + mystery gift"] },
+  { name: "Elite", min: 1000, max: Infinity, multiplier: "2x", color: "#126A44", icon: Crown, benefits: ["2x points on every purchase", "Birthday bonus: 500 pts", "Early access + VIP mystery gift"] },
+];
+
+const REDEMPTION_TIERS = [
+  { points: 100, discount: "$5 Off", minPurchase: 25, desc: "Any purchase $25+" },
+  { points: 250, discount: "$15 Off", minPurchase: 40, desc: "Any purchase $40+" },
+  { points: 500, discount: "$35 Off", minPurchase: 60, desc: "Any purchase $60+" },
+  { points: 1000, discount: "$75 Off", minPurchase: 100, desc: "Any purchase $100+" },
+  { points: 2000, discount: "Free 3.5g Flower", minPurchase: 0, desc: "Pickup only — any strain" },
+];
+
+const WAYS_TO_EARN = [
+  { label: "Sign Up Bonus", pts: 200, icon: Gift, desc: "Create your free account" },
+  { label: "Every $1 Spent", pts: 1, icon: DollarSign, desc: "In-store & online" },
+  { label: "Follow on Instagram", pts: 25, icon: Instagram, desc: "@thehempdispensary" },
+  { label: "Follow on TikTok", pts: 25, icon: Heart, desc: "@thehempdispensary" },
+  { label: "Email Signup", pts: 30, icon: Mail, desc: "Join our mailing list" },
+  { label: "Google Review", pts: 150, icon: Star, desc: "Pending staff approval" },
+  { label: "Refer a Friend", pts: 500, icon: Users, desc: "After friend's first purchase" },
+  { label: "Birthday Bonus", pts: 100, icon: Cake, desc: "Awarded in your birthday month" },
+  { label: "Daily Bud Puppet", pts: 10, icon: Gamepad2, desc: "Play once per day" },
+  { label: "Scratch Card Win", pts: 25, icon: Target, desc: "Win the daily scratch card" },
+];
 
 function LoyaltyPage() {
   const [phone, setPhone] = useState("");
-  const [lookupResult, setLookupResult] = useState<{ found: boolean; points?: number; name?: string } | null>(null);
+  const [customer, setCustomer] = useState<LoyaltyCustomer | null>(null);
+  const [transactions, setTransactions] = useState<LoyaltyTransaction[]>([]);
+  const [lifetimeEarned, setLifetimeEarned] = useState(0);
   const [lookupLoading, setLookupLoading] = useState(false);
+  const [lookupDone, setLookupDone] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
-  const [signupForm, setSignupForm] = useState({ first_name: "", last_name: "", phone: "", email: "" });
+  const [signupForm, setSignupForm] = useState({ first_name: "", last_name: "", phone: "", email: "", birthday_month: "", birthday_day: "" });
   const [signupLoading, setSignupLoading] = useState(false);
   const [signupResult, setSignupResult] = useState<{ status: string; message: string; points?: number } | null>(null);
+  const [showAllTx, setShowAllTx] = useState(false);
+  const [referralForm, setReferralForm] = useState({ friend_name: "", friend_email: "" });
+  const [referralMsg, setReferralMsg] = useState("");
+  const [referralLoading, setReferralLoading] = useState(false);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
 
   const handleLookup = async () => {
     if (!phone) return;
     setLookupLoading(true);
+    setLookupDone(false);
+    setCustomer(null);
+    setTransactions([]);
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000);
@@ -1830,19 +1872,14 @@ function LoyaltyPage() {
       if (resp.ok) {
         const data = await resp.json();
         if (data.found && data.customer) {
-          setLookupResult({ found: true, points: data.customer.points_balance || 0, name: `${data.customer.first_name} ${data.customer.last_name || ""}`.trim() || "Member" });
-        } else if (data.found) {
-          setLookupResult({ found: true, points: data.points_balance || data.points || 0, name: data.name || data.first_name || "Member" });
-        } else {
-          setLookupResult({ found: false });
+          setCustomer(data.customer);
+          setTransactions(data.transactions || []);
+          setLifetimeEarned(data.lifetime_earned || 0);
         }
-      } else {
-        setLookupResult({ found: false });
       }
-    } catch {
-      setLookupResult({ found: false });
-    }
+    } catch { /* timeout or network error */ }
     setLookupLoading(false);
+    setLookupDone(true);
   };
 
   const handleSignup = async () => {
@@ -1850,7 +1887,8 @@ function LoyaltyPage() {
     setSignupLoading(true);
     setSignupResult(null);
     try {
-      const params = new URLSearchParams({ phone: signupForm.phone, first_name: signupForm.first_name, last_name: signupForm.last_name || "", email: signupForm.email || "" });
+      const birthday = signupForm.birthday_month && signupForm.birthday_day ? `${signupForm.birthday_month}/${signupForm.birthday_day}` : "";
+      const params = new URLSearchParams({ phone: signupForm.phone, first_name: signupForm.first_name, last_name: signupForm.last_name || "", email: signupForm.email || "", birthday });
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000);
       const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/signup?${params.toString()}`, { signal: controller.signal });
@@ -1859,6 +1897,8 @@ function LoyaltyPage() {
       if (resp.ok) {
         setSignupResult({ status: data.status, message: data.message, points: data.points });
         setShowSignup(false);
+        setPhone(signupForm.phone);
+        setTimeout(() => handleLookup(), 500);
       } else {
         setSignupResult({ status: "error", message: data.detail || "Something went wrong. Please try again." });
       }
@@ -1868,114 +1908,423 @@ function LoyaltyPage() {
     setSignupLoading(false);
   };
 
+  const handleReferral = async () => {
+    if (!referralForm.friend_name || !referralForm.friend_email || !customer) return;
+    setReferralLoading(true);
+    setReferralMsg("");
+    try {
+      const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/referral`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ referrer_phone: customer.phone, friend_name: referralForm.friend_name, friend_email: referralForm.friend_email }),
+      });
+      if (resp.ok) {
+        setReferralMsg("Referral sent! You'll earn 500 points when your friend makes their first purchase.");
+        setReferralForm({ friend_name: "", friend_email: "" });
+      } else {
+        const data = await resp.json();
+        setReferralMsg(data.detail || "Could not send referral. Please try again.");
+      }
+    } catch {
+      setReferralMsg("Unable to connect. Please try again.");
+    }
+    setReferralLoading(false);
+  };
+
+  const currentTier = VIP_TIERS.find(t => lifetimeEarned >= t.min && lifetimeEarned <= t.max) || VIP_TIERS[0];
+  const nextTier = VIP_TIERS[VIP_TIERS.indexOf(currentTier) + 1] || null;
+  const tierProgress = nextTier ? Math.min(100, ((lifetimeEarned - currentTier.min) / (nextTier.min - currentTier.min)) * 100) : 100;
+
+  const isBirthdayMonth = () => {
+    if (!customer?.birthday) return false;
+    const parts = customer.birthday.split("/");
+    if (parts.length < 2) return false;
+    const now = new Date();
+    return parseInt(parts[0]) === (now.getMonth() + 1);
+  };
+
+  const toggleSection = (s: string) => setActiveSection(activeSection === s ? null : s);
+
+  const displayedTx = showAllTx ? transactions : transactions.slice(0, 10);
+
+  const inputClass = "w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]";
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-16">
-      <div className="text-center mb-12">
+    <div className="max-w-5xl mx-auto px-4 py-12">
+      {/* Header */}
+      <div className="text-center mb-10">
         <div className="inline-flex items-center justify-center w-20 h-20 bg-[#B3D335]/20 rounded-full mb-6">
           <Gift className="h-10 w-10 text-[#58BA49]" />
         </div>
-        <h1 className="text-4xl font-bold text-[#231F20] mb-4">Hemp Rewards</h1>
-        <p className="text-[#231F20]/40 text-lg max-w-2xl mx-auto">Earn points on every purchase, in-store and online. Redeem for discounts on your favorite products.</p>
+        <h1 className="text-4xl font-bold text-[#231F20] mb-3">Hemp Rewards</h1>
+        <p className="text-[#231F20]/50 text-lg max-w-2xl mx-auto">Earn points on every purchase, unlock VIP tiers, and redeem for discounts.</p>
       </div>
 
-      {/* How it works */}
-      <div className="grid md:grid-cols-3 gap-6 mb-12">
-        <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10 text-center">
-          <div className="text-3xl font-bold text-[#B3D335] mb-2">1</div>
-          <h3 className="text-[#231F20] font-semibold mb-2">Sign Up</h3>
-          <p className="text-[#231F20]/40 text-sm">Create your rewards account with your phone number at any location or online.</p>
-        </div>
-        <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10 text-center">
-          <div className="text-3xl font-bold text-[#B3D335] mb-2">2</div>
-          <h3 className="text-[#231F20] font-semibold mb-2">Earn Points</h3>
-          <p className="text-[#231F20]/40 text-sm">Earn 1 point for every $1 spent. Points work across East, West, and online.</p>
-        </div>
-        <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10 text-center">
-          <div className="text-3xl font-bold text-[#B3D335] mb-2">3</div>
-          <h3 className="text-[#231F20] font-semibold mb-2">Redeem</h3>
-          <p className="text-[#231F20]/40 text-sm">Use your points for discounts: 100 pts = $5 off, 200 pts = $12 off, 500 pts = $35 off.</p>
-        </div>
-      </div>
-
-      {/* Sign Up Result */}
+      {/* Sign Up Result Toast */}
       {signupResult && (
         <div className={`max-w-lg mx-auto mb-8 p-4 rounded-lg text-center ${signupResult.status === "error" ? "bg-[#D9A32C]/10 border border-[#D9A32C]/30" : "bg-[#B3D335]/10 border border-[#B3D335]/30"}`}>
           <p className={`font-semibold ${signupResult.status === "error" ? "text-[#D9A32C]" : "text-[#58BA49]"}`}>{signupResult.message}</p>
-          {signupResult.points !== undefined && signupResult.points > 0 && <p className="text-[#FFFFFF] mt-1">You earned <span className="font-bold text-[#B3D335]">{signupResult.points} bonus points</span> for signing up!</p>}
+          {signupResult.points !== undefined && signupResult.points > 0 && <p className="text-[#231F20]/60 mt-1">You earned <span className="font-bold text-[#B3D335]">{signupResult.points} bonus points</span> for signing up!</p>}
         </div>
       )}
 
-      {/* Points lookup */}
-      <div className="bg-[#FFFFFF] rounded-2xl p-8 border border-[#231F20]/20 max-w-lg mx-auto mb-8 shadow-sm">
+      {/* Points Lookup */}
+      <div className="bg-[#FFFFFF] rounded-2xl p-8 border border-[#231F20]/20 max-w-lg mx-auto mb-10 shadow-sm">
         <h2 className="text-xl font-bold text-[#231F20] mb-4 text-center">Check Your Points</h2>
         <div className="flex gap-3">
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="Enter your phone number"
+          <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Enter your phone number"
             className="flex-1 bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]"
-            onKeyDown={(e) => { if (e.key === "Enter") handleLookup(); }}
-          />
-          <button
-            onClick={handleLookup}
-            disabled={lookupLoading || !phone}
-            className="px-6 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg font-medium transition-colors disabled:opacity-50"
-          >
+            onKeyDown={(e) => { if (e.key === "Enter") handleLookup(); }} />
+          <button onClick={handleLookup} disabled={lookupLoading || !phone}
+            className="px-6 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg font-medium transition-colors disabled:opacity-50">
             {lookupLoading ? "..." : "Look Up"}
           </button>
         </div>
-        {lookupResult && (
-          <div className={`mt-4 p-4 rounded-lg ${lookupResult.found ? "bg-[#B3D335]/10 border border-[#B3D335]/30" : "bg-[#FFFFFF] border border-[#231F20]/20"}`}>
-            {lookupResult.found ? (
-              <div className="text-center">
-                <p className="text-[#58BA49] font-semibold text-lg">Welcome back, {lookupResult.name}! — <span className="text-[#231F20] font-bold">{lookupResult.points !== undefined && lookupResult.points !== null ? lookupResult.points : 0} points</span></p>
+
+        {lookupDone && !customer && (
+          <div className="mt-4 p-4 rounded-lg bg-[#FFFFFF] border border-[#231F20]/20 text-center">
+            <p className="text-[#231F20]/50">No rewards account found for this number.</p>
+            <button onClick={() => { setShowSignup(true); setSignupForm(f => ({ ...f, phone })); }} className="mt-3 text-[#B3D335] hover:text-[#58BA49] font-medium underline transition-colors">Sign up for Hemp Rewards</button>
+          </div>
+        )}
+
+        {customer && (
+          <div className="mt-4 p-5 rounded-lg bg-[#B3D335]/10 border border-[#B3D335]/30">
+            <div className="text-center">
+              <p className="text-[#58BA49] font-semibold text-lg">Welcome back, {customer.first_name} {customer.last_name}!</p>
+              <p className="text-[#231F20] font-bold text-3xl mt-1">{customer.points_balance} <span className="text-base font-normal text-[#231F20]/50">points</span></p>
+              {isBirthdayMonth() && (
+                <div className="mt-3 inline-flex items-center gap-2 bg-[#FFCB08]/20 border border-[#FFCB08]/40 rounded-full px-4 py-1.5">
+                  <Cake className="h-4 w-4 text-[#D9A32C]" />
+                  <span className="text-[#D9A32C] font-semibold text-sm">Happy Birthday Month!</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ===== PROFILE SECTIONS (shown after lookup) ===== */}
+      {customer && (
+        <div className="space-y-6">
+
+          {/* --- VIP TIER STATUS --- */}
+          <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10">
+            <div className="flex items-center justify-between mb-4 cursor-pointer" onClick={() => toggleSection("vip")}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: currentTier.color + "20" }}>
+                  <currentTier.icon className="h-5 w-5" style={{ color: currentTier.color }} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-[#231F20]">VIP Tier: {currentTier.name}</h3>
+                  <p className="text-[#231F20]/50 text-sm">{currentTier.multiplier} points multiplier</p>
+                </div>
               </div>
-            ) : (
-              <div className="text-center">
-                <p className="text-[#231F20]/40">No rewards account found for this number.</p>
-                <button onClick={() => { setShowSignup(true); setSignupForm(f => ({ ...f, phone })); }} className="mt-3 text-[#B3D335] hover:text-[#58BA49] font-medium underline transition-colors">Sign up for Hemp Rewards</button>
+              {activeSection === "vip" ? <ChevronUp className="h-5 w-5 text-[#231F20]/40" /> : <ChevronDown className="h-5 w-5 text-[#231F20]/40" />}
+            </div>
+
+            {activeSection === "vip" && (
+              <div className="space-y-4">
+                {/* Progress bar */}
+                {nextTier && (
+                  <div>
+                    <div className="flex justify-between text-xs text-[#231F20]/50 mb-1">
+                      <span>{currentTier.name} (${currentTier.min}+)</span>
+                      <span>{nextTier.name} (${nextTier.min}+)</span>
+                    </div>
+                    <div className="w-full h-3 bg-[#231F20]/10 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${tierProgress}%`, backgroundColor: currentTier.color }} />
+                    </div>
+                    <p className="text-xs text-[#231F20]/40 mt-1">${nextTier.min - lifetimeEarned} more in earnings to reach {nextTier.name}</p>
+                  </div>
+                )}
+                {!nextTier && <p className="text-sm text-[#58BA49] font-medium">You've reached the highest tier!</p>}
+
+                {/* All tiers */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+                  {VIP_TIERS.map(tier => {
+                    const TierIcon = tier.icon;
+                    const isActive = tier.name === currentTier.name;
+                    return (
+                      <div key={tier.name} className={`rounded-xl p-4 border text-center ${isActive ? "border-2" : "border border-[#231F20]/10 opacity-60"}`} style={isActive ? { borderColor: tier.color, backgroundColor: tier.color + "10" } : {}}>
+                        <TierIcon className="h-6 w-6 mx-auto mb-2" style={{ color: tier.color }} />
+                        <p className="font-bold text-[#231F20] text-sm">{tier.name}</p>
+                        <p className="text-xs text-[#231F20]/50">{tier.multiplier} points</p>
+                        <p className="text-xs text-[#231F20]/40 mt-1">${tier.min}{tier.max === Infinity ? "+" : `–$${tier.max}`}</p>
+                        <ul className="mt-2 space-y-0.5">
+                          {tier.benefits.map((b, i) => <li key={i} className="text-[10px] text-[#231F20]/50">{b}</li>)}
+                        </ul>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
+          </div>
+
+          {/* --- POINTS ACTIVITY LOG --- */}
+          <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10">
+            <div className="flex items-center justify-between mb-4 cursor-pointer" onClick={() => toggleSection("activity")}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#FFCB08]/20 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-[#D9A32C]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-[#231F20]">Points Activity</h3>
+                  <p className="text-[#231F20]/50 text-sm">{transactions.length} transactions</p>
+                </div>
+              </div>
+              {activeSection === "activity" ? <ChevronUp className="h-5 w-5 text-[#231F20]/40" /> : <ChevronDown className="h-5 w-5 text-[#231F20]/40" />}
+            </div>
+
+            {activeSection === "activity" && (
+              <div>
+                {transactions.length === 0 ? (
+                  <p className="text-[#231F20]/40 text-sm text-center py-4">No transactions yet. Start earning points!</p>
+                ) : (
+                  <>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-[#231F20]/10">
+                            <th className="text-left py-2 text-[#231F20]/50 font-medium">Activity</th>
+                            <th className="text-right py-2 text-[#231F20]/50 font-medium">Points</th>
+                            <th className="text-right py-2 text-[#231F20]/50 font-medium">Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {displayedTx.map((tx, i) => (
+                            <tr key={i} className="border-b border-[#231F20]/5">
+                              <td className="py-2.5 text-[#231F20]">{tx.description || (tx.type === "earn" ? "Points Earned" : tx.type === "redeem" ? "Points Redeemed" : tx.type)}</td>
+                              <td className={`py-2.5 text-right font-semibold ${tx.type === "earn" || tx.points > 0 ? "text-[#58BA49]" : "text-[#D9A32C]"}`}>
+                                {tx.type === "earn" || tx.points > 0 ? "+" : ""}{tx.points}
+                              </td>
+                              <td className="py-2.5 text-right text-[#231F20]/40">{tx.created_at ? new Date(tx.created_at).toLocaleDateString() : "—"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    {transactions.length > 10 && (
+                      <button onClick={() => setShowAllTx(!showAllTx)} className="mt-3 text-[#B3D335] hover:text-[#58BA49] text-sm font-medium transition-colors">
+                        {showAllTx ? "Show Less" : `Show All ${transactions.length} Transactions`}
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* --- REDEMPTION LADDER --- */}
+          <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10">
+            <div className="flex items-center justify-between mb-4 cursor-pointer" onClick={() => toggleSection("redeem")}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#58BA49]/20 flex items-center justify-center">
+                  <Gift className="h-5 w-5 text-[#58BA49]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-[#231F20]">Redeem Points</h3>
+                  <p className="text-[#231F20]/50 text-sm">{customer.points_balance} points available</p>
+                </div>
+              </div>
+              {activeSection === "redeem" ? <ChevronUp className="h-5 w-5 text-[#231F20]/40" /> : <ChevronDown className="h-5 w-5 text-[#231F20]/40" />}
+            </div>
+
+            {activeSection === "redeem" && (
+              <div className="space-y-3">
+                {REDEMPTION_TIERS.map(tier => {
+                  const canAfford = customer.points_balance >= tier.points;
+                  const needed = tier.points - customer.points_balance;
+                  return (
+                    <div key={tier.points} className={`flex items-center justify-between p-4 rounded-xl border ${canAfford ? "border-[#58BA49]/30 bg-[#58BA49]/5" : "border-[#231F20]/10 opacity-50"}`}>
+                      <div>
+                        <p className={`font-bold ${canAfford ? "text-[#231F20]" : "text-[#231F20]/50"}`}>{tier.discount}</p>
+                        <p className="text-xs text-[#231F20]/40">{tier.desc}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className={`font-bold text-sm ${canAfford ? "text-[#58BA49]" : "text-[#231F20]/40"}`}>{tier.points} pts</p>
+                        {!canAfford && <p className="text-[10px] text-[#D9A32C]">{needed} more needed</p>}
+                        {canAfford && <p className="text-[10px] text-[#58BA49] font-medium">Available!</p>}
+                      </div>
+                    </div>
+                  );
+                })}
+                <p className="text-xs text-[#231F20]/40 text-center mt-2">Visit any location to redeem your points</p>
+              </div>
+            )}
+          </div>
+
+          {/* --- REFERRAL PROGRAM --- */}
+          <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10">
+            <div className="flex items-center justify-between mb-4 cursor-pointer" onClick={() => toggleSection("referral")}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#B3D335]/20 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-[#3D8C32]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-[#231F20]">Refer a Friend</h3>
+                  <p className="text-[#231F20]/50 text-sm">Give $20, Get $20</p>
+                </div>
+              </div>
+              {activeSection === "referral" ? <ChevronUp className="h-5 w-5 text-[#231F20]/40" /> : <ChevronDown className="h-5 w-5 text-[#231F20]/40" />}
+            </div>
+
+            {activeSection === "referral" && (
+              <div>
+                <div className="bg-[#B3D335]/10 border border-[#B3D335]/20 rounded-xl p-4 mb-4 text-center">
+                  <p className="text-[#231F20] font-semibold">Your friend gets <span className="text-[#58BA49]">$20 off</span> their first order</p>
+                  <p className="text-[#231F20]/50 text-sm">You earn <span className="font-bold text-[#58BA49]">500 points</span> when they make their first purchase</p>
+                </div>
+                <div className="space-y-3">
+                  <input type="text" value={referralForm.friend_name} onChange={(e) => setReferralForm(f => ({ ...f, friend_name: e.target.value }))} placeholder="Friend's name" className={inputClass} />
+                  <input type="email" value={referralForm.friend_email} onChange={(e) => setReferralForm(f => ({ ...f, friend_email: e.target.value }))} placeholder="Friend's email" className={inputClass} />
+                  <button onClick={handleReferral} disabled={referralLoading || !referralForm.friend_name || !referralForm.friend_email}
+                    className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg font-medium transition-colors disabled:opacity-50">
+                    {referralLoading ? "Sending..." : "Send Referral"}
+                  </button>
+                  {referralMsg && <p className="text-sm text-center text-[#58BA49]">{referralMsg}</p>}
+                </div>
+              </div>
+            )}
+          </div>
+
+        </div>
+      )}
+
+      {/* ===== GENERAL SECTIONS (always visible) ===== */}
+      <div className="mt-10 space-y-6">
+
+        {/* --- WAYS TO EARN --- */}
+        <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-full bg-[#ADD038]/20 flex items-center justify-center">
+              <TrendingUp className="h-5 w-5 text-[#3D8C32]" />
+            </div>
+            <h3 className="text-lg font-bold text-[#231F20]">Ways to Earn</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {WAYS_TO_EARN.map(way => {
+              const WayIcon = way.icon;
+              return (
+                <div key={way.label} className="flex items-start gap-3 p-3 rounded-xl border border-[#231F20]/10 hover:border-[#B3D335]/40 transition-colors">
+                  <div className="w-9 h-9 rounded-lg bg-[#B3D335]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <WayIcon className="h-4 w-4 text-[#58BA49]" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[#231F20] font-semibold text-sm leading-tight">{way.label}</p>
+                    <p className="text-[#58BA49] font-bold text-xs">+{way.pts} pts</p>
+                    <p className="text-[#231F20]/40 text-[11px] leading-tight">{way.desc}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* --- HOW IT WORKS --- */}
+        <div className="grid md:grid-cols-3 gap-4">
+          <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10 text-center">
+            <div className="text-3xl font-bold text-[#B3D335] mb-2">1</div>
+            <h3 className="text-[#231F20] font-semibold mb-2">Sign Up</h3>
+            <p className="text-[#231F20]/40 text-sm">Create your rewards account with your phone number at any location or online.</p>
+          </div>
+          <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10 text-center">
+            <div className="text-3xl font-bold text-[#B3D335] mb-2">2</div>
+            <h3 className="text-[#231F20] font-semibold mb-2">Earn Points</h3>
+            <p className="text-[#231F20]/40 text-sm">Earn 1 point for every $1 spent. Points work across East, West, and online.</p>
+          </div>
+          <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10 text-center">
+            <div className="text-3xl font-bold text-[#B3D335] mb-2">3</div>
+            <h3 className="text-[#231F20] font-semibold mb-2">Redeem</h3>
+            <p className="text-[#231F20]/40 text-sm">100 pts = $5 off, 250 pts = $15 off, 500 pts = $35 off, 1000 pts = $75 off.</p>
+          </div>
+        </div>
+
+        {/* --- VIP TIER OVERVIEW (for non-logged-in users) --- */}
+        {!customer && (
+          <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-full bg-[#FFCB08]/20 flex items-center justify-center">
+                <Crown className="h-5 w-5 text-[#D9A32C]" />
+              </div>
+              <h3 className="text-lg font-bold text-[#231F20]">VIP Tiers</h3>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {VIP_TIERS.map(tier => {
+                const TierIcon = tier.icon;
+                return (
+                  <div key={tier.name} className="rounded-xl p-4 border border-[#231F20]/10 text-center">
+                    <TierIcon className="h-6 w-6 mx-auto mb-2" style={{ color: tier.color }} />
+                    <p className="font-bold text-[#231F20] text-sm">{tier.name}</p>
+                    <p className="text-xs text-[#231F20]/50">{tier.multiplier} points</p>
+                    <p className="text-xs text-[#231F20]/40 mt-1">${tier.min}{tier.max === Infinity ? "+" : `–$${tier.max}`}</p>
+                    <ul className="mt-2 space-y-0.5">
+                      {tier.benefits.map((b, i) => <li key={i} className="text-[10px] text-[#231F20]/50">{b}</li>)}
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
 
       {/* Sign Up Form */}
       {showSignup && (
-        <div className="bg-[#FFFFFF] rounded-2xl p-8 border border-[#B3D335]/50 max-w-lg mx-auto shadow-sm">
-          <h2 className="text-xl font-bold text-[#231F20] mb-2 text-center">Join Hemp Rewards</h2>
-          <p className="text-[#231F20]/40 text-sm text-center mb-6">Create your free rewards account and start earning points!</p>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-[#231F20] mb-1.5">First Name *</label>
-                <input type="text" value={signupForm.first_name} onChange={(e) => setSignupForm(f => ({ ...f, first_name: e.target.value }))} placeholder="First name" className="w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]" />
+        <div className="fixed inset-0 bg-[#231F20]/50 flex items-center justify-center z-50 p-4" onClick={() => setShowSignup(false)}>
+          <div className="bg-[#FFFFFF] rounded-2xl p-8 max-w-md w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-xl font-bold text-[#231F20] mb-2 text-center">Join Hemp Rewards</h2>
+            <p className="text-[#231F20]/40 text-sm text-center mb-6">Create your free rewards account and start earning points!</p>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-[#231F20] mb-1.5">First Name *</label>
+                  <input type="text" value={signupForm.first_name} onChange={(e) => setSignupForm(f => ({ ...f, first_name: e.target.value }))} placeholder="First name" className={inputClass} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#231F20] mb-1.5">Last Name</label>
+                  <input type="text" value={signupForm.last_name} onChange={(e) => setSignupForm(f => ({ ...f, last_name: e.target.value }))} placeholder="Last name" className={inputClass} />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#231F20] mb-1.5">Last Name</label>
-                <input type="text" value={signupForm.last_name} onChange={(e) => setSignupForm(f => ({ ...f, last_name: e.target.value }))} placeholder="Last name" className="w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]" />
+                <label className="block text-sm font-medium text-[#231F20] mb-1.5">Phone Number *</label>
+                <input type="tel" value={signupForm.phone} onChange={(e) => setSignupForm(f => ({ ...f, phone: e.target.value }))} placeholder="(352) 555-0123" className={inputClass} />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-[#231F20] mb-1.5">Email (optional)</label>
+                <input type="email" value={signupForm.email} onChange={(e) => setSignupForm(f => ({ ...f, email: e.target.value }))} placeholder="you@example.com" className={inputClass} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#231F20] mb-1.5">Birthday (optional, for bonus points)</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <select value={signupForm.birthday_month} onChange={(e) => setSignupForm(f => ({ ...f, birthday_month: e.target.value }))} className={inputClass}>
+                    <option value="">Month</option>
+                    {["January","February","March","April","May","June","July","August","September","October","November","December"].map((m, i) => (
+                      <option key={m} value={String(i + 1)}>{m}</option>
+                    ))}
+                  </select>
+                  <select value={signupForm.birthday_day} onChange={(e) => setSignupForm(f => ({ ...f, birthday_day: e.target.value }))} className={inputClass}>
+                    <option value="">Day</option>
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                      <option key={d} value={String(d)}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <button onClick={handleSignup} disabled={signupLoading || !signupForm.first_name || !signupForm.phone}
+                className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg font-medium transition-colors disabled:opacity-50">
+                {signupLoading ? "Creating account..." : "Create My Rewards Account"}
+              </button>
+              <button onClick={() => setShowSignup(false)} className="w-full py-2 text-[#231F20]/50 hover:text-[#231F20]/30 text-sm transition-colors">Cancel</button>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-[#231F20] mb-1.5">Phone Number *</label>
-              <input type="tel" value={signupForm.phone} onChange={(e) => setSignupForm(f => ({ ...f, phone: e.target.value }))} placeholder="(352) 555-0123" className="w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#231F20] mb-1.5">Email (optional)</label>
-              <input type="email" value={signupForm.email} onChange={(e) => setSignupForm(f => ({ ...f, email: e.target.value }))} placeholder="you@example.com" className="w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]" />
-            </div>
-            <button onClick={handleSignup} disabled={signupLoading || !signupForm.first_name || !signupForm.phone} className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg font-medium transition-colors disabled:opacity-50">
-              {signupLoading ? "Creating account..." : "Create My Rewards Account"}
-            </button>
-            <button onClick={() => setShowSignup(false)} className="w-full py-2 text-[#231F20]/50 hover:text-[#231F20]/30 text-sm transition-colors">Cancel</button>
           </div>
         </div>
       )}
 
-      {/* Sign up CTA when no form shown */}
-      {!showSignup && !signupResult && (
-        <div className="text-center">
+      {/* Sign up CTA */}
+      {!customer && !showSignup && !signupResult && (
+        <div className="text-center mt-8">
           <p className="text-[#231F20]/50 text-sm">Don't have an account? <button onClick={() => setShowSignup(true)} className="text-[#B3D335] hover:text-[#58BA49] font-medium underline">Sign up for free</button></p>
         </div>
       )}
