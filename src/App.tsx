@@ -121,7 +121,7 @@ function getProductBenefit(product: Product): string {
 function StickyTopBar() {
   return (
     <div className="bg-[#231F20] text-white text-center py-2 px-4 text-sm font-medium">
-      <span className="hidden sm:inline">{"\u{1F680}"} Order Online \u2013 Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | Open Late | </span>
+      <span className="hidden sm:inline">{"\u{1F680}"} Order Online {"\u2013"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | Open Late | </span>
       <span className="sm:hidden">{"\u{1F680}"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | </span>
       <span className="text-[#FFCB08] font-bold">FIRST20 = 20% Off</span>
     </div>
@@ -429,8 +429,8 @@ function ReviewsSection() {
 /* ======================== LOCATION SECTION ======================== */
 function LocationSection() {
   const locations = [
-    { name: "Spring Hill East", address: "14312 Spring Hill Dr, Spring Hill, FL 34609", hours: "Open Daily 10am-8pm", phone: "(352) 515-5370", mapsQuery: "The Hemp Dispensary Spring Hill Dr" },
-    { name: "Spring Hill West", address: "6175 Deltona Blvd, Ste 104, Spring Hill, FL 34606", hours: "Mon-Fri 6am-12am \u00B7 Sat-Sun 10am-8pm", phone: "(352) 340-5860", mapsQuery: "The Hemp Dispensary Deltona Blvd" },
+    { name: "Spring Hill East", address: "14312 Spring Hill Dr, Spring Hill, FL 34609", hours: "Open Daily 6am\u201310pm", phone: "(352) 515-5370", mapsQuery: "The Hemp Dispensary Spring Hill Dr" },
+    { name: "Spring Hill West", address: "6175 Deltona Blvd, Ste 104, Spring Hill, FL 34606", hours: "Open Daily 6am\u201312am", phone: "(352) 340-5860", mapsQuery: "The Hemp Dispensary Deltona Blvd" },
   ];
   return (
     <section id="locations-section" className="bg-white py-12 sm:py-16">
@@ -624,7 +624,7 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
 
             {/* Ready for pickup message */}
             <div className={`${isLeafLife(product) ? 'bg-blue-50 border-blue-100' : 'bg-green-50 border-green-100'} border rounded-lg px-4 py-2 mb-4`}>
-              <p className={`text-sm font-medium ${isLeafLife(product) ? 'text-blue-600' : 'text-[#58BA49]'}`}>{isLeafLife(product) ? `${"\u{1F4E6}"} This Product Ships From Our Partner \u2013 Shipping Only` : `${"\u26A1"} Ready For Pickup Today In About 5 Minutes`}</p>
+              <p className={`text-sm font-medium ${isLeafLife(product) ? 'text-blue-600' : 'text-[#58BA49]'}`}>{isLeafLife(product) ? <>{"\u{1F4E6}"} This Product Ships From Our Partner {"\u2013"} Shipping Only</> : <>{"\u26A1"} Ready For Pickup Today In About 5 Minutes</>}</p>
             </div>
 
             {/* Add to cart */}
