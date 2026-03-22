@@ -465,13 +465,12 @@ function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd
     <div className="cursor-pointer group" onClick={() => navigate(`/product/${product.id}`)}>
       <div className="bg-white rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-xl relative">
         {/* Floating product image */}
-        <div className="h-36 sm:h-48 flex items-center justify-center mb-2 sm:mb-3 relative bg-white rounded-xl">
+        <div className="h-36 sm:h-48 flex items-center justify-center mb-2 sm:mb-3 relative bg-white rounded-xl overflow-hidden">
           <img
             src={product.image_url || placeholderUrl(product.name)}
             alt={product.name}
             loading="lazy"
-            className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105 rounded-xl"
-            style={{ backgroundColor: '#fff' }}
+            className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105 rounded-xl mix-blend-multiply"
             onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(product.name); }}
           />
           {/* Soft shadow underneath */}
@@ -557,11 +556,11 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
       <div className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
         <div className="grid md:grid-cols-2 gap-0">
           {/* Product image - floating design */}
-          <div className="p-4 sm:p-8 flex items-center justify-center bg-[#F8F8F8] min-h-[250px] sm:min-h-[400px] relative">
+          <div className="p-4 sm:p-8 flex items-center justify-center bg-white min-h-[250px] sm:min-h-[400px] relative">
             <img
               src={product.image_url || placeholderUrl(product.name, 600)}
               alt={product.name}
-              className="max-h-[350px] max-w-full object-contain"
+              className="max-h-[350px] max-w-full object-contain mix-blend-multiply"
               onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(product.name, 600); }}
             />
             {/* Soft shadow */}
@@ -699,8 +698,8 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
           {results.map((product) => (
             <div key={product.id} className="cursor-pointer group" onClick={() => { navigate(`/product/${product.id}`); onClose(); setQuery(""); }}>
               <div className="bg-[#F8F8F8] rounded-xl p-3 transition-all hover:shadow-md">
-                <div className="h-28 flex items-center justify-center mb-2">
-                  <img src={product.image_url || placeholderUrl(product.name, 200)} alt={product.name} loading="lazy" className="max-h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(product.name, 200); }} />
+                <div className="h-28 flex items-center justify-center mb-2 bg-white rounded-lg overflow-hidden">
+                  <img src={product.image_url || placeholderUrl(product.name, 200)} alt={product.name} loading="lazy" className="max-h-full object-contain mix-blend-multiply" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(product.name, 200); }} />
                 </div>
                 <h3 className="text-xs font-medium text-[#231F20] line-clamp-2 group-hover:text-[#58BA49] transition-colors">{titleCase(product.online_name || product.name)}</h3>
                 <p className="text-[#58BA49] font-bold text-sm mt-1">{formatPrice(product.price)}</p>
