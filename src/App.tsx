@@ -399,7 +399,7 @@ function WhyChooseUs() {
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-3xl font-bold text-[#231F20] text-center mb-2">{"\u26A1"} Why Shop With Us?</h2>
         <p className="text-[#231F20]/60 text-center mb-8">Quality you can trust, speed you can count on</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {reasons.map((r) => (
             <div key={r.text} className="bg-white rounded-xl p-5 text-center border border-[#231F20]/10">
               <r.icon className="h-8 w-8 text-[#3D8C32] mx-auto mb-3" />
@@ -542,9 +542,9 @@ function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd
   const effect = getProductEffect(product);
   return (
     <div className="cursor-pointer group" onClick={() => navigate(`/product/${product.id}`)}>
-      <div className="bg-white rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-xl relative border border-[#231F20]/10">
+      <div className="bg-white rounded-2xl p-[10px] sm:p-4 transition-all duration-300 hover:shadow-xl relative border border-[#231F20]/35">
         {/* Floating product image */}
-        <div className="h-36 sm:h-48 flex items-center justify-center mb-2 sm:mb-3 bg-white rounded-xl overflow-hidden">
+        <div className="h-[140px] sm:h-48 flex items-center justify-center mb-2 sm:mb-3 bg-white rounded-xl overflow-hidden">
           <img
             src={product.image_url || placeholderUrl(product.name)}
             alt={product.name}
@@ -556,21 +556,21 @@ function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd
         </div>
         {/* Badges row */}
         <div className="flex items-center gap-1 flex-wrap mb-1.5">
-          <span className="inline-block text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>
-            {effect.icon} {effect.label}
-          </span>
+                    <span className="inline-block text-[11px] sm:text-xs font-medium px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>
+                      {effect.icon} {effect.label}
+                    </span>
           {product.stock <= 5 && <span className="inline-block bg-[#ADD038] text-[#231F20] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Only {Math.floor(product.stock)} Left</span>}
         </div>
-        <h3 className="text-[#231F20] text-xs sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#58BA49] transition-colors">{titleCase(product.online_name || product.name)}</h3>
+        <h3 className="text-[#231F20] text-[13px] sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#58BA49] transition-colors">{titleCase(product.online_name || product.name)}</h3>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[#231F20] font-bold text-base sm:text-lg">{formatPrice(product.price)}</span>
-          <span className="text-[10px] text-[#3D8C32] hidden sm:inline">{isLeafLife(product) ? `${"\u{1F4E6}"} Shipping Only` : `${"\u26A1"} 5 Minute Pickup`}</span>
+                    <span className="text-[#231F20] font-semibold text-[14px] sm:text-lg">{formatPrice(product.price)}</span>
+                    <span className="text-[11px] sm:text-[10px] text-[#3D8C32] sm:inline">{isLeafLife(product) ? `${"\u{1F4E6}"} Shipping Only` : `${"\u26A1"} 5 Minute Pickup`}</span>
         </div>
         {/* Quick Add to Cart button */}
         {onQuickAdd && product.available && (
           <button
             onClick={(e) => { e.stopPropagation(); onQuickAdd(product); }}
-            className="w-full py-2 sm:py-2.5 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-xl font-semibold text-xs sm:text-sm transition-colors"
+            className="w-full py-2 sm:py-2.5 h-[40px] sm:h-auto bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-xl font-semibold text-[13px] sm:text-sm transition-colors"
           >
             Add to Cart
           </button>
@@ -875,7 +875,7 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart }: { pro
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-[#231F20]">{selectedCategory && selectedCategory !== "all" ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : "All Products"}</h1>
+          <h1 className="text-[18px] sm:text-3xl font-semibold sm:font-bold text-[#231F20]">{selectedCategory && selectedCategory !== "all" ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : "All Products"}</h1>
           <p className="text-[#231F20]/50 text-sm mt-1">{filtered.length} products</p>
         </div>
         <div className="flex gap-2 items-center">
@@ -893,7 +893,7 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart }: { pro
           <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === cat.toLowerCase() ? "bg-[#B3D335] text-[#231F20]" : "bg-white text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>{cat}</button>
         ))}
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
         {filtered.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} />)}
       </div>
       {filtered.length === 0 && (
@@ -1927,7 +1927,7 @@ function LoyaltyPage() {
             {lookupResult.found ? (
               <div className="text-center">
                 <p className="text-[#58BA49] font-semibold text-lg">Welcome back, {lookupResult.name}!</p>
-                <p className="text-white text-3xl font-bold mt-2">{lookupResult.points} <span className="text-sm text-[#231F20]/40 font-normal">points</span></p>
+                <p className="text-[#231F20] text-3xl font-bold mt-2">{lookupResult.points !== undefined ? lookupResult.points : 0} <span className="text-sm text-[#231F20]/40 font-normal">points</span></p>
               </div>
             ) : (
               <div className="text-center">
@@ -2806,10 +2806,10 @@ function App() {
               <section key={cat} className="py-10 bg-white">
                 <div className="max-w-7xl mx-auto px-4">
                   <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-3xl font-bold text-[#231F20]">{cat}</h2>
+                    <h2 className="text-[18px] sm:text-3xl font-semibold sm:font-bold text-[#231F20]">{cat}</h2>
                     <button onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="border border-[#231F20] text-[#231F20] hover:bg-white px-6 py-2 rounded-full font-medium transition-all duration-300 text-sm">View All</button>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                     {displayProducts.map((product) => (
                       <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => addToCart(p, 1)} />
                     ))}
