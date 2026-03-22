@@ -1684,7 +1684,10 @@ function LoyaltyPage() {
     if (!phone) return;
     setLookupLoading(true);
     try {
-      const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/lookup?phone=${encodeURIComponent(phone)}`);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/lookup?phone=${encodeURIComponent(phone)}`, { signal: controller.signal });
+      clearTimeout(timeout);
       if (resp.ok) {
         const data = await resp.json();
         if (data.found && data.customer) {
@@ -1709,7 +1712,10 @@ function LoyaltyPage() {
     setSignupResult(null);
     try {
       const params = new URLSearchParams({ phone: signupForm.phone, first_name: signupForm.first_name, last_name: signupForm.last_name || "", email: signupForm.email || "" });
-      const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/signup?${params.toString()}`);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/signup?${params.toString()}`, { signal: controller.signal });
+      clearTimeout(timeout);
       const data = await resp.json();
       if (resp.ok) {
         setSignupResult({ status: data.status, message: data.message, points: data.points });
@@ -1859,7 +1865,10 @@ function AccountPage() {
     setLoginError("");
     try {
       const query = loginForm.phone ? `phone=${encodeURIComponent(loginForm.phone)}` : `email=${encodeURIComponent(loginForm.email)}`;
-      const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/lookup?${query}`);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/lookup?${query}`, { signal: controller.signal });
+      clearTimeout(timeout);
       if (resp.ok) {
         const data = await resp.json();
         if (data.found && data.customer) {
@@ -1886,7 +1895,10 @@ function AccountPage() {
     setSignupResult(null);
     try {
       const params = new URLSearchParams({ phone: signupForm.phone, first_name: signupForm.first_name, last_name: signupForm.last_name || "", email: signupForm.email || "" });
-      const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/signup?${params.toString()}`);
+      const controller2 = new AbortController();
+      const timeout2 = setTimeout(() => controller2.abort(), 10000);
+      const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/signup?${params.toString()}`, { signal: controller2.signal });
+      clearTimeout(timeout2);
       const data = await resp.json();
       if (resp.ok) {
         setSignupResult({ status: data.status, message: data.message, points: data.points });
