@@ -429,8 +429,8 @@ function ReviewsSection() {
 /* ======================== LOCATION SECTION ======================== */
 function LocationSection() {
   const locations = [
-    { name: "Spring Hill Dr", address: "The Hemp Dispensary, Spring Hill Dr, Spring Hill, FL", hours: "Mon-Sat 10am-9pm \u00B7 Sun 11am-7pm", phone: "(352) 340-2861", mapsQuery: "The Hemp Dispensary Spring Hill Dr" },
-    { name: "Deltona Blvd", address: "The Hemp Dispensary, Deltona Blvd, Spring Hill, FL", hours: "Mon-Sat 10am-9pm \u00B7 Sun 11am-7pm", phone: "(352) 340-2862", mapsQuery: "The Hemp Dispensary Deltona Blvd" },
+    { name: "Spring Hill East", address: "14312 Spring Hill Dr, Spring Hill, FL 34609", hours: "Open Daily 10am-8pm", phone: "(352) 515-5370", mapsQuery: "The Hemp Dispensary Spring Hill Dr" },
+    { name: "Spring Hill West", address: "6175 Deltona Blvd, Ste 104, Spring Hill, FL 34606", hours: "Mon-Fri 6am-12am \u00B7 Sat-Sun 10am-8pm", phone: "(352) 340-5860", mapsQuery: "The Hemp Dispensary Deltona Blvd" },
   ];
   return (
     <section id="locations-section" className="bg-white py-12 sm:py-16">
