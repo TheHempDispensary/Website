@@ -72,7 +72,24 @@ function formatPrice(cents: number): string {
   return "$" + (cents / 100).toFixed(2);
 }
 
+/* Unsplash fallback images for accessory products without real photos */
+/* TODO: Replace these Unsplash stand-ins with real product photos when available */
+const ACCESSORY_PLACEHOLDER_IMAGES: Record<string, string> = {
+  "butane": "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop",
+  "lighter": "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop",
+  "ignitus": "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop",
+  "pipe": "https://images.unsplash.com/photo-1560024802-ec901e5abd1a?w=400&h=400&fit=crop",
+  "glass": "https://images.unsplash.com/photo-1560024802-ec901e5abd1a?w=400&h=400&fit=crop",
+  "grinder": "https://images.unsplash.com/photo-1616690002498-1435060a1948?w=400&h=400&fit=crop",
+  "rolling": "https://images.unsplash.com/photo-1616690002498-1435060a1948?w=400&h=400&fit=crop",
+  "tray": "https://images.unsplash.com/photo-1616690002498-1435060a1948?w=400&h=400&fit=crop",
+};
+
 function placeholderUrl(name: string, size = 400): string {
+  const nameLower = name.toLowerCase();
+  for (const [keyword, url] of Object.entries(ACCESSORY_PLACEHOLDER_IMAGES)) {
+    if (nameLower.includes(keyword)) return url;
+  }
   const text = name.split(" ").slice(0, 3).join("\n");
   return `https://placehold.co/${size}x${size}/f8f8f8/231f20?text=${encodeURIComponent(text)}&font=roboto`;
 }
@@ -131,7 +148,7 @@ function StickyTopBar() {
 /* ======================== HEADER (Light Theme) ======================== */
 function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSearch: () => void; onCartOpen: () => void }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const categories = ["EVERYDAY", "PREMIUM", "ESSENTIAL", "SMALLS", "SNOWCAPS", "CONCENTRATES", "EDIBLES", "VAPOR", "TOPICALS", "TINCTURES", "ACCESSORIES"];
+  const categories = ["FLOWER", "EDIBLES", "CONCENTRATES", "VAPOR", "TOPICALS", "TINCTURES", "ACCESSORIES"];
 
   return (
     <header className="bg-white sticky top-0 z-50 border-b border-gray-200 shadow-sm">
@@ -276,7 +293,7 @@ function TrustStrip() {
     { icon: Shield, label: "Lab Tested", sub: "Clean & Safe" },
     { icon: MapPin, label: "2 Locations", sub: "Spring Hill, FL" },
     { icon: Zap, label: "Ready In 5 Minutes", sub: "Fast Pickup" },
-    { icon: Clock, label: "Open Late", sub: "Mon-Sat Til 9pm" },
+    { icon: Clock, label: "Open Late", sub: "West Til 12am | East Til 10pm" },
   ];
   return (
     <section className="bg-white border-b border-gray-100 cursor-pointer" onClick={() => navigate('/shop')}>
@@ -297,21 +314,21 @@ function TrustStrip() {
 
 /* ======================== SHOP BY CATEGORY ======================== */
 function ShopByCategory({ productsByCategory }: { categories: string[]; productsByCategory: Record<string, Product[]> }) {
-  const displayCats = ["Flower", "Edibles", "Concentrates", "Vapor"].filter(c => {
+  const displayCats = ["Flower", "Edibles", "Concentrates", "Vapor", "Topicals", "Tinctures", "Accessories"].filter(c => {
     const prods = productsByCategory[c] || [];
     return prods.some(p => p.stock > 0);
   });
   if (displayCats.length === 0) return null;
 
-  const catIcons: Record<string, string> = { Flower: "\u{1F33F}", Edibles: "\u{1F36C}", Concentrates: "\u{1F4A7}", Vapor: "\u{1F32C}\uFE0F" };
+  const catIcons: Record<string, string> = { Flower: "\u{1F33F}", Edibles: "\u{1F36C}", Concentrates: "\u{1F4A7}", Vapor: "\u{1F32C}\uFE0F", Topicals: "\u{1F9F4}", Tinctures: "\u{1F48A}", Accessories: "\u{1F527}" };
 
   return (
     <section className="bg-[#F8F8F8] py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-3xl font-bold text-[#231F20] text-center mb-8">Shop by Category</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
           {displayCats.map((cat) => (
-            <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="bg-white rounded-2xl p-6 text-center hover:shadow-lg transition-all group border border-gray-100">
+            <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="bg-white rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-all group border border-gray-100">
               <span className="text-4xl block mb-3">{catIcons[cat] || "\u{1F4E6}"}</span>
               <h3 className="text-lg font-semibold text-[#231F20] group-hover:text-[#58BA49] transition-colors">{cat}</h3>
               <p className="text-sm text-gray-500 mt-1">{(productsByCategory[cat] || []).filter(p => p.stock > 0).length} products</p>
@@ -398,15 +415,21 @@ function WhyChooseUs() {
 /* ======================== REVIEWS SECTION ======================== */
 function ReviewsSection() {
   const reviews = [
-    { name: "Sarah M.", rating: 5, text: "Best hemp products in Spring Hill! Fast pickup and amazing quality.", date: "2 weeks ago" },
-    { name: "Mike T.", rating: 5, text: "Love the variety and the staff is super knowledgeable. My go-to spot.", date: "1 month ago" },
-    { name: "Jessica R.", rating: 5, text: "Ordered online and it was ready in 5 minutes. So convenient!", date: "3 weeks ago" },
-    { name: "David L.", rating: 5, text: "Clean products, fair prices, and great customer service. Highly recommend.", date: "1 week ago" },
+    { name: "Cindy Clark", rating: 5, text: "Yall are doing it right my grandma is loving your gummies \u2764\uFE0F" },
+    { name: "Charley", rating: 5, text: "Shopping here is always a pleasure, fast shipping as always \u{1F601}" },
+    { name: "Jorge Palms", rating: 5, text: "Had an amazing experience shopping here, will come back. Highly recommended \u{1F60A}" },
+    { name: "Sarah M.", rating: 5, text: "Best hemp products in Spring Hill! Fast pickup and amazing quality." },
   ];
   return (
     <section className="bg-[#F8F8F8] py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl font-bold text-[#231F20] text-center mb-8">What Our Customers Say</h2>
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-[#231F20] mb-2">What Our Customers Say</h2>
+          <div className="flex items-center justify-center gap-1 mb-2">
+            {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-5 w-5 fill-[#FFCB08] text-[#FFCB08]" />)}
+          </div>
+          <a href="https://www.google.com/maps/place/The+Hemp+Dispensary/@28.4786,-82.5535,15z/data=!4m8!3m7!1s0x0:0x0!8m2!3d28.4786!4d-82.5535!9m1!1b1" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-500 hover:text-[#58BA49] transition-colors">6,000+ Five Star Reviews on Google {"\u2192"}</a>
+        </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {reviews.map((r, i) => (
             <div key={i} className="bg-white rounded-xl p-5 border border-gray-100">
@@ -414,10 +437,7 @@ function ReviewsSection() {
                 {Array.from({ length: r.rating }).map((_, j) => <Star key={j} className="h-4 w-4 fill-[#FFCB08] text-[#FFCB08]" />)}
               </div>
               <p className="text-gray-600 text-sm mb-3">"{r.text}"</p>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-[#231F20]">{r.name}</span>
-                <span className="text-xs text-gray-400">{r.date}</span>
-              </div>
+              <span className="text-sm font-semibold text-[#231F20]">{r.name}</span>
             </div>
           ))}
         </div>
@@ -429,8 +449,8 @@ function ReviewsSection() {
 /* ======================== LOCATION SECTION ======================== */
 function LocationSection() {
   const locations = [
-    { name: "Spring Hill East", address: "14312 Spring Hill Dr, Spring Hill, FL 34609", hours: "Open Daily 6am\u201310pm", phone: "(352) 515-5370", mapsQuery: "The Hemp Dispensary Spring Hill Dr" },
-    { name: "Spring Hill West", address: "6175 Deltona Blvd, Ste 104, Spring Hill, FL 34606", hours: "Open Daily 6am\u201312am", phone: "(352) 340-5860", mapsQuery: "The Hemp Dispensary Deltona Blvd" },
+    { name: "Spring Hill East", address: "14312 Spring Hill Dr, Spring Hill, FL 34609", hours: "Open Daily 6am\u201310pm", phone: "(352) 515-5370", mapsQuery: "The Hemp Dispensary Spring Hill Dr", googleUrl: "https://www.google.com/maps/place/The+Hemp+Dispensary/@28.4786,-82.5535,15z" },
+    { name: "Spring Hill West", address: "6175 Deltona Blvd, Ste 104, Spring Hill, FL 34606", hours: "Open Daily 6am\u201312am", phone: "(352) 340-5860", mapsQuery: "The Hemp Dispensary Deltona Blvd", googleUrl: "https://www.google.com/maps/place/The+Hemp+Dispensary/@28.4631,-82.6016,15z" },
   ];
   return (
     <section id="locations-section" className="bg-white py-12 sm:py-16">
@@ -445,9 +465,14 @@ function LocationSection() {
                 <p className="flex items-center gap-2"><Clock className="h-4 w-4 text-[#58BA49]" />{loc.hours}</p>
                 <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-[#58BA49]" />{loc.phone}</p>
               </div>
-              <button onClick={() => window.open(`https://maps.google.com/maps/search/${encodeURIComponent(loc.mapsQuery)}`, "_blank")} className="mt-4 text-[#58BA49] font-semibold text-sm flex items-center gap-1 hover:underline">
-                Get Directions <ChevronRight className="h-4 w-4" />
-              </button>
+              <div className="mt-4 flex gap-3">
+                <button onClick={() => window.open(`https://maps.google.com/maps/search/${encodeURIComponent(loc.mapsQuery)}`, "_blank")} className="text-[#58BA49] font-semibold text-sm flex items-center gap-1 hover:underline">
+                  Get Directions <ChevronRight className="h-4 w-4" />
+                </button>
+                <button onClick={() => window.open(loc.googleUrl, "_blank")} className="text-gray-500 font-medium text-sm flex items-center gap-1 hover:text-[#58BA49] hover:underline">
+                  Google Reviews <Star className="h-3 w-3" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -536,10 +561,29 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
   const strength = getProductStrength(product);
   const benefit = getProductBenefit(product);
 
-  // Find related products for "Customers also buy"
+  // Find related products for "You Might Also Like"
   const related = products
     .filter(p => p.id !== product.id && p.stock > 0 && p.categories.some(c => product.categories.includes(c)))
-    .slice(0, 4);
+    .slice(0, 3);
+
+  // Find size variants for savings badge (e.g., "Apples & Bananas Live Rosin 1 Gram" / "4 Grams")
+  const baseName = (product.online_name || product.name).replace(/\d+\s*(gram|grams|g)\b/gi, "").trim().toLowerCase();
+  const sizeVariants = products.filter(p =>
+    p.id !== product.id && p.stock > 0 &&
+    (p.online_name || p.name).replace(/\d+\s*(gram|grams|g)\b/gi, "").trim().toLowerCase() === baseName
+  );
+  const extractGrams = (p: Product): number => {
+    const match = (p.online_name || p.name).match(/(\d+)\s*(gram|grams|g)\b/i);
+    return match ? parseInt(match[1]) : 0;
+  };
+  const currentGrams = extractGrams(product);
+  const smallestVariant = [product, ...sizeVariants]
+    .filter(p => extractGrams(p) > 0)
+    .sort((a, b) => extractGrams(a) - extractGrams(b))[0];
+  const perGramSmallest = smallestVariant && extractGrams(smallestVariant) > 0 ? smallestVariant.price / extractGrams(smallestVariant) : 0;
+  const savingsVsBuying = currentGrams > 0 && perGramSmallest > 0 && smallestVariant?.id !== product.id
+    ? (perGramSmallest * currentGrams) - product.price
+    : 0;
 
   return (
     <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
@@ -584,7 +628,14 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
               <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100" style={{ color: strength.color }}>Strength: {strength.label}</span>
             </div>
 
-            <p className="text-3xl font-bold text-[#58BA49] mb-4">{formatPrice(product.price)}</p>
+            <div className="flex items-center gap-3 mb-4">
+              <p className="text-3xl font-bold text-[#58BA49]">{formatPrice(product.price)}</p>
+              {savingsVsBuying > 0 && (
+                <span className="inline-block bg-green-100 text-[#58BA49] text-xs font-bold px-2.5 py-1 rounded-full">
+                  Save {formatPrice(savingsVsBuying)} vs buying {currentGrams}{"\u00D7"}1g
+                </span>
+              )}
+            </div>
 
             {/* Benefit description */}
             <p className="text-gray-600 text-sm mb-4">{benefit}</p>
@@ -649,12 +700,45 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
         </div>
       </div>
 
-      {/* Customers also buy */}
+      {/* You Might Also Like */}
       {related.length > 0 && (
         <div className="mt-10">
-          <h2 className="text-2xl font-bold text-[#231F20] mb-6">{"\u{1F525}"} Customers Also Buy</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {related.map((p) => <ProductGridCard key={p.id} product={p} />)}
+          <h2 className="text-2xl font-bold text-[#231F20] mb-6">You Might Also Like</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {related.map((p) => (
+              <div key={p.id} className="flex items-center gap-3 bg-white rounded-xl p-3 border border-gray-100 hover:shadow-md transition-all cursor-pointer" onClick={() => navigate(`/product/${p.id}`)}>
+                <div className="w-20 h-20 flex-shrink-0 bg-white rounded-lg overflow-hidden flex items-center justify-center">
+                  <img src={p.image_url || placeholderUrl(p.name, 200)} alt={p.name} className="max-h-full max-w-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(p.name, 200); }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-medium text-[#231F20] line-clamp-2 hover:text-[#58BA49] transition-colors">{titleCase(p.online_name || p.name)}</h3>
+                  <p className="text-[#58BA49] font-bold text-sm mt-1">{formatPrice(p.price)}</p>
+                </div>
+                <button onClick={(e) => { e.stopPropagation(); onAddToCart(p, 1); }} className="flex-shrink-0 bg-[#58BA49] hover:bg-[#4aa83d] text-white rounded-lg px-3 py-2 text-xs font-semibold transition-colors">Add</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Size variants with savings */}
+      {sizeVariants.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-xl font-bold text-[#231F20] mb-4">Available Sizes</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[product, ...sizeVariants].sort((a, b) => extractGrams(a) - extractGrams(b)).map((v) => {
+              const vGrams = extractGrams(v);
+              const vSavings = vGrams > 0 && perGramSmallest > 0 && smallestVariant?.id !== v.id ? (perGramSmallest * vGrams) - v.price : 0;
+              return (
+                <div key={v.id} className={`flex items-center justify-between p-3 rounded-xl border ${v.id === product.id ? 'border-[#58BA49] bg-green-50' : 'border-gray-100 bg-white hover:border-[#58BA49]'} cursor-pointer transition-all`} onClick={() => { if (v.id !== product.id) navigate(`/product/${v.id}`); }}>
+                  <div>
+                    <span className="text-sm font-medium text-[#231F20]">{vGrams > 0 ? `${vGrams}g` : titleCase(v.online_name || v.name)}</span>
+                    {vSavings > 0 && <span className="ml-2 text-xs font-bold text-[#58BA49] bg-green-100 px-2 py-0.5 rounded-full">Save {formatPrice(vSavings)}</span>}
+                  </div>
+                  <span className="text-sm font-bold text-[#58BA49]">{formatPrice(v.price)}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
