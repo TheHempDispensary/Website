@@ -75,9 +75,9 @@ function formatPrice(cents: number): string {
 /* Unsplash fallback images for accessory products without real photos */
 /* TODO: Replace these Unsplash stand-ins with real product photos when available */
 const ACCESSORY_PLACEHOLDER_IMAGES: Record<string, string> = {
-  "butane": "https://images.unsplash.com/photo-1583508805133-8fd03a9916d4?w=400&h=400&fit=crop",
-  "lighter": "https://images.unsplash.com/photo-1583508805133-8fd03a9916d4?w=400&h=400&fit=crop",
-  "ignitus": "https://images.unsplash.com/photo-1583508805133-8fd03a9916d4?w=400&h=400&fit=crop",
+  "butane": "https://images.unsplash.com/photo-1605542484282-6e2d79b74f8f?w=400&h=400&fit=crop",
+  "lighter": "https://images.unsplash.com/photo-1605542484282-6e2d79b74f8f?w=400&h=400&fit=crop",
+  "ignitus": "https://images.unsplash.com/photo-1605542484282-6e2d79b74f8f?w=400&h=400&fit=crop",
   "pipe": "https://images.unsplash.com/photo-1560024802-ec901e5abd1a?w=400&h=400&fit=crop",
   "glass": "https://images.unsplash.com/photo-1560024802-ec901e5abd1a?w=400&h=400&fit=crop",
   "grinder": "https://images.unsplash.com/photo-1616690002498-1435060a1948?w=400&h=400&fit=crop",
