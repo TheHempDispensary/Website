@@ -926,15 +926,121 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart }: { pro
 }
 
 /* ======================== STATIC PAGES (Light Theme) ======================== */
+
+const ABOUT_TIMELINE = [
+  { year: "April 2018", text: "HEMP wholesale company founded by Anthoney & Jimmy" },
+  { year: "February 2019", text: "The Hemp Dispensary concept born during a trip to Colorado" },
+  { year: "December 1, 2019", text: "Spring Hill West opens (6175 Deltona Blvd)" },
+  { year: "Early 2020", text: "Crystal River opens (location #2)" },
+  { year: "2020\u20132021", text: "New Port Richey, Clearwater, Homosassa, Tarpon Springs, Spring Hill East" },
+  { year: "2021\u20132022", text: "Clermont, Hudson, Lady Lake, Pinellas Park, Tampa, Zephyrhills" },
+  { year: "2022\u20132023", text: "Apopka, Port Richey \u2014 15 locations total" },
+  { year: "2023", text: "8,000 sq ft manufacturing & distribution center opens in Brooksville" },
+  { year: "2024", text: "6-county same-day delivery + national e-commerce at peak" },
+  { year: "2024", text: "FDACS THCA reversal \u2014 13 locations closed, warehouse vacated" },
+  { year: "2025", text: "Rebuilding \u2014 new website, new platform, same mission" },
+  { year: "November 2026", text: "New federal hemp law \u2014 we\u2019re ready" },
+];
+
 function AboutPage() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-16">
-      <h1 className="text-4xl font-bold text-[#231F20] mb-6">About The Hemp Dispensary</h1>
-      <div className="prose prose-lg text-[#231F20]/70">
-        <p className="mb-4">The Hemp Dispensary is Spring Hill's premier destination for high-quality hemp products. We're committed to providing lab-tested, clean products that you can trust.</p>
-        <p className="mb-4">With two convenient locations in Spring Hill, Florida, we make it easy to find the perfect hemp product for your needs. Our knowledgeable staff is always ready to help you find exactly what you're looking for.</p>
-        <p>Whether you're looking for flower, edibles, concentrates, or topicals, we have a wide selection of premium products at competitive prices.</p>
-      </div>
+    <div>
+      {/* Hero */}
+      <section className="bg-[#231F20] relative overflow-hidden">
+        <div className="max-w-4xl mx-auto px-4 py-16 sm:py-24 text-center relative z-10">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-[#FFFFFF] mb-4 leading-tight">
+            Built in Spring Hill.<br />
+            <span className="text-[#B3D335]">Built to Last.</span>
+          </h1>
+          <p className="text-[#FFFFFF]/80 text-lg sm:text-xl max-w-2xl mx-auto">Two locals. One idea. A lot of fights worth having.</p>
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#231F20]/50 pointer-events-none" />
+      </section>
+
+      {/* Section 1 — The Beginning */}
+      <section className="bg-[#FFFFFF] py-14 sm:py-20">
+        <div className="max-w-3xl mx-auto px-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">It started with a road trip</h2>
+          <p className="text-[#231F20]/80 text-base sm:text-lg leading-relaxed">
+            In April 2018, Anthoney and Jimmy &mdash; two Spring Hill residents &mdash; started Healing Emotionally Mentally Physically (HEMP), a wholesale hemp company. Early 2019, sourcing problems pushed them to Colorado. Standing inside a marijuana dispensary in Colorado, they looked at each other and knew exactly what Spring Hill was missing. They came home with one idea: open a Hemp Dispensary.
+          </p>
+        </div>
+      </section>
+
+      {/* Section 2 — Nobody Believed */}
+      <section className="bg-[#FFFFFF] py-14 sm:py-20 border-t border-[#231F20]/10">
+        <div className="max-w-3xl mx-auto px-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">Nobody would give us a chance</h2>
+          <p className="text-[#231F20]/80 text-base sm:text-lg leading-relaxed">
+            Anthoney was in real estate. Jimmy was in landscaping. They spent months searching for a building before they even opened &mdash; landlord after landlord turned them away because they didn&rsquo;t understand what hemp was and assumed it was illegal. Finally, one landlord sat down with them, listened, and took a chance. On December 1, 2019, The Hemp Dispensary opened its doors at 6175 Deltona Blvd, Spring Hill, FL &mdash; the store we still call Spring Hill West. Once the doors were open, the real hustle began. When Anthoney had to show a house, Jimmy covered the store. When Jimmy had to run a landscaping estimate, Anthoney held things down. They built it shift by shift.
+          </p>
+        </div>
+      </section>
+
+      {/* Section 3 — We Grew */}
+      <section className="bg-[#FFFFFF] py-14 sm:py-20 border-t border-[#231F20]/10">
+        <div className="max-w-3xl mx-auto px-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">We built something</h2>
+          <p className="text-[#231F20]/80 text-base sm:text-lg leading-relaxed">
+            A few months after opening West, they opened a second location in Crystal River. Then more followed. New Port Richey. Clearwater. Homosassa. Tarpon Springs. Spring Hill East. Clermont. Hudson. Lady Lake. Pinellas Park. Tampa. Zephyrhills. Apopka. Port Richey. By 2024, The Hemp Dispensary had grown to 15 retail locations across Florida, an 8,000 square foot manufacturing and distribution center in Brooksville, an in-house same-day delivery service covering 6 counties, and an e-commerce store shipping nationally and internationally. Along the way they received cease and desist letters from Reese&rsquo;s Peanut Butter, the American Red Cross, and the NFL &mdash; which is how you know you&rsquo;ve built something worth noticing.
+          </p>
+        </div>
+      </section>
+
+      {/* Section 4 — The Hardest Part */}
+      <section className="bg-[#FFFFFF] py-14 sm:py-20 border-t border-[#231F20]/10">
+        <div className="max-w-3xl mx-auto px-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">We did everything right. Then the rules changed.</h2>
+          <p className="text-[#231F20]/80 text-base sm:text-lg leading-relaxed">
+            Florida law around hemp has always been complicated. We&rsquo;ve been targeted more than most because we were one of the biggest brands in the state. When THCA products started appearing everywhere, we stayed on the sideline &mdash; Florida had no clear legal path. Then in 2024, we received a written email from FDACS (Florida Department of Agriculture and Consumer Services) confirming THCA was legal to sell. We invested millions building out a full THCA product line. Months later, FDACS walked into our stores and red-tagged every THCA product. Our competitors continue selling THCA to this day. We cannot. We followed the rules. We paid the price. That decision cost us 13 retail locations, our delivery service, our warehouse, and nearly everything we&rsquo;d built. We went from 15 locations to 2. We went from 64 employees to 9.
+          </p>
+        </div>
+      </section>
+
+      {/* Section 5 — Why We're Still Here */}
+      <section className="bg-[#FFFFFF] py-14 sm:py-20 border-t border-[#231F20]/10">
+        <div className="max-w-3xl mx-auto px-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">Two locations. Same mission.</h2>
+          <p className="text-[#231F20]/80 text-base sm:text-lg leading-relaxed mb-8">
+            Spring Hill West opened December 1, 2019. It&rsquo;s still open. Spring Hill East is still open. We still source the highest quality lab-tested hemp products we can find. We still know most of our customers by name. We&rsquo;re not a corporate chain. We&rsquo;re two guys from Spring Hill who believed in this plant before most people knew what it was &mdash; and we still do. With another federal law change on the horizon, we&rsquo;re facing new challenges again. We&rsquo;ve been here before. We&rsquo;re not going anywhere.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button onClick={() => navigate("/shop")} className="px-8 py-3.5 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] rounded-full font-bold text-lg transition-colors shadow-lg">Shop Now</button>
+            <button onClick={() => { const el = document.getElementById('locations-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else navigate('/contact'); }} className="px-8 py-3.5 border-2 border-[#231F20] text-[#231F20] hover:bg-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors">Visit Us</button>
+          </div>
+        </div>
+      </section>
+
+      {/* Timeline */}
+      <section className="bg-[#FFFFFF] py-14 sm:py-20 border-t border-[#231F20]/10">
+        <div className="max-w-3xl mx-auto px-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-10 text-center">Our Timeline</h2>
+          <div className="relative">
+            {/* Vertical line */}
+            <div className="absolute left-4 sm:left-6 top-0 bottom-0 w-0.5 bg-[#B3D335]" />
+            <div className="space-y-8">
+              {ABOUT_TIMELINE.map((item, i) => (
+                <div key={i} className="relative pl-12 sm:pl-16">
+                  {/* Dot */}
+                  <div className="absolute left-2.5 sm:left-4.5 top-1 w-3.5 h-3.5 rounded-full bg-[#FFCB08] border-2 border-[#FFFFFF] shadow" />
+                  <p className="text-sm font-bold text-[#126A44] mb-1">{item.year}</p>
+                  <p className="text-[#231F20]/80 text-base leading-relaxed">{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Closing Banner */}
+      <section className="bg-[#231F20] py-16 sm:py-20">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#FFCB08] italic leading-relaxed">
+            &ldquo;We didn&rsquo;t build this to quit.&rdquo;
+          </p>
+          <p className="text-[#FFFFFF]/70 mt-4 text-lg">&mdash; Anthoney & Jimmy</p>
+        </div>
+      </section>
     </div>
   );
 }
@@ -3233,6 +3339,7 @@ function App() {
       "#/shop/accessories": "Hemp accessories including glass pipes, rolling papers, grinders, storage, and butane. Everything you need in one stop.",
       "#/loyalty": "Hemp Rewards — earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary.",
       "#/games": "Play games and win prizes at The Hemp Dispensary. Scratch cards, Roll-a-Joint, and more — all free to play for rewards members.",
+      "#/about": "Our Story — how two Spring Hill locals built The Hemp Dispensary from a road trip idea to 15 locations, lost 13 overnight, and kept going.",
     };
     const key = route.startsWith("#/shop/") ? route : (route === "" || route === "#" || route === "#/" ? "" : route);
     const desc = descriptions[key] || descriptions[""];
