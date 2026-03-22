@@ -137,7 +137,7 @@ function getProductBenefit(product: Product): string {
 /* ======================== STICKY TOP BAR ======================== */
 function StickyTopBar() {
   return (
-    <div className="bg-[#231F20] text-white text-center py-2 px-4 text-sm font-medium">
+    <div className="bg-[#231F20] text-[#FFFFFF] text-center py-2 px-4 text-sm font-medium">
       <span className="hidden sm:inline">{"\u{1F680}"} Order Online {"\u2013"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | Open Late | </span>
       <span className="sm:hidden">{"\u{1F680}"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | </span>
       <span className="text-[#FFCB08] font-bold">FIRST20 = 20% Off</span>
@@ -151,7 +151,7 @@ function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSear
   const categories = ["FLOWER", "EDIBLES", "CONCENTRATES", "VAPOR", "TOPICALS", "TINCTURES", "ACCESSORIES"];
 
   return (
-    <header className="bg-white sticky top-0 z-50 border-b border-[#231F20]/15 shadow-sm">
+    <header className="bg-[#FFFFFF] sticky top-0 z-50 border-b border-[#231F20]/15 shadow-sm">
       <div className="max-w-7xl mx-auto px-3 sm:px-4">
         <div className="h-14 sm:h-16 flex items-center justify-between">
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
@@ -184,18 +184,18 @@ function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSear
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center justify-center gap-1 pb-2 overflow-x-auto">
           {categories.map((cat) => (
-            <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="px-3 py-1.5 text-xs font-medium text-[#231F20] hover:text-[#58BA49] hover:bg-white rounded-full transition-colors whitespace-nowrap">{cat}</button>
+            <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="px-3 py-1.5 text-xs font-medium text-[#231F20] hover:text-[#58BA49] hover:bg-[#FFFFFF] rounded-full transition-colors whitespace-nowrap">{cat}</button>
           ))}
         </nav>
       </div>
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-[#231F20]/10 shadow-lg">
+        <div className="md:hidden bg-[#FFFFFF] border-t border-[#231F20]/10 shadow-lg">
           <div className="max-w-7xl mx-auto px-4 py-3 grid grid-cols-2 gap-2">
             {categories.map((cat) => (
-              <button key={cat} onClick={() => { navigate(`/shop/${cat.toLowerCase()}`); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#58BA49] hover:bg-white rounded-lg transition-colors">{cat}</button>
+              <button key={cat} onClick={() => { navigate(`/shop/${cat.toLowerCase()}`); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#58BA49] hover:bg-[#FFFFFF] rounded-lg transition-colors">{cat}</button>
             ))}
-            <a href="#/games" onClick={() => setMobileMenuOpen(false)} className="sm:hidden text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#58BA49] hover:bg-white rounded-lg transition-colors flex items-center gap-2"><Gamepad2 className="h-4 w-4" /> Games</a>
+            <a href="#/games" onClick={() => setMobileMenuOpen(false)} className="sm:hidden text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#58BA49] hover:bg-[#FFFFFF] rounded-lg transition-colors flex items-center gap-2"><Gamepad2 className="h-4 w-4" /> Games</a>
           </div>
         </div>
       )}
@@ -210,8 +210,8 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear }: { o
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[60]">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl flex flex-col">
+      <div className="absolute inset-0 bg-[#231F20]/40" onClick={onClose} />
+      <div className="absolute right-0 top-0 h-full w-full max-w-md bg-[#FFFFFF] shadow-2xl flex flex-col">
         <div className="flex items-center justify-between p-4 border-b border-[#231F20]/15">
           <h2 className="text-lg font-bold text-[#231F20]">Your Cart ({itemCount})</h2>
           <button onClick={onClose} className="p-2 text-[#231F20]/50 hover:text-[#231F20] transition-colors"><X className="h-5 w-5" /></button>
@@ -230,8 +230,8 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear }: { o
           ) : (
             <div className="space-y-4">
               {cart.map((item) => (
-                <div key={item.product.id} className="flex gap-3 bg-white rounded-xl p-3 border border-[#231F20]/10">
-                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-white flex-shrink-0 border border-[#231F20]/10">
+                <div key={item.product.id} className="flex gap-3 bg-[#FFFFFF] rounded-xl p-3 border border-[#231F20]/10">
+                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-[#FFFFFF] flex-shrink-0 border border-[#231F20]/10">
                     <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(item.product.name, 100); }} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -255,7 +255,7 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear }: { o
               <span>Total</span>
               <span>{formatPrice(total)}</span>
             </div>
-            <button onClick={() => { onClose(); navigate("/checkout"); }} className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-full font-semibold transition-colors text-lg">Checkout</button>
+            <button onClick={() => { onClose(); navigate("/checkout"); }} className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors text-lg">Checkout</button>
             <button onClick={onClear} className="w-full py-2 text-[#231F20]/50 hover:text-[#D9A32C] text-sm transition-colors">Clear Cart</button>
           </div>
         )}
@@ -270,14 +270,14 @@ function HeroSection() {
   return (
     <section className="bg-[#231F20] relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 py-10 sm:py-20 text-center relative z-10">
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white mb-3 leading-tight">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-[#FFFFFF] mb-3 leading-tight">
           Skip the Line.<br />
           <span className="text-[#B3D335]">Get Your Hemp in Minutes.</span>
         </h1>
-        <p className="text-white/80 text-base sm:text-xl mb-6 max-w-2xl mx-auto">Fast pickup. Lab-tested. Trusted locally.</p>
+        <p className="text-[#FFFFFF]/80 text-base sm:text-xl mb-6 max-w-2xl mx-auto">Fast pickup. Lab-tested. Trusted locally.</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button onClick={() => navigate("/shop")} className="px-8 py-3.5 sm:py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-full font-bold text-lg transition-colors shadow-lg">Shop Now</button>
-          <button onClick={() => { const el = document.getElementById('locations-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else navigate('/contact'); }} className="px-8 py-3.5 sm:py-4 border-2 border-white hover:bg-white text-white hover:text-[#231F20] rounded-full font-bold text-lg transition-colors">Find Nearest Location</button>
+          <button onClick={() => navigate("/shop")} className="px-8 py-3.5 sm:py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors shadow-lg">Shop Now</button>
+          <button onClick={() => { const el = document.getElementById('locations-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else navigate('/contact'); }} className="px-8 py-3.5 sm:py-4 border-2 border-[#FFFFFF] hover:bg-[#FFFFFF] text-[#FFFFFF] hover:text-[#231F20] rounded-full font-bold text-lg transition-colors">Find Nearest Location</button>
         </div>
         <p className="mt-4 text-[#FFCB08] font-medium text-sm">{"\u{1F525}"} First-time customers: 20% OFF with code FIRST20</p>
       </div>
@@ -296,7 +296,7 @@ function TrustStrip() {
     { icon: Clock, label: "Open Late", sub: "West Til 12am | East Til 10pm" },
   ];
   return (
-    <section className="bg-white border-b border-[#231F20]/10 cursor-pointer" onClick={() => navigate('/shop')}>
+    <section className="bg-[#FFFFFF] border-b border-[#231F20]/10 cursor-pointer" onClick={() => navigate('/shop')}>
       <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
         <div className="grid grid-cols-4 gap-2 sm:gap-4">
           {items.map((item) => (
@@ -323,14 +323,14 @@ function ShopByCategory({ productsByCategory }: { categories: string[]; products
   const catIconComponents: Record<string, React.ComponentType<{ className?: string }>> = { Flower: Leaf, Edibles: Candy, Concentrates: Droplets, Vapor: Wind, Topicals: Pipette, Tinctures: Pill, Accessories: Wrench };
 
   return (
-    <section className="bg-white py-12 sm:py-16">
+    <section className="bg-[#FFFFFF] py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-3xl font-bold text-[#231F20] text-center mb-8">Shop by Category</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
           {displayCats.map((cat) => {
             const IconComp = catIconComponents[cat] || Package;
             return (
-            <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="bg-white rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-all group border border-[#231F20]/15 hover:border-[#B3D335]">
+            <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="bg-[#FFFFFF] rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-all group border border-[#231F20]/15 hover:border-[#B3D335]">
               <IconComp className="h-10 w-10 text-[#3D8C32] mx-auto mb-3" />
               <h3 className="text-lg font-semibold text-[#231F20] group-hover:text-[#58BA49] transition-colors">{cat}</h3>
               <p className="text-sm text-[#231F20] mt-1">{(productsByCategory[cat] || []).filter(p => p.stock > 0).length} products</p>
@@ -353,7 +353,7 @@ function ShopByFeeling({ products }: { products: Product[] }) {
   ];
 
   return (
-    <section className="bg-white py-10 sm:py-14">
+    <section className="bg-[#FFFFFF] py-10 sm:py-14">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] text-center mb-2">How Do You Want to Feel?</h2>
         <p className="text-[#231F20]/50 text-center mb-6 text-sm">Tap to browse products by effect</p>
@@ -381,8 +381,8 @@ function PromoBanner() {
     <section className="bg-[#231F20] py-8 sm:py-10">
       <div className="max-w-3xl mx-auto px-4 text-center">
         <p className="text-[#FFCB08] font-bold text-lg sm:text-2xl mb-2">{"\u{1F525}"} First-Time Customer?</p>
-        <p className="text-white text-sm sm:text-base mb-4">Get <span className="text-[#B3D335] font-bold">20% OFF</span> your entire order with code <span className="bg-white/10 px-2 py-0.5 rounded font-mono font-bold">FIRST20</span></p>
-        <button onClick={() => navigate('/shop')} className="px-8 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-full font-bold transition-colors">Shop Now &amp; Save</button>
+        <p className="text-[#FFFFFF] text-sm sm:text-base mb-4">Get <span className="text-[#B3D335] font-bold">20% OFF</span> your entire order with code <span className="bg-[#FFFFFF]/10 px-2 py-0.5 rounded font-mono font-bold">FIRST20</span></p>
+        <button onClick={() => navigate('/shop')} className="px-8 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold transition-colors">Shop Now &amp; Save</button>
       </div>
     </section>
   );
@@ -398,13 +398,13 @@ function WhyChooseUs() {
     { icon: Star, text: "Not Gas Station Quality" },
   ];
   return (
-    <section className="bg-white py-12 sm:py-16">
+    <section className="bg-[#FFFFFF] py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-3xl font-bold text-[#231F20] text-center mb-2">{"\u26A1"} Why Shop With Us?</h2>
         <p className="text-[#231F20]/60 text-center mb-8">Quality you can trust, speed you can count on</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {reasons.map((r) => (
-            <div key={r.text} className="bg-white rounded-xl p-5 text-center border border-[#231F20]/10">
+            <div key={r.text} className="bg-[#FFFFFF] rounded-xl p-5 text-center border border-[#231F20]/10">
               <r.icon className="h-8 w-8 text-[#3D8C32] mx-auto mb-3" />
               <p className="text-sm font-medium text-[#231F20]">{r.text}</p>
             </div>
@@ -459,7 +459,7 @@ function ReviewsSection() {
   const displayReviews = [...ALL_REVIEWS, ...ALL_REVIEWS];
 
   return (
-    <section className="bg-white py-12 sm:py-16">
+    <section className="bg-[#FFFFFF] py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-[#231F20] mb-2">What Our Customers Say</h2>
@@ -481,7 +481,7 @@ function ReviewsSection() {
           style={{ scrollBehavior: 'auto' }}
         >
           {displayReviews.map((r, i) => (
-            <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl p-5 border border-[#231F20]/10">
+            <div key={i} className="flex-shrink-0 w-72 bg-[#FFFFFF] rounded-xl p-5 border border-[#231F20]/10">
               <div className="flex gap-0.5 mb-3">
                 {Array.from({ length: r.rating }).map((_, j) => <Star key={j} className="h-4 w-4 fill-[#FFCB08] text-[#FFCB08]" />)}
               </div>
@@ -494,7 +494,7 @@ function ReviewsSection() {
           ))}
         </div>
         <div className="text-center mt-6">
-          <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="inline-block bg-white border border-[#231F20]/15 rounded-full px-6 py-2.5 text-sm font-medium text-[#231F20] hover:border-[#B3D335] hover:text-[#58BA49] transition-colors">
+          <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="inline-block bg-[#FFFFFF] border border-[#231F20]/15 rounded-full px-6 py-2.5 text-sm font-medium text-[#231F20] hover:border-[#B3D335] hover:text-[#58BA49] transition-colors">
             See All Reviews on Google
           </a>
         </div>
@@ -510,12 +510,12 @@ function LocationSection() {
     { name: "Spring Hill West", address: "6175 Deltona Blvd, Ste 104, Spring Hill, FL 34606", hours: "Mon\u2013Fri 6am\u201312am | Sat\u2013Sun 10am\u20138pm", phone: "(352) 340-5860", mapsQuery: "The Hemp Dispensary Cannabis Spring Hill West", googleUrl: "https://www.google.com/maps/search/The+Hemp+Dispensary+Cannabis+Spring+Hill+West+6175+Deltona+Blvd" },
   ];
   return (
-    <section id="locations-section" className="bg-white py-12 sm:py-16">
+    <section id="locations-section" className="bg-[#FFFFFF] py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-3xl font-bold text-[#231F20] text-center mb-8">Our Locations</h2>
         <div className="grid md:grid-cols-2 gap-6">
           {locations.map((loc) => (
-            <div key={loc.name} className="bg-white rounded-xl p-6 border border-[#231F20]/15">
+            <div key={loc.name} className="bg-[#FFFFFF] rounded-xl p-6 border border-[#231F20]/15">
               <h3 className="text-xl font-bold text-[#231F20] mb-3">{loc.name}</h3>
               <div className="space-y-2 text-sm text-[#231F20]">
                 <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-[#3D8C32]" />{loc.address}</p>
@@ -545,15 +545,15 @@ function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd
   const effect = getProductEffect(product);
   return (
     <div className="cursor-pointer group" onClick={() => navigate(`/product/${product.id}`)}>
-      <div className="bg-white rounded-2xl p-[10px] sm:p-4 transition-all duration-300 hover:shadow-xl relative border border-[#231F20]/35">
+      <div className="bg-[#FFFFFF] rounded-2xl p-[10px] sm:p-4 transition-all duration-300 hover:shadow-xl relative border border-[#231F20]/35">
         {/* Floating product image */}
-        <div className="h-[140px] sm:h-48 flex items-center justify-center mb-2 sm:mb-3 bg-white rounded-xl overflow-hidden">
+        <div className="h-[140px] sm:h-48 flex items-center justify-center mb-2 sm:mb-3 bg-[#FFFFFF] rounded-xl overflow-hidden">
           <img
             src={product.image_url || placeholderUrl(product.name)}
             alt={product.name}
             loading="lazy"
             className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
-            style={{ backgroundColor: 'white' }}
+            style={{ backgroundColor: '#FFFFFF' }}
             onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(product.name); }}
           />
         </div>
@@ -573,7 +573,7 @@ function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd
         {onQuickAdd && product.available && (
           <button
             onClick={(e) => { e.stopPropagation(); onQuickAdd(product); }}
-            className="w-full py-2 sm:py-2.5 h-[40px] sm:h-auto bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-xl font-semibold text-[13px] sm:text-sm transition-colors"
+            className="w-full py-2 sm:py-2.5 h-[40px] sm:h-auto bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-xl font-semibold text-[13px] sm:text-sm transition-colors"
           >
             Add to Cart
           </button>
@@ -653,15 +653,15 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
         <p className="text-sm font-medium text-[#231F20]">{"\u{1F525}"} First-time customers: <span className="font-bold">20% OFF</span> with code <span className="font-bold text-[#58BA49]">FIRST20</span></p>
       </div>
 
-      <div className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-[#231F20]/10 shadow-sm">
+      <div className="bg-[#FFFFFF] rounded-2xl sm:rounded-3xl overflow-hidden border border-[#231F20]/10 shadow-sm">
         <div className="grid md:grid-cols-2 gap-0">
           {/* Product image - floating design */}
-          <div className="p-4 sm:p-8 flex items-center justify-center bg-white min-h-[250px] sm:min-h-[400px]">
+          <div className="p-4 sm:p-8 flex items-center justify-center bg-[#FFFFFF] min-h-[250px] sm:min-h-[400px]">
             <img
               src={product.image_url || placeholderUrl(product.name, 600)}
               alt={product.name}
               className="max-h-[350px] max-w-full object-contain"
-              style={{ backgroundColor: 'white' }}
+              style={{ backgroundColor: '#FFFFFF' }}
               onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(product.name, 600); }}
             />
           </div>
@@ -672,7 +672,7 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
             {product.categories.length > 0 && (
               <div className="flex gap-2 mb-3 flex-wrap">
                 {product.categories.map((cat) => (
-                  <span key={cat} className="text-xs font-medium bg-white text-[#231F20] px-3 py-1 rounded-full border border-[#B3D335] border-l-4">{cat}</span>
+                  <span key={cat} className="text-xs font-medium bg-[#FFFFFF] text-[#231F20] px-3 py-1 rounded-full border border-[#B3D335] border-l-4">{cat}</span>
                 ))}
               </div>
             )}
@@ -748,7 +748,7 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
               <button
                 disabled={!product.available}
                 onClick={() => { if (product.available) { onAddToCart(product, qty); setAdded(true); setTimeout(() => setAdded(false), 2000); } }}
-                className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 ${product.available ? (added ? "bg-[#ADD038] text-[#231F20]" : "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white shadow-lg") : "bg-[#231F20]/10 text-[#231F20]/40 cursor-not-allowed"}`}
+                className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 ${product.available ? (added ? "bg-[#ADD038] text-[#231F20]" : "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] shadow-lg") : "bg-[#231F20]/10 text-[#231F20]/40 cursor-not-allowed"}`}
               >
                 {!product.available ? "Out of Stock" : added ? "Added to Cart!" : "Add to Cart"}
               </button>
@@ -763,15 +763,15 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
           <h2 className="text-2xl font-bold text-[#231F20] mb-6">You Might Also Like</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {related.map((p) => (
-              <div key={p.id} className="flex items-center gap-3 bg-white rounded-xl p-3 border border-[#231F20]/10 hover:shadow-md transition-all cursor-pointer" onClick={() => navigate(`/product/${p.id}`)}>
-                <div className="w-20 h-20 flex-shrink-0 bg-white rounded-lg overflow-hidden flex items-center justify-center">
+              <div key={p.id} className="flex items-center gap-3 bg-[#FFFFFF] rounded-xl p-3 border border-[#231F20]/10 hover:shadow-md transition-all cursor-pointer" onClick={() => navigate(`/product/${p.id}`)}>
+                <div className="w-20 h-20 flex-shrink-0 bg-[#FFFFFF] rounded-lg overflow-hidden flex items-center justify-center">
                   <img src={p.image_url || placeholderUrl(p.name, 200)} alt={p.name} className="max-h-full max-w-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(p.name, 200); }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-medium text-[#231F20] line-clamp-2 hover:text-[#58BA49] transition-colors">{titleCase(p.online_name || p.name)}</h3>
                   <p className="text-[#58BA49] font-bold text-sm mt-1">{formatPrice(p.price)}</p>
                 </div>
-                <button onClick={(e) => { e.stopPropagation(); onAddToCart(p, 1); }} className="flex-shrink-0 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-lg px-3 py-2 text-xs font-semibold transition-colors">Add</button>
+                <button onClick={(e) => { e.stopPropagation(); onAddToCart(p, 1); }} className="flex-shrink-0 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg px-3 py-2 text-xs font-semibold transition-colors">Add</button>
               </div>
             ))}
           </div>
@@ -787,7 +787,7 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
               const vGrams = extractGrams(v);
               const vSavings = vGrams > 0 && perGramSmallest > 0 && smallestVariant?.id !== v.id ? (perGramSmallest * vGrams) - v.price : 0;
               return (
-                <div key={v.id} className={`flex items-center justify-between p-3 rounded-xl border ${v.id === product.id ? 'border-[#B3D335] bg-white' : 'border-[#231F20]/10 bg-white hover:border-[#B3D335]'} cursor-pointer transition-all`} onClick={() => { if (v.id !== product.id) navigate(`/product/${v.id}`); }}>
+                <div key={v.id} className={`flex items-center justify-between p-3 rounded-xl border ${v.id === product.id ? 'border-[#B3D335] bg-[#FFFFFF]' : 'border-[#231F20]/10 bg-[#FFFFFF] hover:border-[#B3D335]'} cursor-pointer transition-all`} onClick={() => { if (v.id !== product.id) navigate(`/product/${v.id}`); }}>
                   <div>
                     <span className="text-sm font-medium text-[#231F20]">{vGrams > 0 ? `${vGrams}g` : titleCase(v.online_name || v.name)}</span>
                     {vSavings > 0 && <span className="ml-2 text-xs font-bold text-[#231F20] bg-[#FFCB08] px-2 py-0.5 rounded-full">Save {formatPrice(vSavings)}</span>}
@@ -824,21 +824,21 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
 
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-[70] bg-white">
+    <div className="fixed inset-0 z-[70] bg-[#FFFFFF]">
       <div className="max-w-3xl mx-auto px-4 pt-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="flex-1 relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#231F20]/40" />
-            <input ref={inputRef} type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search products..." className="w-full pl-12 pr-4 py-3 bg-white border border-[#231F20]/15 rounded-full text-[#231F20] placeholder-gray-400 focus:outline-none focus:border-[#B3D335] focus:ring-1 focus:ring-[#B3D335]" />
+            <input ref={inputRef} type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search products..." className="w-full pl-12 pr-4 py-3 bg-[#FFFFFF] border border-[#231F20]/15 rounded-full text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335] focus:ring-1 focus:ring-[#B3D335]" />
           </div>
           <button onClick={() => { onClose(); setQuery(""); }} className="p-2 text-[#231F20]/40 hover:text-[#231F20]"><X className="h-6 w-6" /></button>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[70vh] overflow-y-auto">
           {results.map((product) => (
             <div key={product.id} className="cursor-pointer group" onClick={() => { navigate(`/product/${product.id}`); onClose(); setQuery(""); }}>
-              <div className="bg-white rounded-xl p-3 transition-all hover:shadow-md">
-                <div className="h-28 flex items-center justify-center mb-2 bg-white rounded-lg overflow-hidden">
-                  <img src={product.image_url || placeholderUrl(product.name, 200)} alt={product.name} loading="lazy" className="max-h-full object-contain" style={{ backgroundColor: 'white' }} onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(product.name, 200); }} />
+              <div className="bg-[#FFFFFF] rounded-xl p-3 transition-all hover:shadow-md">
+                <div className="h-28 flex items-center justify-center mb-2 bg-[#FFFFFF] rounded-lg overflow-hidden">
+                  <img src={product.image_url || placeholderUrl(product.name, 200)} alt={product.name} loading="lazy" className="max-h-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(product.name, 200); }} />
                 </div>
                 <h3 className="text-xs font-medium text-[#231F20] line-clamp-2 group-hover:text-[#58BA49] transition-colors">{titleCase(product.online_name || product.name)}</h3>
                 <p className="text-[#58BA49] font-bold text-sm mt-1">{formatPrice(product.price)}</p>
@@ -882,7 +882,7 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart }: { pro
           <p className="text-[#231F20]/50 text-sm mt-1">{filtered.length} products</p>
         </div>
         <div className="flex gap-2 items-center">
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-white border border-[#231F20]/15 rounded-lg px-3 py-2 text-sm text-[#231F20] focus:outline-none focus:border-[#B3D335]">
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-[#FFFFFF] border border-[#231F20]/15 rounded-lg px-3 py-2 text-sm text-[#231F20] focus:outline-none focus:border-[#B3D335]">
             <option value="name">Sort by Name</option>
             <option value="price-low">Price: Low to High</option>
             <option value="price-high">Price: High to Low</option>
@@ -891,9 +891,9 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart }: { pro
       </div>
       {/* Category pills */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        <button onClick={() => navigate("/shop")} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${!selectedCategory || selectedCategory === "all" ? "bg-[#B3D335] text-[#231F20]" : "bg-white text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>All</button>
+        <button onClick={() => navigate("/shop")} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${!selectedCategory || selectedCategory === "all" ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>All</button>
         {categories.map((cat) => (
-          <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === cat.toLowerCase() ? "bg-[#B3D335] text-[#231F20]" : "bg-white text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>{cat}</button>
+          <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === cat.toLowerCase() ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>{cat}</button>
         ))}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -982,42 +982,42 @@ function ContactPage() {
 /* ======================== FOOTER (Dark Background) ======================== */
 function SiteFooter() {
   return (
-    <footer className="bg-[#231F20] text-white">
+    <footer className="bg-[#231F20] text-[#FFFFFF]">
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
             <img src="/logo.png" alt="The Hemp Dispensary" className="h-12 w-auto mb-4" />
-            <p className="text-white/70 text-sm">Spring Hill's trusted source for premium hemp products.</p>
+            <p className="text-[#FFFFFF]/70 text-sm">Spring Hill's trusted source for premium hemp products.</p>
           </div>
           <div>
             <h3 className="font-semibold text-[#ADD038] mb-3">Shop</h3>
             <div className="space-y-2">
-              <a href="#/shop/flower" className="block text-white/70 hover:text-[#B3D335] text-sm transition-colors">Flower</a>
-              <a href="#/shop/edibles" className="block text-white/70 hover:text-[#B3D335] text-sm transition-colors">Edibles</a>
-              <a href="#/shop/concentrates" className="block text-white/70 hover:text-[#B3D335] text-sm transition-colors">Concentrates</a>
-              <a href="#/shop/vapor" className="block text-white/70 hover:text-[#B3D335] text-sm transition-colors">Vapor</a>
+              <a href="#/shop/flower" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Flower</a>
+              <a href="#/shop/edibles" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Edibles</a>
+              <a href="#/shop/concentrates" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Concentrates</a>
+              <a href="#/shop/vapor" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Vapor</a>
             </div>
           </div>
           <div>
             <h3 className="font-semibold text-[#ADD038] mb-3">Company</h3>
             <div className="space-y-2">
-              <a href="#/about" className="block text-white/70 hover:text-[#B3D335] text-sm transition-colors">About Us</a>
-              <a href="#/contact" className="block text-white/70 hover:text-[#B3D335] text-sm transition-colors">Contact</a>
-              <a href="#/loyalty" className="block text-white/70 hover:text-[#B3D335] text-sm transition-colors">Rewards</a>
-              <a href="#/games" className="block text-white/70 hover:text-[#B3D335] text-sm transition-colors">Games</a>
+              <a href="#/about" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">About Us</a>
+              <a href="#/contact" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Contact</a>
+              <a href="#/loyalty" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Rewards</a>
+              <a href="#/games" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Games</a>
             </div>
           </div>
           <div>
             <h3 className="font-semibold text-[#ADD038] mb-3">Legal</h3>
             <div className="space-y-2">
-              <a href="#/terms" className="block text-white/70 hover:text-[#B3D335] text-sm transition-colors">Terms of Service</a>
-              <a href="#/privacy" className="block text-white/70 hover:text-[#B3D335] text-sm transition-colors">Privacy Policy</a>
-              <a href="#/shipping" className="block text-white/70 hover:text-[#B3D335] text-sm transition-colors">Shipping & Pickup</a>
+              <a href="#/terms" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Terms of Service</a>
+              <a href="#/privacy" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Privacy Policy</a>
+              <a href="#/shipping" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Shipping & Pickup</a>
             </div>
           </div>
         </div>
-        <div className="border-t border-white/20 mt-8 pt-8 text-center">
-          <p className="text-white/50 text-sm">&copy; {new Date().getFullYear()} The Hemp Dispensary. All rights reserved.</p>
+        <div className="border-t border-[#FFFFFF]/20 mt-8 pt-8 text-center">
+          <p className="text-[#FFFFFF]/50 text-sm">&copy; {new Date().getFullYear()} The Hemp Dispensary. All rights reserved.</p>
         </div>
       </div>
     </footer>
@@ -1231,36 +1231,36 @@ function ChatbotBud({ products }: { products: Product[] }) {
       {!open && (
         <button onClick={openChat} className="fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full bg-[#B3D335] hover:bg-[#58BA49] shadow-lg flex items-center justify-center transition-all hover:scale-110" aria-label="Chat with Bud">
           <img src="/bud-puppet.png" alt="Bud" className="w-10 h-10 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-          <MessageCircle className="h-6 w-6 text-white absolute" style={{ display: 'none' }} />
+          <MessageCircle className="h-6 w-6 text-[#FFFFFF] absolute" style={{ display: 'none' }} />
         </button>
       )}
 
       {/* Chat window */}
       {open && (
-        <div className="fixed bottom-4 right-4 z-50 w-[340px] sm:w-[380px] max-h-[500px] bg-white rounded-2xl shadow-2xl border border-[#231F20]/15 flex flex-col overflow-hidden">
+        <div className="fixed bottom-4 right-4 z-50 w-[340px] sm:w-[380px] max-h-[500px] bg-[#FFFFFF] rounded-2xl shadow-2xl border border-[#231F20]/15 flex flex-col overflow-hidden">
           {/* Header */}
           <div className="bg-[#B3D335] text-[#231F20] px-4 py-3 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2">
-              <img src="/bud-puppet.png" alt="Bud" className="w-8 h-8 object-contain rounded-full bg-white/20 p-0.5" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              <img src="/bud-puppet.png" alt="Bud" className="w-8 h-8 object-contain rounded-full bg-[#FFFFFF]/20 p-0.5" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               <div>
                 <p className="font-bold text-sm">Bud</p>
-                <p className="text-xs text-white/80">Your hemp guide</p>
+                <p className="text-xs text-[#FFFFFF]/80">Your hemp guide</p>
               </div>
             </div>
-            <button onClick={() => setOpen(false)} className="p-1 hover:bg-white/20 rounded-full transition-colors"><X className="h-5 w-5" /></button>
+            <button onClick={() => setOpen(false)} className="p-1 hover:bg-[#FFFFFF]/20 rounded-full transition-colors"><X className="h-5 w-5" /></button>
           </div>
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-[200px] max-h-[340px]">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] ${msg.from === "user" ? "bg-[#B3D335] text-[#231F20] rounded-2xl rounded-br-md px-3 py-2" : "bg-white text-[#231F20] rounded-2xl rounded-bl-md px-3 py-2"}`}>
+                <div className={`max-w-[85%] ${msg.from === "user" ? "bg-[#B3D335] text-[#231F20] rounded-2xl rounded-br-md px-3 py-2" : "bg-[#FFFFFF] text-[#231F20] rounded-2xl rounded-bl-md px-3 py-2"}`}>
                   <p className="text-sm whitespace-pre-line">{msg.text}</p>
                   {/* Product cards */}
                   {msg.products && msg.products.length > 0 && (
                     <div className="mt-2 space-y-2">
                       {msg.products.map(p => (
-                        <div key={p.id} className="bg-white rounded-lg p-2 border border-[#231F20]/10 cursor-pointer hover:shadow-sm transition-shadow" onClick={() => { navigate(`/product/${p.id}`); setOpen(false); }}>
+                        <div key={p.id} className="bg-[#FFFFFF] rounded-lg p-2 border border-[#231F20]/10 cursor-pointer hover:shadow-sm transition-shadow" onClick={() => { navigate(`/product/${p.id}`); setOpen(false); }}>
                           <div className="flex items-center gap-2">
                             <img src={p.image_url || placeholderUrl(p.name, 60)} alt={p.name} className="w-10 h-10 object-contain rounded" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(p.name, 60); }} />
                             <div className="flex-1 min-w-0">
@@ -1276,7 +1276,7 @@ function ChatbotBud({ products }: { products: Product[] }) {
                   {msg.buttons && msg.buttons.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {msg.buttons.map((btn, j) => (
-                        <button key={j} onClick={() => handleButtonClick(btn.value)} className="px-3 py-1.5 bg-white bg-[#ADD038] text-[#231F20] rounded-full text-xs font-medium hover:bg-[#B3D335] transition-colors border-0">
+                        <button key={j} onClick={() => handleButtonClick(btn.value)} className="px-3 py-1.5 bg-[#FFFFFF] bg-[#ADD038] text-[#231F20] rounded-full text-xs font-medium hover:bg-[#B3D335] transition-colors border-0">
                           {btn.label}
                         </button>
                       ))}
@@ -1296,9 +1296,9 @@ function ChatbotBud({ products }: { products: Product[] }) {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
               placeholder="Ask Bud anything..."
-              className="flex-1 bg-white border border-[#231F20]/15 rounded-full px-4 py-2 text-sm text-[#231F20] placeholder-gray-400 focus:outline-none focus:border-[#B3D335]"
+              className="flex-1 bg-[#FFFFFF] border border-[#231F20]/15 rounded-full px-4 py-2 text-sm text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]"
             />
-            <button onClick={handleSend} className="p-2 bg-[#58BA49] hover:bg-[#126A44] text-white rounded-full transition-colors">
+            <button onClick={handleSend} className="p-2 bg-[#58BA49] hover:bg-[#126A44] text-[#FFFFFF] rounded-full transition-colors">
               <Send className="h-4 w-4" />
             </button>
           </div>
@@ -1339,7 +1339,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
 
   const setField = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
 
-  const inputClass = "w-full bg-white border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-gray-400 focus:outline-none focus:border-[#B3D335] focus:ring-1 focus:ring-[#B3D335] transition-colors";
+  const inputClass = "w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335] focus:ring-1 focus:ring-[#B3D335] transition-colors";
   const labelClass = "block text-sm font-medium text-[#231F20] mb-1.5";
 
   // Address autocomplete using Nominatim (free, no API key)
@@ -1467,9 +1467,9 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
     return (
       <div className="max-w-2xl mx-auto px-4 py-24 text-center">
         <ShoppingCart className="mx-auto h-16 w-16 text-[#231F20]/40 mb-4" />
-        <h1 className="text-2xl font-bold text-white mb-2">Your cart is empty</h1>
+        <h1 className="text-2xl font-bold text-[#FFFFFF] mb-2">Your cart is empty</h1>
         <p className="text-[#231F20]/40 mb-6">Add some products before checking out.</p>
-        <button onClick={() => navigate("/shop")} className="bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white px-8 py-3 rounded-full font-medium transition-colors">Shop Now</button>
+        <button onClick={() => navigate("/shop")} className="bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] px-8 py-3 rounded-full font-medium transition-colors">Shop Now</button>
       </div>
     );
   }
@@ -1480,19 +1480,19 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
         <div className="bg-[#B3D335]/20 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
           <CheckCircle className="h-10 w-10 text-[#58BA49]" />
         </div>
-        <h1 className="text-3xl font-bold text-white mb-3">Payment Successful!</h1>
+        <h1 className="text-3xl font-bold text-[#FFFFFF] mb-3">Payment Successful!</h1>
         <p className="text-[#231F20]/40 mb-2">Thank you for your order, {form.firstName}!</p>
         <p className="text-[#231F20]/50 text-sm mb-6">Order #{orderNumber}</p>
-        <div className="bg-white rounded-xl border border-[#231F20]/20 p-6 mb-8 text-left max-w-md mx-auto">
-          <h3 className="text-white font-semibold mb-3">What happens next?</h3>
+        <div className="bg-[#FFFFFF] rounded-xl border border-[#231F20]/20 p-6 mb-8 text-left max-w-md mx-auto">
+          <h3 className="text-[#FFFFFF] font-semibold mb-3">What happens next?</h3>
           <div className="space-y-3 text-sm text-[#231F20]/40">
-            <div className="flex gap-3"><Mail className="h-5 w-5 text-[#58BA49] flex-shrink-0 mt-0.5" /><p>A confirmation email will be sent to <span className="text-white">{form.email}</span></p></div>
+            <div className="flex gap-3"><Mail className="h-5 w-5 text-[#58BA49] flex-shrink-0 mt-0.5" /><p>A confirmation email will be sent to <span className="text-[#FFFFFF]">{form.email}</span></p></div>
             <div className="flex gap-3"><Package className="h-5 w-5 text-[#58BA49] flex-shrink-0 mt-0.5" /><p>Your order will be prepared and packaged</p></div>
             <div className="flex gap-3"><Truck className="h-5 w-5 text-[#58BA49] flex-shrink-0 mt-0.5" /><p>You'll receive shipping details once dispatched</p></div>
           </div>
         </div>
         <div className="flex gap-3 justify-center">
-          <button onClick={() => navigate("")} className="bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white px-8 py-3 rounded-full font-medium transition-colors">Continue Shopping</button>
+          <button onClick={() => navigate("")} className="bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] px-8 py-3 rounded-full font-medium transition-colors">Continue Shopping</button>
         </div>
       </div>
     );
@@ -1570,7 +1570,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
         {steps.map((s, i) => (
           <div key={s.key} className="flex items-center">
             <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              step === s.key ? "bg-[#B3D335] text-[#231F20]" : steps.findIndex((x) => x.key === step) > i ? "bg-[#B3D335]/20 text-[#231F20]" : "bg-white text-[#231F20] border border-[#231F20]/20"
+              step === s.key ? "bg-[#B3D335] text-[#231F20]" : steps.findIndex((x) => x.key === step) > i ? "bg-[#B3D335]/20 text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/20"
             }`}>
               <s.icon className="h-4 w-4" />
               <span className="hidden sm:inline">{s.label}</span>
@@ -1585,7 +1585,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
         {/* Form Section */}
         <div className="lg:col-span-3">
           {step === "info" && (
-            <div className="bg-white rounded-2xl border border-[#231F20]/20 p-6 sm:p-8">
+            <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/20 p-6 sm:p-8">
               <h2 className="text-xl font-bold text-[#231F20] mb-6">Contact Information</h2>
               <div className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
@@ -1597,13 +1597,13 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
               </div>
               <div className="mt-8 flex justify-between">
                 <button onClick={() => navigate("/shop")} className="text-[#231F20]/50 hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Shop</button>
-                <button onClick={() => setStep("shipping")} disabled={!canProceedInfo} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedInfo ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white" : "bg-[#231F20]/10 text-[#231F20]/40 cursor-not-allowed"}`}>Continue to Shipping</button>
+                <button onClick={() => setStep("shipping")} disabled={!canProceedInfo} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedInfo ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20]/40 cursor-not-allowed"}`}>Continue to Shipping</button>
               </div>
             </div>
           )}
 
           {step === "shipping" && (
-            <div className="bg-white rounded-2xl border border-[#231F20]/20 p-6 sm:p-8">
+            <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/20 p-6 sm:p-8">
               <h2 className="text-xl font-bold text-[#231F20] mb-6">Shipping Address</h2>
               <div className="space-y-4">
                 <div className="relative">
@@ -1619,11 +1619,11 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                     className={inputClass}
                   />
                   {showSuggestions && addressSuggestions.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-white border border-[#231F20]/20 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+                    <div className="absolute z-50 w-full mt-1 bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg shadow-xl max-h-48 overflow-y-auto">
                       {addressSuggestions.map((s, i) => (
                         <button
                           key={i}
-                          className="w-full text-left px-4 py-3 text-sm text-[#231F20] hover:bg-white transition-colors border-b border-[#231F20]/10 last:border-b-0"
+                          className="w-full text-left px-4 py-3 text-sm text-[#231F20] hover:bg-[#FFFFFF] transition-colors border-b border-[#231F20]/10 last:border-b-0"
                           onMouseDown={(e) => e.preventDefault()}
                           onClick={() => {
                             setForm((prev) => ({ ...prev, address: s.address, city: s.city, state: s.state, zip: s.zip }));
@@ -1650,32 +1650,32 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
               </div>
               <div className="mt-8 flex justify-between">
                 <button onClick={() => setStep("info")} className="text-[#231F20]/50 hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back</button>
-                <button onClick={() => setStep("payment")} disabled={!canProceedShipping} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedShipping ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white" : "bg-[#231F20]/10 text-[#231F20]/40 cursor-not-allowed"}`}>Continue to Payment</button>
+                <button onClick={() => setStep("payment")} disabled={!canProceedShipping} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedShipping ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20]/40 cursor-not-allowed"}`}>Continue to Payment</button>
               </div>
             </div>
           )}
 
           {step === "payment" && (
-            <div className="bg-white rounded-2xl border border-[#231F20]/20 p-6 sm:p-8">
+            <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/20 p-6 sm:p-8">
               <h2 className="text-xl font-bold text-[#231F20] mb-6">Review & Pay</h2>
 
               {/* Contact summary */}
-              <div className="mb-4 p-4 bg-white rounded-xl">
+              <div className="mb-4 p-4 bg-[#FFFFFF] rounded-xl">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-semibold text-[#231F20]">Contact</h3>
                   <button onClick={() => setStep("info")} className="text-xs text-[#B3D335] hover:text-[#58BA49]">Edit</button>
                 </div>
-                <p className="text-white text-sm">{form.firstName} {form.lastName}</p>
+                <p className="text-[#FFFFFF] text-sm">{form.firstName} {form.lastName}</p>
                 <p className="text-[#231F20]/40 text-sm">{form.email} &bull; {form.phone}</p>
               </div>
 
               {/* Shipping summary */}
-              <div className="mb-4 p-4 bg-white rounded-xl">
+              <div className="mb-4 p-4 bg-[#FFFFFF] rounded-xl">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-semibold text-[#231F20]">Shipping Address</h3>
                   <button onClick={() => setStep("shipping")} className="text-xs text-[#B3D335] hover:text-[#58BA49]">Edit</button>
                 </div>
-                <p className="text-white text-sm">{form.address}{form.apartment ? `, ${form.apartment}` : ""}</p>
+                <p className="text-[#FFFFFF] text-sm">{form.address}{form.apartment ? `, ${form.apartment}` : ""}</p>
                 <p className="text-[#231F20]/40 text-sm">{form.city}, {form.state} {form.zip}</p>
               </div>
 
@@ -1684,22 +1684,22 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                 <h3 className="text-sm font-semibold text-[#231F20]/30 mb-3">Items ({itemCount})</h3>
                 <div className="space-y-2">
                   {cart.map((item) => (
-                    <div key={item.product.id} className="flex items-center gap-3 p-3 bg-white rounded-xl">
-                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-white flex-shrink-0">
+                    <div key={item.product.id} className="flex items-center gap-3 p-3 bg-[#FFFFFF] rounded-xl">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#FFFFFF] flex-shrink-0">
                         <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(item.product.name, 100); }} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-medium truncate">{item.product.online_name || item.product.name}</p>
+                        <p className="text-[#FFFFFF] text-sm font-medium truncate">{item.product.online_name || item.product.name}</p>
                         <p className="text-[#231F20]/50 text-xs">Qty: {item.quantity}</p>
                       </div>
-                      <p className="text-white text-sm font-semibold">{formatPrice(item.product.price * item.quantity)}</p>
+                      <p className="text-[#FFFFFF] text-sm font-semibold">{formatPrice(item.product.price * item.quantity)}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Payment Card Entry */}
-              <div className="mb-6 p-5 bg-white rounded-xl border border-[#231F20]/20">
+              <div className="mb-6 p-5 bg-[#FFFFFF] rounded-xl border border-[#231F20]/20">
                 <div className="flex items-center gap-2 mb-4">
                   <CreditCard className="h-5 w-5 text-[#58BA49]" />
                   <h3 className="text-[#231F20] font-semibold">Payment Details</h3>
@@ -1710,20 +1710,20 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                 <div className="space-y-4">
                   <div>
                     <label className={labelClass}>Card Number</label>
-                    <div id="clover-card-number" className="bg-white border border-[#231F20]/20 rounded-lg overflow-hidden" style={{ minHeight: "48px" }}></div>
+                    <div id="clover-card-number" className="bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg overflow-hidden" style={{ minHeight: "48px" }}></div>
                   </div>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <label className={labelClass}>Expiration</label>
-                      <div id="clover-card-date" className="bg-white border border-[#231F20]/20 rounded-lg overflow-hidden" style={{ minHeight: "48px" }}></div>
+                      <div id="clover-card-date" className="bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg overflow-hidden" style={{ minHeight: "48px" }}></div>
                     </div>
                     <div>
                       <label className={labelClass}>CVV</label>
-                      <div id="clover-card-cvv" className="bg-white border border-[#231F20]/20 rounded-lg overflow-hidden" style={{ minHeight: "48px" }}></div>
+                      <div id="clover-card-cvv" className="bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg overflow-hidden" style={{ minHeight: "48px" }}></div>
                     </div>
                     <div>
                       <label className={labelClass}>ZIP Code</label>
-                      <div id="clover-card-zip" className="bg-white border border-[#231F20]/20 rounded-lg overflow-hidden" style={{ minHeight: "48px" }}></div>
+                      <div id="clover-card-zip" className="bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg overflow-hidden" style={{ minHeight: "48px" }}></div>
                     </div>
                   </div>
                 </div>
@@ -1734,7 +1734,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
               </div>
 
               {/* Loyalty Number */}
-              <div className="mb-6 p-4 bg-white rounded-xl border border-[#231F20]/20">
+              <div className="mb-6 p-4 bg-[#FFFFFF] rounded-xl border border-[#231F20]/20">
                 <div className="flex items-center gap-2 mb-3">
                   <Gift className="h-4 w-4 text-[#58BA49]" />
                   <h3 className="text-[#231F20] text-sm font-semibold">Hemp Rewards (optional)</h3>
@@ -1765,7 +1765,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                 <button
                   onClick={handlePlaceOrder}
                   disabled={submitting}
-                  className="px-8 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-full font-medium transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-8 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-medium transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Lock className="h-4 w-4" />
                   {submitting ? "Processing Payment..." : `Pay ${formatPrice(total)}`}
@@ -1777,25 +1777,25 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
 
         {/* Order Summary Sidebar */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl border border-[#231F20]/20 p-6 sticky top-24">
+          <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/20 p-6 sticky top-24">
             <h2 className="text-lg font-bold text-[#231F20] mb-4">Order Summary</h2>
             <div className="space-y-3 max-h-64 overflow-y-auto mb-4">
               {cart.map((item) => (
                 <div key={item.product.id} className="flex items-center gap-3">
-                  <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0">
+                  <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[#FFFFFF] flex-shrink-0">
                     <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(item.product.name, 100); }} />
                     <span className="absolute -top-1 -right-1 bg-[#B3D335] text-[#231F20] text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">{item.quantity}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-xs font-medium truncate">{item.product.online_name || item.product.name}</p>
+                    <p className="text-[#FFFFFF] text-xs font-medium truncate">{item.product.online_name || item.product.name}</p>
                   </div>
-                  <p className="text-white text-xs font-semibold">{formatPrice(item.product.price * item.quantity)}</p>
+                  <p className="text-[#FFFFFF] text-xs font-semibold">{formatPrice(item.product.price * item.quantity)}</p>
                 </div>
               ))}
             </div>
             <div className="border-t border-[#231F20]/20 pt-4 space-y-2">
               <div className="flex justify-between text-sm"><span className="text-[#231F20]/40">Subtotal</span><span className="text-[#231F20]">{formatPrice(subtotal)}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-[#231F20]/40">Shipping</span><span className="text-white">{shippingCost === 0 ? <span className="text-[#58BA49]">Free</span> : formatPrice(shippingCost)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-[#231F20]/40">Shipping</span><span className="text-[#FFFFFF]">{shippingCost === 0 ? <span className="text-[#58BA49]">Free</span> : formatPrice(shippingCost)}</span></div>
               <div className="flex justify-between text-sm"><span className="text-[#231F20]/40">Tax (7%)</span><span className="text-[#231F20]">{formatPrice(tax)}</span></div>
               <div className="border-t border-[#231F20]/20 pt-3 flex justify-between"><span className="text-[#231F20] font-semibold">Total</span><span className="text-xl font-bold text-[#231F20]">{formatPrice(total)}</span></div>
             </div>
@@ -1880,17 +1880,17 @@ function LoyaltyPage() {
 
       {/* How it works */}
       <div className="grid md:grid-cols-3 gap-6 mb-12">
-        <div className="bg-white rounded-2xl p-6 border border-[#231F20]/10 text-center">
+        <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10 text-center">
           <div className="text-3xl font-bold text-[#B3D335] mb-2">1</div>
           <h3 className="text-[#231F20] font-semibold mb-2">Sign Up</h3>
           <p className="text-[#231F20]/40 text-sm">Create your rewards account with your phone number at any location or online.</p>
         </div>
-        <div className="bg-white rounded-2xl p-6 border border-[#231F20]/10 text-center">
+        <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10 text-center">
           <div className="text-3xl font-bold text-[#B3D335] mb-2">2</div>
           <h3 className="text-[#231F20] font-semibold mb-2">Earn Points</h3>
           <p className="text-[#231F20]/40 text-sm">Earn 1 point for every $1 spent. Points work across East, West, and online.</p>
         </div>
-        <div className="bg-white rounded-2xl p-6 border border-[#231F20]/10 text-center">
+        <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10 text-center">
           <div className="text-3xl font-bold text-[#B3D335] mb-2">3</div>
           <h3 className="text-[#231F20] font-semibold mb-2">Redeem</h3>
           <p className="text-[#231F20]/40 text-sm">Use your points for discounts: 100 pts = $5 off, 200 pts = $12 off, 500 pts = $35 off.</p>
@@ -1901,12 +1901,12 @@ function LoyaltyPage() {
       {signupResult && (
         <div className={`max-w-lg mx-auto mb-8 p-4 rounded-lg text-center ${signupResult.status === "error" ? "bg-[#D9A32C]/10 border border-[#D9A32C]/30" : "bg-[#B3D335]/10 border border-[#B3D335]/30"}`}>
           <p className={`font-semibold ${signupResult.status === "error" ? "text-[#D9A32C]" : "text-[#58BA49]"}`}>{signupResult.message}</p>
-          {signupResult.points !== undefined && signupResult.points > 0 && <p className="text-white mt-1">You earned <span className="font-bold text-[#B3D335]">{signupResult.points} bonus points</span> for signing up!</p>}
+          {signupResult.points !== undefined && signupResult.points > 0 && <p className="text-[#FFFFFF] mt-1">You earned <span className="font-bold text-[#B3D335]">{signupResult.points} bonus points</span> for signing up!</p>}
         </div>
       )}
 
       {/* Points lookup */}
-      <div className="bg-white rounded-2xl p-8 border border-[#231F20]/20 max-w-lg mx-auto mb-8 shadow-sm">
+      <div className="bg-[#FFFFFF] rounded-2xl p-8 border border-[#231F20]/20 max-w-lg mx-auto mb-8 shadow-sm">
         <h2 className="text-xl font-bold text-[#231F20] mb-4 text-center">Check Your Points</h2>
         <div className="flex gap-3">
           <input
@@ -1914,23 +1914,22 @@ function LoyaltyPage() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="Enter your phone number"
-            className="flex-1 bg-white border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-gray-400 focus:outline-none focus:border-[#B3D335]"
+            className="flex-1 bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]"
             onKeyDown={(e) => { if (e.key === "Enter") handleLookup(); }}
           />
           <button
             onClick={handleLookup}
             disabled={lookupLoading || !phone}
-            className="px-6 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+            className="px-6 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg font-medium transition-colors disabled:opacity-50"
           >
             {lookupLoading ? "..." : "Look Up"}
           </button>
         </div>
         {lookupResult && (
-          <div className={`mt-4 p-4 rounded-lg ${lookupResult.found ? "bg-[#B3D335]/10 border border-[#B3D335]/30" : "bg-white border border-[#231F20]/20"}`}>
+          <div className={`mt-4 p-4 rounded-lg ${lookupResult.found ? "bg-[#B3D335]/10 border border-[#B3D335]/30" : "bg-[#FFFFFF] border border-[#231F20]/20"}`}>
             {lookupResult.found ? (
               <div className="text-center">
-                <p className="text-[#58BA49] font-semibold text-lg">Welcome back, {lookupResult.name}!</p>
-                <p className="text-[#231F20] text-3xl font-bold mt-2">{lookupResult.points !== undefined ? lookupResult.points : 0} <span className="text-sm text-[#231F20]/40 font-normal">points</span></p>
+                <p className="text-[#58BA49] font-semibold text-lg">Welcome back, {lookupResult.name}! — <span className="text-[#231F20] font-bold">{lookupResult.points !== undefined && lookupResult.points !== null ? lookupResult.points : 0} points</span></p>
               </div>
             ) : (
               <div className="text-center">
@@ -1944,29 +1943,29 @@ function LoyaltyPage() {
 
       {/* Sign Up Form */}
       {showSignup && (
-        <div className="bg-white rounded-2xl p-8 border border-[#B3D335]/50 max-w-lg mx-auto shadow-sm">
+        <div className="bg-[#FFFFFF] rounded-2xl p-8 border border-[#B3D335]/50 max-w-lg mx-auto shadow-sm">
           <h2 className="text-xl font-bold text-[#231F20] mb-2 text-center">Join Hemp Rewards</h2>
           <p className="text-[#231F20]/40 text-sm text-center mb-6">Create your free rewards account and start earning points!</p>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-[#231F20] mb-1.5">First Name *</label>
-                <input type="text" value={signupForm.first_name} onChange={(e) => setSignupForm(f => ({ ...f, first_name: e.target.value }))} placeholder="First name" className="w-full bg-white border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-gray-400 focus:outline-none focus:border-[#B3D335]" />
+                <input type="text" value={signupForm.first_name} onChange={(e) => setSignupForm(f => ({ ...f, first_name: e.target.value }))} placeholder="First name" className="w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#231F20] mb-1.5">Last Name</label>
-                <input type="text" value={signupForm.last_name} onChange={(e) => setSignupForm(f => ({ ...f, last_name: e.target.value }))} placeholder="Last name" className="w-full bg-white border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-gray-400 focus:outline-none focus:border-[#B3D335]" />
+                <input type="text" value={signupForm.last_name} onChange={(e) => setSignupForm(f => ({ ...f, last_name: e.target.value }))} placeholder="Last name" className="w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]" />
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-[#231F20] mb-1.5">Phone Number *</label>
-              <input type="tel" value={signupForm.phone} onChange={(e) => setSignupForm(f => ({ ...f, phone: e.target.value }))} placeholder="(352) 555-0123" className="w-full bg-white border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-gray-400 focus:outline-none focus:border-[#B3D335]" />
+              <input type="tel" value={signupForm.phone} onChange={(e) => setSignupForm(f => ({ ...f, phone: e.target.value }))} placeholder="(352) 555-0123" className="w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]" />
             </div>
             <div>
               <label className="block text-sm font-medium text-[#231F20] mb-1.5">Email (optional)</label>
-              <input type="email" value={signupForm.email} onChange={(e) => setSignupForm(f => ({ ...f, email: e.target.value }))} placeholder="you@example.com" className="w-full bg-white border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-gray-400 focus:outline-none focus:border-[#B3D335]" />
+              <input type="email" value={signupForm.email} onChange={(e) => setSignupForm(f => ({ ...f, email: e.target.value }))} placeholder="you@example.com" className="w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]" />
             </div>
-            <button onClick={handleSignup} disabled={signupLoading || !signupForm.first_name || !signupForm.phone} className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-lg font-medium transition-colors disabled:opacity-50">
+            <button onClick={handleSignup} disabled={signupLoading || !signupForm.first_name || !signupForm.phone} className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg font-medium transition-colors disabled:opacity-50">
               {signupLoading ? "Creating account..." : "Create My Rewards Account"}
             </button>
             <button onClick={() => setShowSignup(false)} className="w-full py-2 text-[#231F20]/50 hover:text-[#231F20]/30 text-sm transition-colors">Cancel</button>
@@ -2058,7 +2057,7 @@ function AccountPage() {
   if (loggedIn && memberData) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16">
-        <div className="bg-white rounded-2xl p-8 border border-[#231F20]/20 shadow-sm">
+        <div className="bg-[#FFFFFF] rounded-2xl p-8 border border-[#231F20]/20 shadow-sm">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-[#B3D335]/20 rounded-full mb-4">
               <User className="h-8 w-8 text-[#58BA49]" />
@@ -2066,21 +2065,21 @@ function AccountPage() {
             <h1 className="text-2xl font-bold text-[#231F20]">{memberData.name}</h1>
             <p className="text-[#231F20]/40">{memberData.phone} {memberData.email ? `| ${memberData.email}` : ""}</p>
           </div>
-          <div className="bg-white rounded-xl p-6 text-center mb-6">
+          <div className="bg-[#FFFFFF] rounded-xl p-6 text-center mb-6">
             <p className="text-[#231F20]/40 text-sm mb-1">Your Reward Points</p>
             <p className="text-4xl font-bold text-[#B3D335]">{memberData.points}</p>
             <p className="text-[#231F20]/50 text-xs mt-1">Points work across all locations + online</p>
           </div>
           <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-white rounded-lg">
+            <div className="flex justify-between items-center p-3 bg-[#FFFFFF] rounded-lg">
               <span className="text-[#231F20]">100 points</span>
               <span className="text-[#58BA49] font-semibold">$5 off</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-white rounded-lg">
+            <div className="flex justify-between items-center p-3 bg-[#FFFFFF] rounded-lg">
               <span className="text-[#231F20]">200 points</span>
               <span className="text-[#58BA49] font-semibold">$12 off</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-white rounded-lg">
+            <div className="flex justify-between items-center p-3 bg-[#FFFFFF] rounded-lg">
               <span className="text-[#231F20]">500 points</span>
               <span className="text-[#58BA49] font-semibold">$35 off</span>
             </div>
@@ -2103,7 +2102,7 @@ function AccountPage() {
       )}
 
       {!showSignup ? (
-        <div className="bg-white rounded-2xl p-8 border border-[#231F20]/20 shadow-sm">
+        <div className="bg-[#FFFFFF] rounded-2xl p-8 border border-[#231F20]/20 shadow-sm">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-[#B3D335]/20 rounded-full mb-4">
               <User className="h-8 w-8 text-[#58BA49]" />
@@ -2119,7 +2118,7 @@ function AccountPage() {
                 value={loginForm.phone}
                 onChange={(e) => setLoginForm((prev) => ({ ...prev, phone: e.target.value }))}
                 placeholder="(352) 555-0123"
-                className="w-full bg-white border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-gray-400 focus:outline-none focus:border-[#B3D335]"
+                className="w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]"
                 onKeyDown={(e) => { if (e.key === "Enter") handleLogin(); }}
               />
             </div>
@@ -2131,7 +2130,7 @@ function AccountPage() {
                 value={loginForm.email}
                 onChange={(e) => setLoginForm((prev) => ({ ...prev, email: e.target.value }))}
                 placeholder="you@example.com"
-                className="w-full bg-white border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-gray-400 focus:outline-none focus:border-[#B3D335]"
+                className="w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]"
                 onKeyDown={(e) => { if (e.key === "Enter") handleLogin(); }}
               />
             </div>
@@ -2139,7 +2138,7 @@ function AccountPage() {
             <button
               onClick={handleLogin}
               disabled={loginLoading}
-              className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+              className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg font-medium transition-colors disabled:opacity-50"
             >
               {loginLoading ? "Signing in..." : "Sign In"}
             </button>
@@ -2152,7 +2151,7 @@ function AccountPage() {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl p-8 border border-[#B3D335]/50 shadow-sm">
+        <div className="bg-[#FFFFFF] rounded-2xl p-8 border border-[#B3D335]/50 shadow-sm">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-[#B3D335]/20 rounded-full mb-4">
               <Gift className="h-8 w-8 text-[#58BA49]" />
@@ -2164,23 +2163,23 @@ function AccountPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-[#231F20] mb-1.5">First Name *</label>
-                <input type="text" value={signupForm.first_name} onChange={(e) => setSignupForm(f => ({ ...f, first_name: e.target.value }))} placeholder="First name" className="w-full bg-white border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-gray-400 focus:outline-none focus:border-[#B3D335]" />
+                <input type="text" value={signupForm.first_name} onChange={(e) => setSignupForm(f => ({ ...f, first_name: e.target.value }))} placeholder="First name" className="w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#231F20] mb-1.5">Last Name</label>
-                <input type="text" value={signupForm.last_name} onChange={(e) => setSignupForm(f => ({ ...f, last_name: e.target.value }))} placeholder="Last name" className="w-full bg-white border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-gray-400 focus:outline-none focus:border-[#B3D335]" />
+                <input type="text" value={signupForm.last_name} onChange={(e) => setSignupForm(f => ({ ...f, last_name: e.target.value }))} placeholder="Last name" className="w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]" />
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-[#231F20] mb-1.5">Phone Number *</label>
-              <input type="tel" value={signupForm.phone} onChange={(e) => setSignupForm(f => ({ ...f, phone: e.target.value }))} placeholder="(352) 555-0123" className="w-full bg-white border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-gray-400 focus:outline-none focus:border-[#B3D335]" />
+              <input type="tel" value={signupForm.phone} onChange={(e) => setSignupForm(f => ({ ...f, phone: e.target.value }))} placeholder="(352) 555-0123" className="w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]" />
             </div>
             <div>
               <label className="block text-sm font-medium text-[#231F20] mb-1.5">Email (optional)</label>
-              <input type="email" value={signupForm.email} onChange={(e) => setSignupForm(f => ({ ...f, email: e.target.value }))} placeholder="you@example.com" className="w-full bg-white border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-gray-400 focus:outline-none focus:border-[#B3D335]" />
+              <input type="email" value={signupForm.email} onChange={(e) => setSignupForm(f => ({ ...f, email: e.target.value }))} placeholder="you@example.com" className="w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]" />
             </div>
             {signupResult && signupResult.status === "error" && <p className="text-[#D9A32C] text-sm text-center">{signupResult.message}</p>}
-            <button onClick={handleSignup} disabled={signupLoading || !signupForm.first_name || !signupForm.phone} className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-lg font-medium transition-colors disabled:opacity-50">
+            <button onClick={handleSignup} disabled={signupLoading || !signupForm.first_name || !signupForm.phone} className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg font-medium transition-colors disabled:opacity-50">
               {signupLoading ? "Creating account..." : "Create My Rewards Account"}
             </button>
             <button onClick={() => { setShowSignup(false); setSignupResult(null); }} className="w-full py-2 text-[#231F20]/50 hover:text-[#231F20]/30 text-sm transition-colors">Already have an account? Sign in</button>
@@ -2356,22 +2355,22 @@ function ScratchCardGame() {
           <h1 className="text-4xl font-bold text-[#231F20] mb-2">Scratch & Win!</h1>
           <p className="text-[#231F20]/40">Enter your rewards number to play</p>
         </div>
-        <div className="bg-white rounded-2xl border border-[#231F20]/15 p-8 text-center max-w-md mx-auto">
+        <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/15 p-8 text-center max-w-md mx-auto">
           <Gift className="h-12 w-12 text-[#58BA49] mx-auto mb-4" />
           <h2 className="text-xl font-bold text-[#231F20] mb-2">Rewards Members Only</h2>
           <p className="text-[#231F20]/50 text-sm mb-6">Enter your rewards phone number to unlock your daily scratch card. Not a member? <a href="#/loyalty" className="text-[#58BA49] underline">Sign up free</a></p>
           <input type="tel" placeholder="(555) 555-5555" value={scratchPhone} onChange={(e) => setScratchPhone(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleScratchAuth()}
             className="w-full px-4 py-3 rounded-xl border border-[#231F20]/15 text-[#231F20] text-center text-lg mb-4 focus:outline-none focus:border-[#B3D335]" />
-          {scratchAuthError && <p className="text-red-500 text-sm mb-3">{scratchAuthError}</p>}
+          {scratchAuthError && <p className="text-[#231F20] text-sm mb-3">{scratchAuthError}</p>}
           <button onClick={handleScratchAuth} disabled={scratchAuthLoading || !scratchPhone}
-            className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-xl font-semibold transition-colors disabled:opacity-50">
+            className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-xl font-semibold transition-colors disabled:opacity-50">
             {scratchAuthLoading ? "Verifying..." : "Unlock My Scratch Card"}
           </button>
         </div>
         <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3">
           {prizes.map((p, i) => (
-            <div key={i} className="bg-white border border-[#231F20]/10 rounded-lg p-3 text-center">
+            <div key={i} className="bg-[#FFFFFF] border border-[#231F20]/10 rounded-lg p-3 text-center">
               <span className="text-2xl">{p.emoji}</span>
               <p className="text-xs text-[#231F20]/50 mt-1 font-medium">{p.text}</p>
             </div>
@@ -2393,12 +2392,12 @@ function ScratchCardGame() {
           <h1 className="text-4xl font-bold text-[#231F20] mb-2">Scratch & Win!</h1>
           <p className="text-[#231F20]/40">Welcome back, {scratchAuthName}!</p>
         </div>
-        <div className="bg-white rounded-2xl border border-[#231F20]/15 p-8 text-center max-w-md mx-auto">
+        <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/15 p-8 text-center max-w-md mx-auto">
           <Clock className="h-12 w-12 text-[#D9A32C] mx-auto mb-4" />
           <h2 className="text-xl font-bold text-[#231F20] mb-2">Come Back Tomorrow!</h2>
           <p className="text-[#231F20]/50 text-sm mb-4">You already played today. Your next scratch card unlocks in <span className="font-bold text-[#231F20]">{hoursLeft} hour{hoursLeft !== 1 ? "s" : ""}</span>.</p>
           <p className="text-[#231F20]/40 text-xs mb-6">Make a purchase to earn an extra scratch card!</p>
-          <button onClick={() => navigate("/shop")} className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-xl font-semibold transition-colors">Shop Now</button>
+          <button onClick={() => navigate("/shop")} className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-xl font-semibold transition-colors">Shop Now</button>
         </div>
       </div>
     );
@@ -2413,7 +2412,7 @@ function ScratchCardGame() {
       <div className="bg-[#231F20] rounded-2xl border border-[#231F20] p-8 text-center">
         <div className="relative inline-block rounded-xl overflow-hidden border-4 border-[#B3D335] shadow-lg shadow-[#B3D335]/30" style={{ width: 320, height: 200 }}>
           {/* Prize underneath */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#231F20] via-black to-[#231F20]">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#231F20] via-[#231F20] to-[#231F20]">
             <span className="text-5xl mb-2">{prizeEmoji}</span>
             <span className="text-2xl font-bold text-[#B3D335]">{prize}</span>
             {currentPrize && <span className="text-sm text-[#231F20]/40 mt-1">{currentPrize.desc}</span>}
@@ -2432,11 +2431,11 @@ function ScratchCardGame() {
             <p className="text-[#B3D335] text-lg font-semibold mb-4 animate-pulse">Congratulations, {scratchAuthName}! You won {prize}!</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button onClick={handleShareWin}
-                className="px-6 py-2 bg-[#58BA49] hover:bg-[#3D8C32] text-white rounded-full font-medium transition-all">
+                className="px-6 py-2 bg-[#58BA49] hover:bg-[#3D8C32] text-[#FFFFFF] rounded-full font-medium transition-all">
                 {shared ? "Copied!" : "Share your win \u{1F389}"}
               </button>
               <button onClick={() => navigate("/loyalty")}
-                className="px-6 py-2 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-full font-medium transition-all">
+                className="px-6 py-2 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-medium transition-all">
                 Check Rewards Balance
               </button>
             </div>
@@ -2467,7 +2466,7 @@ function BudPuppet({ size = 80, className = "", action = "idle" }: { size?: numb
   const actionClass = action === "grind" ? "animate-spin-slow" : action === "roll" ? "animate-wiggle" : action === "light" ? "animate-pulse" : action === "smoke" ? "animate-float" : action === "celebrate" ? "animate-bounce" : "";
   return (
     <div className={`relative inline-block ${className}`} style={{ width: size, height: size }}>
-      <img src="/bud-puppet.png" alt="Bud Puppet" className={`w-full h-full object-contain drop-shadow-lg ${actionClass}`} style={{ filter: "drop-shadow(0 0 12px rgba(34,197,94,0.4))" }} />
+      <img src="/bud-puppet.png" alt="Bud Puppet" className={`w-full h-full object-contain drop-shadow-lg ${actionClass}`} style={{ filter: "drop-shadow(0 0 12px rgba(88,186,73,0.4))" }} />
       {action === "grind" && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs font-bold text-[#B3D335] animate-pulse whitespace-nowrap">Grinding...</div>}
       {action === "roll" && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs font-bold text-[#FFCB08] animate-pulse whitespace-nowrap">Rolling!</div>}
       {action === "light" && <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-2xl animate-bounce">{"\uD83D\uDD25"}</div>}
@@ -2548,7 +2547,7 @@ function RollAJointGame() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
       <div className="text-center mb-6">
-        <h1 className="text-4xl font-bold text-white mb-2">Roll a Joint!</h1>
+        <h1 className="text-4xl font-bold text-[#FFFFFF] mb-2">Roll a Joint!</h1>
         <p className="text-[#231F20]/40">Help Bud Puppet grind, roll, light, and enjoy</p>
         <div className="flex items-center justify-center gap-6 mt-3">
           <span className="text-[#B3D335] font-bold">Round {round}</span>
@@ -2565,16 +2564,16 @@ function RollAJointGame() {
         {/* Step 0: Pick Flower */}
         {step === 0 && (
           <div>
-            <h2 className="text-xl font-bold text-white text-center mb-2">Step 1: Pick Your Flower</h2>
+            <h2 className="text-xl font-bold text-[#FFFFFF] text-center mb-2">Step 1: Pick Your Flower</h2>
             <p className="text-[#231F20]/50 text-center text-sm mb-4">Bud Puppet wants to roll one up! Choose a strain:</p>
             <div className="grid grid-cols-2 gap-4">
               {STRAINS.map(s => (
                 <button key={s.name} onClick={() => pickStrain(s)}
-                  className="p-4 rounded-xl border-2 border-[#231F20]/20 hover:border-[#B3D335] bg-white hover:bg-white transition-all group">
+                  className="p-4 rounded-xl border-2 border-[#231F20]/20 hover:border-[#B3D335] bg-[#FFFFFF] hover:bg-[#FFFFFF] transition-all group">
                   <div className="w-16 h-16 mx-auto rounded-full mb-3 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-110" style={{ background: s.color }}>
                     <img src="/bud-puppet.png" alt={s.name} className="w-12 h-12 object-contain" />
                   </div>
-                  <p className="text-white font-semibold">{s.name}</p>
+                  <p className="text-[#FFFFFF] font-semibold">{s.name}</p>
                   <p className="text-[#231F20]/50 text-xs mt-1">{s.desc}</p>
                 </button>
               ))}
@@ -2585,7 +2584,7 @@ function RollAJointGame() {
         {/* Step 1: Grind - Bud Puppet grinds the flower */}
         {step === 1 && selectedStrain && (
           <div className="text-center">
-            <h2 className="text-xl font-bold text-white mb-2">Step 2: Grind the {selectedStrain.name}</h2>
+            <h2 className="text-xl font-bold text-[#FFFFFF] mb-2">Step 2: Grind the {selectedStrain.name}</h2>
             <p className="text-[#231F20]/50 text-sm mb-4">Bud Puppet is grinding it up!</p>
             <div className="relative w-48 h-48 mx-auto mb-4">
               {/* Grinder with Bud Puppet inside */}
@@ -2600,13 +2599,13 @@ function RollAJointGame() {
               {grindProgress > 20 && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-sm text-[#B3D335] animate-pulse">{"Crunch crunch..."}</div>}
             </div>
             <div className="w-56 mx-auto bg-[#231F20]/10 rounded-full h-4 mb-4 overflow-hidden">
-              <div className="h-4 rounded-full transition-all flex items-center justify-center text-xs font-bold text-white" style={{ width: `${grindProgress}%`, background: `linear-gradient(90deg, ${selectedStrain.color}, #B3D335)` }}>
+              <div className="h-4 rounded-full transition-all flex items-center justify-center text-xs font-bold text-[#FFFFFF]" style={{ width: `${grindProgress}%`, background: `linear-gradient(90deg, ${selectedStrain.color}, #B3D335)` }}>
                 {grindProgress > 15 && `${Math.round(grindProgress)}%`}
               </div>
             </div>
             <button onMouseDown={startGrind} onMouseUp={stopGrind} onMouseLeave={stopGrind}
               onTouchStart={startGrind} onTouchEnd={stopGrind}
-              className="px-8 py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-full font-bold text-lg transition-all active:scale-95 shadow-lg shadow-[#B3D335]/50">
+              className="px-8 py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-all active:scale-95 shadow-lg shadow-[#B3D335]/50">
               Hold to Grind
             </button>
           </div>
@@ -2615,7 +2614,7 @@ function RollAJointGame() {
         {/* Step 2: Roll - Bud Puppet rolls it */}
         {step === 2 && selectedStrain && (
           <div className="text-center">
-            <h2 className="text-xl font-bold text-white mb-2">Step 3: Roll the Joint</h2>
+            <h2 className="text-xl font-bold text-[#FFFFFF] mb-2">Step 3: Roll the Joint</h2>
             <p className="text-[#231F20]/50 text-sm mb-4">Bud Puppet is rolling it tight!</p>
             <div className="relative w-72 h-28 mx-auto mb-6">
               {/* Rolling paper background */}
@@ -2633,7 +2632,7 @@ function RollAJointGame() {
             </div>
             <p className="text-[#231F20]/40 text-sm mb-4">Tap to roll! ({Math.round(rollProgress)}%)</p>
             <button onClick={handleRollClick}
-              className="px-8 py-4 bg-[#D9A32C] hover:bg-[#FFCB08] text-white rounded-full font-bold text-lg transition-all active:scale-90 shadow-lg shadow-[#D9A32C]/30/50">
+              className="px-8 py-4 bg-[#D9A32C] hover:bg-[#FFCB08] text-[#FFFFFF] rounded-full font-bold text-lg transition-all active:scale-90 shadow-lg shadow-[#D9A32C]/30/50">
               Tap to Roll
             </button>
           </div>
@@ -2642,7 +2641,7 @@ function RollAJointGame() {
         {/* Step 3: Light - Bud Puppet lights it */}
         {step === 3 && (
           <div className="text-center">
-            <h2 className="text-xl font-bold text-white mb-2">Step 4: Light It Up!</h2>
+            <h2 className="text-xl font-bold text-[#FFFFFF] mb-2">Step 4: Light It Up!</h2>
             <p className="text-[#231F20]/50 text-sm mb-4">Bud Puppet is sparking it up!</p>
             <div className="relative w-56 h-56 mx-auto mb-4">
               {/* Joint */}
@@ -2661,12 +2660,12 @@ function RollAJointGame() {
               {lightProgress < 100 && <div className="absolute top-8 right-4 text-4xl animate-bounce">{"\uD83E\uDE94"}</div>}
             </div>
             <div className="w-56 mx-auto bg-[#231F20]/10 rounded-full h-4 mb-4 overflow-hidden">
-              <div className="bg-gradient-to-r from-[#D9A32C] to-[#D9A32C] h-4 rounded-full transition-all flex items-center justify-center text-xs font-bold text-white" style={{ width: `${lightProgress}%` }}>
+              <div className="bg-gradient-to-r from-[#D9A32C] to-[#D9A32C] h-4 rounded-full transition-all flex items-center justify-center text-xs font-bold text-[#FFFFFF]" style={{ width: `${lightProgress}%` }}>
                 {lightProgress > 15 && `${Math.round(lightProgress)}%`}
               </div>
             </div>
             <button onClick={handleLightClick}
-              className="px-8 py-4 bg-[#D9A32C] hover:bg-[#D9A32C] text-white rounded-full font-bold text-lg transition-all active:scale-95 shadow-lg shadow-[#D9A32C]/30/50">
+              className="px-8 py-4 bg-[#D9A32C] hover:bg-[#D9A32C] text-[#FFFFFF] rounded-full font-bold text-lg transition-all active:scale-95 shadow-lg shadow-[#D9A32C]/30/50">
               {"\uD83D\uDD25"} Click to Light
             </button>
           </div>
@@ -2675,7 +2674,7 @@ function RollAJointGame() {
         {/* Step 4: Smoke animation - Bud Puppet enjoys */}
         {step === 4 && (
           <div className="text-center">
-            <h2 className="text-xl font-bold text-white mb-4">Bud Puppet is Enjoying It!</h2>
+            <h2 className="text-xl font-bold text-[#FFFFFF] mb-4">Bud Puppet is Enjoying It!</h2>
             <div className="relative w-72 h-72 mx-auto">
               {/* Glow effect */}
               <div className="absolute inset-0 flex items-center justify-center">
@@ -2709,7 +2708,7 @@ function RollAJointGame() {
             <BudPuppet size={100} action="celebrate" className="mx-auto mb-6" />
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button onClick={nextRound}
-                className="px-8 py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-white rounded-full font-bold text-lg transition-all shadow-lg shadow-[#B3D335]/50">
+                className="px-8 py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-all shadow-lg shadow-[#B3D335]/50">
                 Next Round
               </button>
               <button onClick={() => navigate("/loyalty")}
@@ -2724,7 +2723,7 @@ function RollAJointGame() {
       {/* Step indicators */}
       <div className="flex items-center justify-center gap-2 mt-6">
         {["Pick", "Grind", "Roll", "Light", "Smoke"].map((label, i) => (
-          <div key={i} className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${i <= step ? "bg-[#B3D335]/20 text-[#231F20] border border-[#B3D335]" : "bg-white text-[#231F20]/40 border border-[#231F20]/15"}`}>
+          <div key={i} className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${i <= step ? "bg-[#B3D335]/20 text-[#231F20] border border-[#B3D335]" : "bg-[#FFFFFF] text-[#231F20]/40 border border-[#231F20]/15"}`}>
             {i < step ? "\u2713" : i + 1}. {label}
           </div>
         ))}
@@ -2753,23 +2752,23 @@ function GamesPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold text-white mb-3">Hemp Games</h1>
+        <h1 className="text-4xl font-bold text-[#FFFFFF] mb-3">Hemp Games</h1>
         <p className="text-[#231F20]/40 text-lg">Play games, win prizes, and have fun!</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Scratch Card */}
         <button onClick={() => setActiveGame("scratch")}
-          className="bg-white border-2 border-[#B3D335]/50 hover:border-[#B3D335] rounded-2xl p-8 text-left transition-all hover:scale-105 group">
+          className="bg-[#FFFFFF] border-2 border-[#B3D335]/50 hover:border-[#B3D335] rounded-2xl p-8 text-left transition-all hover:scale-105 group">
           <div className="text-5xl mb-4">{"\u{1F3B0}"}</div>
-          <h2 className="text-2xl font-bold text-white mb-2">Scratch & Win</h2>
+          <h2 className="text-2xl font-bold text-[#FFFFFF] mb-2">Scratch & Win</h2>
           <p className="text-[#231F20]/40">Scratch the card to reveal exclusive prizes — discounts, free shipping, bonus points, and more!</p>
           <span className="inline-block mt-4 text-[#58BA49] font-semibold group-hover:translate-x-1 transition-transform">        Play Now {"\u2192"}</span>
                 </button>
                 {/* Roll a Joint */}
         <button onClick={() => setActiveGame("roll")}
-          className="bg-white border-2 border-[#FFCB08]/50 hover:border-[#FFCB08] rounded-2xl p-8 text-left transition-all hover:scale-105 group">
+          className="bg-[#FFFFFF] border-2 border-[#FFCB08]/50 hover:border-[#FFCB08] rounded-2xl p-8 text-left transition-all hover:scale-105 group">
           <div className="text-5xl mb-4">{"\u{1F525}"}</div>
-          <h2 className="text-2xl font-bold text-white mb-2">Roll a Joint</h2>
+          <h2 className="text-2xl font-bold text-[#FFFFFF] mb-2">Roll a Joint</h2>
           <p className="text-[#231F20]/40">Pick your flower, grind it, roll it, light it! Watch your cannabis nut character enjoy the ride.</p>
           <span className="inline-block mt-4 text-[#FFCB08] font-semibold group-hover:translate-x-1 transition-transform">      Play Now {"\u2192"}</span>
               </button>
@@ -2880,7 +2879,7 @@ function App() {
   }, [productsByCategory]);
 
   const shell = (content: React.ReactNode) => (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#FFFFFF]">
       <StickyTopBar />
       <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} />
       {content}
@@ -2910,7 +2909,7 @@ function App() {
 
   // Homepage
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#FFFFFF]">
       <StickyTopBar />
       <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} />
       <HeroSection />
@@ -2928,11 +2927,11 @@ function App() {
             const displayProducts = catProducts.length >= 4 ? catProducts.slice(0, 4) : inStock.slice(0, 4);
             if (displayProducts.length === 0) return null;
             return (
-              <section key={cat} className="py-10 bg-white">
+              <section key={cat} className="py-10 bg-[#FFFFFF]">
                 <div className="max-w-7xl mx-auto px-4">
                   <div className="flex items-center justify-between mb-8">
                     <h2 className="text-[18px] sm:text-3xl font-semibold sm:font-bold text-[#231F20]">{cat}</h2>
-                    <button onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="border border-[#231F20] text-[#231F20] hover:bg-white px-6 py-2 rounded-full font-medium transition-all duration-300 text-sm">View All</button>
+                    <button onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="border border-[#231F20] text-[#231F20] hover:bg-[#FFFFFF] px-6 py-2 rounded-full font-medium transition-all duration-300 text-sm">View All</button>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                     {displayProducts.map((product) => (
