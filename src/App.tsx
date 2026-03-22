@@ -503,8 +503,8 @@ function ReviewsSection() {
 /* ======================== LOCATION SECTION ======================== */
 function LocationSection() {
   const locations = [
-    { name: "Spring Hill East", address: "14312 Spring Hill Dr, Spring Hill, FL 34609", hours: "Open Daily 6am\u201310pm", phone: "(352) 515-5370", mapsQuery: "The Hemp Dispensary Spring Hill Dr", googleUrl: "https://www.google.com/maps/place/The+Hemp+Dispensary/@28.4786,-82.5535,15z" },
-    { name: "Spring Hill West", address: "6175 Deltona Blvd, Ste 104, Spring Hill, FL 34606", hours: "Open Daily 6am\u201312am", phone: "(352) 340-5860", mapsQuery: "The Hemp Dispensary Deltona Blvd", googleUrl: "https://www.google.com/maps/place/The+Hemp+Dispensary/@28.4631,-82.6016,15z" },
+    { name: "Spring Hill East", address: "14312 Spring Hill Dr, Spring Hill, FL 34609", hours: "Open Daily 6am\u201310pm", phone: "(352) 515-5370", mapsQuery: "The Hemp Dispensary Cannabis Spring Hill East", googleUrl: "https://www.google.com/maps/place/The+Hemp+Dispensary+-+Cannabis+-+Spring+Hill+East/@28.4979227,-82.526553,14z" },
+    { name: "Spring Hill West", address: "6175 Deltona Blvd, Ste 104, Spring Hill, FL 34606", hours: "Mon\u2013Fri 6am\u201312am | Sat\u2013Sun 10am\u20138pm", phone: "(352) 340-5860", mapsQuery: "The Hemp Dispensary Cannabis Spring Hill West", googleUrl: "https://www.google.com/maps/place/The+Hemp+Dispensary+-+Cannabis+-+Spring+Hill+West/@28.5194235,-82.6024028,14z" },
   ];
   return (
     <section id="locations-section" className="bg-white py-12 sm:py-16">
