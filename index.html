@@ -8,9 +8,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="The Hemp Dispensary — Spring Hill FL's trusted hemp store. Shop premium flower, edibles, concentrates, vapes, topicals, and tinctures online. Ready in 5 minutes or shipped to your door." />
     <title>The Hemp Dispensary</title>
+    <!-- Critical inline CSS: instant render before React hydrates -->
+    <style>
+      body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:#FFFFFF;color:#231F20}
+      #root{min-height:100vh}
+      .loading-shell{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#FFFFFF}
+      .loading-shell img{height:3rem;width:auto;animation:pulse 2s ease-in-out infinite}
+      .loading-shell p{color:rgba(35,31,32,0.5);font-style:italic;margin-top:0.5rem}
+      @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Instant loading shell shown before JS executes -->
+      <div class="loading-shell">
+        <img src="/logo.webp" alt="The Hemp Dispensary" width="120" height="48" />
+        <p>Remedy Your Way</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
