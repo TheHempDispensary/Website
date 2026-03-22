@@ -3386,6 +3386,14 @@ function App() {
       .catch((err) => { console.error("Failed to load products:", err); setLoading(false); });
   }, []);
 
+  // Keepalive: ping backend every 5 minutes to prevent Fly.io cold starts
+  useEffect(() => {
+    const ping = () => { fetch(`${API_URL}/healthz`, { method: "GET" }).catch(() => {}); };
+    ping();
+    const id = setInterval(ping, 5 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
+
   const productsByCategory = useMemo(() => {
     const map: Record<string, Product[]> = {};
     products.forEach((p) => { p.categories.forEach((cat) => { if (!map[cat]) map[cat] = []; map[cat].push(p); }); });
