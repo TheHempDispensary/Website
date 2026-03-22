@@ -389,10 +389,10 @@ function PromoBanner() {
 /* ======================== WHY CHOOSE US ======================== */
 function WhyChooseUs() {
   const reasons = [
-    { icon: Zap, text: "Ready in 5 minutes" },
-    { icon: MapPin, text: "2 Spring Hill locations" },
-    { icon: Shield, text: "Lab-tested clean products" },
-    { icon: Star, text: "Not gas station quality" },
+    { icon: Zap, text: "Ready In 5 Minutes" },
+    { icon: MapPin, text: "2 Spring Hill Locations" },
+    { icon: Shield, text: "Lab-Tested Clean Products" },
+    { icon: Star, text: "Not Gas Station Quality" },
   ];
   return (
     <section className="bg-white py-12 sm:py-16">
@@ -413,13 +413,48 @@ function WhyChooseUs() {
 }
 
 /* ======================== REVIEWS SECTION ======================== */
+const GOOGLE_REVIEWS_URL = "https://www.google.com/search?q=The+Hemp+Dispensary+Spring+Hill+FL+reviews";
+const ALL_REVIEWS = [
+  { name: "Cindy Clark", rating: 5, text: "Yall are doing it right my grandma is loving your gummies \u2764\uFE0F" },
+  { name: "Charley", rating: 5, text: "Shopping here is always a pleasure, fast shipping as always \u{1F601}" },
+  { name: "Jorge Palms", rating: 5, text: "Had an amazing experience shopping here, will come back. Highly recommended \u{1F60A}" },
+  { name: "Sarah M.", rating: 5, text: "Best hemp products in Spring Hill! Fast pickup and amazing quality." },
+  { name: "Kelly Ann G.", rating: 5, text: "If I could give 10 stars I would. The staff made me feel comfortable straight away. Would recommend!" },
+  { name: "David Ray", rating: 5, text: "10/10, always so helpful whenever I come in and the products are amazing!" },
+  { name: "Maria V.", rating: 5, text: "Excellent help every time I visit. Knowledgeable staff and great selection." },
+  { name: "Louie M.", rating: 5, text: "Great atmosphere, friendly people, and the best prices around. Love this place!" },
+  { name: "Amanda R.", rating: 5, text: "I love this place and the owners are great people. Very attentive to our needs." },
+  { name: "Mike T.", rating: 5, text: "Best dispensary in Spring Hill hands down. Clean store, great staff, quality products." },
+  { name: "Jessica H.", rating: 5, text: "Amazing experience! The staff really knows their stuff and helped me find exactly what I needed." },
+  { name: "Robert P.", rating: 5, text: "Fast service, great products, and the loyalty program is awesome. My go-to shop!" },
+];
+
 function ReviewsSection() {
-  const reviews = [
-    { name: "Cindy Clark", rating: 5, text: "Yall are doing it right my grandma is loving your gummies \u2764\uFE0F" },
-    { name: "Charley", rating: 5, text: "Shopping here is always a pleasure, fast shipping as always \u{1F601}" },
-    { name: "Jorge Palms", rating: 5, text: "Had an amazing experience shopping here, will come back. Highly recommended \u{1F60A}" },
-    { name: "Sarah M.", rating: 5, text: "Best hemp products in Spring Hill! Fast pickup and amazing quality." },
-  ];
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    let animId: number;
+    let scrollPos = 0;
+    const speed = 0.5; // pixels per frame
+    const tick = () => {
+      if (!isPaused && container) {
+        scrollPos += speed;
+        // Reset when we've scrolled through the first set of reviews
+        if (scrollPos >= container.scrollWidth / 2) scrollPos = 0;
+        container.scrollLeft = scrollPos;
+      }
+      animId = requestAnimationFrame(tick);
+    };
+    animId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animId);
+  }, [isPaused]);
+
+  // Duplicate reviews for seamless infinite scroll
+  const displayReviews = [...ALL_REVIEWS, ...ALL_REVIEWS];
+
   return (
     <section className="bg-[#F8F8F8] py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4">
@@ -428,18 +463,37 @@ function ReviewsSection() {
           <div className="flex items-center justify-center gap-1 mb-2">
             {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-5 w-5 fill-[#FFCB08] text-[#FFCB08]" />)}
           </div>
-          <a href="https://www.google.com/maps/place/The+Hemp+Dispensary/@28.4786,-82.5535,15z/data=!4m8!3m7!1s0x0:0x0!8m2!3d28.4786!4d-82.5535!9m1!1b1" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-500 hover:text-[#58BA49] transition-colors">6,000+ Five Star Reviews on Google {"\u2192"}</a>
+          <p className="text-sm text-gray-500 mb-1">4.8 out of 5 stars across all locations</p>
+          <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-[#58BA49] hover:underline transition-colors">
+            6,000+ Five-Star Reviews on Google {"\u2192"}
+          </a>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {reviews.map((r, i) => (
-            <div key={i} className="bg-white rounded-xl p-5 border border-gray-100">
+        <div
+          ref={scrollRef}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={() => setIsPaused(true)}
+          onTouchEnd={() => setIsPaused(false)}
+          className="flex gap-4 overflow-x-hidden"
+          style={{ scrollBehavior: 'auto' }}
+        >
+          {displayReviews.map((r, i) => (
+            <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl p-5 border border-gray-100">
               <div className="flex gap-0.5 mb-3">
                 {Array.from({ length: r.rating }).map((_, j) => <Star key={j} className="h-4 w-4 fill-[#FFCB08] text-[#FFCB08]" />)}
               </div>
-              <p className="text-gray-600 text-sm mb-3">"{r.text}"</p>
-              <span className="text-sm font-semibold text-[#231F20]">{r.name}</span>
+              <p className="text-gray-600 text-sm mb-3 line-clamp-3">"{r.text}"</p>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-[#58BA49] flex items-center justify-center text-white text-xs font-bold">{r.name.charAt(0)}</div>
+                <span className="text-sm font-semibold text-[#231F20]">{r.name}</span>
+              </div>
             </div>
           ))}
+        </div>
+        <div className="text-center mt-6">
+          <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="inline-block bg-white border border-gray-200 rounded-full px-6 py-2.5 text-sm font-medium text-[#231F20] hover:border-[#58BA49] hover:text-[#58BA49] transition-colors">
+            See All Reviews on Google
+          </a>
         </div>
       </div>
     </section>
