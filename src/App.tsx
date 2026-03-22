@@ -242,17 +242,17 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear }: { o
 function HeroSection() {
   return (
     <section className="bg-[#231F20] relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 py-16 sm:py-24 text-center relative z-10">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 leading-tight">
+      <div className="max-w-7xl mx-auto px-4 py-10 sm:py-20 text-center relative z-10">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white mb-3 leading-tight">
           Skip the Line.<br />
           <span className="text-[#ADD038]">Get Your Hemp in Minutes.</span>
         </h1>
-        <p className="text-gray-300 text-lg sm:text-xl mb-8 max-w-2xl mx-auto">Fast pickup. Lab-tested. Trusted locally.</p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button onClick={() => navigate("/shop")} className="px-8 py-4 bg-[#58BA49] hover:bg-[#4aa83d] text-white rounded-full font-bold text-lg transition-colors shadow-lg">Shop Now</button>
-          <button onClick={() => navigate("/contact")} className="px-8 py-4 border-2 border-white/30 hover:border-white text-white rounded-full font-bold text-lg transition-colors">Find Nearest Location</button>
+        <p className="text-gray-300 text-base sm:text-xl mb-6 max-w-2xl mx-auto">Fast pickup. Lab-tested. Trusted locally.</p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <button onClick={() => navigate("/shop")} className="px-8 py-3.5 sm:py-4 bg-[#58BA49] hover:bg-[#4aa83d] text-white rounded-full font-bold text-lg transition-colors shadow-lg">Shop Now</button>
+          <button onClick={() => { const el = document.getElementById('locations-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else navigate('/contact'); }} className="px-8 py-3.5 sm:py-4 border-2 border-white/30 hover:border-white text-white rounded-full font-bold text-lg transition-colors">Find Nearest Location</button>
         </div>
-        <p className="mt-6 text-[#FFCB08] font-medium text-sm">{"\u{1F525}"} First-time customers: 20% OFF with code FIRST20</p>
+        <p className="mt-4 text-[#FFCB08] font-medium text-sm">{"\u{1F525}"} First-time customers: 20% OFF with code FIRST20</p>
       </div>
       {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#231F20]/50 pointer-events-none" />
@@ -263,19 +263,20 @@ function HeroSection() {
 /* ======================== TRUST STRIP ======================== */
 function TrustStrip() {
   const items = [
-    { icon: Shield, label: "Lab Tested" },
-    { icon: MapPin, label: "Local Dispensary" },
-    { icon: Zap, label: "Fast Pickup" },
-    { icon: Clock, label: "Open Late" },
+    { icon: Shield, label: "Lab Tested", sub: "Clean & safe" },
+    { icon: MapPin, label: "2 Locations", sub: "Spring Hill, FL" },
+    { icon: Zap, label: "Ready in 5 Min", sub: "Fast pickup" },
+    { icon: Clock, label: "Open Late", sub: "Mon-Sat til 9pm" },
   ];
   return (
-    <section className="bg-white border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <section className="bg-white border-b border-gray-100 cursor-pointer" onClick={() => navigate('/shop')}>
+      <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
+        <div className="grid grid-cols-4 gap-2 sm:gap-4">
           {items.map((item) => (
-            <div key={item.label} className="flex items-center justify-center gap-2 text-center">
-              <item.icon className="h-5 w-5 text-[#58BA49]" />
-              <span className="text-sm font-medium text-[#231F20]">{item.label}</span>
+            <div key={item.label} className="flex flex-col items-center text-center">
+              <item.icon className="h-5 w-5 text-[#58BA49] mb-1" />
+              <span className="text-xs sm:text-sm font-semibold text-[#231F20] leading-tight">{item.label}</span>
+              <span className="text-[10px] sm:text-xs text-gray-400 hidden sm:block">{item.sub}</span>
             </div>
           ))}
         </div>
@@ -315,26 +316,26 @@ function ShopByCategory({ productsByCategory }: { categories: string[]; products
 /* ======================== SHOP BY FEELING ======================== */
 function ShopByFeeling({ products }: { products: Product[] }) {
   const feelings = [
-    { label: "Relax", icon: "\u{1F60C}", color: "#58BA49", bg: "#f0fdf4", desc: "Calm your mind" },
-    { label: "Sleep", icon: "\u{1F634}", color: "#6366f1", bg: "#eef2ff", desc: "Rest easy tonight" },
-    { label: "Energy", icon: "\u26A1", color: "#f59e0b", bg: "#fffbeb", desc: "Power your day" },
-    { label: "Focus", icon: "\u{1F9E0}", color: "#8b5cf6", bg: "#f5f3ff", desc: "Sharpen your mind" },
+    { label: "Relax", icon: "\u{1F60C}", color: "#58BA49", bg: "#f0fdf4", desc: "Calm your mind", keywords: ["relax", "calm", "chill", "indica", "hybrid"] },
+    { label: "Sleep", icon: "\u{1F634}", color: "#6366f1", bg: "#eef2ff", desc: "Rest easy tonight", keywords: ["sleep", "night", "dream", "rest", "melatonin", "cbn"] },
+    { label: "Energy", icon: "\u26A1", color: "#f59e0b", bg: "#fffbeb", desc: "Power your day", keywords: ["energy", "sativa", "boost", "uplift"] },
+    { label: "Focus", icon: "\u{1F9E0}", color: "#8b5cf6", bg: "#f5f3ff", desc: "Sharpen your mind", keywords: ["focus", "clarity", "brain", "mental"] },
   ];
 
   return (
-    <section className="bg-white py-12 sm:py-16">
+    <section className="bg-white py-10 sm:py-14">
       <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl font-bold text-[#231F20] text-center mb-3">Shop by Feeling</h2>
-        <p className="text-gray-500 text-center mb-8">Find the perfect product for your vibe</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] text-center mb-2">How Do You Want to Feel?</h2>
+        <p className="text-gray-500 text-center mb-6 text-sm">Tap to browse products by effect</p>
+        <div className="grid grid-cols-4 gap-3 sm:gap-6">
           {feelings.map((f) => {
             const count = products.filter(p => p.stock > 0 && getProductEffect(p).label === f.label).length;
             return (
-              <button key={f.label} onClick={() => navigate(`/shop`)} className="rounded-2xl p-6 text-center hover:shadow-lg transition-all group border border-gray-100" style={{ backgroundColor: f.bg }}>
-                <span className="text-4xl block mb-3">{f.icon}</span>
-                <h3 className="text-lg font-semibold text-[#231F20] group-hover:text-[#58BA49] transition-colors">{f.label}</h3>
-                <p className="text-sm text-gray-500 mt-1">{f.desc}</p>
-                {count > 0 && <p className="text-xs text-gray-400 mt-2">{count} products</p>}
+              <button key={f.label} onClick={() => navigate(`/shop/${f.label.toLowerCase()}`)} className="rounded-2xl p-3 sm:p-6 text-center hover:shadow-lg transition-all group border border-gray-100" style={{ backgroundColor: f.bg }}>
+                <span className="text-2xl sm:text-4xl block mb-1 sm:mb-3">{f.icon}</span>
+                <h3 className="text-sm sm:text-lg font-semibold text-[#231F20] group-hover:text-[#58BA49] transition-colors">{f.label}</h3>
+                <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">{f.desc}</p>
+                {count > 0 && <p className="text-[10px] sm:text-xs text-gray-400 mt-1">{count} items</p>}
               </button>
             );
           })}
@@ -344,27 +345,14 @@ function ShopByFeeling({ products }: { products: Product[] }) {
   );
 }
 
-/* ======================== FEATURED BUNDLES ======================== */
-function FeaturedBundles() {
-  const bundles = [
-    { name: "Starter Pack", desc: "Perfect for first-timers. A curated selection to explore.", icon: "\u{1F331}", color: "#58BA49" },
-    { name: "Sleep Pack", desc: "Wind down naturally with our best sleep products.", icon: "\u{1F319}", color: "#6366f1" },
-    { name: "Chill Pack", desc: "Ultimate relaxation bundle for stress-free evenings.", icon: "\u{1F60C}", color: "#ADD038" },
-  ];
+/* ======================== PROMO CTA BANNER ======================== */
+function PromoBanner() {
   return (
-    <section className="bg-[#F8F8F8] py-12 sm:py-16">
-      <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl font-bold text-[#231F20] text-center mb-8">Featured Bundles</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          {bundles.map((b) => (
-            <div key={b.name} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-all cursor-pointer" onClick={() => navigate("/shop")}>
-              <span className="text-4xl block mb-4">{b.icon}</span>
-              <h3 className="text-xl font-bold text-[#231F20] mb-2">{b.name}</h3>
-              <p className="text-gray-500 text-sm mb-4">{b.desc}</p>
-              <span className="text-[#58BA49] font-semibold text-sm flex items-center gap-1">Shop Bundle <ChevronRight className="h-4 w-4" /></span>
-            </div>
-          ))}
-        </div>
+    <section className="bg-[#231F20] py-8 sm:py-10">
+      <div className="max-w-3xl mx-auto px-4 text-center">
+        <p className="text-[#FFCB08] font-bold text-lg sm:text-2xl mb-2">{"\u{1F525}"} First-Time Customer?</p>
+        <p className="text-white text-sm sm:text-base mb-4">Get <span className="text-[#ADD038] font-bold">20% OFF</span> your entire order with code <span className="bg-white/10 px-2 py-0.5 rounded font-mono font-bold">FIRST20</span></p>
+        <button onClick={() => navigate('/shop')} className="px-8 py-3 bg-[#58BA49] hover:bg-[#4aa83d] text-white rounded-full font-bold transition-colors">Shop Now &amp; Save</button>
       </div>
     </section>
   );
@@ -435,7 +423,7 @@ function LocationSection() {
     { name: "East \u2013 Spring Hill", address: "2480 Commercial Way, Spring Hill, FL 34606", hours: "Mon-Sat 10am-9pm \u00B7 Sun 11am-7pm", phone: "(352) 340-2862" },
   ];
   return (
-    <section className="bg-white py-12 sm:py-16">
+    <section id="locations-section" className="bg-white py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-3xl font-bold text-[#231F20] text-center mb-8">Our Locations</h2>
         <div className="grid md:grid-cols-2 gap-6">
@@ -459,15 +447,15 @@ function LocationSection() {
 }
 
 
-/* ======================== PRODUCT GRID CARD (Floating Design) ======================== */
-function ProductGridCard({ product }: { product: Product }) {
+/* ======================== PRODUCT GRID CARD (Floating Design + Quick Add) ======================== */
+function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd?: (product: Product) => void }) {
   if (product.stock <= 0) return null;
   const effect = getProductEffect(product);
   return (
     <div className="cursor-pointer group" onClick={() => navigate(`/product/${product.id}`)}>
-      <div className="bg-white rounded-2xl p-4 transition-all duration-300 hover:shadow-xl relative">
+      <div className="bg-white rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-xl relative">
         {/* Floating product image */}
-        <div className="h-48 flex items-center justify-center mb-3 relative">
+        <div className="h-36 sm:h-48 flex items-center justify-center mb-2 sm:mb-3 relative">
           <img
             src={product.image_url || placeholderUrl(product.name)}
             alt={product.name}
@@ -478,17 +466,27 @@ function ProductGridCard({ product }: { product: Product }) {
           {/* Soft shadow underneath */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-2 bg-black/5 rounded-full blur-sm" />
         </div>
-        {/* Effect badge */}
-        <span className="inline-block text-xs font-medium px-2 py-0.5 rounded-full mb-2" style={{ backgroundColor: effect.bg, color: effect.color }}>
-          {effect.icon} {effect.label}
-        </span>
-        {/* Stock badge */}
-        {product.stock <= 5 && <span className="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full mb-2 ml-1">Only {Math.floor(product.stock)} remaining</span>}
-        <h3 className="text-[#231F20] text-sm font-medium leading-tight line-clamp-2 min-h-[2.5rem] mb-2 group-hover:text-[#58BA49] transition-colors">{product.online_name || product.name}</h3>
-        <div className="flex items-center justify-between">
-          <span className="text-[#58BA49] font-bold text-lg">{formatPrice(product.price)}</span>
-          {product.is_age_restricted && <span className="text-amber-600 text-xs font-bold bg-amber-50 px-2 py-0.5 rounded">21+</span>}
+        {/* Badges row */}
+        <div className="flex items-center gap-1 flex-wrap mb-1.5">
+          <span className="inline-block text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>
+            {effect.icon} {effect.label}
+          </span>
+          {product.stock <= 5 && <span className="inline-block bg-amber-100 text-amber-700 text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Only {Math.floor(product.stock)} left</span>}
         </div>
+        <h3 className="text-[#231F20] text-xs sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#58BA49] transition-colors">{product.online_name || product.name}</h3>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[#58BA49] font-bold text-base sm:text-lg">{formatPrice(product.price)}</span>
+          <span className="text-[10px] text-gray-400 hidden sm:inline">{"\u26A1"} 5 min pickup</span>
+        </div>
+        {/* Quick Add to Cart button */}
+        {onQuickAdd && product.available && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onQuickAdd(product); }}
+            className="w-full py-2 sm:py-2.5 bg-[#58BA49] hover:bg-[#4aa83d] text-white rounded-xl font-semibold text-xs sm:text-sm transition-colors"
+          >
+            Add to Cart
+          </button>
+        )}
       </div>
     </div>
   );
@@ -706,20 +704,26 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
 }
 
 /* ======================== SHOP PAGE (Light Theme) ======================== */
-function ShopPage({ products, categories, selectedCategory }: { products: Product[]; categories: string[]; selectedCategory: string }) {
+function ShopPage({ products, categories, selectedCategory, onAddToCart }: { products: Product[]; categories: string[]; selectedCategory: string; onAddToCart: (product: Product) => void }) {
   const [sortBy, setSortBy] = useState("name");
+  const feelingLabels = ["relax", "sleep", "energy", "focus"];
+  const isFeelingFilter = feelingLabels.includes(selectedCategory.toLowerCase());
 
   const filtered = useMemo(() => {
     let items = products.filter(p => p.stock > 0);
     if (selectedCategory && selectedCategory !== "all") {
       const catLower = selectedCategory.toLowerCase();
-      items = items.filter((p) => p.categories.some((c) => c.toLowerCase() === catLower));
+      if (isFeelingFilter) {
+        items = items.filter((p) => getProductEffect(p).label.toLowerCase() === catLower);
+      } else {
+        items = items.filter((p) => p.categories.some((c) => c.toLowerCase() === catLower));
+      }
     }
     if (sortBy === "price-low") items.sort((a, b) => a.price - b.price);
     else if (sortBy === "price-high") items.sort((a, b) => b.price - a.price);
     else items.sort((a, b) => a.name.localeCompare(b.name));
     return items;
-  }, [products, selectedCategory, sortBy]);
+  }, [products, selectedCategory, sortBy, isFeelingFilter]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -744,7 +748,7 @@ function ShopPage({ products, categories, selectedCategory }: { products: Produc
         ))}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {filtered.map((product) => <ProductGridCard key={product.id} product={product} />)}
+        {filtered.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} />)}
       </div>
       {filtered.length === 0 && (
         <div className="text-center py-16">
@@ -2609,7 +2613,7 @@ function App() {
     const catSlug = route.replace("#/shop/", "").replace("#/shop", "");
     return shell(loading
       ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.png" alt="The Hemp Dispensary" className="h-20 w-auto animate-pulse mb-4" /><p className="text-gray-500 text-lg italic">Remedy Your Way</p></div>
-      : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} />);
+      : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} onAddToCart={(p) => addToCart(p, 1)} />);
   }
   if (route === "#/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />);
   if (route === "#/about") return shell(<AboutPage />);
@@ -2649,14 +2653,14 @@ function App() {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {displayProducts.map((product) => (
-                      <ProductGridCard key={product.id} product={product} />
+                      <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => addToCart(p, 1)} />
                     ))}
                   </div>
                 </div>
               </section>
             );
           })}
-          <FeaturedBundles />
+          <PromoBanner />
         </>
       )}
       <WhyChooseUs />
