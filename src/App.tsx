@@ -1953,8 +1953,8 @@ function LoyaltyPage() {
     <div className="max-w-5xl mx-auto px-4 py-12">
       {/* Header */}
       <div className="text-center mb-10">
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-[#B3D335]/20 rounded-full mb-6">
-          <Gift className="h-10 w-10 text-[#58BA49]" />
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-[#B3D335] rounded-full mb-6">
+                  <Gift className="h-10 w-10 text-[#231F20]" />
         </div>
         <h1 className="text-4xl font-bold text-[#231F20] mb-3">Hemp Rewards</h1>
         <p className="text-[#231F20]/50 text-lg max-w-2xl mx-auto">Earn points on every purchase, unlock VIP tiers, and redeem for discounts.</p>
@@ -1993,6 +1993,23 @@ function LoyaltyPage() {
             <div className="text-center">
               <p className="text-[#58BA49] font-semibold text-lg">Welcome back, {customer.first_name} {customer.last_name}!</p>
               <p className="text-[#231F20] font-bold text-3xl mt-1">{customer.points_balance} <span className="text-base font-normal text-[#231F20]/50">points</span></p>
+              {/* VIP Tier Progress */}
+              <div className="mt-4 pt-4 border-t border-[#231F20]/10">
+                <div className="flex items-center gap-2 mb-2">
+                  <currentTier.icon className="h-5 w-5" style={{ color: currentTier.color }} />
+                  <span className="text-[#231F20] font-semibold text-sm">{currentTier.name} Member</span>
+                </div>
+                {nextTier ? (
+                  <>
+                    <div className="w-full h-3 bg-[#231F20]/15 rounded-full overflow-hidden mb-2">
+                      <div className="h-full bg-[#B3D335] rounded-full transition-all duration-500" style={{ width: `${tierProgress}%` }} />
+                    </div>
+                    <p className="text-[#231F20]/60 text-sm">Spend <span className="font-bold text-[#231F20]">${nextTier.min - lifetimeEarned} more</span> to reach <span className="font-bold" style={{ color: nextTier.color }}>{nextTier.name}</span> and earn {nextTier.multiplier} points on every purchase.</p>
+                  </>
+                ) : (
+                  <p className="text-[#58BA49] text-sm font-medium">You&apos;ve reached the highest tier — {currentTier.multiplier} points on every purchase!</p>
+                )}
+              </div>
               {isBirthdayMonth() && (
                 <div className="mt-3 inline-flex items-center gap-2 bg-[#FFCB08]/20 border border-[#FFCB08]/40 rounded-full px-4 py-1.5">
                   <Cake className="h-4 w-4 text-[#D9A32C]" />
@@ -2325,7 +2342,7 @@ function LoyaltyPage() {
       {/* Sign up CTA */}
       {!customer && !showSignup && !signupResult && (
         <div className="text-center mt-8">
-          <p className="text-[#231F20]/50 text-sm">Don't have an account? <button onClick={() => setShowSignup(true)} className="text-[#B3D335] hover:text-[#58BA49] font-medium underline">Sign up for free</button></p>
+          <p className="text-[#231F20]/50 text-sm">Don't have an account? <button onClick={() => setShowSignup(true)} className="text-[#58BA49] hover:text-[#3D8C32] font-medium underline">Sign up for free</button></p>
         </div>
       )}
     </div>
