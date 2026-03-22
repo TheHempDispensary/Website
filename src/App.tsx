@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, Package, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, MessageCircle, Send } from "lucide-react";
+import { Search, ShoppingCart, Package, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, MessageCircle, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -320,20 +320,23 @@ function ShopByCategory({ productsByCategory }: { categories: string[]; products
   });
   if (displayCats.length === 0) return null;
 
-  const catIcons: Record<string, string> = { Flower: "\u{1F33F}", Edibles: "\u{1F36C}", Concentrates: "\u{1F4A7}", Vapor: "\u{1F32C}\uFE0F", Topicals: "\u{1F9F4}", Tinctures: "\u{1F48A}", Accessories: "\u{1F527}" };
+  const catIconComponents: Record<string, React.ComponentType<{ className?: string }>> = { Flower: Leaf, Edibles: Candy, Concentrates: Droplets, Vapor: Wind, Topicals: Pipette, Tinctures: Pill, Accessories: Wrench };
 
   return (
     <section className="bg-white py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-3xl font-bold text-[#231F20] text-center mb-8">Shop by Category</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
-          {displayCats.map((cat) => (
+          {displayCats.map((cat) => {
+            const IconComp = catIconComponents[cat] || Package;
+            return (
             <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="bg-white rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-all group border border-[#231F20]/15 hover:border-[#B3D335]">
-              <span className="text-4xl block mb-3">{catIcons[cat] || "\u{1F4E6}"}</span>
+              <IconComp className="h-10 w-10 text-[#3D8C32] mx-auto mb-3" />
               <h3 className="text-lg font-semibold text-[#231F20] group-hover:text-[#58BA49] transition-colors">{cat}</h3>
               <p className="text-sm text-[#231F20] mt-1">{(productsByCategory[cat] || []).filter(p => p.stock > 0).length} products</p>
             </button>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
@@ -564,7 +567,7 @@ function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd
         <h3 className="text-[#231F20] text-[13px] sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#58BA49] transition-colors">{titleCase(product.online_name || product.name)}</h3>
         <div className="flex items-center justify-between mb-2">
                     <span className="text-[#231F20] font-semibold text-[14px] sm:text-lg">{formatPrice(product.price)}</span>
-                    <span className="text-[11px] sm:text-[10px] text-[#3D8C32] sm:inline">{isLeafLife(product) ? `${"\u{1F4E6}"} Shipping Only` : `${"\u26A1"} 5 Minute Pickup`}</span>
+                    <span className="text-[11px] sm:text-[10px] text-[#3D8C32] sm:inline">{isLeafLife(product) ? <><span className="text-[#58BA49]">●</span> Shipping Only</> : <><span className="text-[#58BA49]">●</span> 5 Minute Pickup</>}</span>
         </div>
         {/* Quick Add to Cart button */}
         {onQuickAdd && product.available && (
