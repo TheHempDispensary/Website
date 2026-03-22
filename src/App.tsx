@@ -85,13 +85,12 @@ const ACCESSORY_PLACEHOLDER_IMAGES: Record<string, string> = {
   "tray": "https://images.unsplash.com/photo-1616690002498-1435060a1948?w=400&h=400&fit=crop",
 };
 
-function placeholderUrl(name: string, size = 400): string {
+function placeholderUrl(name: string, _size = 400): string {
   const nameLower = name.toLowerCase();
   for (const [keyword, url] of Object.entries(ACCESSORY_PLACEHOLDER_IMAGES)) {
     if (nameLower.includes(keyword)) return url;
   }
-  const text = name.split(" ").slice(0, 3).join("\n");
-  return `https://placehold.co/${size}x${size}/ffffff/231f20?text=${encodeURIComponent(text)}&font=roboto`;
+  return "/images/product-placeholder.webp";
 }
 
 /* ======================== HELPER: Product Effect Detection ======================== */
@@ -123,8 +122,17 @@ function titleCase(str: string): string {
   return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 }
 
+const PRODUCT_FALLBACK = "/images/product-placeholder.webp";
+
+function handleImgError(e: React.SyntheticEvent<HTMLImageElement>) {
+  const img = e.target as HTMLImageElement;
+  if (!img.src.includes("product-placeholder")) {
+    img.src = PRODUCT_FALLBACK;
+  }
+}
+
 function imageSrcSet(url: string | null): string | undefined {
-  if (!url || url.includes('placehold.co')) return undefined;
+  if (!url || url.includes('product-placeholder')) return undefined;
   const sep = url.includes('?') ? '&' : '?';
   return `${url}${sep}w=200 200w, ${url}${sep}w=400 400w, ${url}${sep}w=800 800w`;
 }
@@ -167,7 +175,7 @@ function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSear
             <button onClick={onSearch} className="p-2 text-[#231F20] hover:text-[#58BA49] transition-colors" aria-label="Search products"><Search className="h-5 w-5" /></button>
           </div>
           <a href="#" onClick={(e) => { e.preventDefault(); navigate(""); }} className="flex items-center flex-shrink-0">
-            <img src="/logo.png" alt="The Hemp Dispensary" className="h-10 sm:h-12 w-auto object-contain" width="120" height="48" />
+            <img src="/logo.webp" alt="The Hemp Dispensary" className="h-10 sm:h-12 w-auto object-contain" width="120" height="48" />
           </a>
           <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
             <a href="#/loyalty" className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#58BA49] transition-colors flex items-center gap-1" title="Hemp Rewards">
@@ -238,7 +246,7 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear }: { o
               {cart.map((item) => (
                 <div key={item.product.id} className="flex gap-3 bg-[#FFFFFF] rounded-xl p-3 border border-[#231F20]/10">
                   <div className="w-16 h-16 rounded-lg overflow-hidden bg-[#FFFFFF] flex-shrink-0 border border-[#231F20]/10">
-                    <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(item.product.name, 100); }} />
+                    <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={handleImgError} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-medium text-[#231F20] truncate">{item.product.online_name || item.product.name}</h3>
@@ -564,7 +572,7 @@ function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd
             srcSet={imageSrcSet(product.image_url)}
             className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
             style={{ backgroundColor: '#FFFFFF' }}
-            onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(product.name); }}
+            onError={handleImgError}
           />
         </div>
         {/* Badges row */}
@@ -678,7 +686,7 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
               srcSet={imageSrcSet(product.image_url)}
               className="max-h-[350px] max-w-full object-contain"
               style={{ backgroundColor: '#FFFFFF' }}
-              onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(product.name, 600); }}
+              onError={handleImgError}
             />
           </div>
 
@@ -781,7 +789,7 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
             {related.map((p) => (
               <div key={p.id} className="flex items-center gap-3 bg-[#FFFFFF] rounded-xl p-3 border border-[#231F20]/10 hover:shadow-md transition-all cursor-pointer" onClick={() => navigate(`/product/${p.id}`)}>
                 <div className="w-20 h-20 flex-shrink-0 bg-[#FFFFFF] rounded-lg overflow-hidden flex items-center justify-center">
-                  <img src={p.image_url || placeholderUrl(p.name, 200)} alt={p.name} className="max-h-full max-w-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(p.name, 200); }} />
+                  <img src={p.image_url || placeholderUrl(p.name, 200)} alt={p.name} className="max-h-full max-w-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={handleImgError} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-medium text-[#231F20] line-clamp-2 hover:text-[#58BA49] transition-colors">{titleCase(p.online_name || p.name)}</h3>
@@ -854,7 +862,7 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
             <div key={product.id} className="cursor-pointer group" onClick={() => { navigate(`/product/${product.id}`); onClose(); setQuery(""); }}>
               <div className="bg-[#FFFFFF] rounded-xl p-3 transition-all hover:shadow-md">
                 <div className="h-28 flex items-center justify-center mb-2 bg-[#FFFFFF] rounded-lg overflow-hidden">
-                  <img src={product.image_url || placeholderUrl(product.name, 200)} alt={product.name} loading="lazy" className="max-h-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(product.name, 200); }} />
+                  <img src={product.image_url || placeholderUrl(product.name, 200)} alt={product.name} loading="lazy" className="max-h-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={handleImgError} />
                 </div>
                 <h3 className="text-xs font-medium text-[#231F20] line-clamp-2 group-hover:text-[#58BA49] transition-colors">{titleCase(product.online_name || product.name)}</h3>
                 <p className="text-[#58BA49] font-bold text-sm mt-1">{formatPrice(product.price)}</p>
@@ -1108,7 +1116,7 @@ function SiteFooter() {
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
-            <img src="/logo.png" alt="The Hemp Dispensary" className="h-12 w-auto mb-4" />
+            <img src="/logo.webp" alt="The Hemp Dispensary" className="h-12 w-auto mb-4" />
             <p className="text-[#FFFFFF]/70 text-sm">Spring Hill's trusted source for premium hemp products.</p>
           </div>
           <div>
@@ -1352,7 +1360,7 @@ function ChatbotBud({ products }: { products: Product[] }) {
       {/* Floating button */}
       {!open && (
         <button onClick={openChat} className="fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full bg-[#B3D335] hover:bg-[#58BA49] shadow-lg flex items-center justify-center transition-all hover:scale-110" aria-label="Open Bud hemp guide">
-          <img src="/bud-puppet.png" alt="Bud" className="w-10 h-10 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+          <img src="/bud-puppet.webp" alt="Bud" className="w-10 h-10 object-contain" width="70" height="70" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           <MessageCircle className="h-6 w-6 text-[#FFFFFF] absolute" style={{ display: 'none' }} />
         </button>
       )}
@@ -1363,7 +1371,7 @@ function ChatbotBud({ products }: { products: Product[] }) {
           {/* Header */}
           <div className="bg-[#B3D335] text-[#231F20] px-4 py-3 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2">
-              <img src="/bud-puppet.png" alt="Bud" className="w-8 h-8 object-contain rounded-full bg-[#FFFFFF]/20 p-0.5" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              <img src="/bud-puppet.webp" alt="Bud" className="w-8 h-8 object-contain rounded-full bg-[#FFFFFF]/20 p-0.5" width="70" height="70" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               <div>
                 <p className="font-bold text-sm">Bud</p>
                 <p className="text-xs text-[#FFFFFF]/80">Your hemp guide</p>
@@ -1384,7 +1392,7 @@ function ChatbotBud({ products }: { products: Product[] }) {
                       {msg.products.map(p => (
                         <div key={p.id} className="bg-[#FFFFFF] rounded-lg p-2 border border-[#231F20]/10 cursor-pointer hover:shadow-sm transition-shadow" onClick={() => { navigate(`/product/${p.id}`); setOpen(false); }}>
                           <div className="flex items-center gap-2">
-                            <img src={p.image_url || placeholderUrl(p.name, 60)} alt={p.name} className="w-10 h-10 object-contain rounded" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(p.name, 60); }} />
+                            <img src={p.image_url || placeholderUrl(p.name, 60)} alt={p.name} className="w-10 h-10 object-contain rounded" onError={handleImgError} />
                             <div className="flex-1 min-w-0">
                               <p className="text-xs font-medium text-[#231F20] truncate">{p.online_name || p.name}</p>
                               <p className="text-xs text-[#58BA49] font-bold">{formatPrice(p.price)}</p>
@@ -1808,7 +1816,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                   {cart.map((item) => (
                     <div key={item.product.id} className="flex items-center gap-3 p-3 bg-[#FFFFFF] rounded-xl">
                       <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#FFFFFF] flex-shrink-0">
-                        <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(item.product.name, 100); }} />
+                        <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={handleImgError} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[#FFFFFF] text-sm font-medium truncate">{item.product.online_name || item.product.name}</p>
@@ -1905,7 +1913,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
               {cart.map((item) => (
                 <div key={item.product.id} className="flex items-center gap-3">
                   <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[#FFFFFF] flex-shrink-0">
-                    <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(item.product.name, 100); }} />
+                    <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={handleImgError} />
                     <span className="absolute -top-1 -right-1 bg-[#B3D335] text-[#231F20] text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">{item.quantity}</span>
                   </div>
                   <div className="flex-1 min-w-0">
@@ -2954,7 +2962,7 @@ function BudPuppet({ size = 80, className = "", action = "idle" }: { size?: numb
   const actionClass = action === "grind" ? "animate-spin-slow" : action === "roll" ? "animate-wiggle" : action === "light" ? "animate-pulse" : action === "smoke" ? "animate-float" : action === "celebrate" ? "animate-bounce" : "";
   return (
     <div className={`relative inline-block ${className}`} style={{ width: size, height: size }}>
-      <img src="/bud-puppet.png" alt="Bud Puppet" className={`w-full h-full object-contain drop-shadow-lg ${actionClass}`} style={{ filter: "drop-shadow(0 0 12px rgba(88,186,73,0.4))" }} />
+      <img src="/bud-puppet.webp" alt="Bud Puppet" className={`w-full h-full object-contain drop-shadow-lg ${actionClass}`} style={{ filter: "drop-shadow(0 0 12px rgba(88,186,73,0.4))" }} />
       {action === "grind" && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs font-bold text-[#B3D335] animate-pulse whitespace-nowrap">Grinding...</div>}
       {action === "roll" && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs font-bold text-[#FFCB08] animate-pulse whitespace-nowrap">Rolling!</div>}
       {action === "light" && <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-2xl animate-bounce">{"\uD83D\uDD25"}</div>}
@@ -3059,7 +3067,7 @@ function RollAJointGame() {
                 <button key={s.name} onClick={() => pickStrain(s)}
                   className="p-4 rounded-xl border-2 border-[#231F20]/20 hover:border-[#B3D335] bg-[#FFFFFF] hover:bg-[#FFFFFF] transition-all group">
                   <div className="w-16 h-16 mx-auto rounded-full mb-3 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-110" style={{ background: s.color }}>
-                    <img src="/bud-puppet.png" alt={s.name} className="w-12 h-12 object-contain" />
+                    <img src="/bud-puppet.webp" alt={s.name} className="w-12 h-12 object-contain" />
                   </div>
                   <p className="text-[#FFFFFF] font-semibold">{s.name}</p>
                   <p className="text-[#231F20]/50 text-xs mt-1">{s.desc}</p>
@@ -3079,7 +3087,7 @@ function RollAJointGame() {
               <div className="absolute inset-0 rounded-full border-4 border-[#231F20]/30 overflow-hidden" style={{ background: `conic-gradient(${selectedStrain.color} ${grindProgress}%, rgba(35,31,32,0.15) ${grindProgress}%)` }}>
                 <div className="absolute inset-4 rounded-full bg-[#231F20]/80 border-2 border-[#231F20]/30 flex items-center justify-center">
                   <div style={{ transform: `rotate(${grindProgress * 3.6}deg)`, transition: "transform 0.1s" }}>
-                    <img src="/bud-puppet.png" alt="Grinding" className="w-16 h-16 object-contain" />
+                    <img src="/bud-puppet.webp" alt="Grinding" className="w-16 h-16 object-contain" />
                   </div>
                 </div>
               </div>
@@ -3109,7 +3117,7 @@ function RollAJointGame() {
               <div className="absolute inset-0 rounded-xl bg-[#D9A32C]/20/20 border-2 border-[#D9A32C]/30 overflow-hidden">
                 {/* Filled portion */}
                 <div className="h-full rounded-xl transition-all duration-200 flex items-center" style={{ width: `${rollProgress}%`, background: `linear-gradient(90deg, ${selectedStrain.color}44, ${selectedStrain.color})` }}>
-                  {rollProgress > 10 && <img src="/bud-puppet.png" alt="Rolling" className="h-16 w-16 object-contain ml-auto mr-2 animate-wiggle" />}
+                  {rollProgress > 10 && <img src="/bud-puppet.webp" alt="Rolling" className="h-16 w-16 object-contain ml-auto mr-2 animate-wiggle" />}
                 </div>
               </div>
               {/* Rolling paper texture lines */}
@@ -3142,7 +3150,7 @@ function RollAJointGame() {
               </div>
               {/* Bud Puppet holding the joint */}
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
-                <img src="/bud-puppet.png" alt="Lighting" className="w-20 h-20 object-contain" style={{ filter: `brightness(${1 + lightProgress / 200})` }} />
+                <img src="/bud-puppet.webp" alt="Lighting" className="w-20 h-20 object-contain" style={{ filter: `brightness(${1 + lightProgress / 200})` }} />
               </div>
               {/* Lighter */}
               {lightProgress < 100 && <div className="absolute top-8 right-4 text-4xl animate-bounce">{"\uD83E\uDE94"}</div>}
@@ -3409,7 +3417,7 @@ function App() {
   if (route.startsWith("#/shop")) {
     const catSlug = route.replace("#/shop/", "").replace("#/shop", "");
     return shell(loading
-      ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.png" alt="The Hemp Dispensary" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20]/50 text-lg italic">Remedy Your Way</p></div>
+      ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20]/50 text-lg italic">Remedy Your Way</p></div>
       : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} onAddToCart={(p) => addToCart(p, 1)} />);
   }
   if (route === "#/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />);
@@ -3432,7 +3440,7 @@ function App() {
       <HeroSection />
       <TrustStrip />
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-24"><img src="/logo.png" alt="The Hemp Dispensary" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20]/50 text-lg italic">Remedy Your Way</p></div>
+        <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20]/50 text-lg italic">Remedy Your Way</p></div>
       ) : (
         <>
           <ShopByCategory categories={categories} productsByCategory={productsByCategory} />
@@ -3440,7 +3448,7 @@ function App() {
           {/* Product carousels by category */}
           {homeCategories.map((cat) => {
             const inStock = (productsByCategory[cat] || []).filter(p => p.stock > 0);
-            const catProducts = inStock.filter(p => p.image_url && !p.image_url.includes('placehold.co'));
+            const catProducts = inStock.filter(p => p.image_url && !p.image_url.includes('product-placeholder'));
             const displayProducts = catProducts.length >= 4 ? catProducts.slice(0, 4) : inStock.slice(0, 4);
             if (displayProducts.length === 0) return null;
             return (
