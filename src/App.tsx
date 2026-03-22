@@ -96,6 +96,16 @@ function getProductStrength(product: Product): { label: string; color: string } 
   return { label: "Low", color: "#58BA49" };
 }
 
+const LEAFLIFE_KEYWORDS = ["everyday", "premium", "essential", "smalls", "snowcaps"];
+function isLeafLife(product: Product): boolean {
+  const name = (product.online_name || product.name).toLowerCase();
+  return LEAFLIFE_KEYWORDS.some(kw => name.includes(kw));
+}
+
+function titleCase(str: string): string {
+  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+}
+
 function getProductBenefit(product: Product): string {
   const effect = getProductEffect(product);
   switch (effect.label) {
@@ -111,8 +121,8 @@ function getProductBenefit(product: Product): string {
 function StickyTopBar() {
   return (
     <div className="bg-[#231F20] text-white text-center py-2 px-4 text-sm font-medium">
-      <span className="hidden sm:inline">{"\u{1F680}"} Order Online \u2013 Ready in 5 Minutes | {"\u{1F4CD}"} Spring Hill | Open Late | </span>
-      <span className="sm:hidden">{"\u{1F680}"} Ready in 5 Min | {"\u{1F4CD}"} Spring Hill | </span>
+      <span className="hidden sm:inline">{"\u{1F680}"} Order Online \u2013 Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | Open Late | </span>
+      <span className="sm:hidden">{"\u{1F680}"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | </span>
       <span className="text-[#FFCB08] font-bold">FIRST20 = 20% Off</span>
     </div>
   );
@@ -263,10 +273,10 @@ function HeroSection() {
 /* ======================== TRUST STRIP ======================== */
 function TrustStrip() {
   const items = [
-    { icon: Shield, label: "Lab Tested", sub: "Clean & safe" },
+    { icon: Shield, label: "Lab Tested", sub: "Clean & Safe" },
     { icon: MapPin, label: "2 Locations", sub: "Spring Hill, FL" },
-    { icon: Zap, label: "Ready in 5 Min", sub: "Fast pickup" },
-    { icon: Clock, label: "Open Late", sub: "Mon-Sat til 9pm" },
+    { icon: Zap, label: "Ready In 5 Minutes", sub: "Fast Pickup" },
+    { icon: Clock, label: "Open Late", sub: "Mon-Sat Til 9pm" },
   ];
   return (
     <section className="bg-white border-b border-gray-100 cursor-pointer" onClick={() => navigate('/shop')}>
@@ -419,8 +429,8 @@ function ReviewsSection() {
 /* ======================== LOCATION SECTION ======================== */
 function LocationSection() {
   const locations = [
-    { name: "HQ \u2013 Spring Hill", address: "1233 Pinehurst Dr, Spring Hill, FL 34606", hours: "Mon-Sat 10am-9pm \u00B7 Sun 11am-7pm", phone: "(352) 340-2861" },
-    { name: "East \u2013 Spring Hill", address: "2480 Commercial Way, Spring Hill, FL 34606", hours: "Mon-Sat 10am-9pm \u00B7 Sun 11am-7pm", phone: "(352) 340-2862" },
+    { name: "Spring Hill Dr", address: "The Hemp Dispensary, Spring Hill Dr, Spring Hill, FL", hours: "Mon-Sat 10am-9pm \u00B7 Sun 11am-7pm", phone: "(352) 340-2861", mapsQuery: "The Hemp Dispensary Spring Hill Dr" },
+    { name: "Deltona Blvd", address: "The Hemp Dispensary, Deltona Blvd, Spring Hill, FL", hours: "Mon-Sat 10am-9pm \u00B7 Sun 11am-7pm", phone: "(352) 340-2862", mapsQuery: "The Hemp Dispensary Deltona Blvd" },
   ];
   return (
     <section id="locations-section" className="bg-white py-12 sm:py-16">
@@ -435,7 +445,7 @@ function LocationSection() {
                 <p className="flex items-center gap-2"><Clock className="h-4 w-4 text-[#58BA49]" />{loc.hours}</p>
                 <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-[#58BA49]" />{loc.phone}</p>
               </div>
-              <button onClick={() => window.open(`https://maps.google.com/?q=${encodeURIComponent(loc.address)}`, "_blank")} className="mt-4 text-[#58BA49] font-semibold text-sm flex items-center gap-1 hover:underline">
+              <button onClick={() => window.open(`https://maps.google.com/maps/search/${encodeURIComponent(loc.mapsQuery)}`, "_blank")} className="mt-4 text-[#58BA49] font-semibold text-sm flex items-center gap-1 hover:underline">
                 Get Directions <ChevronRight className="h-4 w-4" />
               </button>
             </div>
@@ -455,12 +465,13 @@ function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd
     <div className="cursor-pointer group" onClick={() => navigate(`/product/${product.id}`)}>
       <div className="bg-white rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-xl relative">
         {/* Floating product image */}
-        <div className="h-36 sm:h-48 flex items-center justify-center mb-2 sm:mb-3 relative">
+        <div className="h-36 sm:h-48 flex items-center justify-center mb-2 sm:mb-3 relative bg-white rounded-xl">
           <img
             src={product.image_url || placeholderUrl(product.name)}
             alt={product.name}
             loading="lazy"
-            className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+            className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105 rounded-xl"
+            style={{ backgroundColor: '#fff' }}
             onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(product.name); }}
           />
           {/* Soft shadow underneath */}
@@ -471,12 +482,12 @@ function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd
           <span className="inline-block text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>
             {effect.icon} {effect.label}
           </span>
-          {product.stock <= 5 && <span className="inline-block bg-amber-100 text-amber-700 text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Only {Math.floor(product.stock)} left</span>}
+          {product.stock <= 5 && <span className="inline-block bg-amber-100 text-amber-700 text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Only {Math.floor(product.stock)} Left</span>}
         </div>
-        <h3 className="text-[#231F20] text-xs sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#58BA49] transition-colors">{product.online_name || product.name}</h3>
+        <h3 className="text-[#231F20] text-xs sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#58BA49] transition-colors">{titleCase(product.online_name || product.name)}</h3>
         <div className="flex items-center justify-between mb-2">
           <span className="text-[#58BA49] font-bold text-base sm:text-lg">{formatPrice(product.price)}</span>
-          <span className="text-[10px] text-gray-400 hidden sm:inline">{"\u26A1"} 5 min pickup</span>
+          <span className="text-[10px] text-gray-400 hidden sm:inline">{isLeafLife(product) ? `${"\u{1F4E6}"} Shipping Only` : `${"\u26A1"} 5 Minute Pickup`}</span>
         </div>
         {/* Quick Add to Cart button */}
         {onQuickAdd && product.available && (
@@ -568,7 +579,7 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
               </div>
             )}
 
-            <h1 className="text-2xl md:text-3xl font-bold text-[#231F20] mb-2">{product.online_name || product.name}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-[#231F20] mb-2">{titleCase(product.online_name || product.name)}</h1>
 
             {/* Effect & Strength badges */}
             <div className="flex gap-2 mb-4">
@@ -613,8 +624,8 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
             </div>
 
             {/* Ready for pickup message */}
-            <div className="bg-green-50 border border-green-100 rounded-lg px-4 py-2 mb-4">
-              <p className="text-[#58BA49] text-sm font-medium">{"\u26A1"} Ready for pickup today in about 5 minutes</p>
+            <div className={`${isLeafLife(product) ? 'bg-blue-50 border-blue-100' : 'bg-green-50 border-green-100'} border rounded-lg px-4 py-2 mb-4`}>
+              <p className={`text-sm font-medium ${isLeafLife(product) ? 'text-blue-600' : 'text-[#58BA49]'}`}>{isLeafLife(product) ? `${"\u{1F4E6}"} This Product Ships From Our Partner \u2013 Shipping Only` : `${"\u26A1"} Ready For Pickup Today In About 5 Minutes`}</p>
             </div>
 
             {/* Add to cart */}
@@ -691,7 +702,7 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
                 <div className="h-28 flex items-center justify-center mb-2">
                   <img src={product.image_url || placeholderUrl(product.name, 200)} alt={product.name} loading="lazy" className="max-h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(product.name, 200); }} />
                 </div>
-                <h3 className="text-xs font-medium text-[#231F20] line-clamp-2 group-hover:text-[#58BA49] transition-colors">{product.online_name || product.name}</h3>
+                <h3 className="text-xs font-medium text-[#231F20] line-clamp-2 group-hover:text-[#58BA49] transition-colors">{titleCase(product.online_name || product.name)}</h3>
                 <p className="text-[#58BA49] font-bold text-sm mt-1">{formatPrice(product.price)}</p>
               </div>
             </div>
