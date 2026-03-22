@@ -123,6 +123,12 @@ function titleCase(str: string): string {
   return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 }
 
+function imageSrcSet(url: string | null): string | undefined {
+  if (!url || url.includes('placehold.co')) return undefined;
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}w=200 200w, ${url}${sep}w=400 400w, ${url}${sep}w=800 800w`;
+}
+
 function getProductBenefit(product: Product): string {
   const effect = getProductEffect(product);
   switch (effect.label) {
@@ -155,27 +161,27 @@ function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSear
       <div className="max-w-7xl mx-auto px-3 sm:px-4">
         <div className="h-14 sm:h-16 flex items-center justify-between">
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-[#231F20] hover:text-[#58BA49] transition-colors" aria-label="Menu">
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-[#231F20] hover:text-[#58BA49] transition-colors" aria-label="Open navigation menu">
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>}
             </button>
-            <button onClick={onSearch} className="p-2 text-[#231F20] hover:text-[#58BA49] transition-colors"><Search className="h-5 w-5" /></button>
+            <button onClick={onSearch} className="p-2 text-[#231F20] hover:text-[#58BA49] transition-colors" aria-label="Search products"><Search className="h-5 w-5" /></button>
           </div>
           <a href="#" onClick={(e) => { e.preventDefault(); navigate(""); }} className="flex items-center flex-shrink-0">
-            <img src="/logo.png" alt="The Hemp Dispensary" className="h-10 sm:h-12 w-auto object-contain" />
+            <img src="/logo.png" alt="The Hemp Dispensary" className="h-10 sm:h-12 w-auto object-contain" width="120" height="48" />
           </a>
           <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
             <a href="#/loyalty" className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#58BA49] transition-colors flex items-center gap-1" title="Hemp Rewards">
               <Gift className="h-5 w-5" />
               <span className="hidden md:inline text-xs font-medium">Rewards</span>
             </a>
-            <a href="#/account" className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#58BA49] transition-colors" title="Account">
+            <a href="#/account" className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#58BA49] transition-colors" title="Account" aria-label="My account">
               <User className="h-5 w-5" />
             </a>
             <a href="#/games" className="hidden sm:flex p-2 text-[#231F20] hover:text-[#58BA49] transition-colors items-center gap-1" title="Games">
               <Gamepad2 className="h-5 w-5" />
               <span className="hidden md:inline text-xs font-medium">Games</span>
             </a>
-            <button onClick={onCartOpen} className="relative p-1.5 sm:p-2 text-[#231F20] hover:text-[#58BA49] transition-colors">
+            <button onClick={onCartOpen} className="relative p-1.5 sm:p-2 text-[#231F20] hover:text-[#58BA49] transition-colors" aria-label="View cart">
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && <span className="absolute -top-0.5 -right-0.5 bg-[#B3D335] text-[#231F20] text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">{cartCount}</span>}
             </button>
@@ -232,15 +238,15 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear }: { o
               {cart.map((item) => (
                 <div key={item.product.id} className="flex gap-3 bg-[#FFFFFF] rounded-xl p-3 border border-[#231F20]/10">
                   <div className="w-16 h-16 rounded-lg overflow-hidden bg-[#FFFFFF] flex-shrink-0 border border-[#231F20]/10">
-                    <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(item.product.name, 100); }} />
+                    <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(item.product.name, 100); }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-medium text-[#231F20] truncate">{item.product.online_name || item.product.name}</h3>
                     <p className="text-[#58BA49] font-bold text-sm">{formatPrice(item.product.price)}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <button onClick={() => onUpdateQty(item.product.id, item.quantity - 1)} className="p-1 text-[#231F20]/40 hover:text-[#231F20]"><Minus className="h-3 w-3" /></button>
+                      <button onClick={() => onUpdateQty(item.product.id, item.quantity - 1)} className="p-1 text-[#231F20]/40 hover:text-[#231F20]" aria-label="Decrease quantity"><Minus className="h-3 w-3" /></button>
                       <span className="text-sm font-medium text-[#231F20] min-w-[1.5rem] text-center">{item.quantity}</span>
-                      <button onClick={() => onUpdateQty(item.product.id, item.quantity + 1)} className="p-1 text-[#231F20]/40 hover:text-[#231F20]"><Plus className="h-3 w-3" /></button>
+                      <button onClick={() => onUpdateQty(item.product.id, item.quantity + 1)} className="p-1 text-[#231F20]/40 hover:text-[#231F20]" aria-label="Increase quantity"><Plus className="h-3 w-3" /></button>
                       <button onClick={() => onRemove(item.product.id)} className="ml-auto p-1 text-[#231F20]/40 hover:text-[#D9A32C]"><Trash2 className="h-3 w-3" /></button>
                     </div>
                   </div>
@@ -552,6 +558,10 @@ function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd
             src={product.image_url || placeholderUrl(product.name)}
             alt={product.name}
             loading="lazy"
+            width="300"
+            height="300"
+            sizes="(max-width: 768px) 150px, 300px"
+            srcSet={imageSrcSet(product.image_url)}
             className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
             style={{ backgroundColor: '#FFFFFF' }}
             onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(product.name); }}
@@ -660,6 +670,12 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
             <img
               src={product.image_url || placeholderUrl(product.name, 600)}
               alt={product.name}
+              loading="eager"
+              fetchPriority="high"
+              width="600"
+              height="600"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              srcSet={imageSrcSet(product.image_url)}
               className="max-h-[350px] max-w-full object-contain"
               style={{ backgroundColor: '#FFFFFF' }}
               onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(product.name, 600); }}
@@ -739,9 +755,9 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
                 <div className="flex items-center gap-3">
                   <span className="text-[#231F20]/50 text-sm">Qty:</span>
                   <div className="flex items-center border border-[#231F20]/15 rounded-lg">
-                    <button onClick={() => setQty(Math.max(1, qty - 1))} className="p-2 text-[#231F20]/40 hover:text-[#231F20] transition-colors"><Minus className="h-4 w-4" /></button>
+                    <button onClick={() => setQty(Math.max(1, qty - 1))} className="p-2 text-[#231F20]/40 hover:text-[#231F20] transition-colors" aria-label="Decrease quantity"><Minus className="h-4 w-4" /></button>
                     <span className="px-4 py-2 text-[#231F20] font-medium min-w-[3rem] text-center">{qty}</span>
-                    <button onClick={() => setQty(Math.min(product.stock, qty + 1))} className="p-2 text-[#231F20]/40 hover:text-[#231F20] transition-colors"><Plus className="h-4 w-4" /></button>
+                    <button onClick={() => setQty(Math.min(product.stock, qty + 1))} className="p-2 text-[#231F20]/40 hover:text-[#231F20] transition-colors" aria-label="Increase quantity"><Plus className="h-4 w-4" /></button>
                   </div>
                 </div>
               )}
@@ -990,7 +1006,7 @@ function SiteFooter() {
             <p className="text-[#FFFFFF]/70 text-sm">Spring Hill's trusted source for premium hemp products.</p>
           </div>
           <div>
-            <h3 className="font-semibold text-[#ADD038] mb-3">Shop</h3>
+            <h3 className="font-semibold text-[#3D8C32] mb-3">Shop</h3>
             <div className="space-y-2">
               <a href="#/shop/flower" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Flower</a>
               <a href="#/shop/edibles" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Edibles</a>
@@ -999,7 +1015,7 @@ function SiteFooter() {
             </div>
           </div>
           <div>
-            <h3 className="font-semibold text-[#ADD038] mb-3">Company</h3>
+            <h3 className="font-semibold text-[#3D8C32] mb-3">Company</h3>
             <div className="space-y-2">
               <a href="#/about" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">About Us</a>
               <a href="#/contact" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Contact</a>
@@ -1008,7 +1024,7 @@ function SiteFooter() {
             </div>
           </div>
           <div>
-            <h3 className="font-semibold text-[#ADD038] mb-3">Legal</h3>
+            <h3 className="font-semibold text-[#3D8C32] mb-3">Legal</h3>
             <div className="space-y-2">
               <a href="#/terms" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Terms of Service</a>
               <a href="#/privacy" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Privacy Policy</a>
@@ -1229,7 +1245,7 @@ function ChatbotBud({ products }: { products: Product[] }) {
     <>
       {/* Floating button */}
       {!open && (
-        <button onClick={openChat} className="fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full bg-[#B3D335] hover:bg-[#58BA49] shadow-lg flex items-center justify-center transition-all hover:scale-110" aria-label="Chat with Bud">
+        <button onClick={openChat} className="fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full bg-[#B3D335] hover:bg-[#58BA49] shadow-lg flex items-center justify-center transition-all hover:scale-110" aria-label="Open Bud hemp guide">
           <img src="/bud-puppet.png" alt="Bud" className="w-10 h-10 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           <MessageCircle className="h-6 w-6 text-[#FFFFFF] absolute" style={{ display: 'none' }} />
         </button>
@@ -1247,7 +1263,7 @@ function ChatbotBud({ products }: { products: Product[] }) {
                 <p className="text-xs text-[#FFFFFF]/80">Your hemp guide</p>
               </div>
             </div>
-            <button onClick={() => setOpen(false)} className="p-1 hover:bg-[#FFFFFF]/20 rounded-full transition-colors"><X className="h-5 w-5" /></button>
+            <button onClick={() => setOpen(false)} className="p-1 hover:bg-[#FFFFFF]/20 rounded-full transition-colors" aria-label="Close chat"><X className="h-5 w-5" /></button>
           </div>
 
           {/* Messages */}
@@ -1276,7 +1292,7 @@ function ChatbotBud({ products }: { products: Product[] }) {
                   {msg.buttons && msg.buttons.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {msg.buttons.map((btn, j) => (
-                        <button key={j} onClick={() => handleButtonClick(btn.value)} className="px-3 py-1.5 bg-[#FFFFFF] bg-[#ADD038] text-[#231F20] rounded-full text-xs font-medium hover:bg-[#B3D335] transition-colors border-0">
+                        <button key={j} onClick={() => handleButtonClick(btn.value)} className="px-3 py-1.5 bg-[#B3D335] text-[#231F20] rounded-full text-xs font-medium hover:bg-[#58BA49] transition-colors border-0">
                           {btn.label}
                         </button>
                       ))}
@@ -1298,7 +1314,7 @@ function ChatbotBud({ products }: { products: Product[] }) {
               placeholder="Ask Bud anything..."
               className="flex-1 bg-[#FFFFFF] border border-[#231F20]/15 rounded-full px-4 py-2 text-sm text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]"
             />
-            <button onClick={handleSend} className="p-2 bg-[#58BA49] hover:bg-[#126A44] text-[#FFFFFF] rounded-full transition-colors">
+            <button onClick={handleSend} className="p-2 bg-[#58BA49] hover:bg-[#126A44] text-[#FFFFFF] rounded-full transition-colors" aria-label="Send message">
               <Send className="h-4 w-4" />
             </button>
           </div>
@@ -1686,7 +1702,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                   {cart.map((item) => (
                     <div key={item.product.id} className="flex items-center gap-3 p-3 bg-[#FFFFFF] rounded-xl">
                       <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#FFFFFF] flex-shrink-0">
-                        <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(item.product.name, 100); }} />
+                        <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(item.product.name, 100); }} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[#FFFFFF] text-sm font-medium truncate">{item.product.online_name || item.product.name}</p>
@@ -1783,7 +1799,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
               {cart.map((item) => (
                 <div key={item.product.id} className="flex items-center gap-3">
                   <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[#FFFFFF] flex-shrink-0">
-                    <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(item.product.name, 100); }} />
+                    <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl(item.product.name, 100); }} />
                     <span className="absolute -top-1 -right-1 bg-[#B3D335] text-[#231F20] text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">{item.quantity}</span>
                   </div>
                   <div className="flex-1 min-w-0">
@@ -3204,6 +3220,31 @@ function App() {
     updateCart([]);
   }, [updateCart]);
 
+  // Dynamic meta descriptions per route
+  useEffect(() => {
+    const descriptions: Record<string, string> = {
+      "": "The Hemp Dispensary — Spring Hill FL's trusted hemp store. Shop premium flower, edibles, concentrates, vapes, topicals, and tinctures online. Ready in 5 minutes or shipped to your door.",
+      "#/shop/flower": "Shop premium hemp flower at The Hemp Dispensary — Everyday, Premium, Essential, Smalls, and Snowcaps tiers. Lab-tested, locally trusted, ready in 5 minutes.",
+      "#/shop/edibles": "Hemp edibles including Delta-9 gummies, CBD chocolates, and CBN sleep chews. Lab-tested, legally compliant, available for pickup or shipping.",
+      "#/shop/concentrates": "Premium hemp concentrates including live rosin, diamonds, shatter, and badder. Solventless and hydrocarbon options, lab-tested for purity.",
+      "#/shop/vapor": "CBD and THC vape cartridges, disposables, and 510-thread batteries. Lab-tested hemp vapor products ready for pickup in Spring Hill FL.",
+      "#/shop/topicals": "Hemp topicals including CBD muscle creams, balms, roll-ons, and transdermal patches. Targeted relief, lab-tested, available in-store and online.",
+      "#/shop/tinctures": "CBD, CBG, CBN and full spectrum hemp tinctures. Sublingual oils for sleep, pain, focus, and daily wellness. Lab-tested, fast pickup or shipping.",
+      "#/shop/accessories": "Hemp accessories including glass pipes, rolling papers, grinders, storage, and butane. Everything you need in one stop.",
+      "#/loyalty": "Hemp Rewards — earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary.",
+      "#/games": "Play games and win prizes at The Hemp Dispensary. Scratch cards, Roll-a-Joint, and more — all free to play for rewards members.",
+    };
+    const key = route.startsWith("#/shop/") ? route : (route === "" || route === "#" || route === "#/" ? "" : route);
+    const desc = descriptions[key] || descriptions[""];
+    let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "description";
+      document.head.appendChild(meta);
+    }
+    meta.content = desc;
+  }, [route]);
+
   useEffect(() => {
     // Load from localStorage cache first for instant display
     try {
@@ -3246,9 +3287,10 @@ function App() {
 
   const shell = (content: React.ReactNode) => (
     <div className="min-h-screen bg-[#FFFFFF]">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-0 focus:top-0 focus:z-[9999] focus:bg-[#FFFFFF] focus:px-4 focus:py-2 focus:text-[#231F20] focus:underline">Skip to main content</a>
       <StickyTopBar />
       <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} />
-      {content}
+      <main id="main-content">{content}</main>
       <SiteFooter />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} products={products} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />
@@ -3276,8 +3318,10 @@ function App() {
   // Homepage
   return (
     <div className="min-h-screen bg-[#FFFFFF]">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-0 focus:top-0 focus:z-[9999] focus:bg-[#FFFFFF] focus:px-4 focus:py-2 focus:text-[#231F20] focus:underline">Skip to main content</a>
       <StickyTopBar />
       <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} />
+      <main id="main-content">
       <HeroSection />
       <TrustStrip />
       {loading ? (
@@ -3314,6 +3358,7 @@ function App() {
       <WhyChooseUs />
       <ReviewsSection />
       <LocationSection />
+      </main>
       <SiteFooter />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} products={products} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />
