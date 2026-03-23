@@ -3362,20 +3362,22 @@ function App() {
   }, [route]);
 
   useEffect(() => {
-    // Load from localStorage cache first for instant display
+    // Load from localStorage cache first for instant display — no TTL, always use if available
+    let hadCachedData = false;
     try {
       const cached = localStorage.getItem("thd-products-cache");
       if (cached) {
-        const { products: cp, categories: cc, timestamp: ct } = JSON.parse(cached);
-        if (Date.now() - ct < 600000) {
+        const { products: cp, categories: cc } = JSON.parse(cached);
+        if (cp && cp.length > 0) {
           setProducts(cp);
           setCategories(cc);
           setLoading(false);
+          hadCachedData = true;
         }
       }
     } catch { /* ignore parse errors */ }
 
-    // Always fetch fresh data in background with 15s timeout + 2 retries
+    // Always fetch fresh data in background with 20s timeout + 2 retries
     const fetchWithTimeout = (url: string, timeoutMs: number): Promise<Response> => {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -3384,7 +3386,7 @@ function App() {
     const fetchProducts = async (retries = 2): Promise<void> => {
       for (let attempt = 0; attempt <= retries; attempt++) {
         try {
-          const r = await fetchWithTimeout(`${API_URL}/api/ecommerce/products?limit=1000`, 15000);
+          const r = await fetchWithTimeout(`${API_URL}/api/ecommerce/products?limit=1000`, 20000);
           const data: ProductsResponse = await r.json();
           setProducts(data.products);
           setCategories(data.categories);
@@ -3397,8 +3399,11 @@ function App() {
           if (attempt < retries) await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
-      setLoading(false);
-      setFetchError(true);
+      // Only show error if we have NO cached data at all
+      if (!hadCachedData) {
+        setLoading(false);
+        setFetchError(true);
+      }
     };
     fetchProducts();
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3415,7 +3420,7 @@ function App() {
     (async () => {
       for (let attempt = 0; attempt <= 2; attempt++) {
         try {
-          const r = await fetchWithTimeout2(`${API_URL}/api/ecommerce/products?limit=1000`, 15000);
+          const r = await fetchWithTimeout2(`${API_URL}/api/ecommerce/products?limit=1000`, 20000);
           const data: ProductsResponse = await r.json();
           setProducts(data.products);
           setCategories(data.categories);
