@@ -1627,13 +1627,13 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
         <div className="bg-[#B3D335]/20 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
           <CheckCircle className="h-10 w-10 text-[#126A44]" />
         </div>
-        <h1 className="text-3xl font-bold text-[#FFFFFF] mb-3">Payment Successful!</h1>
+        <h1 className="text-3xl font-bold text-[#231F20] mb-3">Payment Successful!</h1>
         <p className="text-[#231F20] mb-2">Thank you for your order, {form.firstName}!</p>
         <p className="text-[#231F20] text-sm mb-6">Order #{orderNumber}</p>
         <div className="bg-[#FFFFFF] rounded-xl border border-[#231F20]/20 p-6 mb-8 text-left max-w-md mx-auto">
-          <h3 className="text-[#FFFFFF] font-semibold mb-3">What happens next?</h3>
+          <h3 className="text-[#231F20] font-semibold mb-3">What happens next?</h3>
           <div className="space-y-3 text-sm text-[#231F20]">
-            <div className="flex gap-3"><Mail className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>A confirmation email will be sent to <span className="text-[#FFFFFF]">{form.email}</span></p></div>
+            <div className="flex gap-3"><Mail className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>A confirmation email will be sent to <span className="font-semibold text-[#231F20]">{form.email}</span></p></div>
             <div className="flex gap-3"><Package className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>Your order will be prepared and packaged</p></div>
             <div className="flex gap-3"><Truck className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>You'll receive shipping details once dispatched</p></div>
           </div>
