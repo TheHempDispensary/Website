@@ -169,27 +169,27 @@ function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSear
       <div className="max-w-7xl mx-auto px-3 sm:px-4">
         <div className="h-14 sm:h-16 flex items-center justify-between">
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-[#231F20] hover:text-[#58BA49] transition-colors" aria-label="Open navigation menu">
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-[#231F20] hover:text-[#126A44] transition-colors" aria-label="Open navigation menu">
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>}
             </button>
-            <button onClick={onSearch} className="p-2 text-[#231F20] hover:text-[#58BA49] transition-colors" aria-label="Search products"><Search className="h-5 w-5" /></button>
+            <button onClick={onSearch} className="p-2 text-[#231F20] hover:text-[#126A44] transition-colors" aria-label="Search products"><Search className="h-5 w-5" /></button>
           </div>
           <a href="#" onClick={(e) => { e.preventDefault(); navigate(""); }} className="flex items-center flex-shrink-0">
             <img src="/logo.webp" alt="The Hemp Dispensary" className="h-10 sm:h-12 w-auto object-contain" width="120" height="48" />
           </a>
           <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
-            <a href="#/loyalty" className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#58BA49] transition-colors flex items-center gap-1" title="Hemp Rewards">
+            <a href="#/loyalty" className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#126A44] transition-colors flex items-center gap-1" title="Hemp Rewards">
               <Gift className="h-5 w-5" />
               <span className="hidden md:inline text-xs font-medium">Rewards</span>
             </a>
-            <a href="#/account" className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#58BA49] transition-colors" title="Account" aria-label="My account">
+            <a href="#/account" className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#126A44] transition-colors" title="Account" aria-label="My account">
               <User className="h-5 w-5" />
             </a>
-            <a href="#/games" className="hidden sm:flex p-2 text-[#231F20] hover:text-[#58BA49] transition-colors items-center gap-1" title="Games">
+            <a href="#/games" className="hidden sm:flex p-2 text-[#231F20] hover:text-[#126A44] transition-colors items-center gap-1" title="Games">
               <Gamepad2 className="h-5 w-5" />
               <span className="hidden md:inline text-xs font-medium">Games</span>
             </a>
-            <button onClick={onCartOpen} className="relative p-1.5 sm:p-2 text-[#231F20] hover:text-[#58BA49] transition-colors" aria-label="View cart">
+            <button onClick={onCartOpen} className="relative p-1.5 sm:p-2 text-[#231F20] hover:text-[#126A44] transition-colors" aria-label="View cart">
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && <span className="absolute -top-0.5 -right-0.5 bg-[#B3D335] text-[#231F20] text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">{cartCount}</span>}
             </button>
@@ -198,7 +198,7 @@ function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSear
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center justify-center gap-1 pb-2 overflow-x-auto">
           {categories.map((cat) => (
-            <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="px-3 py-1.5 text-xs font-medium text-[#231F20] hover:text-[#58BA49] hover:bg-[#FFFFFF] rounded-full transition-colors whitespace-nowrap">{cat}</button>
+            <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="px-3 py-1.5 text-xs font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-full transition-colors whitespace-nowrap">{cat}</button>
           ))}
         </nav>
       </div>
@@ -207,9 +207,9 @@ function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSear
         <div className="md:hidden bg-[#FFFFFF] border-t border-[#231F20]/10 shadow-lg">
           <div className="max-w-7xl mx-auto px-4 py-3 grid grid-cols-2 gap-2">
             {categories.map((cat) => (
-              <button key={cat} onClick={() => { navigate(`/shop/${cat.toLowerCase()}`); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#58BA49] hover:bg-[#FFFFFF] rounded-lg transition-colors">{cat}</button>
+              <button key={cat} onClick={() => { navigate(`/shop/${cat.toLowerCase()}`); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors">{cat}</button>
             ))}
-            <a href="#/games" onClick={() => setMobileMenuOpen(false)} className="sm:hidden text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#58BA49] hover:bg-[#FFFFFF] rounded-lg transition-colors flex items-center gap-2"><Gamepad2 className="h-4 w-4" /> Games</a>
+            <a href="#/games" onClick={() => setMobileMenuOpen(false)} className="sm:hidden text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors flex items-center gap-2"><Gamepad2 className="h-4 w-4" /> Games</a>
           </div>
         </div>
       )}
@@ -228,18 +228,18 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear }: { o
       <div className="absolute right-0 top-0 h-full w-full max-w-md bg-[#FFFFFF] shadow-2xl flex flex-col">
         <div className="flex items-center justify-between p-4 border-b border-[#231F20]/15">
           <h2 className="text-lg font-bold text-[#231F20]">Your Cart ({itemCount})</h2>
-          <button onClick={onClose} className="p-2 text-[#231F20]/50 hover:text-[#231F20] transition-colors"><X className="h-5 w-5" /></button>
+          <button onClick={onClose} className="p-2 text-[#231F20] hover:text-[#231F20] transition-colors"><X className="h-5 w-5" /></button>
         </div>
         {/* FIRST20 promo banner */}
         <div className="bg-[#FFCB08]/10 border-b border-[#FFCB08]/20 px-4 py-2 text-center">
-          <p className="text-sm font-medium text-[#231F20]">{"\u{1F525}"} Use code <span className="font-bold text-[#58BA49]">FIRST20</span> for 20% off your first order!</p>
+          <p className="text-sm font-medium text-[#231F20]">{"\u{1F525}"} Use code <span className="font-bold text-[#126A44]">FIRST20</span> for 20% off your first order!</p>
         </div>
         <div className="flex-1 overflow-y-auto p-4">
           {cart.length === 0 ? (
             <div className="text-center py-12">
-              <ShoppingCart className="mx-auto h-12 w-12 text-[#231F20]/30 mb-3" />
-              <p className="text-[#231F20]/50">Your cart is empty</p>
-              <button onClick={() => { onClose(); navigate("/shop"); }} className="mt-4 text-[#58BA49] hover:underline font-medium">Start Shopping</button>
+              <ShoppingCart className="mx-auto h-12 w-12 text-[#231F20] mb-3" />
+              <p className="text-[#231F20]">Your cart is empty</p>
+              <button onClick={() => { onClose(); navigate("/shop"); }} className="mt-4 text-[#126A44] hover:underline font-medium">Start Shopping</button>
             </div>
           ) : (
             <div className="space-y-4">
@@ -250,12 +250,12 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear }: { o
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-medium text-[#231F20] truncate">{item.product.online_name || item.product.name}</h3>
-                    <p className="text-[#58BA49] font-bold text-sm">{formatPrice(item.product.price)}</p>
+                    <p className="text-[#126A44] font-bold text-sm">{formatPrice(item.product.price)}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <button onClick={() => onUpdateQty(item.product.id, item.quantity - 1)} className="p-1 text-[#231F20]/40 hover:text-[#231F20]" aria-label="Decrease quantity"><Minus className="h-3 w-3" /></button>
+                      <button onClick={() => onUpdateQty(item.product.id, item.quantity - 1)} className="p-1 text-[#231F20] hover:text-[#231F20]" aria-label="Decrease quantity"><Minus className="h-3 w-3" /></button>
                       <span className="text-sm font-medium text-[#231F20] min-w-[1.5rem] text-center">{item.quantity}</span>
-                      <button onClick={() => onUpdateQty(item.product.id, item.quantity + 1)} className="p-1 text-[#231F20]/40 hover:text-[#231F20]" aria-label="Increase quantity"><Plus className="h-3 w-3" /></button>
-                      <button onClick={() => onRemove(item.product.id)} className="ml-auto p-1 text-[#231F20]/40 hover:text-[#D9A32C]"><Trash2 className="h-3 w-3" /></button>
+                      <button onClick={() => onUpdateQty(item.product.id, item.quantity + 1)} className="p-1 text-[#231F20] hover:text-[#231F20]" aria-label="Increase quantity"><Plus className="h-3 w-3" /></button>
+                      <button onClick={() => onRemove(item.product.id)} className="ml-auto p-1 text-[#231F20] hover:text-[#D9A32C]"><Trash2 className="h-3 w-3" /></button>
                     </div>
                   </div>
                 </div>
@@ -270,7 +270,7 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear }: { o
               <span>{formatPrice(total)}</span>
             </div>
             <button onClick={() => { onClose(); navigate("/checkout"); }} className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors text-lg">Checkout</button>
-            <button onClick={onClear} className="w-full py-2 text-[#231F20]/50 hover:text-[#D9A32C] text-sm transition-colors">Clear Cart</button>
+            <button onClick={onClear} className="w-full py-2 text-[#231F20] hover:text-[#D9A32C] text-sm transition-colors">Clear Cart</button>
           </div>
         )}
       </div>
@@ -346,7 +346,7 @@ function ShopByCategory({ productsByCategory }: { categories: string[]; products
             return (
             <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="bg-[#FFFFFF] rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-all group border border-[#231F20]/15 hover:border-[#B3D335]">
               <IconComp className="h-10 w-10 text-[#3D8C32] mx-auto mb-3" />
-              <h3 className="text-lg font-semibold text-[#231F20] group-hover:text-[#58BA49] transition-colors">{cat}</h3>
+              <h3 className="text-lg font-semibold text-[#231F20] group-hover:text-[#126A44] transition-colors">{cat}</h3>
               <p className="text-sm text-[#231F20] mt-1">{(productsByCategory[cat] || []).filter(p => p.stock > 0).length} products</p>
             </button>
             );
@@ -370,14 +370,14 @@ function ShopByFeeling({ products }: { products: Product[] }) {
     <section className="bg-[#FFFFFF] py-10 sm:py-14">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] text-center mb-2">How Do You Want to Feel?</h2>
-        <p className="text-[#231F20]/50 text-center mb-6 text-sm">Tap to browse products by effect</p>
+        <p className="text-[#231F20] text-center mb-6 text-sm">Tap to browse products by effect</p>
         <div className="grid grid-cols-4 gap-3 sm:gap-6">
           {feelings.map((f) => {
             const count = products.filter(p => p.stock > 0 && getProductEffect(p).label === f.label).length;
             return (
               <button key={f.label} onClick={() => navigate(`/shop/${f.label.toLowerCase()}`)} className="rounded-2xl p-3 sm:p-6 text-center hover:shadow-lg transition-all group border border-[#231F20]/10 hover:border-[#B3D335]" style={{ backgroundColor: f.bg }}>
                 <span className="text-2xl sm:text-4xl block mb-1 sm:mb-3">{f.icon}</span>
-                <h3 className="text-sm sm:text-lg font-semibold text-[#231F20] group-hover:text-[#58BA49] transition-colors">{f.label}</h3>
+                <h3 className="text-sm sm:text-lg font-semibold text-[#231F20] group-hover:text-[#126A44] transition-colors">{f.label}</h3>
                 <p className="text-xs text-[#231F20] mt-0.5 hidden sm:block">{f.desc}</p>
                 {count > 0 && <p className="text-[10px] sm:text-xs text-[#3D8C32] mt-1">{count} items</p>}
               </button>
@@ -415,7 +415,7 @@ function WhyChooseUs() {
     <section className="bg-[#FFFFFF] py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-3xl font-bold text-[#231F20] text-center mb-2">{"\u26A1"} Why Shop With Us?</h2>
-        <p className="text-[#231F20]/60 text-center mb-8">Quality you can trust, speed you can count on</p>
+        <p className="text-[#231F20] text-center mb-8">Quality you can trust, speed you can count on</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {reasons.map((r) => (
             <div key={r.text} className="bg-[#FFFFFF] rounded-xl p-5 text-center border border-[#231F20]/10">
@@ -481,7 +481,7 @@ function ReviewsSection() {
             {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-5 w-5 fill-[#FFCB08] text-[#FFCB08]" />)}
           </div>
           <p className="text-sm text-[#231F20] mb-1">4.8 out of 5 stars across all locations</p>
-          <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-[#58BA49] hover:underline transition-colors">
+          <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-[#126A44] hover:underline transition-colors">
             6,000+ Five-Star Reviews on Google {"\u2192"}
           </a>
         </div>
@@ -508,7 +508,7 @@ function ReviewsSection() {
           ))}
         </div>
         <div className="text-center mt-6">
-          <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="inline-block bg-[#FFFFFF] border border-[#231F20]/15 rounded-full px-6 py-2.5 text-sm font-medium text-[#231F20] hover:border-[#B3D335] hover:text-[#58BA49] transition-colors">
+          <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="inline-block bg-[#FFFFFF] border border-[#231F20]/15 rounded-full px-6 py-2.5 text-sm font-medium text-[#231F20] hover:border-[#B3D335] hover:text-[#126A44] transition-colors">
             See All Reviews on Google
           </a>
         </div>
@@ -537,10 +537,10 @@ function LocationSection() {
                 <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-[#3D8C32]" />{loc.phone}</p>
               </div>
               <div className="mt-4 flex gap-3">
-                <button onClick={() => window.open(`https://maps.google.com/maps/search/${encodeURIComponent(loc.mapsQuery)}`, "_blank")} className="text-[#58BA49] font-semibold text-sm flex items-center gap-1 hover:text-[#126A44] hover:underline">
+                <button onClick={() => window.open(`https://maps.google.com/maps/search/${encodeURIComponent(loc.mapsQuery)}`, "_blank")} className="text-[#126A44] font-semibold text-sm flex items-center gap-1 hover:text-[#126A44] hover:underline">
                   Get Directions <ChevronRight className="h-4 w-4" />
                 </button>
-                <button onClick={() => window.open(loc.googleUrl, "_blank")} className="text-[#231F20] font-medium text-sm flex items-center gap-1 hover:text-[#58BA49] hover:underline">
+                <button onClick={() => window.open(loc.googleUrl, "_blank")} className="text-[#231F20] font-medium text-sm flex items-center gap-1 hover:text-[#126A44] hover:underline">
                   Google Reviews <Star className="h-3 w-3" />
                 </button>
               </div>
@@ -582,10 +582,10 @@ function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd
                     </span>
           {product.stock <= 5 && <span className="inline-block bg-[#ADD038] text-[#231F20] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Only {Math.floor(product.stock)} Left</span>}
         </div>
-        <h3 className="text-[#231F20] text-[13px] sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#58BA49] transition-colors">{titleCase(product.online_name || product.name)}</h3>
+        <h3 className="text-[#231F20] text-[13px] sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#126A44] transition-colors">{titleCase(product.online_name || product.name)}</h3>
         <div className="flex items-center justify-between mb-2">
                     <span className="text-[#231F20] font-semibold text-[14px] sm:text-lg">{formatPrice(product.price)}</span>
-                    <span className="text-[11px] sm:text-[10px] text-[#3D8C32] sm:inline">{isLeafLife(product) ? <><span className="text-[#58BA49]">●</span> Shipping Only</> : <><span className="text-[#58BA49]">●</span> 5 Minute Pickup</>}</span>
+                    <span className="text-[11px] sm:text-[10px] text-[#3D8C32] sm:inline">{isLeafLife(product) ? <><span className="text-[#126A44]">●</span> Shipping Only</> : <><span className="text-[#126A44]">●</span> 5 Minute Pickup</>}</span>
         </div>
         {/* Quick Add to Cart button */}
         {onQuickAdd && product.available && (
@@ -626,9 +626,9 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
 
   if (!product) return (
     <div className="text-center py-32">
-      <Package className="mx-auto h-16 w-16 text-[#231F20]/30 mb-4" />
-      <p className="text-[#231F20]/50 text-lg">Product not found</p>
-      <button onClick={() => navigate("")} className="mt-4 text-[#58BA49] hover:underline">Back to products</button>
+      <Package className="mx-auto h-16 w-16 text-[#231F20] mb-4" />
+      <p className="text-[#231F20] text-lg">Product not found</p>
+      <button onClick={() => navigate("")} className="mt-4 text-[#126A44] hover:underline">Back to products</button>
     </div>
   );
 
@@ -662,13 +662,13 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
 
   return (
     <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
-      <button onClick={() => window.history.back()} className="flex items-center gap-2 text-[#58BA49] hover:text-[#126A44] mb-4 sm:mb-6 font-medium text-sm sm:text-base">
+      <button onClick={() => window.history.back()} className="flex items-center gap-2 text-[#126A44] hover:text-[#126A44] mb-4 sm:mb-6 font-medium text-sm sm:text-base">
         <ArrowLeft className="h-4 w-4" /> Back to Products
       </button>
 
       {/* FIRST20 promo */}
       <div className="bg-[#FFCB08]/10 border border-[#FFCB08]/30 rounded-xl px-4 py-3 mb-6 text-center">
-        <p className="text-sm font-medium text-[#231F20]">{"\u{1F525}"} First-time customers: <span className="font-bold">20% OFF</span> with code <span className="font-bold text-[#58BA49]">FIRST20</span></p>
+        <p className="text-sm font-medium text-[#231F20]">{"\u{1F525}"} First-time customers: <span className="font-bold">20% OFF</span> with code <span className="font-bold text-[#126A44]">FIRST20</span></p>
       </div>
 
       <div className="bg-[#FFFFFF] rounded-2xl sm:rounded-3xl overflow-hidden border border-[#231F20]/10 shadow-sm">
@@ -710,7 +710,7 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
             </div>
 
             <div className="flex items-center gap-3 mb-4">
-              <p className="text-3xl font-bold text-[#58BA49]">{formatPrice(product.price)}</p>
+              <p className="text-3xl font-bold text-[#126A44]">{formatPrice(product.price)}</p>
               {savingsVsBuying > 0 && (
                 <span className="inline-block bg-[#ADD038] text-[#231F20] text-xs font-bold px-2.5 py-1 rounded-full">
                   Save {formatPrice(savingsVsBuying)} vs buying {currentGrams}{"\u00D7"}1g
@@ -719,7 +719,7 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
             </div>
 
             {/* Benefit description */}
-            <p className="text-[#231F20]/70 text-sm mb-4">{benefit}</p>
+            <p className="text-[#231F20] text-sm mb-4">{benefit}</p>
 
             {product.is_age_restricted && (
               <div className="flex items-center gap-2 mb-4 bg-[#FFCB08]/10 border border-[#FFCB08]/30 rounded-lg px-4 py-2">
@@ -730,8 +730,8 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
 
             {product.description && (
               <div className="mb-4">
-                <h3 className="text-sm font-semibold text-[#231F20]/50 uppercase tracking-wider mb-2">Description</h3>
-                <p className="text-[#231F20]/70 leading-relaxed text-sm">{product.description}</p>
+                <h3 className="text-sm font-semibold text-[#231F20] uppercase tracking-wider mb-2">Description</h3>
+                <p className="text-[#231F20] leading-relaxed text-sm">{product.description}</p>
               </div>
             )}
 
@@ -740,7 +740,7 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
               {product.stock > 0 ? (
                 <div className="flex items-center gap-2">
                   <div className={`h-2.5 w-2.5 rounded-full ${product.stock <= 5 ? 'bg-[#FFCB08]' : 'bg-[#58BA49]'}`}></div>
-                  <span className={`text-sm font-medium ${product.stock <= 5 ? 'text-[#D9A32C]' : 'text-[#58BA49]'}`}>
+                  <span className={`text-sm font-medium ${product.stock <= 5 ? 'text-[#D9A32C]' : 'text-[#126A44]'}`}>
                     {product.stock <= 5 ? `Only ${Math.floor(product.stock)} remaining` : `In Stock (${Math.floor(product.stock)} available)`}
                   </span>
                 </div>
@@ -754,25 +754,25 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
 
             {/* Ready for pickup message */}
             <div className={`${isLeafLife(product) ? 'bg-[#ADD038]/20 border-[#ADD038]/30' : 'bg-[#ADD038]/20 border-[#ADD038]/30'} border rounded-lg px-4 py-2 mb-4`}>
-              <p className={`text-sm font-medium ${isLeafLife(product) ? 'text-[#58BA49]' : 'text-[#58BA49]'}`}>{isLeafLife(product) ? <>{"\u{1F4E6}"} This Product Ships From Our Partner {"\u2013"} Shipping Only</> : <>{"\u26A1"} Ready For Pickup Today In About 5 Minutes</>}</p>
+              <p className={`text-sm font-medium ${isLeafLife(product) ? 'text-[#126A44]' : 'text-[#126A44]'}`}>{isLeafLife(product) ? <>{"\u{1F4E6}"} This Product Ships From Our Partner {"\u2013"} Shipping Only</> : <>{"\u26A1"} Ready For Pickup Today In About 5 Minutes</>}</p>
             </div>
 
             {/* Add to cart */}
             <div className="mt-auto pt-4 space-y-3">
               {product.available && (
                 <div className="flex items-center gap-3">
-                  <span className="text-[#231F20]/50 text-sm">Qty:</span>
+                  <span className="text-[#231F20] text-sm">Qty:</span>
                   <div className="flex items-center border border-[#231F20]/15 rounded-lg">
-                    <button onClick={() => setQty(Math.max(1, qty - 1))} className="p-2 text-[#231F20]/40 hover:text-[#231F20] transition-colors" aria-label="Decrease quantity"><Minus className="h-4 w-4" /></button>
+                    <button onClick={() => setQty(Math.max(1, qty - 1))} className="p-2 text-[#231F20] hover:text-[#231F20] transition-colors" aria-label="Decrease quantity"><Minus className="h-4 w-4" /></button>
                     <span className="px-4 py-2 text-[#231F20] font-medium min-w-[3rem] text-center">{qty}</span>
-                    <button onClick={() => setQty(Math.min(product.stock, qty + 1))} className="p-2 text-[#231F20]/40 hover:text-[#231F20] transition-colors" aria-label="Increase quantity"><Plus className="h-4 w-4" /></button>
+                    <button onClick={() => setQty(Math.min(product.stock, qty + 1))} className="p-2 text-[#231F20] hover:text-[#231F20] transition-colors" aria-label="Increase quantity"><Plus className="h-4 w-4" /></button>
                   </div>
                 </div>
               )}
               <button
                 disabled={!product.available}
                 onClick={() => { if (product.available) { onAddToCart(product, qty); setAdded(true); setTimeout(() => setAdded(false), 2000); } }}
-                className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 ${product.available ? (added ? "bg-[#ADD038] text-[#231F20]" : "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] shadow-lg") : "bg-[#231F20]/10 text-[#231F20]/40 cursor-not-allowed"}`}
+                className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 ${product.available ? (added ? "bg-[#ADD038] text-[#231F20]" : "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] shadow-lg") : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}
               >
                 {!product.available ? "Out of Stock" : added ? "Added to Cart!" : "Add to Cart"}
               </button>
@@ -792,8 +792,8 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
                   <img src={p.image_url || placeholderUrl(p.name, 200)} alt={p.name} className="max-h-full max-w-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={handleImgError} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-[#231F20] line-clamp-2 hover:text-[#58BA49] transition-colors">{titleCase(p.online_name || p.name)}</h3>
-                  <p className="text-[#58BA49] font-bold text-sm mt-1">{formatPrice(p.price)}</p>
+                  <h3 className="text-sm font-medium text-[#231F20] line-clamp-2 hover:text-[#126A44] transition-colors">{titleCase(p.online_name || p.name)}</h3>
+                  <p className="text-[#126A44] font-bold text-sm mt-1">{formatPrice(p.price)}</p>
                 </div>
                 <button onClick={(e) => { e.stopPropagation(); onAddToCart(p, 1); }} className="flex-shrink-0 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg px-3 py-2 text-xs font-semibold transition-colors">Add</button>
               </div>
@@ -816,7 +816,7 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
                     <span className="text-sm font-medium text-[#231F20]">{vGrams > 0 ? `${vGrams}g` : titleCase(v.online_name || v.name)}</span>
                     {vSavings > 0 && <span className="ml-2 text-xs font-bold text-[#231F20] bg-[#FFCB08] px-2 py-0.5 rounded-full">Save {formatPrice(vSavings)}</span>}
                   </div>
-                  <span className="text-sm font-bold text-[#58BA49]">{formatPrice(v.price)}</span>
+                  <span className="text-sm font-bold text-[#126A44]">{formatPrice(v.price)}</span>
                 </div>
               );
             })}
@@ -852,10 +852,10 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
       <div className="max-w-3xl mx-auto px-4 pt-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#231F20]/40" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#231F20]" />
             <input ref={inputRef} type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search products..." className="w-full pl-12 pr-4 py-3 bg-[#FFFFFF] border border-[#231F20]/15 rounded-full text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335] focus:ring-1 focus:ring-[#B3D335]" />
           </div>
-          <button onClick={() => { onClose(); setQuery(""); }} className="p-2 text-[#231F20]/40 hover:text-[#231F20]"><X className="h-6 w-6" /></button>
+          <button onClick={() => { onClose(); setQuery(""); }} className="p-2 text-[#231F20] hover:text-[#231F20]"><X className="h-6 w-6" /></button>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[70vh] overflow-y-auto">
           {results.map((product) => (
@@ -864,13 +864,13 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
                 <div className="h-28 flex items-center justify-center mb-2 bg-[#FFFFFF] rounded-lg overflow-hidden">
                   <img src={product.image_url || placeholderUrl(product.name, 200)} alt={product.name} loading="lazy" className="max-h-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={handleImgError} />
                 </div>
-                <h3 className="text-xs font-medium text-[#231F20] line-clamp-2 group-hover:text-[#58BA49] transition-colors">{titleCase(product.online_name || product.name)}</h3>
-                <p className="text-[#58BA49] font-bold text-sm mt-1">{formatPrice(product.price)}</p>
+                <h3 className="text-xs font-medium text-[#231F20] line-clamp-2 group-hover:text-[#126A44] transition-colors">{titleCase(product.online_name || product.name)}</h3>
+                <p className="text-[#126A44] font-bold text-sm mt-1">{formatPrice(product.price)}</p>
               </div>
             </div>
           ))}
         </div>
-        {query && results.length === 0 && <p className="text-center text-[#231F20]/40 py-12">No products found for "{query}"</p>}
+        {query && results.length === 0 && <p className="text-center text-[#231F20] py-12">No products found for "{query}"</p>}
       </div>
     </div>
   );
@@ -903,7 +903,7 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart }: { pro
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-[18px] sm:text-3xl font-semibold sm:font-bold text-[#231F20]">{selectedCategory && selectedCategory !== "all" ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : "All Products"}</h1>
-          <p className="text-[#231F20]/50 text-sm mt-1">{filtered.length} products</p>
+          <p className="text-[#231F20] text-sm mt-1">{filtered.length} products</p>
         </div>
         <div className="flex gap-2 items-center">
           <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-[#FFFFFF] border border-[#231F20]/15 rounded-lg px-3 py-2 text-sm text-[#231F20] focus:outline-none focus:border-[#B3D335]">
@@ -925,8 +925,8 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart }: { pro
       </div>
       {filtered.length === 0 && (
         <div className="text-center py-16">
-          <Package className="mx-auto h-12 w-12 text-[#231F20]/30 mb-3" />
-          <p className="text-[#231F20]/50">No products found in this category</p>
+          <Package className="mx-auto h-12 w-12 text-[#231F20] mb-3" />
+          <p className="text-[#231F20]">No products found in this category</p>
         </div>
       )}
     </div>
@@ -969,7 +969,7 @@ function AboutPage() {
       <section className="bg-[#FFFFFF] py-14 sm:py-20">
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">It started with a road trip</h2>
-          <p className="text-[#231F20]/80 text-base sm:text-lg leading-relaxed">
+          <p className="text-[#231F20] text-base sm:text-lg leading-relaxed">
             In April 2018, Anthoney and Jimmy &mdash; two Spring Hill residents &mdash; started Healing Emotionally Mentally Physically (HEMP), a wholesale hemp company. Early 2019, sourcing problems pushed them to Colorado. Standing inside a marijuana dispensary in Colorado, they looked at each other and knew exactly what Spring Hill was missing. They came home with one idea: open a Hemp Dispensary.
           </p>
         </div>
@@ -979,7 +979,7 @@ function AboutPage() {
       <section className="bg-[#FFFFFF] py-14 sm:py-20 border-t border-[#231F20]/10">
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">Nobody would give us a chance</h2>
-          <p className="text-[#231F20]/80 text-base sm:text-lg leading-relaxed">
+          <p className="text-[#231F20] text-base sm:text-lg leading-relaxed">
             Anthoney was in real estate. Jimmy was in landscaping. They spent months searching for a building before they even opened &mdash; landlord after landlord turned them away because they didn&rsquo;t understand what hemp was and assumed it was illegal. Finally, one landlord sat down with them, listened, and took a chance. On December 1, 2019, The Hemp Dispensary opened its doors at 6175 Deltona Blvd, Spring Hill, FL &mdash; the store we still call Spring Hill West. Once the doors were open, the real hustle began. When Anthoney had to show a house, Jimmy covered the store. When Jimmy had to run a landscaping estimate, Anthoney held things down. They built it shift by shift.
           </p>
         </div>
@@ -989,7 +989,7 @@ function AboutPage() {
       <section className="bg-[#FFFFFF] py-14 sm:py-20 border-t border-[#231F20]/10">
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">We built something</h2>
-          <p className="text-[#231F20]/80 text-base sm:text-lg leading-relaxed">
+          <p className="text-[#231F20] text-base sm:text-lg leading-relaxed">
             A few months after opening West, they opened a second location in Crystal River. Then more followed. New Port Richey. Clearwater. Homosassa. Tarpon Springs. Spring Hill East. Clermont. Hudson. Lady Lake. Pinellas Park. Tampa. Zephyrhills. Apopka. Port Richey. By 2024, The Hemp Dispensary had grown to 15 retail locations across Florida, an 8,000 square foot manufacturing and distribution center in Brooksville, an in-house same-day delivery service covering 6 counties, and an e-commerce store shipping nationally and internationally. Along the way they received cease and desist letters from Reese&rsquo;s Peanut Butter, the American Red Cross, and the NFL &mdash; which is how you know you&rsquo;ve built something worth noticing.
           </p>
         </div>
@@ -999,7 +999,7 @@ function AboutPage() {
       <section className="bg-[#FFFFFF] py-14 sm:py-20 border-t border-[#231F20]/10">
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">We did everything right. Then the rules changed.</h2>
-          <p className="text-[#231F20]/80 text-base sm:text-lg leading-relaxed">
+          <p className="text-[#231F20] text-base sm:text-lg leading-relaxed">
             Florida law around hemp has always been complicated. We&rsquo;ve been targeted more than most because we were one of the biggest brands in the state. When THCA products started appearing everywhere, we stayed on the sideline &mdash; Florida had no clear legal path. Then in 2024, we received a written email from FDACS (Florida Department of Agriculture and Consumer Services) confirming THCA was legal to sell. We invested millions building out a full THCA product line. Months later, FDACS walked into our stores and red-tagged every THCA product. Our competitors continue selling THCA to this day. We cannot. We followed the rules. We paid the price. That decision cost us 13 retail locations, our delivery service, our warehouse, and nearly everything we&rsquo;d built. We went from 15 locations to 2. We went from 64 employees to 9.
           </p>
         </div>
@@ -1009,7 +1009,7 @@ function AboutPage() {
       <section className="bg-[#FFFFFF] py-14 sm:py-20 border-t border-[#231F20]/10">
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">Two locations. Same mission.</h2>
-          <p className="text-[#231F20]/80 text-base sm:text-lg leading-relaxed mb-8">
+          <p className="text-[#231F20] text-base sm:text-lg leading-relaxed mb-8">
             Spring Hill West opened December 1, 2019. It&rsquo;s still open. Spring Hill East is still open. We still source the highest quality lab-tested hemp products we can find. We still know most of our customers by name. We&rsquo;re not a corporate chain. We&rsquo;re two guys from Spring Hill who believed in this plant before most people knew what it was &mdash; and we still do. With another federal law change on the horizon, we&rsquo;re facing new challenges again. We&rsquo;ve been here before. We&rsquo;re not going anywhere.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -1032,7 +1032,7 @@ function AboutPage() {
                   {/* Dot */}
                   <div className="absolute left-2.5 sm:left-4.5 top-1 w-3.5 h-3.5 rounded-full bg-[#FFCB08] border-2 border-[#FFFFFF] shadow" />
                   <p className="text-sm font-bold text-[#126A44] mb-1">{item.year}</p>
-                  <p className="text-[#231F20]/80 text-base leading-relaxed">{item.text}</p>
+                  <p className="text-[#231F20] text-base leading-relaxed">{item.text}</p>
                 </div>
               ))}
             </div>
@@ -1057,7 +1057,7 @@ function TermsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-16">
       <h1 className="text-4xl font-bold text-[#231F20] mb-6">Terms of Service</h1>
-      <div className="prose prose-lg text-[#231F20]/70">
+      <div className="prose prose-lg text-[#231F20]">
         <p className="mb-4">By using our website and services, you agree to these terms. All products are sold in compliance with federal and state hemp regulations.</p>
         <p className="mb-4">You must be 21 years or older to purchase age-restricted products. We reserve the right to verify age at the time of pickup.</p>
         <p>All sales are final. Products cannot be returned once purchased due to the nature of our products.</p>
@@ -1070,7 +1070,7 @@ function PrivacyPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-16">
       <h1 className="text-4xl font-bold text-[#231F20] mb-6">Privacy Policy</h1>
-      <div className="prose prose-lg text-[#231F20]/70">
+      <div className="prose prose-lg text-[#231F20]">
         <p className="mb-4">We respect your privacy and are committed to protecting your personal information. We collect only the information necessary to process your orders and improve your experience.</p>
         <p className="mb-4">We do not sell or share your personal information with third parties except as necessary to fulfill your orders.</p>
         <p>Your payment information is processed securely through Clover and is never stored on our servers.</p>
@@ -1083,7 +1083,7 @@ function ShippingPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-16">
       <h1 className="text-4xl font-bold text-[#231F20] mb-6">Shipping & Pickup</h1>
-      <div className="prose prose-lg text-[#231F20]/70">
+      <div className="prose prose-lg text-[#231F20]">
         <p className="mb-4">Most orders are ready for pickup in about 5 minutes! We offer fast, convenient pickup at both of our Spring Hill locations.</p>
         <p className="mb-4">Free shipping on orders over $50. Standard shipping typically takes 3-5 business days.</p>
         <p>For local customers, we recommend our pickup option for the fastest service.</p>
@@ -1096,12 +1096,12 @@ function ContactPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-16">
       <h1 className="text-4xl font-bold text-[#231F20] mb-6">Contact Us</h1>
-      <div className="prose prose-lg text-[#231F20]/70">
+      <div className="prose prose-lg text-[#231F20]">
         <p className="mb-4">Have questions? We'd love to hear from you!</p>
         <div className="space-y-3">
-          <p className="flex items-center gap-2"><Phone className="h-5 w-5 text-[#58BA49]" /> (352) 340-2861</p>
-          <p className="flex items-center gap-2"><Mail className="h-5 w-5 text-[#58BA49]" /> support@thehempdispensary.com</p>
-          <p className="flex items-center gap-2"><MapPin className="h-5 w-5 text-[#58BA49]" /> Spring Hill, FL</p>
+          <p className="flex items-center gap-2"><Phone className="h-5 w-5 text-[#126A44]" /> (352) 340-2861</p>
+          <p className="flex items-center gap-2"><Mail className="h-5 w-5 text-[#126A44]" /> support@thehempdispensary.com</p>
+          <p className="flex items-center gap-2"><MapPin className="h-5 w-5 text-[#126A44]" /> Spring Hill, FL</p>
         </div>
       </div>
     </div>
@@ -1116,7 +1116,7 @@ function SiteFooter() {
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
-            <img src="/logo.webp" alt="The Hemp Dispensary" className="h-12 w-auto mb-4" />
+            <img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-12 w-auto mb-4" />
             <p className="text-[#FFFFFF]/70 text-sm">Spring Hill's trusted source for premium hemp products.</p>
           </div>
           <div>
@@ -1395,7 +1395,7 @@ function ChatbotBud({ products }: { products: Product[] }) {
                             <img src={p.image_url || placeholderUrl(p.name, 60)} alt={p.name} className="w-10 h-10 object-contain rounded" onError={handleImgError} />
                             <div className="flex-1 min-w-0">
                               <p className="text-xs font-medium text-[#231F20] truncate">{p.online_name || p.name}</p>
-                              <p className="text-xs text-[#58BA49] font-bold">{formatPrice(p.price)}</p>
+                              <p className="text-xs text-[#126A44] font-bold">{formatPrice(p.price)}</p>
                             </div>
                           </div>
                         </div>
@@ -1596,9 +1596,9 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
   if (cart.length === 0 && step !== "confirmed") {
     return (
       <div className="max-w-2xl mx-auto px-4 py-24 text-center">
-        <ShoppingCart className="mx-auto h-16 w-16 text-[#231F20]/40 mb-4" />
+        <ShoppingCart className="mx-auto h-16 w-16 text-[#231F20] mb-4" />
         <h1 className="text-2xl font-bold text-[#FFFFFF] mb-2">Your cart is empty</h1>
-        <p className="text-[#231F20]/40 mb-6">Add some products before checking out.</p>
+        <p className="text-[#231F20] mb-6">Add some products before checking out.</p>
         <button onClick={() => navigate("/shop")} className="bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] px-8 py-3 rounded-full font-medium transition-colors">Shop Now</button>
       </div>
     );
@@ -1608,17 +1608,17 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
     return (
       <div className="max-w-2xl mx-auto px-4 py-24 text-center">
         <div className="bg-[#B3D335]/20 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="h-10 w-10 text-[#58BA49]" />
+          <CheckCircle className="h-10 w-10 text-[#126A44]" />
         </div>
         <h1 className="text-3xl font-bold text-[#FFFFFF] mb-3">Payment Successful!</h1>
-        <p className="text-[#231F20]/40 mb-2">Thank you for your order, {form.firstName}!</p>
-        <p className="text-[#231F20]/50 text-sm mb-6">Order #{orderNumber}</p>
+        <p className="text-[#231F20] mb-2">Thank you for your order, {form.firstName}!</p>
+        <p className="text-[#231F20] text-sm mb-6">Order #{orderNumber}</p>
         <div className="bg-[#FFFFFF] rounded-xl border border-[#231F20]/20 p-6 mb-8 text-left max-w-md mx-auto">
           <h3 className="text-[#FFFFFF] font-semibold mb-3">What happens next?</h3>
-          <div className="space-y-3 text-sm text-[#231F20]/40">
-            <div className="flex gap-3"><Mail className="h-5 w-5 text-[#58BA49] flex-shrink-0 mt-0.5" /><p>A confirmation email will be sent to <span className="text-[#FFFFFF]">{form.email}</span></p></div>
-            <div className="flex gap-3"><Package className="h-5 w-5 text-[#58BA49] flex-shrink-0 mt-0.5" /><p>Your order will be prepared and packaged</p></div>
-            <div className="flex gap-3"><Truck className="h-5 w-5 text-[#58BA49] flex-shrink-0 mt-0.5" /><p>You'll receive shipping details once dispatched</p></div>
+          <div className="space-y-3 text-sm text-[#231F20]">
+            <div className="flex gap-3"><Mail className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>A confirmation email will be sent to <span className="text-[#FFFFFF]">{form.email}</span></p></div>
+            <div className="flex gap-3"><Package className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>Your order will be prepared and packaged</p></div>
+            <div className="flex gap-3"><Truck className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>You'll receive shipping details once dispatched</p></div>
           </div>
         </div>
         <div className="flex gap-3 justify-center">
@@ -1726,8 +1726,8 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                 <div><label className={labelClass}>Phone *</label><input type="tel" value={form.phone} onChange={(e) => setField("phone", e.target.value)} placeholder="(352) 555-0123" className={inputClass} /></div>
               </div>
               <div className="mt-8 flex justify-between">
-                <button onClick={() => navigate("/shop")} className="text-[#231F20]/50 hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Shop</button>
-                <button onClick={() => setStep("shipping")} disabled={!canProceedInfo} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedInfo ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20]/40 cursor-not-allowed"}`}>Continue to Shipping</button>
+                <button onClick={() => navigate("/shop")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Shop</button>
+                <button onClick={() => setStep("shipping")} disabled={!canProceedInfo} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedInfo ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>Continue to Shipping</button>
               </div>
             </div>
           )}
@@ -1762,7 +1762,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                           }}
                         >
                           <span className="flex items-center gap-2">
-                            <MapPin className="h-3.5 w-3.5 text-[#58BA49] flex-shrink-0" />
+                            <MapPin className="h-3.5 w-3.5 text-[#126A44] flex-shrink-0" />
                             <span className="truncate">{s.display}</span>
                           </span>
                         </button>
@@ -1779,8 +1779,8 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                 <div><label className={labelClass}>Order Notes (optional)</label><textarea value={form.notes} onChange={(e) => setField("notes", e.target.value)} placeholder="Any special instructions..." rows={3} className={inputClass} /></div>
               </div>
               <div className="mt-8 flex justify-between">
-                <button onClick={() => setStep("info")} className="text-[#231F20]/50 hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back</button>
-                <button onClick={() => setStep("payment")} disabled={!canProceedShipping} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedShipping ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20]/40 cursor-not-allowed"}`}>Continue to Payment</button>
+                <button onClick={() => setStep("info")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back</button>
+                <button onClick={() => setStep("payment")} disabled={!canProceedShipping} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedShipping ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>Continue to Payment</button>
               </div>
             </div>
           )}
@@ -1793,25 +1793,25 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
               <div className="mb-4 p-4 bg-[#FFFFFF] rounded-xl">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-semibold text-[#231F20]">Contact</h3>
-                  <button onClick={() => setStep("info")} className="text-xs text-[#B3D335] hover:text-[#58BA49]">Edit</button>
+                  <button onClick={() => setStep("info")} className="text-xs text-[#B3D335] hover:text-[#126A44]">Edit</button>
                 </div>
                 <p className="text-[#FFFFFF] text-sm">{form.firstName} {form.lastName}</p>
-                <p className="text-[#231F20]/40 text-sm">{form.email} &bull; {form.phone}</p>
+                <p className="text-[#231F20] text-sm">{form.email} &bull; {form.phone}</p>
               </div>
 
               {/* Shipping summary */}
               <div className="mb-4 p-4 bg-[#FFFFFF] rounded-xl">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-semibold text-[#231F20]">Shipping Address</h3>
-                  <button onClick={() => setStep("shipping")} className="text-xs text-[#B3D335] hover:text-[#58BA49]">Edit</button>
+                  <button onClick={() => setStep("shipping")} className="text-xs text-[#B3D335] hover:text-[#126A44]">Edit</button>
                 </div>
                 <p className="text-[#FFFFFF] text-sm">{form.address}{form.apartment ? `, ${form.apartment}` : ""}</p>
-                <p className="text-[#231F20]/40 text-sm">{form.city}, {form.state} {form.zip}</p>
+                <p className="text-[#231F20] text-sm">{form.city}, {form.state} {form.zip}</p>
               </div>
 
               {/* Items */}
               <div className="mb-6">
-                <h3 className="text-sm font-semibold text-[#231F20]/30 mb-3">Items ({itemCount})</h3>
+                <h3 className="text-sm font-semibold text-[#231F20] mb-3">Items ({itemCount})</h3>
                 <div className="space-y-2">
                   {cart.map((item) => (
                     <div key={item.product.id} className="flex items-center gap-3 p-3 bg-[#FFFFFF] rounded-xl">
@@ -1820,7 +1820,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[#FFFFFF] text-sm font-medium truncate">{item.product.online_name || item.product.name}</p>
-                        <p className="text-[#231F20]/50 text-xs">Qty: {item.quantity}</p>
+                        <p className="text-[#231F20] text-xs">Qty: {item.quantity}</p>
                       </div>
                       <p className="text-[#FFFFFF] text-sm font-semibold">{formatPrice(item.product.price * item.quantity)}</p>
                     </div>
@@ -1831,10 +1831,10 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
               {/* Payment Card Entry */}
               <div className="mb-6 p-5 bg-[#FFFFFF] rounded-xl border border-[#231F20]/20">
                 <div className="flex items-center gap-2 mb-4">
-                  <CreditCard className="h-5 w-5 text-[#58BA49]" />
+                  <CreditCard className="h-5 w-5 text-[#126A44]" />
                   <h3 className="text-[#231F20] font-semibold">Payment Details</h3>
-                  <Lock className="h-3.5 w-3.5 text-[#231F20]/50 ml-auto" />
-                  <span className="text-xs text-[#231F20]/50">Secure</span>
+                  <Lock className="h-3.5 w-3.5 text-[#231F20] ml-auto" />
+                  <span className="text-xs text-[#231F20]">Secure</span>
                 </div>
 
                 <div className="space-y-4">
@@ -1858,7 +1858,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                   </div>
                 </div>
 
-                <p className="text-xs text-[#231F20]/70 mt-3 flex items-center gap-1">
+                <p className="text-xs text-[#231F20] mt-3 flex items-center gap-1">
                   <Lock className="h-3 w-3" /> Your payment is securely processed by Clover
                 </p>
               </div>
@@ -1866,7 +1866,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
               {/* Loyalty Number */}
               <div className="mb-6 p-4 bg-[#FFFFFF] rounded-xl border border-[#231F20]/20">
                 <div className="flex items-center gap-2 mb-3">
-                  <Gift className="h-4 w-4 text-[#58BA49]" />
+                  <Gift className="h-4 w-4 text-[#126A44]" />
                   <h3 className="text-[#231F20] text-sm font-semibold">Hemp Rewards (optional)</h3>
                 </div>
                 <input
@@ -1876,7 +1876,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                   placeholder="Enter your loyalty number or phone number"
                   className={inputClass}
                 />
-                <p className="text-xs text-[#231F20]/50 mt-2">Enter your rewards number to earn points on this purchase</p>
+                <p className="text-xs text-[#231F20] mt-2">Enter your rewards number to earn points on this purchase</p>
               </div>
 
               {/* Error display */}
@@ -1891,7 +1891,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
               )}
 
               <div className="mt-6 flex justify-between">
-                <button onClick={() => setStep("shipping")} className="text-[#231F20]/50 hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back</button>
+                <button onClick={() => setStep("shipping")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back</button>
                 <button
                   onClick={handlePlaceOrder}
                   disabled={submitting}
@@ -1924,12 +1924,12 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
               ))}
             </div>
             <div className="border-t border-[#231F20]/20 pt-4 space-y-2">
-              <div className="flex justify-between text-sm"><span className="text-[#231F20]/40">Subtotal</span><span className="text-[#231F20]">{formatPrice(subtotal)}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-[#231F20]/40">Shipping</span><span className="text-[#FFFFFF]">{shippingCost === 0 ? <span className="text-[#58BA49]">Free</span> : formatPrice(shippingCost)}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-[#231F20]/40">Tax (7%)</span><span className="text-[#231F20]">{formatPrice(tax)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-[#231F20]">Subtotal</span><span className="text-[#231F20]">{formatPrice(subtotal)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-[#231F20]">Shipping</span><span className="text-[#FFFFFF]">{shippingCost === 0 ? <span className="text-[#126A44]">Free</span> : formatPrice(shippingCost)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-[#231F20]">Tax (7%)</span><span className="text-[#231F20]">{formatPrice(tax)}</span></div>
               <div className="border-t border-[#231F20]/20 pt-3 flex justify-between"><span className="text-[#231F20] font-semibold">Total</span><span className="text-xl font-bold text-[#231F20]">{formatPrice(total)}</span></div>
             </div>
-            {shippingCost > 0 && <p className="text-center text-xs text-[#58BA49] mt-3">Add {formatPrice(5000 - subtotal)} more for free shipping!</p>}
+            {shippingCost > 0 && <p className="text-center text-xs text-[#126A44] mt-3">Add {formatPrice(5000 - subtotal)} more for free shipping!</p>}
           </div>
         </div>
       </div>
@@ -2087,14 +2087,14 @@ function LoyaltyPage() {
                   <Gift className="h-10 w-10 text-[#231F20]" />
         </div>
         <h1 className="text-4xl font-bold text-[#231F20] mb-3">Hemp Rewards</h1>
-        <p className="text-[#231F20]/50 text-lg max-w-2xl mx-auto">Earn points on every purchase, unlock VIP tiers, and redeem for discounts.</p>
+        <p className="text-[#231F20] text-lg max-w-2xl mx-auto">Earn points on every purchase, unlock VIP tiers, and redeem for discounts.</p>
       </div>
 
       {/* Sign Up Result Toast */}
       {signupResult && (
         <div className={`max-w-lg mx-auto mb-8 p-4 rounded-lg text-center ${signupResult.status === "error" ? "bg-[#D9A32C]/10 border border-[#D9A32C]/30" : "bg-[#B3D335]/10 border border-[#B3D335]/30"}`}>
-          <p className={`font-semibold ${signupResult.status === "error" ? "text-[#D9A32C]" : "text-[#58BA49]"}`}>{signupResult.message}</p>
-          {signupResult.points !== undefined && signupResult.points > 0 && <p className="text-[#231F20]/60 mt-1">You earned <span className="font-bold text-[#B3D335]">{signupResult.points} bonus points</span> for signing up!</p>}
+          <p className={`font-semibold ${signupResult.status === "error" ? "text-[#D9A32C]" : "text-[#126A44]"}`}>{signupResult.message}</p>
+          {signupResult.points !== undefined && signupResult.points > 0 && <p className="text-[#231F20] mt-1">You earned <span className="font-bold text-[#B3D335]">{signupResult.points} bonus points</span> for signing up!</p>}
         </div>
       )}
 
@@ -2113,16 +2113,16 @@ function LoyaltyPage() {
 
         {lookupDone && !customer && (
           <div className="mt-4 p-4 rounded-lg bg-[#FFFFFF] border border-[#231F20]/20 text-center">
-            <p className="text-[#231F20]/50">No rewards account found for this number.</p>
-            <button onClick={() => { setShowSignup(true); setSignupForm(f => ({ ...f, phone })); }} className="mt-3 text-[#B3D335] hover:text-[#58BA49] font-medium underline transition-colors">Sign up for Hemp Rewards</button>
+            <p className="text-[#231F20]">No rewards account found for this number.</p>
+            <button onClick={() => { setShowSignup(true); setSignupForm(f => ({ ...f, phone })); }} className="mt-3 text-[#B3D335] hover:text-[#126A44] font-medium underline transition-colors">Sign up for Hemp Rewards</button>
           </div>
         )}
 
         {customer && (
           <div className="mt-4 p-5 rounded-lg bg-[#B3D335]/10 border border-[#B3D335]/30">
             <div className="text-center">
-              <p className="text-[#58BA49] font-semibold text-lg">Welcome back, {customer.first_name} {customer.last_name}!</p>
-              <p className="text-[#231F20] font-bold text-3xl mt-1">{customer.points_balance} <span className="text-base font-normal text-[#231F20]/50">points</span></p>
+              <p className="text-[#126A44] font-semibold text-lg">Welcome back, {customer.first_name} {customer.last_name}!</p>
+              <p className="text-[#231F20] font-bold text-3xl mt-1">{customer.points_balance} <span className="text-base font-normal text-[#231F20]">points</span></p>
               {/* VIP Tier Progress */}
               <div className="mt-4 pt-4 border-t border-[#231F20]/10">
                 <div className="flex items-center gap-2 mb-2">
@@ -2134,10 +2134,10 @@ function LoyaltyPage() {
                     <div className="w-full h-3 bg-[#231F20]/15 rounded-full overflow-hidden mb-2">
                       <div className="h-full bg-[#B3D335] rounded-full transition-all duration-500" style={{ width: `${tierProgress}%` }} />
                     </div>
-                    <p className="text-[#231F20]/60 text-sm">Spend <span className="font-bold text-[#231F20]">${nextTier.min - lifetimeEarned} more</span> to reach <span className="font-bold" style={{ color: nextTier.color }}>{nextTier.name}</span> and earn {nextTier.multiplier} points on every purchase.</p>
+                    <p className="text-[#231F20] text-sm">Spend <span className="font-bold text-[#231F20]">${nextTier.min - lifetimeEarned} more</span> to reach <span className="font-bold" style={{ color: nextTier.color }}>{nextTier.name}</span> and earn {nextTier.multiplier} points on every purchase.</p>
                   </>
                 ) : (
-                  <p className="text-[#58BA49] text-sm font-medium">You&apos;ve reached the highest tier — {currentTier.multiplier} points on every purchase!</p>
+                  <p className="text-[#126A44] text-sm font-medium">You&apos;ve reached the highest tier — {currentTier.multiplier} points on every purchase!</p>
                 )}
               </div>
               {isBirthdayMonth() && (
@@ -2164,10 +2164,10 @@ function LoyaltyPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-[#231F20]">VIP Tier: {currentTier.name}</h3>
-                  <p className="text-[#231F20]/50 text-sm">{currentTier.multiplier} points multiplier</p>
+                  <p className="text-[#231F20] text-sm">{currentTier.multiplier} points multiplier</p>
                 </div>
               </div>
-              {activeSection === "vip" ? <ChevronUp className="h-5 w-5 text-[#231F20]/40" /> : <ChevronDown className="h-5 w-5 text-[#231F20]/40" />}
+              {activeSection === "vip" ? <ChevronUp className="h-5 w-5 text-[#231F20]" /> : <ChevronDown className="h-5 w-5 text-[#231F20]" />}
             </div>
 
             {activeSection === "vip" && (
@@ -2175,17 +2175,17 @@ function LoyaltyPage() {
                 {/* Progress bar */}
                 {nextTier && (
                   <div>
-                    <div className="flex justify-between text-xs text-[#231F20]/50 mb-1">
+                    <div className="flex justify-between text-xs text-[#231F20] mb-1">
                       <span>{currentTier.name} (${currentTier.min}+)</span>
                       <span>{nextTier.name} (${nextTier.min}+)</span>
                     </div>
                     <div className="w-full h-3 bg-[#231F20]/10 rounded-full overflow-hidden">
                       <div className="h-full rounded-full transition-all duration-500" style={{ width: `${tierProgress}%`, backgroundColor: currentTier.color }} />
                     </div>
-                    <p className="text-xs text-[#231F20]/40 mt-1">${nextTier.min - lifetimeEarned} more in earnings to reach {nextTier.name}</p>
+                    <p className="text-xs text-[#231F20] mt-1">${nextTier.min - lifetimeEarned} more in earnings to reach {nextTier.name}</p>
                   </div>
                 )}
-                {!nextTier && <p className="text-sm text-[#58BA49] font-medium">You've reached the highest tier!</p>}
+                {!nextTier && <p className="text-sm text-[#126A44] font-medium">You've reached the highest tier!</p>}
 
                 {/* All tiers */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
@@ -2196,10 +2196,10 @@ function LoyaltyPage() {
                       <div key={tier.name} className={`rounded-xl p-4 border text-center ${isActive ? "border-2" : "border border-[#231F20]/10 opacity-60"}`} style={isActive ? { borderColor: tier.color, backgroundColor: tier.color + "10" } : {}}>
                         <TierIcon className="h-6 w-6 mx-auto mb-2" style={{ color: tier.color }} />
                         <p className="font-bold text-[#231F20] text-sm">{tier.name}</p>
-                        <p className="text-xs text-[#231F20]/50">{tier.multiplier} points</p>
-                        <p className="text-xs text-[#231F20]/40 mt-1">${tier.min}{tier.max === Infinity ? "+" : `–$${tier.max}`}</p>
+                        <p className="text-xs text-[#231F20]">{tier.multiplier} points</p>
+                        <p className="text-xs text-[#231F20] mt-1">${tier.min}{tier.max === Infinity ? "+" : `–$${tier.max}`}</p>
                         <ul className="mt-2 space-y-0.5">
-                          {tier.benefits.map((b, i) => <li key={i} className="text-[10px] text-[#231F20]/50">{b}</li>)}
+                          {tier.benefits.map((b, i) => <li key={i} className="text-[10px] text-[#231F20]">{b}</li>)}
                         </ul>
                       </div>
                     );
@@ -2218,42 +2218,42 @@ function LoyaltyPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-[#231F20]">Points Activity</h3>
-                  <p className="text-[#231F20]/50 text-sm">{transactions.length} transactions</p>
+                  <p className="text-[#231F20] text-sm">{transactions.length} transactions</p>
                 </div>
               </div>
-              {activeSection === "activity" ? <ChevronUp className="h-5 w-5 text-[#231F20]/40" /> : <ChevronDown className="h-5 w-5 text-[#231F20]/40" />}
+              {activeSection === "activity" ? <ChevronUp className="h-5 w-5 text-[#231F20]" /> : <ChevronDown className="h-5 w-5 text-[#231F20]" />}
             </div>
 
             {activeSection === "activity" && (
               <div>
                 {transactions.length === 0 ? (
-                  <p className="text-[#231F20]/40 text-sm text-center py-4">No transactions yet. Start earning points!</p>
+                  <p className="text-[#231F20] text-sm text-center py-4">No transactions yet. Start earning points!</p>
                 ) : (
                   <>
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="border-b border-[#231F20]/10">
-                            <th className="text-left py-2 text-[#231F20]/50 font-medium">Activity</th>
-                            <th className="text-right py-2 text-[#231F20]/50 font-medium">Points</th>
-                            <th className="text-right py-2 text-[#231F20]/50 font-medium">Date</th>
+                            <th className="text-left py-2 text-[#231F20] font-medium">Activity</th>
+                            <th className="text-right py-2 text-[#231F20] font-medium">Points</th>
+                            <th className="text-right py-2 text-[#231F20] font-medium">Date</th>
                           </tr>
                         </thead>
                         <tbody>
                           {displayedTx.map((tx, i) => (
                             <tr key={i} className="border-b border-[#231F20]/5">
                               <td className="py-2.5 text-[#231F20]">{tx.description || (tx.type === "earn" ? "Points Earned" : tx.type === "redeem" ? "Points Redeemed" : tx.type)}</td>
-                              <td className={`py-2.5 text-right font-semibold ${tx.type === "earn" || tx.points > 0 ? "text-[#58BA49]" : "text-[#D9A32C]"}`}>
+                              <td className={`py-2.5 text-right font-semibold ${tx.type === "earn" || tx.points > 0 ? "text-[#126A44]" : "text-[#D9A32C]"}`}>
                                 {tx.type === "earn" || tx.points > 0 ? "+" : ""}{tx.points}
                               </td>
-                              <td className="py-2.5 text-right text-[#231F20]/40">{tx.created_at ? new Date(tx.created_at).toLocaleDateString() : "—"}</td>
+                              <td className="py-2.5 text-right text-[#231F20]">{tx.created_at ? new Date(tx.created_at).toLocaleDateString() : "—"}</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                     </div>
                     {transactions.length > 10 && (
-                      <button onClick={() => setShowAllTx(!showAllTx)} className="mt-3 text-[#B3D335] hover:text-[#58BA49] text-sm font-medium transition-colors">
+                      <button onClick={() => setShowAllTx(!showAllTx)} className="mt-3 text-[#B3D335] hover:text-[#126A44] text-sm font-medium transition-colors">
                         {showAllTx ? "Show Less" : `Show All ${transactions.length} Transactions`}
                       </button>
                     )}
@@ -2268,14 +2268,14 @@ function LoyaltyPage() {
             <div className="flex items-center justify-between mb-4 cursor-pointer" onClick={() => toggleSection("redeem")}>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-[#58BA49]/20 flex items-center justify-center">
-                  <Gift className="h-5 w-5 text-[#58BA49]" />
+                  <Gift className="h-5 w-5 text-[#126A44]" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-[#231F20]">Redeem Points</h3>
-                  <p className="text-[#231F20]/50 text-sm">{customer.points_balance} points available</p>
+                  <p className="text-[#231F20] text-sm">{customer.points_balance} points available</p>
                 </div>
               </div>
-              {activeSection === "redeem" ? <ChevronUp className="h-5 w-5 text-[#231F20]/40" /> : <ChevronDown className="h-5 w-5 text-[#231F20]/40" />}
+              {activeSection === "redeem" ? <ChevronUp className="h-5 w-5 text-[#231F20]" /> : <ChevronDown className="h-5 w-5 text-[#231F20]" />}
             </div>
 
             {activeSection === "redeem" && (
@@ -2286,18 +2286,18 @@ function LoyaltyPage() {
                   return (
                     <div key={tier.points} className={`flex items-center justify-between p-4 rounded-xl border ${canAfford ? "border-[#58BA49]/30 bg-[#58BA49]/5" : "border-[#231F20]/10 opacity-50"}`}>
                       <div>
-                        <p className={`font-bold ${canAfford ? "text-[#231F20]" : "text-[#231F20]/50"}`}>{tier.discount}</p>
-                        <p className="text-xs text-[#231F20]/40">{tier.desc}</p>
+                        <p className={`font-bold ${canAfford ? "text-[#231F20]" : "text-[#231F20]"}`}>{tier.discount}</p>
+                        <p className="text-xs text-[#231F20]">{tier.desc}</p>
                       </div>
                       <div className="text-right">
-                        <p className={`font-bold text-sm ${canAfford ? "text-[#58BA49]" : "text-[#231F20]/40"}`}>{tier.points} pts</p>
+                        <p className={`font-bold text-sm ${canAfford ? "text-[#126A44]" : "text-[#231F20]"}`}>{tier.points} pts</p>
                         {!canAfford && <p className="text-[10px] text-[#D9A32C]">{needed} more needed</p>}
-                        {canAfford && <p className="text-[10px] text-[#58BA49] font-medium">Available!</p>}
+                        {canAfford && <p className="text-[10px] text-[#126A44] font-medium">Available!</p>}
                       </div>
                     </div>
                   );
                 })}
-                <p className="text-xs text-[#231F20]/40 text-center mt-2">Visit any location to redeem your points</p>
+                <p className="text-xs text-[#231F20] text-center mt-2">Visit any location to redeem your points</p>
               </div>
             )}
           </div>
@@ -2311,17 +2311,17 @@ function LoyaltyPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-[#231F20]">Refer a Friend</h3>
-                  <p className="text-[#231F20]/50 text-sm">Give $20, Get $20</p>
+                  <p className="text-[#231F20] text-sm">Give $20, Get $20</p>
                 </div>
               </div>
-              {activeSection === "referral" ? <ChevronUp className="h-5 w-5 text-[#231F20]/40" /> : <ChevronDown className="h-5 w-5 text-[#231F20]/40" />}
+              {activeSection === "referral" ? <ChevronUp className="h-5 w-5 text-[#231F20]" /> : <ChevronDown className="h-5 w-5 text-[#231F20]" />}
             </div>
 
             {activeSection === "referral" && (
               <div>
                 <div className="bg-[#B3D335]/10 border border-[#B3D335]/20 rounded-xl p-4 mb-4 text-center">
-                  <p className="text-[#231F20] font-semibold">Your friend gets <span className="text-[#58BA49]">$20 off</span> their first order</p>
-                  <p className="text-[#231F20]/50 text-sm">You earn <span className="font-bold text-[#58BA49]">500 points</span> when they make their first purchase</p>
+                  <p className="text-[#231F20] font-semibold">Your friend gets <span className="text-[#126A44]">$20 off</span> their first order</p>
+                  <p className="text-[#231F20] text-sm">You earn <span className="font-bold text-[#126A44]">500 points</span> when they make their first purchase</p>
                 </div>
                 <div className="space-y-3">
                   <input type="text" value={referralForm.friend_name} onChange={(e) => setReferralForm(f => ({ ...f, friend_name: e.target.value }))} placeholder="Friend's name" className={inputClass} />
@@ -2330,7 +2330,7 @@ function LoyaltyPage() {
                     className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg font-medium transition-colors disabled:opacity-50">
                     {referralLoading ? "Sending..." : "Send Referral"}
                   </button>
-                  {referralMsg && <p className="text-sm text-center text-[#58BA49]">{referralMsg}</p>}
+                  {referralMsg && <p className="text-sm text-center text-[#126A44]">{referralMsg}</p>}
                 </div>
               </div>
             )}
@@ -2356,12 +2356,12 @@ function LoyaltyPage() {
               return (
                 <div key={way.label} className="flex items-start gap-3 p-3 rounded-xl border border-[#231F20]/10 hover:border-[#B3D335]/40 transition-colors">
                   <div className="w-9 h-9 rounded-lg bg-[#B3D335]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <WayIcon className="h-4 w-4 text-[#58BA49]" />
+                    <WayIcon className="h-4 w-4 text-[#126A44]" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-[#231F20] font-semibold text-sm leading-tight">{way.label}</p>
-                    <p className="text-[#58BA49] font-bold text-xs">+{way.pts} pts</p>
-                    <p className="text-[#231F20]/40 text-[11px] leading-tight">{way.desc}</p>
+                    <p className="text-[#126A44] font-bold text-xs">+{way.pts} pts</p>
+                    <p className="text-[#231F20] text-[11px] leading-tight">{way.desc}</p>
                   </div>
                 </div>
               );
@@ -2374,17 +2374,17 @@ function LoyaltyPage() {
           <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10 text-center">
             <div className="text-3xl font-bold text-[#B3D335] mb-2">1</div>
             <h3 className="text-[#231F20] font-semibold mb-2">Sign Up</h3>
-            <p className="text-[#231F20]/40 text-sm">Create your rewards account with your phone number at any location or online.</p>
+            <p className="text-[#231F20] text-sm">Create your rewards account with your phone number at any location or online.</p>
           </div>
           <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10 text-center">
             <div className="text-3xl font-bold text-[#B3D335] mb-2">2</div>
             <h3 className="text-[#231F20] font-semibold mb-2">Earn Points</h3>
-            <p className="text-[#231F20]/40 text-sm">Earn 1 point for every $1 spent. Points work across East, West, and online.</p>
+            <p className="text-[#231F20] text-sm">Earn 1 point for every $1 spent. Points work across East, West, and online.</p>
           </div>
           <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10 text-center">
             <div className="text-3xl font-bold text-[#B3D335] mb-2">3</div>
             <h3 className="text-[#231F20] font-semibold mb-2">Redeem</h3>
-            <p className="text-[#231F20]/40 text-sm">100 pts = $5 off, 250 pts = $15 off, 500 pts = $35 off, 1000 pts = $75 off.</p>
+            <p className="text-[#231F20] text-sm">100 pts = $5 off, 250 pts = $15 off, 500 pts = $35 off, 1000 pts = $75 off.</p>
           </div>
         </div>
 
@@ -2404,10 +2404,10 @@ function LoyaltyPage() {
                   <div key={tier.name} className="rounded-xl p-4 border border-[#231F20]/10 text-center">
                     <TierIcon className="h-6 w-6 mx-auto mb-2" style={{ color: tier.color }} />
                     <p className="font-bold text-[#231F20] text-sm">{tier.name}</p>
-                    <p className="text-xs text-[#231F20]/50">{tier.multiplier} points</p>
-                    <p className="text-xs text-[#231F20]/40 mt-1">${tier.min}{tier.max === Infinity ? "+" : `–$${tier.max}`}</p>
+                    <p className="text-xs text-[#231F20]">{tier.multiplier} points</p>
+                    <p className="text-xs text-[#231F20] mt-1">${tier.min}{tier.max === Infinity ? "+" : `–$${tier.max}`}</p>
                     <ul className="mt-2 space-y-0.5">
-                      {tier.benefits.map((b, i) => <li key={i} className="text-[10px] text-[#231F20]/50">{b}</li>)}
+                      {tier.benefits.map((b, i) => <li key={i} className="text-[10px] text-[#231F20]">{b}</li>)}
                     </ul>
                   </div>
                 );
@@ -2422,7 +2422,7 @@ function LoyaltyPage() {
         <div className="fixed inset-0 bg-[#231F20]/50 flex items-center justify-center z-50 p-4" onClick={() => setShowSignup(false)}>
           <div className="bg-[#FFFFFF] rounded-2xl p-8 max-w-md w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-xl font-bold text-[#231F20] mb-2 text-center">Join Hemp Rewards</h2>
-            <p className="text-[#231F20]/40 text-sm text-center mb-6">Create your free rewards account and start earning points!</p>
+            <p className="text-[#231F20] text-sm text-center mb-6">Create your free rewards account and start earning points!</p>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -2463,7 +2463,7 @@ function LoyaltyPage() {
                 className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg font-medium transition-colors disabled:opacity-50">
                 {signupLoading ? "Creating account..." : "Create My Rewards Account"}
               </button>
-              <button onClick={() => setShowSignup(false)} className="w-full py-2 text-[#231F20]/50 hover:text-[#231F20]/30 text-sm transition-colors">Cancel</button>
+              <button onClick={() => setShowSignup(false)} className="w-full py-2 text-[#231F20] hover:text-[#231F20] text-sm transition-colors">Cancel</button>
             </div>
           </div>
         </div>
@@ -2472,7 +2472,7 @@ function LoyaltyPage() {
       {/* Sign up CTA */}
       {!customer && !showSignup && !signupResult && (
         <div className="text-center mt-8">
-          <p className="text-[#231F20]/50 text-sm">Don't have an account? <button onClick={() => setShowSignup(true)} className="text-[#58BA49] hover:text-[#3D8C32] font-medium underline">Sign up for free</button></p>
+          <p className="text-[#231F20] text-sm">Don't have an account? <button onClick={() => setShowSignup(true)} className="text-[#126A44] hover:text-[#3D8C32] font-medium underline">Sign up for free</button></p>
         </div>
       )}
     </div>
@@ -2556,31 +2556,31 @@ function AccountPage() {
         <div className="bg-[#FFFFFF] rounded-2xl p-8 border border-[#231F20]/20 shadow-sm">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-[#B3D335]/20 rounded-full mb-4">
-              <User className="h-8 w-8 text-[#58BA49]" />
+              <User className="h-8 w-8 text-[#126A44]" />
             </div>
             <h1 className="text-2xl font-bold text-[#231F20]">{memberData.name}</h1>
-            <p className="text-[#231F20]/40">{memberData.phone} {memberData.email ? `| ${memberData.email}` : ""}</p>
+            <p className="text-[#231F20]">{memberData.phone} {memberData.email ? `| ${memberData.email}` : ""}</p>
           </div>
           <div className="bg-[#FFFFFF] rounded-xl p-6 text-center mb-6">
-            <p className="text-[#231F20]/40 text-sm mb-1">Your Reward Points</p>
+            <p className="text-[#231F20] text-sm mb-1">Your Reward Points</p>
             <p className="text-4xl font-bold text-[#B3D335]">{memberData.points}</p>
-            <p className="text-[#231F20]/50 text-xs mt-1">Points work across all locations + online</p>
+            <p className="text-[#231F20] text-xs mt-1">Points work across all locations + online</p>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center p-3 bg-[#FFFFFF] rounded-lg">
               <span className="text-[#231F20]">100 points</span>
-              <span className="text-[#58BA49] font-semibold">$5 off</span>
+              <span className="text-[#126A44] font-semibold">$5 off</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-[#FFFFFF] rounded-lg">
               <span className="text-[#231F20]">200 points</span>
-              <span className="text-[#58BA49] font-semibold">$12 off</span>
+              <span className="text-[#126A44] font-semibold">$12 off</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-[#FFFFFF] rounded-lg">
               <span className="text-[#231F20]">500 points</span>
-              <span className="text-[#58BA49] font-semibold">$35 off</span>
+              <span className="text-[#126A44] font-semibold">$35 off</span>
             </div>
           </div>
-          <button onClick={() => { setLoggedIn(false); setMemberData(null); setSignupResult(null); }} className="w-full mt-6 py-3 border border-[#231F20]/20 text-[#231F20]/50 hover:text-[#231F20] rounded-lg transition-colors">
+          <button onClick={() => { setLoggedIn(false); setMemberData(null); setSignupResult(null); }} className="w-full mt-6 py-3 border border-[#231F20]/20 text-[#231F20] hover:text-[#231F20] rounded-lg transition-colors">
             Sign Out
           </button>
         </div>
@@ -2593,7 +2593,7 @@ function AccountPage() {
       {/* Sign Up Result */}
       {signupResult && !loggedIn && (
         <div className={`mb-6 p-4 rounded-lg text-center ${signupResult.status === "error" ? "bg-[#D9A32C]/10 border border-[#D9A32C]/30" : "bg-[#B3D335]/10 border border-[#B3D335]/30"}`}>
-          <p className={`font-semibold ${signupResult.status === "error" ? "text-[#D9A32C]" : "text-[#58BA49]"}`}>{signupResult.message}</p>
+          <p className={`font-semibold ${signupResult.status === "error" ? "text-[#D9A32C]" : "text-[#126A44]"}`}>{signupResult.message}</p>
         </div>
       )}
 
@@ -2601,10 +2601,10 @@ function AccountPage() {
         <div className="bg-[#FFFFFF] rounded-2xl p-8 border border-[#231F20]/20 shadow-sm">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-[#B3D335]/20 rounded-full mb-4">
-              <User className="h-8 w-8 text-[#58BA49]" />
+              <User className="h-8 w-8 text-[#126A44]" />
             </div>
             <h1 className="text-2xl font-bold text-[#231F20] mb-2">Sign In</h1>
-            <p className="text-[#231F20]/40 text-sm">Access your Hemp Rewards account</p>
+            <p className="text-[#231F20] text-sm">Access your Hemp Rewards account</p>
           </div>
           <div className="space-y-4">
             <div>
@@ -2618,7 +2618,7 @@ function AccountPage() {
                 onKeyDown={(e) => { if (e.key === "Enter") handleLogin(); }}
               />
             </div>
-            <div className="text-center text-[#231F20]/70 text-sm">— or —</div>
+            <div className="text-center text-[#231F20] text-sm">— or —</div>
             <div>
               <label className="block text-sm font-medium text-[#231F20] mb-1.5">Email</label>
               <input
@@ -2640,7 +2640,7 @@ function AccountPage() {
             </button>
           </div>
           <div className="text-center mt-6 border-t border-[#231F20]/20 pt-6">
-            <p className="text-[#231F20]/50 text-sm mb-3">Don't have an account?</p>
+            <p className="text-[#231F20] text-sm mb-3">Don't have an account?</p>
             <button onClick={() => setShowSignup(true)} className="w-full py-3 border border-[#B3D335] text-[#231F20] hover:bg-[#B3D335]/10 rounded-lg font-medium transition-colors">
               Sign Up for Hemp Rewards
             </button>
@@ -2650,10 +2650,10 @@ function AccountPage() {
         <div className="bg-[#FFFFFF] rounded-2xl p-8 border border-[#B3D335]/50 shadow-sm">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-[#B3D335]/20 rounded-full mb-4">
-              <Gift className="h-8 w-8 text-[#58BA49]" />
+              <Gift className="h-8 w-8 text-[#126A44]" />
             </div>
             <h1 className="text-2xl font-bold text-[#231F20] mb-2">Join Hemp Rewards</h1>
-            <p className="text-[#231F20]/40 text-sm">Create your free rewards account and start earning points!</p>
+            <p className="text-[#231F20] text-sm">Create your free rewards account and start earning points!</p>
           </div>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -2678,7 +2678,7 @@ function AccountPage() {
             <button onClick={handleSignup} disabled={signupLoading || !signupForm.first_name || !signupForm.phone} className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg font-medium transition-colors disabled:opacity-50">
               {signupLoading ? "Creating account..." : "Create My Rewards Account"}
             </button>
-            <button onClick={() => { setShowSignup(false); setSignupResult(null); }} className="w-full py-2 text-[#231F20]/50 hover:text-[#231F20]/30 text-sm transition-colors">Already have an account? Sign in</button>
+            <button onClick={() => { setShowSignup(false); setSignupResult(null); }} className="w-full py-2 text-[#231F20] hover:text-[#231F20] text-sm transition-colors">Already have an account? Sign in</button>
           </div>
         </div>
       )}
@@ -2849,12 +2849,12 @@ function ScratchCardGame() {
       <div className="max-w-2xl mx-auto px-4 py-12">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-[#231F20] mb-2">Scratch & Win!</h1>
-          <p className="text-[#231F20]/40">Enter your rewards number to play</p>
+          <p className="text-[#231F20]">Enter your rewards number to play</p>
         </div>
         <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/15 p-8 text-center max-w-md mx-auto">
-          <Gift className="h-12 w-12 text-[#58BA49] mx-auto mb-4" />
+          <Gift className="h-12 w-12 text-[#126A44] mx-auto mb-4" />
           <h2 className="text-xl font-bold text-[#231F20] mb-2">Rewards Members Only</h2>
-          <p className="text-[#231F20]/50 text-sm mb-6">Enter your rewards phone number to unlock your daily scratch card. Not a member? <a href="#/loyalty" className="text-[#58BA49] underline">Sign up free</a></p>
+          <p className="text-[#231F20] text-sm mb-6">Enter your rewards phone number to unlock your daily scratch card. Not a member? <a href="#/loyalty" className="text-[#126A44] underline">Sign up free</a></p>
           <input type="tel" placeholder="(555) 555-5555" value={scratchPhone} onChange={(e) => setScratchPhone(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleScratchAuth()}
             className="w-full px-4 py-3 rounded-xl border border-[#231F20]/15 text-[#231F20] text-center text-lg mb-4 focus:outline-none focus:border-[#B3D335]" />
@@ -2868,7 +2868,7 @@ function ScratchCardGame() {
           {prizes.map((p, i) => (
             <div key={i} className="bg-[#FFFFFF] border border-[#231F20]/10 rounded-lg p-3 text-center">
               <span className="text-2xl">{p.emoji}</span>
-              <p className="text-xs text-[#231F20]/50 mt-1 font-medium">{p.text}</p>
+              <p className="text-xs text-[#231F20] mt-1 font-medium">{p.text}</p>
             </div>
           ))}
         </div>
@@ -2886,13 +2886,13 @@ function ScratchCardGame() {
       <div className="max-w-2xl mx-auto px-4 py-12">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-[#231F20] mb-2">Scratch & Win!</h1>
-          <p className="text-[#231F20]/40">Welcome back, {scratchAuthName}!</p>
+          <p className="text-[#231F20]">Welcome back, {scratchAuthName}!</p>
         </div>
         <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/15 p-8 text-center max-w-md mx-auto">
           <Clock className="h-12 w-12 text-[#D9A32C] mx-auto mb-4" />
           <h2 className="text-xl font-bold text-[#231F20] mb-2">Come Back Tomorrow!</h2>
-          <p className="text-[#231F20]/50 text-sm mb-4">You already played today. Your next scratch card unlocks in <span className="font-bold text-[#231F20]">{hoursLeft} hour{hoursLeft !== 1 ? "s" : ""}</span>.</p>
-          <p className="text-[#231F20]/40 text-xs mb-6">Make a purchase to earn an extra scratch card!</p>
+          <p className="text-[#231F20] text-sm mb-4">You already played today. Your next scratch card unlocks in <span className="font-bold text-[#231F20]">{hoursLeft} hour{hoursLeft !== 1 ? "s" : ""}</span>.</p>
+          <p className="text-[#231F20] text-xs mb-6">Make a purchase to earn an extra scratch card!</p>
           <button onClick={() => navigate("/shop")} className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-xl font-semibold transition-colors">Shop Now</button>
         </div>
       </div>
@@ -2903,7 +2903,7 @@ function ScratchCardGame() {
     <div className="max-w-2xl mx-auto px-4 py-12">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-[#231F20] mb-2">Scratch & Win!</h1>
-        <p className="text-[#231F20]/40">Welcome, {scratchAuthName}! Scratch the card below to reveal your prize</p>
+        <p className="text-[#231F20]">Welcome, {scratchAuthName}! Scratch the card below to reveal your prize</p>
       </div>
       <div className="bg-[#231F20] rounded-2xl border border-[#231F20] p-8 text-center">
         <div className="relative inline-block rounded-xl overflow-hidden border-4 border-[#B3D335] shadow-lg shadow-[#B3D335]/30" style={{ width: 320, height: 200 }}>
@@ -2911,7 +2911,7 @@ function ScratchCardGame() {
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#231F20] via-[#231F20] to-[#231F20]">
             <span className="text-5xl mb-2">{prizeEmoji}</span>
             <span className="text-2xl font-bold text-[#B3D335]">{prize}</span>
-            {currentPrize && <span className="text-sm text-[#231F20]/40 mt-1">{currentPrize.desc}</span>}
+            {currentPrize && <span className="text-sm text-[#231F20] mt-1">{currentPrize.desc}</span>}
           </div>
           {/* Scratch canvas on top */}
           <canvas
@@ -2921,7 +2921,7 @@ function ScratchCardGame() {
             onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}
           />
         </div>
-        {hasStarted && !revealed && <div className="mt-4"><div className="w-64 mx-auto bg-[#231F20]/10 rounded-full h-2"><div className="bg-[#B3D335] h-2 rounded-full transition-all" style={{ width: `${scratchPercent}%` }} /></div><p className="text-xs text-[#231F20]/50 mt-1">{Math.round(scratchPercent)}% scratched</p></div>}
+        {hasStarted && !revealed && <div className="mt-4"><div className="w-64 mx-auto bg-[#231F20]/10 rounded-full h-2"><div className="bg-[#B3D335] h-2 rounded-full transition-all" style={{ width: `${scratchPercent}%` }} /></div><p className="text-xs text-[#231F20] mt-1">{Math.round(scratchPercent)}% scratched</p></div>}
         {revealed && (
           <div className="mt-6">
             <p className="text-[#B3D335] text-lg font-semibold mb-4 animate-pulse">Congratulations, {scratchAuthName}! You won {prize}!</p>
@@ -2942,7 +2942,7 @@ function ScratchCardGame() {
         {prizes.map((p, i) => (
           <div key={i} className="bg-[#231F20]/50 border border-[#231F20] rounded-lg p-3 text-center">
             <span className="text-2xl">{p.emoji}</span>
-            <p className="text-xs text-[#231F20]/40 mt-1 font-medium">{p.text}</p>
+            <p className="text-xs text-[#231F20] mt-1 font-medium">{p.text}</p>
           </div>
         ))}
       </div>
@@ -3044,7 +3044,7 @@ function RollAJointGame() {
     <div className="max-w-2xl mx-auto px-4 py-12">
       <div className="text-center mb-6">
         <h1 className="text-4xl font-bold text-[#FFFFFF] mb-2">Roll a Joint!</h1>
-        <p className="text-[#231F20]/40">Help Bud Puppet grind, roll, light, and enjoy</p>
+        <p className="text-[#231F20]">Help Bud Puppet grind, roll, light, and enjoy</p>
         <div className="flex items-center justify-center gap-6 mt-3">
           <span className="text-[#B3D335] font-bold">Round {round}</span>
           <span className="text-[#FFCB08] font-bold">Score: {score}</span>
@@ -3061,7 +3061,7 @@ function RollAJointGame() {
         {step === 0 && (
           <div>
             <h2 className="text-xl font-bold text-[#FFFFFF] text-center mb-2">Step 1: Pick Your Flower</h2>
-            <p className="text-[#231F20]/50 text-center text-sm mb-4">Bud Puppet wants to roll one up! Choose a strain:</p>
+            <p className="text-[#231F20] text-center text-sm mb-4">Bud Puppet wants to roll one up! Choose a strain:</p>
             <div className="grid grid-cols-2 gap-4">
               {STRAINS.map(s => (
                 <button key={s.name} onClick={() => pickStrain(s)}
@@ -3070,7 +3070,7 @@ function RollAJointGame() {
                     <img src="/bud-puppet.webp" alt={s.name} className="w-12 h-12 object-contain" />
                   </div>
                   <p className="text-[#FFFFFF] font-semibold">{s.name}</p>
-                  <p className="text-[#231F20]/50 text-xs mt-1">{s.desc}</p>
+                  <p className="text-[#231F20] text-xs mt-1">{s.desc}</p>
                 </button>
               ))}
             </div>
@@ -3081,7 +3081,7 @@ function RollAJointGame() {
         {step === 1 && selectedStrain && (
           <div className="text-center">
             <h2 className="text-xl font-bold text-[#FFFFFF] mb-2">Step 2: Grind the {selectedStrain.name}</h2>
-            <p className="text-[#231F20]/50 text-sm mb-4">Bud Puppet is grinding it up!</p>
+            <p className="text-[#231F20] text-sm mb-4">Bud Puppet is grinding it up!</p>
             <div className="relative w-48 h-48 mx-auto mb-4">
               {/* Grinder with Bud Puppet inside */}
               <div className="absolute inset-0 rounded-full border-4 border-[#231F20]/30 overflow-hidden" style={{ background: `conic-gradient(${selectedStrain.color} ${grindProgress}%, rgba(35,31,32,0.15) ${grindProgress}%)` }}>
@@ -3111,7 +3111,7 @@ function RollAJointGame() {
         {step === 2 && selectedStrain && (
           <div className="text-center">
             <h2 className="text-xl font-bold text-[#FFFFFF] mb-2">Step 3: Roll the Joint</h2>
-            <p className="text-[#231F20]/50 text-sm mb-4">Bud Puppet is rolling it tight!</p>
+            <p className="text-[#231F20] text-sm mb-4">Bud Puppet is rolling it tight!</p>
             <div className="relative w-72 h-28 mx-auto mb-6">
               {/* Rolling paper background */}
               <div className="absolute inset-0 rounded-xl bg-[#D9A32C]/20/20 border-2 border-[#D9A32C]/30 overflow-hidden">
@@ -3126,7 +3126,7 @@ function RollAJointGame() {
                 {rollProgress >= 100 && <span className="text-[#B3D335] font-bold text-lg animate-bounce">{"Perfect roll!"}</span>}
               </div>
             </div>
-            <p className="text-[#231F20]/40 text-sm mb-4">Tap to roll! ({Math.round(rollProgress)}%)</p>
+            <p className="text-[#231F20] text-sm mb-4">Tap to roll! ({Math.round(rollProgress)}%)</p>
             <button onClick={handleRollClick}
               className="px-8 py-4 bg-[#D9A32C] hover:bg-[#FFCB08] text-[#FFFFFF] rounded-full font-bold text-lg transition-all active:scale-90 shadow-lg shadow-[#D9A32C]/30/50">
               Tap to Roll
@@ -3138,7 +3138,7 @@ function RollAJointGame() {
         {step === 3 && (
           <div className="text-center">
             <h2 className="text-xl font-bold text-[#FFFFFF] mb-2">Step 4: Light It Up!</h2>
-            <p className="text-[#231F20]/50 text-sm mb-4">Bud Puppet is sparking it up!</p>
+            <p className="text-[#231F20] text-sm mb-4">Bud Puppet is sparking it up!</p>
             <div className="relative w-56 h-56 mx-auto mb-4">
               {/* Joint */}
               <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-8 h-36 rounded-t-sm overflow-hidden" style={{ background: `linear-gradient(180deg, ${selectedStrain?.color || "#3D8C32"}, #FFFFFF)` }}>
@@ -3194,12 +3194,12 @@ function RollAJointGame() {
           <div className="text-center">
             <div className="text-6xl mb-4">{"\uD83C\uDF89"}</div>
             <h2 className="text-2xl font-bold text-[#B3D335] mb-2">Round {round} Complete!</h2>
-            <p className="text-[#231F20]/40 mb-2">Bud Puppet rolled a perfect {selectedStrain?.name} joint!</p>
+            <p className="text-[#231F20] mb-2">Bud Puppet rolled a perfect {selectedStrain?.name} joint!</p>
             <p className="text-[#FFCB08] font-bold text-xl mb-2">+{100 + round * 10} game points!</p>
             <div className="bg-[#B3D335]/10 border border-[#B3D335]/30 rounded-xl p-4 mb-6 inline-block">
-              <p className="text-[#58BA49] font-semibold text-sm mb-1">{"\u{1F3C6}"} Bonus Rewards Points Earned!</p>
-              <p className="text-[#231F20] font-bold text-2xl">{score >= 500 ? "+25" : "+10"} <span className="text-sm font-normal text-[#231F20]/50">rewards points</span></p>
-              <p className="text-[#231F20]/40 text-xs mt-1">{score >= 500 ? "High score bonus!" : "Complete more rounds for 25 pts!"}</p>
+              <p className="text-[#126A44] font-semibold text-sm mb-1">{"\u{1F3C6}"} Bonus Rewards Points Earned!</p>
+              <p className="text-[#231F20] font-bold text-2xl">{score >= 500 ? "+25" : "+10"} <span className="text-sm font-normal text-[#231F20]">rewards points</span></p>
+              <p className="text-[#231F20] text-xs mt-1">{score >= 500 ? "High score bonus!" : "Complete more rounds for 25 pts!"}</p>
             </div>
             <BudPuppet size={100} action="celebrate" className="mx-auto mb-6" />
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -3219,7 +3219,7 @@ function RollAJointGame() {
       {/* Step indicators */}
       <div className="flex items-center justify-center gap-2 mt-6">
         {["Pick", "Grind", "Roll", "Light", "Smoke"].map((label, i) => (
-          <div key={i} className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${i <= step ? "bg-[#B3D335]/20 text-[#231F20] border border-[#B3D335]" : "bg-[#FFFFFF] text-[#231F20]/40 border border-[#231F20]/15"}`}>
+          <div key={i} className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${i <= step ? "bg-[#B3D335]/20 text-[#231F20] border border-[#B3D335]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15"}`}>
             {i < step ? "\u2713" : i + 1}. {label}
           </div>
         ))}
@@ -3234,13 +3234,13 @@ function GamesPage() {
 
   if (activeGame === "scratch") return (
     <div>
-      <div className="max-w-2xl mx-auto px-4 pt-8"><button onClick={() => setActiveGame("none")} className="text-[#231F20]/50 hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Games</button></div>
+      <div className="max-w-2xl mx-auto px-4 pt-8"><button onClick={() => setActiveGame("none")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Games</button></div>
       <ScratchCardGame />
     </div>
   );
   if (activeGame === "roll") return (
     <div>
-      <div className="max-w-2xl mx-auto px-4 pt-8"><button onClick={() => setActiveGame("none")} className="text-[#231F20]/50 hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Games</button></div>
+      <div className="max-w-2xl mx-auto px-4 pt-8"><button onClick={() => setActiveGame("none")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Games</button></div>
       <RollAJointGame />
     </div>
   );
@@ -3249,7 +3249,7 @@ function GamesPage() {
     <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="text-center mb-10">
         <h1 className="text-4xl font-bold text-[#FFFFFF] mb-3">Hemp Games</h1>
-        <p className="text-[#231F20]/40 text-lg">Play games, win prizes, and have fun!</p>
+        <p className="text-[#231F20] text-lg">Play games, win prizes, and have fun!</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Scratch Card */}
@@ -3257,15 +3257,15 @@ function GamesPage() {
           className="bg-[#FFFFFF] border-2 border-[#B3D335]/50 hover:border-[#B3D335] rounded-2xl p-8 text-left transition-all hover:scale-105 group">
           <div className="text-5xl mb-4">{"\u{1F3B0}"}</div>
           <h2 className="text-2xl font-bold text-[#FFFFFF] mb-2">Scratch & Win</h2>
-          <p className="text-[#231F20]/40">Scratch the card to reveal exclusive prizes — discounts, free shipping, bonus points, and more!</p>
-          <span className="inline-block mt-4 text-[#58BA49] font-semibold group-hover:translate-x-1 transition-transform">        Play Now {"\u2192"}</span>
+          <p className="text-[#231F20]">Scratch the card to reveal exclusive prizes — discounts, free shipping, bonus points, and more!</p>
+          <span className="inline-block mt-4 text-[#126A44] font-semibold group-hover:translate-x-1 transition-transform">        Play Now {"\u2192"}</span>
                 </button>
                 {/* Roll a Joint */}
         <button onClick={() => setActiveGame("roll")}
           className="bg-[#FFFFFF] border-2 border-[#FFCB08]/50 hover:border-[#FFCB08] rounded-2xl p-8 text-left transition-all hover:scale-105 group">
           <div className="text-5xl mb-4">{"\u{1F525}"}</div>
           <h2 className="text-2xl font-bold text-[#FFFFFF] mb-2">Roll a Joint</h2>
-          <p className="text-[#231F20]/40">Pick your flower, grind it, roll it, light it! Watch your cannabis nut character enjoy the ride.</p>
+          <p className="text-[#231F20]">Pick your flower, grind it, roll it, light it! Watch your cannabis nut character enjoy the ride.</p>
           <span className="inline-block mt-4 text-[#FFCB08] font-semibold group-hover:translate-x-1 transition-transform">      Play Now {"\u2192"}</span>
               </button>
             </div>
@@ -3280,6 +3280,7 @@ function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [cart, setCart] = useState<CartItem[]>(loadCart);
   const [searchOpen, setSearchOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -3374,16 +3375,62 @@ function App() {
       }
     } catch { /* ignore parse errors */ }
 
-    // Always fetch fresh data in background
-    fetch(`${API_URL}/api/ecommerce/products?limit=1000`)
-      .then((r) => r.json())
-      .then((data: ProductsResponse) => {
-        setProducts(data.products);
-        setCategories(data.categories);
-        setLoading(false);
-        try { localStorage.setItem("thd-products-cache", JSON.stringify({ products: data.products, categories: data.categories, timestamp: Date.now() })); } catch { /* quota */ }
-      })
-      .catch((err) => { console.error("Failed to load products:", err); setLoading(false); });
+    // Always fetch fresh data in background with 5s timeout + 2 retries
+    const fetchWithTimeout = (url: string, timeoutMs: number): Promise<Response> => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
+    };
+    const fetchProducts = async (retries = 2): Promise<void> => {
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          const r = await fetchWithTimeout(`${API_URL}/api/ecommerce/products?limit=1000`, 5000);
+          const data: ProductsResponse = await r.json();
+          setProducts(data.products);
+          setCategories(data.categories);
+          setLoading(false);
+          setFetchError(false);
+          try { localStorage.setItem("thd-products-cache", JSON.stringify({ products: data.products, categories: data.categories, timestamp: Date.now() })); } catch { /* quota */ }
+          return;
+        } catch (err) {
+          console.error(`Failed to load products (attempt ${attempt + 1}/${retries + 1}):`, err);
+          if (attempt < retries) await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+      setLoading(false);
+      setFetchError(true);
+    };
+    fetchProducts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const retryFetch = useCallback(() => {
+    setLoading(true);
+    setFetchError(false);
+    const fetchWithTimeout2 = (url: string, timeoutMs: number): Promise<Response> => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
+    };
+    (async () => {
+      for (let attempt = 0; attempt <= 2; attempt++) {
+        try {
+          const r = await fetchWithTimeout2(`${API_URL}/api/ecommerce/products?limit=1000`, 5000);
+          const data: ProductsResponse = await r.json();
+          setProducts(data.products);
+          setCategories(data.categories);
+          setLoading(false);
+          setFetchError(false);
+          try { localStorage.setItem("thd-products-cache", JSON.stringify({ products: data.products, categories: data.categories, timestamp: Date.now() })); } catch { /* quota */ }
+          return;
+        } catch (err) {
+          console.error(`Retry failed (attempt ${attempt + 1}/3):`, err);
+          if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+      setLoading(false);
+      setFetchError(true);
+    })();
   }, []);
 
   // Keepalive: ping backend every 5 minutes to prevent Fly.io cold starts
@@ -3425,7 +3472,8 @@ function App() {
   if (route.startsWith("#/shop")) {
     const catSlug = route.replace("#/shop/", "").replace("#/shop", "");
     return shell(loading
-      ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20]/50 text-lg italic">Remedy Your Way</p></div>
+      ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
+      : fetchError ? <div className="flex flex-col items-center justify-center py-24"><AlertCircle className="h-12 w-12 text-[#D9A32C] mb-4" /><p className="text-[#231F20] text-lg font-medium mb-2">Unable to load products</p><p className="text-[#231F20] text-sm mb-4">Please check your connection and try again.</p><button onClick={retryFetch} className="px-6 py-3 bg-[#B3D335] hover:bg-[#126A44] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors">Try Again</button></div>
       : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} onAddToCart={(p) => addToCart(p, 1)} />);
   }
   if (route === "#/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />);
@@ -3448,7 +3496,14 @@ function App() {
       <HeroSection />
       <TrustStrip />
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20]/50 text-lg italic">Remedy Your Way</p></div>
+        <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
+      ) : fetchError ? (
+        <div className="flex flex-col items-center justify-center py-24">
+          <AlertCircle className="h-12 w-12 text-[#D9A32C] mb-4" />
+          <p className="text-[#231F20] text-lg font-medium mb-2">Unable to load products</p>
+          <p className="text-[#231F20] text-sm mb-4">Please check your connection and try again.</p>
+          <button onClick={retryFetch} className="px-6 py-3 bg-[#B3D335] hover:bg-[#126A44] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors">Try Again</button>
+        </div>
       ) : (
         <>
           <ShopByCategory categories={categories} productsByCategory={productsByCategory} />
