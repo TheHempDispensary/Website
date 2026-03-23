@@ -119,7 +119,8 @@ function isLeafLife(product: Product): boolean {
 }
 
 function titleCase(str: string): string {
-  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+  const KEEP_UPPER = /\b(CBC|CBD|CBG|CBN|CBT|THC)\b/gi;
+  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).replace(KEEP_UPPER, m => m.toUpperCase());
 }
 
 const PRODUCT_FALLBACK = "/images/product-placeholder.webp";
