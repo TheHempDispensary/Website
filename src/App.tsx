@@ -3375,7 +3375,7 @@ function App() {
       }
     } catch { /* ignore parse errors */ }
 
-    // Always fetch fresh data in background with 5s timeout + 2 retries
+    // Always fetch fresh data in background with 15s timeout + 2 retries
     const fetchWithTimeout = (url: string, timeoutMs: number): Promise<Response> => {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -3384,7 +3384,7 @@ function App() {
     const fetchProducts = async (retries = 2): Promise<void> => {
       for (let attempt = 0; attempt <= retries; attempt++) {
         try {
-          const r = await fetchWithTimeout(`${API_URL}/api/ecommerce/products?limit=1000`, 5000);
+          const r = await fetchWithTimeout(`${API_URL}/api/ecommerce/products?limit=1000`, 15000);
           const data: ProductsResponse = await r.json();
           setProducts(data.products);
           setCategories(data.categories);
@@ -3415,7 +3415,7 @@ function App() {
     (async () => {
       for (let attempt = 0; attempt <= 2; attempt++) {
         try {
-          const r = await fetchWithTimeout2(`${API_URL}/api/ecommerce/products?limit=1000`, 5000);
+          const r = await fetchWithTimeout2(`${API_URL}/api/ecommerce/products?limit=1000`, 15000);
           const data: ProductsResponse = await r.json();
           setProducts(data.products);
           setCategories(data.categories);
