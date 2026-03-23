@@ -45,6 +45,7 @@ interface Product {
   available: boolean;
   image_url: string | null;
   is_age_restricted: boolean;
+  shipping_only?: boolean;
 }
 
 interface ProductsResponse {
@@ -114,6 +115,8 @@ function getProductStrength(product: Product): { label: string; color: string } 
 
 const LEAFLIFE_KEYWORDS = ["everyday", "premium", "essential", "smalls", "snowcaps"];
 function isLeafLife(product: Product): boolean {
+  // Use API shipping_only flag (checks SKU prefix LF-) if available, fall back to keyword matching
+  if (product.shipping_only !== undefined) return product.shipping_only;
   const name = (product.online_name || product.name).toLowerCase();
   return LEAFLIFE_KEYWORDS.some(kw => name.includes(kw));
 }
