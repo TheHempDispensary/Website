@@ -1086,7 +1086,7 @@ function ShippingPage() {
       <h1 className="text-4xl font-bold text-[#231F20] mb-6">Shipping & Pickup</h1>
       <div className="prose prose-lg text-[#231F20]">
         <p className="mb-4">Most orders are ready for pickup in about 5 minutes! We offer fast, convenient pickup at both of our Spring Hill locations.</p>
-        <p className="mb-4">Free shipping on orders over $50. Standard shipping typically takes 3-5 business days.</p>
+        <p className="mb-4">Standard shipping is a flat rate of $7.99. Most orders ship within 1-2 business days and arrive in 3-5 business days.</p>
         <p>For local customers, we recommend our pickup option for the fastest service.</p>
       </div>
     </div>
@@ -1468,7 +1468,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const discount = promoApplied ? Math.round(subtotal * 0.15) : 0;
   const discountedSubtotal = subtotal - discount;
-  const shippingCost = discountedSubtotal >= 5000 ? 0 : 799;
+  const shippingCost = 799;
   const tax = Math.round(discountedSubtotal * 0.07);
   const total = discountedSubtotal + shippingCost + tax;
 
@@ -1966,11 +1966,10 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
             <div className="border-t border-[#231F20]/20 pt-4 space-y-2">
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Subtotal</span><span className="text-[#231F20]">{formatPrice(subtotal)}</span></div>
               {promoApplied && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Discount (15%)</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
-              <div className="flex justify-between text-sm"><span className="text-[#231F20]">Shipping</span><span className="text-[#FFFFFF]">{shippingCost === 0 ? <span className="text-[#126A44]">Free</span> : formatPrice(shippingCost)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-[#231F20]">Shipping</span><span className="text-[#231F20]">{formatPrice(shippingCost)}</span></div>
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Tax (7%)</span><span className="text-[#231F20]">{formatPrice(tax)}</span></div>
               <div className="border-t border-[#231F20]/20 pt-3 flex justify-between"><span className="text-[#231F20] font-semibold">Total</span><span className="text-xl font-bold text-[#231F20]">{formatPrice(total)}</span></div>
             </div>
-            {shippingCost > 0 && <p className="text-center text-xs text-[#126A44] mt-3">Add {formatPrice(5000 - discountedSubtotal)} more for free shipping!</p>}
           </div>
         </div>
       </div>
@@ -2798,7 +2797,7 @@ function ScratchCardGame() {
     { text: "10% OFF", emoji: "\u{1F389}", desc: "Use code HEMP10 at checkout" },
     { text: "15% OFF", emoji: "\u{1F38A}", desc: "Use code HEMP15 at checkout" },
     { text: "15% OFF", emoji: "\u{1F525}", desc: "Use code FIRST15 at checkout" },
-    { text: "FREE SHIPPING", emoji: "\u{1F69A}", desc: "Use code FREESHIP at checkout" },
+    { text: "20% OFF", emoji: "\u{1F69A}", desc: "Use code HEMP20 at checkout" },
     { text: "500 POINTS", emoji: "\u2B50", desc: "Added to your Hemp Rewards" },
     { text: "BUY 1 GET 1", emoji: "\u{1F381}", desc: "On select products" },
     { text: "$5 OFF", emoji: "\u{1F4B5}", desc: "Use code SAVE5 at checkout" },
@@ -3298,7 +3297,7 @@ function GamesPage() {
           className="bg-[#FFFFFF] border-2 border-[#B3D335]/50 hover:border-[#B3D335] rounded-2xl p-8 text-left transition-all hover:scale-105 group">
           <div className="text-5xl mb-4">{"\u{1F3B0}"}</div>
           <h2 className="text-2xl font-bold text-[#FFFFFF] mb-2">Scratch & Win</h2>
-          <p className="text-[#231F20]">Scratch the card to reveal exclusive prizes — discounts, free shipping, bonus points, and more!</p>
+          <p className="text-[#231F20]">Scratch the card to reveal exclusive prizes — discounts, bonus points, and more!</p>
           <span className="inline-block mt-4 text-[#126A44] font-semibold group-hover:translate-x-1 transition-transform">        Play Now {"\u2192"}</span>
                 </button>
                 {/* Roll a Joint */}
