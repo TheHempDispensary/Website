@@ -154,7 +154,7 @@ function StickyTopBar() {
     <div className="bg-[#231F20] text-[#FFFFFF] text-center py-2 px-4 text-sm font-medium">
       <span className="hidden sm:inline">{"\u{1F680}"} Order Online {"\u2013"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | Open Late | </span>
       <span className="sm:hidden">{"\u{1F680}"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | </span>
-      <span className="text-[#FFCB08] font-bold">FIRST20 = 20% Off</span>
+      <span className="text-[#FFCB08] font-bold">FIRST15 = 15% Off</span>
     </div>
   );
 }
@@ -232,7 +232,7 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear }: { o
         </div>
         {/* FIRST20 promo banner */}
         <div className="bg-[#FFCB08]/10 border-b border-[#FFCB08]/20 px-4 py-2 text-center">
-          <p className="text-sm font-medium text-[#231F20]">{"\u{1F525}"} Use code <span className="font-bold text-[#126A44]">FIRST20</span> for 20% off your first order!</p>
+          <p className="text-sm font-medium text-[#231F20]">{"\u{1F525}"} Use code <span className="font-bold text-[#126A44]">FIRST15</span> for 15% off your first order!</p>
         </div>
         <div className="flex-1 overflow-y-auto p-4">
           {cart.length === 0 ? (
@@ -293,7 +293,7 @@ function HeroSection() {
           <button onClick={() => navigate("/shop")} className="px-8 py-3.5 sm:py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors shadow-lg">Shop Now</button>
           <button onClick={() => { const el = document.getElementById('locations-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else navigate('/contact'); }} className="px-8 py-3.5 sm:py-4 border-2 border-[#FFFFFF] hover:bg-[#FFFFFF] text-[#FFFFFF] hover:text-[#231F20] rounded-full font-bold text-lg transition-colors">Find Nearest Location</button>
         </div>
-        <p className="mt-4 text-[#FFCB08] font-medium text-sm">{"\u{1F525}"} First-time customers: 20% OFF with code FIRST20</p>
+        <p className="mt-4 text-[#FFCB08] font-medium text-sm">{"\u{1F525}"} First-time customers: 15% OFF with code FIRST15</p>
       </div>
       {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#231F20]/50 pointer-events-none" />
@@ -395,7 +395,7 @@ function PromoBanner() {
     <section className="bg-[#231F20] py-8 sm:py-10">
       <div className="max-w-3xl mx-auto px-4 text-center">
         <p className="text-[#FFCB08] font-bold text-lg sm:text-2xl mb-2">{"\u{1F525}"} First-Time Customer?</p>
-        <p className="text-[#FFFFFF] text-sm sm:text-base mb-4">Get <span className="text-[#B3D335] font-bold">20% OFF</span> your entire order with code <span className="bg-[#FFFFFF]/10 px-2 py-0.5 rounded font-mono font-bold">FIRST20</span></p>
+        <p className="text-[#FFFFFF] text-sm sm:text-base mb-4">Get <span className="text-[#B3D335] font-bold">15% OFF</span> your entire order with code <span className="bg-[#FFFFFF]/10 px-2 py-0.5 rounded font-mono font-bold">FIRST15</span></p>
         <button onClick={() => navigate('/shop')} className="px-8 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold transition-colors">Shop Now &amp; Save</button>
       </div>
     </section>
@@ -668,7 +668,7 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
 
       {/* FIRST20 promo */}
       <div className="bg-[#FFCB08]/10 border border-[#FFCB08]/30 rounded-xl px-4 py-3 mb-6 text-center">
-        <p className="text-sm font-medium text-[#231F20]">{"\u{1F525}"} First-time customers: <span className="font-bold">20% OFF</span> with code <span className="font-bold text-[#126A44]">FIRST20</span></p>
+        <p className="text-sm font-medium text-[#231F20]">{"\u{1F525}"} First-time customers: <span className="font-bold">15% OFF</span> with code <span className="font-bold text-[#126A44]">FIRST15</span></p>
       </div>
 
       <div className="bg-[#FFFFFF] rounded-2xl sm:rounded-3xl overflow-hidden border border-[#231F20]/10 shadow-sm">
@@ -1327,7 +1327,7 @@ function ChatbotBud({ products }: { products: Product[] }) {
     } else if (msg.includes("safe") || msg.includes("test") || msg.includes("lab") || msg.includes("quality")) {
       response = { from: "bot", text: "\u{1F6E1}\uFE0F All our products are lab-tested and sourced carefully. Quality and safety are our top priority!" };
     } else if (msg.includes("first") || msg.includes("new") || msg.includes("discount") || msg.includes("code") || msg.includes("coupon")) {
-      response = { from: "bot", text: "\u{1F389} Use code FIRST20 for 20% off your first order! Works on everything in the store." };
+      response = { from: "bot", text: "\u{1F389} Use code FIRST15 for 15% off your first order! Works on everything in the store." };
     } else if (msg.includes("recommend") || msg.includes("suggest") || msg.includes("what should")) {
       response = {
         from: "bot",
@@ -1449,6 +1449,9 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
   const [addressSuggestions, setAddressSuggestions] = useState<Array<{ display: string; address: string; city: string; state: string; zip: string }>>([]); 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const addressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoApplied, setPromoApplied] = useState(false);
+  const [promoError, setPromoError] = useState("");
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", phone: "",
     address: "", apartment: "", city: "", state: "FL", zip: "",
@@ -1462,9 +1465,22 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
   const sdkLoadedRef = useRef(false);
 
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const shippingCost = subtotal >= 5000 ? 0 : 799;
-  const tax = Math.round(subtotal * 0.07);
-  const total = subtotal + shippingCost + tax;
+  const discount = promoApplied ? Math.round(subtotal * 0.15) : 0;
+  const discountedSubtotal = subtotal - discount;
+  const shippingCost = discountedSubtotal >= 5000 ? 0 : 799;
+  const tax = Math.round(discountedSubtotal * 0.07);
+  const total = discountedSubtotal + shippingCost + tax;
+
+  const applyPromo = () => {
+    const code = promoCode.trim().toUpperCase();
+    if (code === "FIRST15") {
+      setPromoApplied(true);
+      setPromoError("");
+    } else {
+      setPromoApplied(false);
+      setPromoError("Invalid promo code");
+    }
+  };
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const setField = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
@@ -1661,7 +1677,8 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
         customer: { first_name: form.firstName, last_name: form.lastName, email: form.email, phone: form.phone },
         shipping_address: { address: form.address, apartment: form.apartment, city: form.city, state: form.state, zip: form.zip },
         items: cart.map((item) => ({ product_id: item.product.id, name: item.product.name, sku: item.product.sku, price: item.product.price, quantity: item.quantity })),
-        subtotal, shipping_cost: shippingCost, tax, total, notes: form.notes,
+        subtotal, discount, shipping_cost: shippingCost, tax, total, notes: form.notes,
+        promo_code: promoApplied ? "FIRST15" : null,
         payment_token: tokenResult.token,
         loyalty_number: form.loyaltyNumber,
       };
@@ -1923,13 +1940,36 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                 </div>
               ))}
             </div>
+            {/* Promo Code */}
+            <div className="border-t border-[#231F20]/20 pt-4 mb-4">
+              <label className="block text-sm font-medium text-[#231F20] mb-1.5">Promo Code</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={promoCode}
+                  onChange={(e) => { setPromoCode(e.target.value); if (promoError) setPromoError(""); }}
+                  onKeyDown={(e) => { if (e.key === "Enter") applyPromo(); }}
+                  placeholder="Enter code"
+                  className="flex-1 bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-3 py-2 text-sm text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335] focus:ring-1 focus:ring-[#B3D335] transition-colors"
+                  disabled={promoApplied}
+                />
+                {promoApplied ? (
+                  <button onClick={() => { setPromoApplied(false); setPromoCode(""); }} className="px-4 py-2 text-sm font-medium text-[#231F20] border border-[#231F20]/20 rounded-lg hover:bg-[#231F20]/5 transition-colors">Remove</button>
+                ) : (
+                  <button onClick={applyPromo} className="px-4 py-2 text-sm font-medium bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg transition-colors">Apply</button>
+                )}
+              </div>
+              {promoError && <p className="text-red-500 text-xs mt-1">{promoError}</p>}
+              {promoApplied && <p className="text-[#126A44] text-xs mt-1 font-medium">FIRST15 applied — 15% off!</p>}
+            </div>
             <div className="border-t border-[#231F20]/20 pt-4 space-y-2">
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Subtotal</span><span className="text-[#231F20]">{formatPrice(subtotal)}</span></div>
+              {promoApplied && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Discount (15%)</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Shipping</span><span className="text-[#FFFFFF]">{shippingCost === 0 ? <span className="text-[#126A44]">Free</span> : formatPrice(shippingCost)}</span></div>
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Tax (7%)</span><span className="text-[#231F20]">{formatPrice(tax)}</span></div>
               <div className="border-t border-[#231F20]/20 pt-3 flex justify-between"><span className="text-[#231F20] font-semibold">Total</span><span className="text-xl font-bold text-[#231F20]">{formatPrice(total)}</span></div>
             </div>
-            {shippingCost > 0 && <p className="text-center text-xs text-[#126A44] mt-3">Add {formatPrice(5000 - subtotal)} more for free shipping!</p>}
+            {shippingCost > 0 && <p className="text-center text-xs text-[#126A44] mt-3">Add {formatPrice(5000 - discountedSubtotal)} more for free shipping!</p>}
           </div>
         </div>
       </div>
@@ -2756,7 +2796,7 @@ function ScratchCardGame() {
   const prizes = [
     { text: "10% OFF", emoji: "\u{1F389}", desc: "Use code HEMP10 at checkout" },
     { text: "15% OFF", emoji: "\u{1F38A}", desc: "Use code HEMP15 at checkout" },
-    { text: "20% OFF", emoji: "\u{1F525}", desc: "Use code HEMP20 at checkout" },
+    { text: "15% OFF", emoji: "\u{1F525}", desc: "Use code FIRST15 at checkout" },
     { text: "FREE SHIPPING", emoji: "\u{1F69A}", desc: "Use code FREESHIP at checkout" },
     { text: "500 POINTS", emoji: "\u2B50", desc: "Added to your Hemp Rewards" },
     { text: "BUY 1 GET 1", emoji: "\u{1F381}", desc: "On select products" },
@@ -2833,7 +2873,7 @@ function ScratchCardGame() {
   const handleTouchMove = (e: React.TouchEvent) => { e.preventDefault(); const t = e.touches[0]; scratch(t.clientX, t.clientY); };
 
   const handleShareWin = () => {
-    const shareText = `I just won ${prize} at The Hemp Dispensary! Use code FIRST20 for 20% off your first order \u2192 https://www.thehempdispensary.com`;
+    const shareText = `I just won ${prize} at The Hemp Dispensary! Use code FIRST15 for 15% off your first order \u2192 https://www.thehempdispensary.com`;
     if (navigator.share) {
       navigator.share({ title: "I won at The Hemp Dispensary!", text: shareText, url: "https://www.thehempdispensary.com" }).catch(() => {});
     } else {
