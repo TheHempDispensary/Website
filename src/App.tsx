@@ -9,7 +9,7 @@ declare global {
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-const CLOVER_PAKMS_KEY = "2a720977884442c0c638b21b7746bfc1";
+const CLOVER_PAKMS_KEY = "ffacf4a65f1681720f6882f75d2824b9";
 const CLOVER_MERCHANT_ID = "0AJ4FF0G1YFM1";
 
 interface CartItem {
