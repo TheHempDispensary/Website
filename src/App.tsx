@@ -55,17 +55,19 @@ interface ProductsResponse {
 }
 
 function useRoute() {
-  const [hash, setHash] = useState(window.location.hash);
+  const [path, setPath] = useState(window.location.pathname);
   useEffect(() => {
-    const handler = () => setHash(window.location.hash);
-    window.addEventListener("hashchange", handler);
-    return () => window.removeEventListener("hashchange", handler);
+    const handler = () => setPath(window.location.pathname);
+    window.addEventListener("popstate", handler);
+    return () => window.removeEventListener("popstate", handler);
   }, []);
-  return hash;
+  return path;
 }
 
 function navigate(path: string) {
-  window.location.hash = path;
+  const fullPath = path.startsWith("/") ? path : "/" + path;
+  window.history.pushState(null, "", fullPath);
+  window.dispatchEvent(new PopStateEvent("popstate"));
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -178,18 +180,18 @@ function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSear
             </button>
             <button onClick={onSearch} className="p-2 text-[#231F20] hover:text-[#126A44] transition-colors" aria-label="Search products"><Search className="h-5 w-5" /></button>
           </div>
-          <a href="#" onClick={(e) => { e.preventDefault(); navigate(""); }} className="flex items-center flex-shrink-0">
+          <a href="/" onClick={(e) => { e.preventDefault(); navigate("/"); }} className="flex items-center flex-shrink-0">
             <img src="/logo.webp" alt="The Hemp Dispensary" className="h-10 sm:h-12 w-auto object-contain" width="120" height="48" />
           </a>
           <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
-            <a href="#/loyalty" className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#126A44] transition-colors flex items-center gap-1" title="Hemp Rewards">
+            <a href="/loyalty" onClick={(e) => { e.preventDefault(); navigate("/loyalty"); }} className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#126A44] transition-colors flex items-center gap-1" title="Hemp Rewards">
               <Gift className="h-5 w-5" />
               <span className="hidden md:inline text-xs font-medium">Rewards</span>
             </a>
-            <a href="#/account" className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#126A44] transition-colors" title="Account" aria-label="My account">
+            <a href="/account" onClick={(e) => { e.preventDefault(); navigate("/account"); }} className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#126A44] transition-colors" title="Account" aria-label="My account">
               <User className="h-5 w-5" />
             </a>
-            <a href="#/games" className="hidden sm:flex p-2 text-[#231F20] hover:text-[#126A44] transition-colors items-center gap-1" title="Games">
+            <a href="/games" onClick={(e) => { e.preventDefault(); navigate("/games"); }} className="hidden sm:flex p-2 text-[#231F20] hover:text-[#126A44] transition-colors items-center gap-1" title="Games">
               <Gamepad2 className="h-5 w-5" />
               <span className="hidden md:inline text-xs font-medium">Games</span>
             </a>
@@ -213,7 +215,7 @@ function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSear
             {categories.map((cat) => (
               <button key={cat} onClick={() => { navigate(`/shop/${cat.toLowerCase()}`); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors">{cat}</button>
             ))}
-            <a href="#/games" onClick={() => setMobileMenuOpen(false)} className="sm:hidden text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors flex items-center gap-2"><Gamepad2 className="h-4 w-4" /> Games</a>
+            <a href="/games" onClick={(e) => { e.preventDefault(); navigate("/games"); setMobileMenuOpen(false); }} className="sm:hidden text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors flex items-center gap-2"><Gamepad2 className="h-4 w-4" /> Games</a>
           </div>
         </div>
       )}
@@ -632,7 +634,7 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
     <div className="text-center py-32">
       <Package className="mx-auto h-16 w-16 text-[#231F20] mb-4" />
       <p className="text-[#231F20] text-lg">Product not found</p>
-      <button onClick={() => navigate("")} className="mt-4 text-[#126A44] hover:underline">Back to products</button>
+      <button onClick={() => navigate("/")} className="mt-4 text-[#126A44] hover:underline">Back to products</button>
     </div>
   );
 
@@ -1126,27 +1128,27 @@ function SiteFooter() {
           <div>
             <h3 className="font-semibold text-[#3D8C32] mb-3">Shop</h3>
             <div className="space-y-2">
-              <a href="#/shop/flower" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Flower</a>
-              <a href="#/shop/edibles" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Edibles</a>
-              <a href="#/shop/concentrates" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Concentrates</a>
-              <a href="#/shop/vapor" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Vapor</a>
+              <a href="/shop/flower" onClick={(e) => { e.preventDefault(); navigate("/shop/flower"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Flower</a>
+              <a href="/shop/edibles" onClick={(e) => { e.preventDefault(); navigate("/shop/edibles"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Edibles</a>
+              <a href="/shop/concentrates" onClick={(e) => { e.preventDefault(); navigate("/shop/concentrates"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Concentrates</a>
+              <a href="/shop/vapor" onClick={(e) => { e.preventDefault(); navigate("/shop/vapor"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Vapor</a>
             </div>
           </div>
           <div>
             <h3 className="font-semibold text-[#3D8C32] mb-3">Company</h3>
             <div className="space-y-2">
-              <a href="#/about" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">About Us</a>
-              <a href="#/contact" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Contact</a>
-              <a href="#/loyalty" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Rewards</a>
-              <a href="#/games" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Games</a>
+              <a href="/about" onClick={(e) => { e.preventDefault(); navigate("/about"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">About Us</a>
+              <a href="/contact" onClick={(e) => { e.preventDefault(); navigate("/contact"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Contact</a>
+              <a href="/loyalty" onClick={(e) => { e.preventDefault(); navigate("/loyalty"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Rewards</a>
+              <a href="/games" onClick={(e) => { e.preventDefault(); navigate("/games"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Games</a>
             </div>
           </div>
           <div>
             <h3 className="font-semibold text-[#3D8C32] mb-3">Legal</h3>
             <div className="space-y-2">
-              <a href="#/terms" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Terms of Service</a>
-              <a href="#/privacy" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Privacy Policy</a>
-              <a href="#/shipping" className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Shipping & Pickup</a>
+              <a href="/terms" onClick={(e) => { e.preventDefault(); navigate("/terms"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Terms of Service</a>
+              <a href="/privacy" onClick={(e) => { e.preventDefault(); navigate("/privacy"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Privacy Policy</a>
+              <a href="/shipping" onClick={(e) => { e.preventDefault(); navigate("/shipping"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Shipping & Pickup</a>
             </div>
           </div>
         </div>
@@ -1642,7 +1644,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
           </div>
         </div>
         <div className="flex gap-3 justify-center">
-          <button onClick={() => navigate("")} className="bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] px-8 py-3 rounded-full font-medium transition-colors">Continue Shopping</button>
+          <button onClick={() => navigate("/")} className="bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] px-8 py-3 rounded-full font-medium transition-colors">Continue Shopping</button>
         </div>
       </div>
     );
@@ -2897,7 +2899,7 @@ function ScratchCardGame() {
         <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/15 p-8 text-center max-w-md mx-auto">
           <Gift className="h-12 w-12 text-[#126A44] mx-auto mb-4" />
           <h2 className="text-xl font-bold text-[#231F20] mb-2">Rewards Members Only</h2>
-          <p className="text-[#231F20] text-sm mb-6">Enter your rewards phone number to unlock your daily scratch card. Not a member? <a href="#/loyalty" className="text-[#126A44] underline">Sign up free</a></p>
+          <p className="text-[#231F20] text-sm mb-6">Enter your rewards phone number to unlock your daily scratch card. Not a member? <a href="/loyalty" onClick={(e) => { e.preventDefault(); navigate("/loyalty"); }} className="text-[#126A44] underline">Sign up free</a></p>
           <input type="tel" placeholder="(555) 555-5555" value={scratchPhone} onChange={(e) => setScratchPhone(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleScratchAuth()}
             className="w-full px-4 py-3 rounded-xl border border-[#231F20]/15 text-[#231F20] text-center text-lg mb-4 focus:outline-none focus:border-[#B3D335]" />
@@ -3381,20 +3383,20 @@ function App() {
   // Dynamic meta descriptions per route
   useEffect(() => {
     const descriptions: Record<string, string> = {
-      "": "The Hemp Dispensary — Spring Hill FL's trusted hemp store. Shop premium flower, edibles, concentrates, vapes, topicals, and tinctures online. Ready in 5 minutes or shipped to your door.",
-      "#/shop/flower": "Shop premium hemp flower at The Hemp Dispensary — Everyday, Premium, Essential, Smalls, and Snowcaps tiers. Lab-tested, locally trusted, ready in 5 minutes.",
-      "#/shop/edibles": "Hemp edibles including Delta-9 gummies, CBD chocolates, and CBN sleep chews. Lab-tested, legally compliant, available for pickup or shipping.",
-      "#/shop/concentrates": "Premium hemp concentrates including live rosin, diamonds, shatter, and badder. Solventless and hydrocarbon options, lab-tested for purity.",
-      "#/shop/vapor": "CBD and THC vape cartridges, disposables, and 510-thread batteries. Lab-tested hemp vapor products ready for pickup in Spring Hill FL.",
-      "#/shop/topicals": "Hemp topicals including CBD muscle creams, balms, roll-ons, and transdermal patches. Targeted relief, lab-tested, available in-store and online.",
-      "#/shop/tinctures": "CBD, CBG, CBN and full spectrum hemp tinctures. Sublingual oils for sleep, pain, focus, and daily wellness. Lab-tested, fast pickup or shipping.",
-      "#/shop/accessories": "Hemp accessories including glass pipes, rolling papers, grinders, storage, and butane. Everything you need in one stop.",
-      "#/loyalty": "Hemp Rewards — earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary.",
-      "#/games": "Play games and win prizes at The Hemp Dispensary. Scratch cards, Roll-a-Joint, and more — all free to play for rewards members.",
-      "#/about": "Our Story — how two Spring Hill locals built The Hemp Dispensary from a road trip idea to 15 locations, lost 13 overnight, and kept going.",
+      "/": "The Hemp Dispensary — Spring Hill FL's trusted hemp store. Shop premium flower, edibles, concentrates, vapes, topicals, and tinctures online. Ready in 5 minutes or shipped to your door.",
+      "/shop/flower": "Shop premium hemp flower at The Hemp Dispensary — Everyday, Premium, Essential, Smalls, and Snowcaps tiers. Lab-tested, locally trusted, ready in 5 minutes.",
+      "/shop/edibles": "Hemp edibles including Delta-9 gummies, CBD chocolates, and CBN sleep chews. Lab-tested, legally compliant, available for pickup or shipping.",
+      "/shop/concentrates": "Premium hemp concentrates including live rosin, diamonds, shatter, and badder. Solventless and hydrocarbon options, lab-tested for purity.",
+      "/shop/vapor": "CBD and THC vape cartridges, disposables, and 510-thread batteries. Lab-tested hemp vapor products ready for pickup in Spring Hill FL.",
+      "/shop/topicals": "Hemp topicals including CBD muscle creams, balms, roll-ons, and transdermal patches. Targeted relief, lab-tested, available in-store and online.",
+      "/shop/tinctures": "CBD, CBG, CBN and full spectrum hemp tinctures. Sublingual oils for sleep, pain, focus, and daily wellness. Lab-tested, fast pickup or shipping.",
+      "/shop/accessories": "Hemp accessories including glass pipes, rolling papers, grinders, storage, and butane. Everything you need in one stop.",
+      "/loyalty": "Hemp Rewards — earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary.",
+      "/games": "Play games and win prizes at The Hemp Dispensary. Scratch cards, Roll-a-Joint, and more — all free to play for rewards members.",
+      "/about": "Our Story — how two Spring Hill locals built The Hemp Dispensary from a road trip idea to 15 locations, lost 13 overnight, and kept going.",
     };
-    const key = route.startsWith("#/shop/") ? route : (route === "" || route === "#" || route === "#/" ? "" : route);
-    const desc = descriptions[key] || descriptions[""];
+    const key = route.startsWith("/shop/") ? route : (route === "/" || route === "" ? "/" : route);
+    const desc = descriptions[key] || descriptions["/"];
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     if (!meta) {
       meta = document.createElement("meta");
@@ -3516,23 +3518,23 @@ function App() {
     </div>
   );
 
-  if (route.startsWith("#/product/")) return shell(<ProductDetail productId={route.replace("#/product/", "")} products={products} onAddToCart={addToCart} />);
-  if (route.startsWith("#/shop")) {
-    const catSlug = route.replace("#/shop/", "").replace("#/shop", "");
+  if (route.startsWith("/product/")) return shell(<ProductDetail productId={route.replace("/product/", "")} products={products} onAddToCart={addToCart} />);
+  if (route.startsWith("/shop")) {
+    const catSlug = route.replace("/shop/", "").replace("/shop", "");
     return shell(loading
       ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
       : fetchError ? <div className="flex flex-col items-center justify-center py-24"><AlertCircle className="h-12 w-12 text-[#D9A32C] mb-4" /><p className="text-[#231F20] text-lg font-medium mb-2">Unable to load products</p><p className="text-[#231F20] text-sm mb-4">Please check your connection and try again.</p><button onClick={retryFetch} className="px-6 py-3 bg-[#B3D335] hover:bg-[#126A44] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors">Try Again</button></div>
       : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} onAddToCart={(p) => addToCart(p, 1)} />);
   }
-  if (route === "#/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />);
-  if (route === "#/about") return shell(<AboutPage />);
-  if (route === "#/terms") return shell(<TermsPage />);
-  if (route === "#/privacy") return shell(<PrivacyPage />);
-  if (route === "#/shipping") return shell(<ShippingPage />);
-  if (route === "#/loyalty") return shell(<LoyaltyPage />);
-  if (route === "#/account") return shell(<AccountPage />);
-  if (route === "#/games") return shell(<GamesPage />);
-  if (route === "#/contact") return shell(<><ContactPage /><LocationSection /></>);
+  if (route === "/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />);
+  if (route === "/about") return shell(<AboutPage />);
+  if (route === "/terms") return shell(<TermsPage />);
+  if (route === "/privacy") return shell(<PrivacyPage />);
+  if (route === "/shipping") return shell(<ShippingPage />);
+  if (route === "/loyalty") return shell(<LoyaltyPage />);
+  if (route === "/account") return shell(<AccountPage />);
+  if (route === "/games") return shell(<GamesPage />);
+  if (route === "/contact") return shell(<><ContactPage /><LocationSection /></>);
 
   // Homepage
   return (
