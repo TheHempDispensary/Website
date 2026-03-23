@@ -1091,7 +1091,7 @@ function ShippingPage() {
       <h1 className="text-4xl font-bold text-[#231F20] mb-6">Shipping & Pickup</h1>
       <div className="prose prose-lg text-[#231F20]">
         <p className="mb-4">Most orders are ready for pickup in about 5 minutes! We offer fast, convenient pickup at both of our Spring Hill locations.</p>
-        <p className="mb-4">Standard shipping is a flat rate of $7.99. Most orders ship within 1-2 business days and arrive in 3-5 business days.</p>
+        <p className="mb-4">Shipping rates are calculated at checkout based on your address using USPS. Most orders ship within 1-2 business days.</p>
         <p>For local customers, we recommend our pickup option for the fastest service.</p>
       </div>
     </div>
@@ -1458,6 +1458,10 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoError, setPromoError] = useState("");
+  const [shippingRates, setShippingRates] = useState<Array<{ id: string; provider: string; service_level: string; amount: string; amount_cents: number; estimated_days: number | null; duration_terms: string }>>([]);
+  const [selectedRateId, setSelectedRateId] = useState("");
+  const [ratesLoading, setRatesLoading] = useState(false);
+  const [ratesError, setRatesError] = useState("");
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", phone: "",
     address: "", apartment: "", city: "", state: "FL", zip: "",
@@ -1473,9 +1477,32 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const discount = promoApplied ? Math.round(subtotal * 0.15) : 0;
   const discountedSubtotal = subtotal - discount;
-  const shippingCost = 799;
+  const selectedRate = shippingRates.find(r => r.id === selectedRateId);
+  const shippingCost = selectedRate ? selectedRate.amount_cents : 0;
   const tax = Math.round(discountedSubtotal * 0.07);
   const total = discountedSubtotal + shippingCost + tax;
+
+  const fetchShippingRates = useCallback(async (addr: { address: string; apartment: string; city: string; state: string; zip: string }) => {
+    if (!addr.address || !addr.city || !addr.state || !addr.zip) return;
+    setRatesLoading(true);
+    setRatesError("");
+    try {
+      const productNames = cart.map(item => item.product.online_name || item.product.name);
+      const resp = await fetch(`${API_URL}/api/shipping/rates`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ street1: addr.address, street2: addr.apartment || "", city: addr.city, state: addr.state, zip_code: addr.zip, product_names: productNames }),
+      });
+      if (!resp.ok) throw new Error("Failed to fetch rates");
+      const data = await resp.json();
+      setShippingRates(data.rates || []);
+      if (data.rates?.length > 0) setSelectedRateId(data.rates[0].id);
+    } catch {
+      setRatesError("Unable to load shipping rates. Please verify your address.");
+      setShippingRates([]);
+    }
+    setRatesLoading(false);
+  }, [cart]);
 
   const applyPromo = () => {
     const code = promoCode.trim().toUpperCase();
@@ -1651,7 +1678,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
   }
 
   const canProceedInfo = form.firstName && form.lastName && form.email && form.phone;
-  const canProceedShipping = form.address && form.city && form.state && form.zip;
+  const canProceedShipping = form.address && form.city && form.state && form.zip && selectedRateId;
 
   const handlePlaceOrder = async () => {
     if (!cloverRef.current) {
@@ -1684,6 +1711,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
         shipping_address: { address: form.address, apartment: form.apartment, city: form.city, state: form.state, zip: form.zip },
         items: cart.map((item) => ({ product_id: item.product.id, name: item.product.name, sku: item.product.sku, price: item.product.price, quantity: item.quantity })),
         subtotal, discount, shipping_cost: shippingCost, tax, total, notes: form.notes,
+        shipping_service: selectedRate?.service_level || "",
         promo_code: promoApplied ? "FIRST15" : null,
         payment_token: tokenResult.token,
         loyalty_number: form.loyaltyNumber,
@@ -1801,6 +1829,68 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                 </div>
                 <div><label className={labelClass}>Order Notes (optional)</label><textarea value={form.notes} onChange={(e) => setField("notes", e.target.value)} placeholder="Any special instructions..." rows={3} className={inputClass} /></div>
               </div>
+
+              {/* Shipping Rate Selection */}
+              {form.address && form.city && form.state && form.zip && (
+                <div className="mt-6 border-t border-[#231F20]/10 pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-[#231F20]">Shipping Method</h3>
+                    <button
+                      onClick={() => fetchShippingRates({ address: form.address, apartment: form.apartment, city: form.city, state: form.state, zip: form.zip })}
+                      disabled={ratesLoading}
+                      className="text-sm text-[#126A44] hover:text-[#58BA49] font-medium transition-colors"
+                    >
+                      {ratesLoading ? "Loading..." : shippingRates.length > 0 ? "Refresh Rates" : "Get Shipping Rates"}
+                    </button>
+                  </div>
+
+                  {ratesLoading && (
+                    <div className="flex items-center gap-3 py-6 justify-center">
+                      <div className="h-5 w-5 border-2 border-[#B3D335] border-t-transparent rounded-full animate-spin" />
+                      <span className="text-sm text-[#231F20]">Fetching USPS rates...</span>
+                    </div>
+                  )}
+
+                  {ratesError && <p className="text-red-500 text-sm mb-3">{ratesError}</p>}
+
+                  {!ratesLoading && shippingRates.length === 0 && !ratesError && (
+                    <p className="text-[#231F20]/60 text-sm">Click &quot;Get Shipping Rates&quot; to see available USPS shipping options for your address.</p>
+                  )}
+
+                  {!ratesLoading && shippingRates.length > 0 && (
+                    <div className="space-y-2">
+                      {shippingRates.map((rate) => (
+                        <button
+                          key={rate.id}
+                          onClick={() => setSelectedRateId(rate.id)}
+                          className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all text-left ${
+                            selectedRateId === rate.id
+                              ? "border-[#B3D335] bg-[#B3D335]/5"
+                              : "border-[#231F20]/10 hover:border-[#231F20]/30"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedRateId === rate.id ? "border-[#B3D335]" : "border-[#231F20]/30"}`}>
+                              {selectedRateId === rate.id && <div className="w-2.5 h-2.5 rounded-full bg-[#B3D335]" />}
+                            </div>
+                            <div>
+                              <p className="font-medium text-[#231F20] text-sm">{rate.service_level}</p>
+                              {rate.estimated_days && (
+                                <p className="text-xs text-[#231F20]/60">{rate.estimated_days} business day{rate.estimated_days !== 1 ? "s" : ""}</p>
+                              )}
+                              {rate.duration_terms && !rate.estimated_days && (
+                                <p className="text-xs text-[#231F20]/60">{rate.duration_terms}</p>
+                              )}
+                            </div>
+                          </div>
+                          <span className="font-semibold text-[#231F20]">${rate.amount}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="mt-8 flex justify-between">
                 <button onClick={() => setStep("info")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back</button>
                 <button onClick={() => setStep("payment")} disabled={!canProceedShipping} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedShipping ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>Continue to Payment</button>
@@ -1971,7 +2061,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
             <div className="border-t border-[#231F20]/20 pt-4 space-y-2">
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Subtotal</span><span className="text-[#231F20]">{formatPrice(subtotal)}</span></div>
               {promoApplied && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Discount (15%)</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
-              <div className="flex justify-between text-sm"><span className="text-[#231F20]">Shipping</span><span className="text-[#231F20]">{formatPrice(shippingCost)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-[#231F20]">Shipping{selectedRate ? ` (${selectedRate.service_level})` : ""}</span><span className="text-[#231F20]">{selectedRate ? formatPrice(shippingCost) : "Select a rate"}</span></div>
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Tax (7%)</span><span className="text-[#231F20]">{formatPrice(tax)}</span></div>
               <div className="border-t border-[#231F20]/20 pt-3 flex justify-between"><span className="text-[#231F20] font-semibold">Total</span><span className="text-xl font-bold text-[#231F20]">{formatPrice(total)}</span></div>
             </div>
