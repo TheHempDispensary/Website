@@ -2833,9 +2833,9 @@ function ScratchCardGame() {
   const handleTouchMove = (e: React.TouchEvent) => { e.preventDefault(); const t = e.touches[0]; scratch(t.clientX, t.clientY); };
 
   const handleShareWin = () => {
-    const shareText = `I just won ${prize} at The Hemp Dispensary! Use code FIRST20 for 20% off your first order \u2192 https://its420here.com`;
+    const shareText = `I just won ${prize} at The Hemp Dispensary! Use code FIRST20 for 20% off your first order \u2192 https://www.thehempdispensary.com`;
     if (navigator.share) {
-      navigator.share({ title: "I won at The Hemp Dispensary!", text: shareText, url: "https://its420here.com" }).catch(() => {});
+      navigator.share({ title: "I won at The Hemp Dispensary!", text: shareText, url: "https://www.thehempdispensary.com" }).catch(() => {});
     } else {
       navigator.clipboard.writeText(shareText).then(() => setShared(true)).catch(() => {});
     }

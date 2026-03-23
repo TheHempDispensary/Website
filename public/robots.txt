@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://thehempdispensary.com/sitemap.xml
+Sitemap: https://www.thehempdispensary.com/sitemap.xml

@@ -1,82 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://thehempdispensary.com/</loc>
+    <loc>https://www.thehempdispensary.com/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://thehempdispensary.com/#/shop</loc>
+    <loc>https://www.thehempdispensary.com/#/shop</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://thehempdispensary.com/#/shop/flower</loc>
+    <loc>https://www.thehempdispensary.com/#/shop/flower</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://thehempdispensary.com/#/shop/edibles</loc>
+    <loc>https://www.thehempdispensary.com/#/shop/edibles</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://thehempdispensary.com/#/shop/concentrates</loc>
+    <loc>https://www.thehempdispensary.com/#/shop/concentrates</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://thehempdispensary.com/#/shop/vapor</loc>
+    <loc>https://www.thehempdispensary.com/#/shop/vapor</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://thehempdispensary.com/#/shop/topicals</loc>
+    <loc>https://www.thehempdispensary.com/#/shop/topicals</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://thehempdispensary.com/#/shop/tinctures</loc>
+    <loc>https://www.thehempdispensary.com/#/shop/tinctures</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://thehempdispensary.com/#/shop/accessories</loc>
+    <loc>https://www.thehempdispensary.com/#/shop/accessories</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://thehempdispensary.com/#/loyalty</loc>
+    <loc>https://www.thehempdispensary.com/#/loyalty</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://thehempdispensary.com/#/games</loc>
+    <loc>https://www.thehempdispensary.com/#/games</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://thehempdispensary.com/#/about</loc>
+    <loc>https://www.thehempdispensary.com/#/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://thehempdispensary.com/#/contact</loc>
+    <loc>https://www.thehempdispensary.com/#/contact</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://thehempdispensary.com/#/terms</loc>
+    <loc>https://www.thehempdispensary.com/#/terms</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://thehempdispensary.com/#/privacy</loc>
+    <loc>https://www.thehempdispensary.com/#/privacy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://thehempdispensary.com/#/shipping</loc>
+    <loc>https://www.thehempdispensary.com/#/shipping</loc>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
