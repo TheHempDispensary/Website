@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, Package, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, MessageCircle, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, Instagram, Heart, DollarSign, Target } from "lucide-react";
+import { Search, ShoppingCart, Package, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, MessageCircle, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, Instagram, Heart, DollarSign, Target, RefreshCw } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -42,10 +42,50 @@ interface Product {
   description: string;
   categories: string[];
   stock: number;
+  stock_hq: number;
+  stock_west: number;
+  stock_east: number;
   available: boolean;
   image_url: string | null;
   is_age_restricted: boolean;
   shipping_only?: boolean;
+}
+
+type FulfillmentType = "pickup_west" | "pickup_east" | "ship";
+
+interface FulfillmentChoice {
+  fulfillment: FulfillmentType;
+  timestamp: number;
+}
+
+const FULFILLMENT_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+function loadFulfillment(): FulfillmentChoice | null {
+  try {
+    const stored = localStorage.getItem("thd-fulfillment");
+    if (stored) {
+      const parsed: FulfillmentChoice = JSON.parse(stored);
+      if (Date.now() - parsed.timestamp < FULFILLMENT_TTL) return parsed;
+      localStorage.removeItem("thd-fulfillment");
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
+function saveFulfillment(choice: FulfillmentChoice) {
+  localStorage.setItem("thd-fulfillment", JSON.stringify(choice));
+}
+
+function getFulfillmentLabel(f: FulfillmentType): string {
+  if (f === "pickup_west") return "Picking up at West";
+  if (f === "pickup_east") return "Picking up at East";
+  return "Shipping to me";
+}
+
+function getStockForFulfillment(product: Product, f: FulfillmentType): number {
+  if (f === "pickup_west") return product.stock_west ?? 0;
+  if (f === "pickup_east") return product.stock_east ?? 0;
+  return product.stock_hq ?? product.stock ?? 0;
 }
 
 interface ProductsResponse {
@@ -169,6 +209,218 @@ function getProductBenefit(product: Product): string {
 }
 
 
+/* ======================== BUD AGE GATE + FULFILLMENT POPUP ======================== */
+function BudAgeGatePopup({ onComplete }: { onComplete: (f: FulfillmentType) => void }) {
+  const [step, setStep] = useState<1 | 2>(1);
+  const [dobMonth, setDobMonth] = useState("");
+  const [dobDay, setDobDay] = useState("");
+  const [dobYear, setDobYear] = useState("");
+  const [ageError, setAgeError] = useState("");
+  const [selected, setSelected] = useState<FulfillmentType | "">("");
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(true), 4000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleAgeCheck = () => {
+    setAgeError("");
+    const month = parseInt(dobMonth);
+    const day = parseInt(dobDay);
+    const year = parseInt(dobYear);
+    if (!month || !day || !year) { setAgeError("Please select your full date of birth."); return; }
+    const dob = new Date(year, month - 1, day);
+    const now = new Date();
+    let age = now.getFullYear() - dob.getFullYear();
+    const monthDiff = now.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < dob.getDate())) age--;
+    if (age < 21) { setAgeError("Sorry, we can only provide our products to individuals over 21 years of age."); return; }
+    setStep(2);
+  };
+
+  const handleConfirm = () => {
+    if (!selected) return;
+    onComplete(selected);
+  };
+
+  if (!visible) return null;
+
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ backgroundColor: "rgba(35,31,32,0.85)" }}>
+      <div className="bg-[#FFFFFF] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" style={{ animation: "fadeInUp 0.4s ease-out" }}>
+        {/* Bud character header */}
+        <div className="bg-[#231F20] px-6 pt-6 pb-4 text-center relative">
+          <img src="/bud-puppet.png" alt="Bud" className="w-20 h-20 mx-auto mb-2 object-contain" />
+          <h2 className="text-[#B3D335] text-xl font-bold">{step === 1 ? "Hey! I'm Bud." : "How do you want your order?"}</h2>
+          <p className="text-[#FFFFFF] text-sm mt-1">{step === 1 ? "Before we get started, I need to verify your age." : "Choose your preferred fulfillment method."}</p>
+        </div>
+
+        <div className="px-6 py-5">
+          {step === 1 ? (
+            <>
+              <p className="text-[#231F20] text-sm font-medium mb-3">Date of Birth</p>
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                <select value={dobMonth} onChange={(e) => setDobMonth(e.target.value)} className="bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-2 py-2.5 text-sm text-[#231F20] focus:outline-none focus:border-[#B3D335]">
+                  <option value="">Month</option>
+                  {months.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                </select>
+                <select value={dobDay} onChange={(e) => setDobDay(e.target.value)} className="bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-2 py-2.5 text-sm text-[#231F20] focus:outline-none focus:border-[#B3D335]">
+                  <option value="">Day</option>
+                  {days.map((d) => <option key={d} value={d}>{d}</option>)}
+                </select>
+                <select value={dobYear} onChange={(e) => setDobYear(e.target.value)} className="bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-2 py-2.5 text-sm text-[#231F20] focus:outline-none focus:border-[#B3D335]">
+                  <option value="">Year</option>
+                  {years.map((y) => <option key={y} value={y}>{y}</option>)}
+                </select>
+              </div>
+              {ageError && <p className="text-red-600 text-sm mb-3 font-medium">{ageError}</p>}
+              <button onClick={handleAgeCheck} className="w-full py-3 rounded-xl font-bold text-[#231F20] transition-colors" style={{ backgroundColor: "#B3D335" }}>
+                I'm 21 or older — Let's go!
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="space-y-3 mb-4">
+                {/* West pickup */}
+                <button onClick={() => setSelected("pickup_west")} className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selected === "pickup_west" ? "border-[#231F20] bg-[#231F20] text-[#B3D335]" : "border-[#231F20]/20 bg-[#FFFFFF] text-[#231F20] hover:border-[#231F20]/50"}`}>
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-sm">PICK UP AT SPRING HILL WEST</p>
+                      <p className={`text-xs mt-1 ${selected === "pickup_west" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>6175 Deltona Blvd, Suite 104, Spring Hill FL</p>
+                      <p className={`text-xs ${selected === "pickup_west" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Mon-Fri 6am-12am, Sat-Sun 10am-8pm</p>
+                      <p className={`text-xs font-semibold mt-1 ${selected === "pickup_west" ? "text-[#B3D335]" : "text-[#58BA49]"}`}>Ready in 5 minutes</p>
+                    </div>
+                  </div>
+                </button>
+                {/* East pickup */}
+                <button onClick={() => setSelected("pickup_east")} className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selected === "pickup_east" ? "border-[#231F20] bg-[#231F20] text-[#B3D335]" : "border-[#231F20]/20 bg-[#FFFFFF] text-[#231F20] hover:border-[#231F20]/50"}`}>
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-sm">PICK UP AT SPRING HILL EAST</p>
+                      <p className={`text-xs mt-1 ${selected === "pickup_east" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>14312 Spring Hill Dr, Spring Hill FL</p>
+                      <p className={`text-xs ${selected === "pickup_east" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Daily 6am-10pm</p>
+                      <p className={`text-xs font-semibold mt-1 ${selected === "pickup_east" ? "text-[#B3D335]" : "text-[#58BA49]"}`}>Ready in 5 minutes</p>
+                    </div>
+                  </div>
+                </button>
+                {/* Ship to me */}
+                <button onClick={() => setSelected("ship")} className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selected === "ship" ? "border-[#231F20] bg-[#231F20] text-[#B3D335]" : "border-[#231F20]/20 bg-[#FFFFFF] text-[#231F20] hover:border-[#231F20]/50"}`}>
+                  <div className="flex items-start gap-3">
+                    <Truck className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-sm">SHIP TO ME</p>
+                      <p className={`text-xs mt-1 ${selected === "ship" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Delivered to your door</p>
+                      <p className={`text-xs font-semibold mt-1 ${selected === "ship" ? "text-[#B3D335]" : "text-[#3D8C32]"}`}>Ships in 1-2 days</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+              <button onClick={handleConfirm} disabled={!selected} className={`w-full py-3 rounded-xl font-bold transition-colors ${selected ? "bg-[#B3D335] text-[#231F20] hover:bg-[#58BA49]" : "bg-[#231F20]/10 text-[#231F20]/30 cursor-not-allowed"}`}>
+                Let's Shop!
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+      <style>{`@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+    </div>
+  );
+}
+
+/* ======================== FULFILLMENT SELECTOR (Step 2 only, for header pill) ======================== */
+function FulfillmentSelectorModal({ currentFulfillment, onSelect, onClose }: { currentFulfillment: FulfillmentType; onSelect: (f: FulfillmentType) => void; onClose: () => void }) {
+  const [selected, setSelected] = useState<FulfillmentType>(currentFulfillment);
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ backgroundColor: "rgba(35,31,32,0.85)" }}>
+      <div className="bg-[#FFFFFF] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" style={{ animation: "fadeInUp 0.4s ease-out" }}>
+        <div className="bg-[#231F20] px-6 pt-6 pb-4 text-center relative">
+          <img src="/bud-puppet.png" alt="Bud" className="w-16 h-16 mx-auto mb-2 object-contain" />
+          <h2 className="text-[#B3D335] text-xl font-bold">Switch fulfillment method</h2>
+          <p className="text-[#FFFFFF] text-sm mt-1">Choose how you'd like to get your order.</p>
+          <button onClick={onClose} className="absolute top-3 right-3 text-[#FFFFFF]/60 hover:text-[#FFFFFF]"><X className="h-5 w-5" /></button>
+        </div>
+        <div className="px-6 py-5">
+          <div className="space-y-3 mb-4">
+            <button onClick={() => setSelected("pickup_west")} className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selected === "pickup_west" ? "border-[#231F20] bg-[#231F20] text-[#B3D335]" : "border-[#231F20]/20 bg-[#FFFFFF] text-[#231F20] hover:border-[#231F20]/50"}`}>
+              <div className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-sm">PICK UP AT SPRING HILL WEST</p>
+                  <p className={`text-xs mt-1 ${selected === "pickup_west" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>6175 Deltona Blvd, Suite 104, Spring Hill FL</p>
+                  <p className={`text-xs font-semibold mt-1 ${selected === "pickup_west" ? "text-[#B3D335]" : "text-[#58BA49]"}`}>Ready in 5 minutes</p>
+                </div>
+              </div>
+            </button>
+            <button onClick={() => setSelected("pickup_east")} className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selected === "pickup_east" ? "border-[#231F20] bg-[#231F20] text-[#B3D335]" : "border-[#231F20]/20 bg-[#FFFFFF] text-[#231F20] hover:border-[#231F20]/50"}`}>
+              <div className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-sm">PICK UP AT SPRING HILL EAST</p>
+                  <p className={`text-xs mt-1 ${selected === "pickup_east" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>14312 Spring Hill Dr, Spring Hill FL</p>
+                  <p className={`text-xs font-semibold mt-1 ${selected === "pickup_east" ? "text-[#B3D335]" : "text-[#58BA49]"}`}>Ready in 5 minutes</p>
+                </div>
+              </div>
+            </button>
+            <button onClick={() => setSelected("ship")} className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selected === "ship" ? "border-[#231F20] bg-[#231F20] text-[#B3D335]" : "border-[#231F20]/20 bg-[#FFFFFF] text-[#231F20] hover:border-[#231F20]/50"}`}>
+              <div className="flex items-start gap-3">
+                <Truck className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-sm">SHIP TO ME</p>
+                  <p className={`text-xs mt-1 ${selected === "ship" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Delivered to your door</p>
+                  <p className={`text-xs font-semibold mt-1 ${selected === "ship" ? "text-[#B3D335]" : "text-[#3D8C32]"}`}>Ships in 1-2 days</p>
+                </div>
+              </div>
+            </button>
+          </div>
+          <button onClick={() => { onSelect(selected); onClose(); }} className="w-full py-3 rounded-xl font-bold bg-[#B3D335] text-[#231F20] hover:bg-[#58BA49] transition-colors">
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ======================== FULFILLMENT SWITCH NOTIFICATION ======================== */
+function FulfillmentSwitchNotification({ removedItems, newLabel, onClose }: { removedItems: string[]; newLabel: string; onClose: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 8000);
+    return () => clearTimeout(t);
+  }, [onClose]);
+
+  return (
+    <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[90] w-full max-w-md px-4" style={{ animation: "fadeInUp 0.3s ease-out" }}>
+      <div className="bg-[#FFFFFF] rounded-xl shadow-2xl border border-[#D9A32C]/30 p-4">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 text-[#D9A32C] flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-[#231F20] text-sm font-semibold">Some items were removed</p>
+            <p className="text-[#231F20]/70 text-xs mt-1">These items aren't available for {newLabel}:</p>
+            <ul className="mt-2 space-y-1">
+              {removedItems.map((name, i) => (
+                <li key={i} className="text-xs text-[#231F20]/60 flex items-center gap-1.5">
+                  <X className="h-3 w-3 text-[#D9A32C]" />
+                  {name}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <button onClick={onClose} className="text-[#231F20]/30 hover:text-[#231F20]"><X className="h-4 w-4" /></button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ======================== STICKY TOP BAR ======================== */
 function StickyTopBar() {
   return (
@@ -181,7 +433,7 @@ function StickyTopBar() {
 }
 
 /* ======================== HEADER (Light Theme) ======================== */
-function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSearch: () => void; onCartOpen: () => void }) {
+function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentClick }: { cartCount: number; onSearch: () => void; onCartOpen: () => void; fulfillment: FulfillmentType | null; onFulfillmentClick: () => void }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const categories = ["FLOWER", "EDIBLES", "CONCENTRATES", "VAPOR", "TOPICALS", "TINCTURES", "ACCESSORIES"];
 
@@ -199,6 +451,14 @@ function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSear
             <img src="/logo.webp" alt="The Hemp Dispensary" className="h-10 sm:h-12 w-auto object-contain" width="120" height="48" />
           </a>
           <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
+            {/* Fulfillment pill */}
+            {fulfillment && (
+              <button onClick={onFulfillmentClick} className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#231F20] text-[#B3D335] rounded-full text-xs font-medium hover:bg-[#231F20]/80 transition-colors" title="Change fulfillment method">
+                {fulfillment.startsWith("pickup") ? <MapPin className="h-3.5 w-3.5" /> : <Truck className="h-3.5 w-3.5" />}
+                <span>{getFulfillmentLabel(fulfillment)}</span>
+                <RefreshCw className="h-3 w-3" />
+              </button>
+            )}
             <a href="/loyalty" onClick={(e) => { e.preventDefault(); navigate("/loyalty"); }} className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#126A44] transition-colors flex items-center gap-1" title="Hemp Rewards">
               <Gift className="h-5 w-5" />
               <span className="hidden md:inline text-xs font-medium">Rewards</span>
@@ -216,6 +476,16 @@ function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSear
             </button>
           </div>
         </div>
+        {/* Mobile fulfillment pill */}
+        {fulfillment && (
+          <div className="sm:hidden flex justify-center pb-1.5">
+            <button onClick={onFulfillmentClick} className="flex items-center gap-1.5 px-3 py-1 bg-[#231F20] text-[#B3D335] rounded-full text-[11px] font-medium">
+              {fulfillment.startsWith("pickup") ? <MapPin className="h-3 w-3" /> : <Truck className="h-3 w-3" />}
+              <span>{getFulfillmentLabel(fulfillment)}</span>
+              <RefreshCw className="h-2.5 w-2.5" />
+            </button>
+          </div>
+        )}
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center justify-center gap-1 pb-2 overflow-x-auto">
           {categories.map((cat) => (
@@ -575,9 +845,11 @@ function LocationSection() {
 
 
 /* ======================== PRODUCT GRID CARD (Floating Design + Quick Add) ======================== */
-function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd?: (product: Product) => void }) {
-  if (product.stock <= 0) return null;
+function ProductGridCard({ product, onQuickAdd, fulfillment }: { product: Product; onQuickAdd?: (product: Product) => void; fulfillment?: FulfillmentType | null }) {
+  const effectiveStock = fulfillment ? getStockForFulfillment(product, fulfillment) : product.stock;
+  if (effectiveStock <= 0) return null;
   const effect = getProductEffect(product);
+  const isPickup = fulfillment && fulfillment.startsWith("pickup");
   return (
     <div className="cursor-pointer group" onClick={() => navigate(`/product/${product.id}`)}>
       <div className="bg-[#FFFFFF] rounded-2xl p-[10px] sm:p-4 transition-all duration-300 hover:shadow-xl relative border border-[#231F20]/35">
@@ -601,12 +873,14 @@ function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd
                     <span className="inline-block text-[11px] sm:text-xs font-medium px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>
                       {effect.icon} {effect.label}
                     </span>
-          {product.stock <= 5 && <span className="inline-block bg-[#ADD038] text-[#231F20] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Only {Math.floor(product.stock)} Left</span>}
+          {fulfillment && isPickup && <span className="inline-block bg-[#58BA49] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ready in 5 min</span>}
+          {fulfillment && !isPickup && <span className="inline-block bg-[#3D8C32] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ships 1–3 days</span>}
+          {effectiveStock <= 5 && <span className="inline-block bg-[#ADD038] text-[#231F20] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Only {Math.floor(effectiveStock)} Left</span>}
         </div>
         <h3 className="text-[#231F20] text-[13px] sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#126A44] transition-colors">{titleCase(product.online_name || product.name)}</h3>
         <div className="flex items-center justify-between mb-2">
                     <span className="text-[#231F20] font-semibold text-[14px] sm:text-lg">{formatPrice(product.price)}</span>
-                    <span className="text-[11px] sm:text-[10px] text-[#3D8C32] sm:inline">{isLeafLife(product) ? <><span className="text-[#126A44]">●</span> Shipping Only</> : <><span className="text-[#126A44]">●</span> 5 Minute Pickup</>}</span>
+                    <span className="text-[11px] sm:text-[10px] text-[#3D8C32] sm:inline">{fulfillment && isPickup ? <><span className="text-[#58BA49]">●</span> 5 Minute Pickup</> : fulfillment && !isPickup ? <><span className="text-[#3D8C32]">●</span> Ships to You</> : isLeafLife(product) ? <><span className="text-[#126A44]">●</span> Shipping Only</> : <><span className="text-[#126A44]">●</span> 5 Minute Pickup</>}</span>
         </div>
         {/* Quick Add to Cart button */}
         {onQuickAdd && product.available && (
@@ -898,13 +1172,15 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
 }
 
 /* ======================== SHOP PAGE (Light Theme) ======================== */
-function ShopPage({ products, categories, selectedCategory, onAddToCart }: { products: Product[]; categories: string[]; selectedCategory: string; onAddToCart: (product: Product) => void }) {
+function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfillment }: { products: Product[]; categories: string[]; selectedCategory: string; onAddToCart: (product: Product) => void; fulfillment: FulfillmentType | null }) {
   const [sortBy, setSortBy] = useState("name");
   const feelingLabels = ["relax", "sleep", "energy", "focus"];
   const isFeelingFilter = feelingLabels.includes(selectedCategory.toLowerCase());
 
   const filtered = useMemo(() => {
-    let items = products.filter(p => p.stock > 0);
+    let items = fulfillment
+      ? products.filter(p => getStockForFulfillment(p, fulfillment) > 0)
+      : products.filter(p => p.stock > 0);
     if (selectedCategory && selectedCategory !== "all") {
       const catLower = selectedCategory.toLowerCase();
       if (isFeelingFilter) {
@@ -917,7 +1193,7 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart }: { pro
     else if (sortBy === "price-high") items.sort((a, b) => b.price - a.price);
     else items.sort((a, b) => a.name.localeCompare(b.name));
     return items;
-  }, [products, selectedCategory, sortBy, isFeelingFilter]);
+  }, [products, selectedCategory, sortBy, isFeelingFilter, fulfillment]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -942,7 +1218,7 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart }: { pro
         ))}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-        {filtered.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} />)}
+        {filtered.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} fulfillment={fulfillment} />)}
       </div>
       {filtered.length === 0 && (
         <div className="text-center py-16">
@@ -1462,7 +1738,7 @@ function ChatbotBud({ products }: { products: Product[] }) {
 
 /* ======================== CHECKOUT PAGE (Preserved) ======================== */
 
-function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (productId: string, qty: number) => void; onRemove: (productId: string) => void; onClear: () => void }) {
+function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpdateQty: (productId: string, qty: number) => void; onRemove: (productId: string) => void; onClear: () => void; fulfillment: FulfillmentType | null }) {
   const [step, setStep] = useState<"info" | "shipping" | "payment" | "confirmed">("info");
   const [submitting, setSubmitting] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
@@ -1755,6 +2031,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
         promo_code: promoApplied ? "FIRST15" : null,
         payment_token: tokenResult.token,
         loyalty_number: form.loyaltyNumber,
+        fulfillment_type: fulfillment || "shipping",
       };
 
       const resp = await fetch(`${API_URL}/api/ecommerce/orders`, {
@@ -3460,6 +3737,43 @@ function App() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
 
+  // Fulfillment state
+  const [fulfillment, setFulfillment] = useState<FulfillmentType | null>(() => {
+    const stored = loadFulfillment();
+    return stored ? stored.fulfillment : null;
+  });
+  const [showAgeGate, setShowAgeGate] = useState(() => !loadFulfillment());
+  const [showFulfillmentModal, setShowFulfillmentModal] = useState(false);
+  const [switchNotification, setSwitchNotification] = useState<{ removedItems: string[]; newLabel: string } | null>(null);
+
+  const handleAgeGateComplete = useCallback((f: FulfillmentType) => {
+    setFulfillment(f);
+    saveFulfillment({ fulfillment: f, timestamp: Date.now() });
+    setShowAgeGate(false);
+  }, []);
+
+  const handleFulfillmentSwitch = useCallback((newF: FulfillmentType) => {
+    if (newF === fulfillment) return;
+    // Cart protection: re-check every item against new location stock
+    const removedNames: string[] = [];
+    const keptItems: CartItem[] = [];
+    cart.forEach((item) => {
+      const newStock = getStockForFulfillment(item.product, newF);
+      if (newStock > 0) {
+        keptItems.push(item);
+      } else {
+        removedNames.push(item.product.online_name || item.product.name);
+      }
+    });
+    if (removedNames.length > 0) {
+      setSwitchNotification({ removedItems: removedNames, newLabel: getFulfillmentLabel(newF) });
+      setCart(keptItems);
+      saveCart(keptItems);
+    }
+    setFulfillment(newF);
+    saveFulfillment({ fulfillment: newF, timestamp: Date.now() });
+  }, [fulfillment, cart]);
+
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const updateCart = useCallback((newCart: CartItem[]) => {
@@ -3639,12 +3953,15 @@ function App() {
     <div className="min-h-screen bg-[#FFFFFF]">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-0 focus:top-0 focus:z-[9999] focus:bg-[#FFFFFF] focus:px-4 focus:py-2 focus:text-[#231F20] focus:underline">Skip to main content</a>
       <StickyTopBar />
-      <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} />
+      <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} fulfillment={fulfillment} onFulfillmentClick={() => setShowFulfillmentModal(true)} />
       <main id="main-content">{content}</main>
       <SiteFooter />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} products={products} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />
       <ChatbotBud products={products} />
+      {showAgeGate && <BudAgeGatePopup onComplete={handleAgeGateComplete} />}
+      {showFulfillmentModal && <FulfillmentSelectorModal currentFulfillment={fulfillment || "ship"} onSelect={handleFulfillmentSwitch} onClose={() => setShowFulfillmentModal(false)} />}
+      {switchNotification && <FulfillmentSwitchNotification removedItems={switchNotification.removedItems} newLabel={switchNotification.newLabel} onClose={() => setSwitchNotification(null)} />}
     </div>
   );
 
@@ -3654,9 +3971,9 @@ function App() {
     return shell(loading
       ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
       : fetchError ? <div className="flex flex-col items-center justify-center py-24"><AlertCircle className="h-12 w-12 text-[#D9A32C] mb-4" /><p className="text-[#231F20] text-lg font-medium mb-2">Unable to load products</p><p className="text-[#231F20] text-sm mb-4">Please check your connection and try again.</p><button onClick={retryFetch} className="px-6 py-3 bg-[#B3D335] hover:bg-[#126A44] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors">Try Again</button></div>
-      : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} onAddToCart={(p) => addToCart(p, 1)} />);
+      : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} />);
   }
-  if (route === "/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />);
+  if (route === "/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} fulfillment={fulfillment} />);
   if (route === "/about") return shell(<AboutPage />);
   if (route === "/terms") return shell(<TermsPage />);
   if (route === "/privacy") return shell(<PrivacyPage />);
@@ -3671,7 +3988,7 @@ function App() {
     <div className="min-h-screen bg-[#FFFFFF]">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-0 focus:top-0 focus:z-[9999] focus:bg-[#FFFFFF] focus:px-4 focus:py-2 focus:text-[#231F20] focus:underline">Skip to main content</a>
       <StickyTopBar />
-      <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} />
+      <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} fulfillment={fulfillment} onFulfillmentClick={() => setShowFulfillmentModal(true)} />
       <main id="main-content">
       <HeroSection />
       <TrustStrip />
@@ -3703,7 +4020,7 @@ function App() {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                     {displayProducts.map((product) => (
-                      <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => addToCart(p, 1)} />
+                      <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => addToCart(p, 1)} fulfillment={fulfillment} />
                     ))}
                   </div>
                 </div>
@@ -3721,6 +4038,9 @@ function App() {
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} products={products} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />
       <ChatbotBud products={products} />
+      {showAgeGate && <BudAgeGatePopup onComplete={handleAgeGateComplete} />}
+      {showFulfillmentModal && <FulfillmentSelectorModal currentFulfillment={fulfillment || "ship"} onSelect={handleFulfillmentSwitch} onClose={() => setShowFulfillmentModal(false)} />}
+      {switchNotification && <FulfillmentSwitchNotification removedItems={switchNotification.removedItems} newLabel={switchNotification.newLabel} onClose={() => setSwitchNotification(null)} />}
     </div>
   );
 }
