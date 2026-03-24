@@ -1520,15 +1520,39 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
     setRatesLoading(false);
   }, [cart]);
 
-  const applyPromo = () => {
+  const [promoLoading, setPromoLoading] = useState(false);
+  const applyPromo = async () => {
     const code = promoCode.trim().toUpperCase();
-    if (code === "FIRST15") {
-      setPromoApplied(true);
-      setPromoError("");
-    } else {
-      setPromoApplied(false);
-      setPromoError("Invalid promo code");
+    if (!code) { setPromoError("Please enter a promo code"); return; }
+    const email = form.email.trim();
+    if (!email) { setPromoError("Please enter your email first so we can validate the promo code"); return; }
+    setPromoLoading(true);
+    setPromoError("");
+    try {
+      const resp = await fetch(`${API_URL}/api/ecommerce/validate-promo`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ promo_code: code, email }),
+      });
+      const data = await resp.json();
+      if (data.valid) {
+        setPromoApplied(true);
+        setPromoError("");
+      } else {
+        setPromoApplied(false);
+        setPromoError(data.reason || "Invalid promo code");
+      }
+    } catch {
+      // Fallback to client-side validation if backend is unreachable
+      if (code === "FIRST15") {
+        setPromoApplied(true);
+        setPromoError("");
+      } else {
+        setPromoApplied(false);
+        setPromoError("Invalid promo code");
+      }
     }
+    setPromoLoading(false);
   };
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -2068,7 +2092,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                 {promoApplied ? (
                   <button onClick={() => { setPromoApplied(false); setPromoCode(""); }} className="px-4 py-2 text-sm font-medium text-[#231F20] border border-[#231F20]/20 rounded-lg hover:bg-[#231F20]/5 transition-colors">Remove</button>
                 ) : (
-                  <button onClick={applyPromo} className="px-4 py-2 text-sm font-medium bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg transition-colors">Apply</button>
+                  <button onClick={applyPromo} disabled={promoLoading} className="px-4 py-2 text-sm font-medium bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg transition-colors disabled:opacity-50">{promoLoading ? "Checking..." : "Apply"}</button>
                 )}
               </div>
               {promoError && <p className="text-red-500 text-xs mt-1">{promoError}</p>}
