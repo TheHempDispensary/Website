@@ -618,10 +618,11 @@ function TrustStrip() {
 }
 
 /* ======================== SHOP BY CATEGORY ======================== */
-function ShopByCategory({ productsByCategory }: { categories: string[]; productsByCategory: Record<string, Product[]> }) {
+function ShopByCategory({ productsByCategory, fulfillment }: { categories: string[]; productsByCategory: Record<string, Product[]>; fulfillment?: FulfillmentType | null }) {
+  const stockFor = (p: Product) => fulfillment ? getStockForFulfillment(p, fulfillment) : p.stock;
   const displayCats = ["Flower", "Edibles", "Concentrates", "Vapor", "Topicals", "Tinctures", "Accessories"].filter(c => {
     const prods = productsByCategory[c] || [];
-    return prods.some(p => p.stock > 0);
+    return prods.some(p => stockFor(p) > 0);
   });
   if (displayCats.length === 0) return null;
 
@@ -638,7 +639,7 @@ function ShopByCategory({ productsByCategory }: { categories: string[]; products
             <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="bg-[#FFFFFF] rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-all group border border-[#231F20]/15 hover:border-[#B3D335]">
               <IconComp className="h-10 w-10 text-[#3D8C32] mx-auto mb-3" />
               <h3 className="text-lg font-semibold text-[#231F20] group-hover:text-[#126A44] transition-colors">{cat}</h3>
-              <p className="text-sm text-[#231F20] mt-1">{(productsByCategory[cat] || []).filter(p => p.stock > 0).length} products</p>
+              <p className="text-sm text-[#231F20] mt-1">{(productsByCategory[cat] || []).filter(p => stockFor(p) > 0).length} products</p>
             </button>
             );
           })}
@@ -3941,13 +3942,15 @@ function App() {
     return map;
   }, [products]);
 
+  const stockForFulfillment = useCallback((p: Product) => fulfillment ? getStockForFulfillment(p, fulfillment) : p.stock, [fulfillment]);
+
   const homeCategories = useMemo(() => {
     const preferred = ["Flower", "Concentrates", "Edibles", "Topicals", "Tinctures", "Vapor", "Accessories", "Pets"];
     return preferred.filter((c) => {
       const prods = productsByCategory[c] || [];
-      return prods.some(p => p.stock > 0);
+      return prods.some(p => stockForFulfillment(p) > 0);
     });
-  }, [productsByCategory]);
+  }, [productsByCategory, stockForFulfillment]);
 
   const shell = (content: React.ReactNode) => (
     <div className="min-h-screen bg-[#FFFFFF]">
@@ -4003,11 +4006,11 @@ function App() {
         </div>
       ) : (
         <>
-          <ShopByCategory categories={categories} productsByCategory={productsByCategory} />
+          <ShopByCategory categories={categories} productsByCategory={productsByCategory} fulfillment={fulfillment} />
           <ShopByFeeling products={products} />
           {/* Product carousels by category */}
           {homeCategories.map((cat) => {
-            const inStock = (productsByCategory[cat] || []).filter(p => p.stock > 0);
+            const inStock = (productsByCategory[cat] || []).filter(p => stockForFulfillment(p) > 0);
             const catProducts = inStock.filter(p => p.image_url && !p.image_url.includes('product-placeholder'));
             const displayProducts = catProducts.length >= 4 ? catProducts.slice(0, 4) : inStock.slice(0, 4);
             if (displayProducts.length === 0) return null;
