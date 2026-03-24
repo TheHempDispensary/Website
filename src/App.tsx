@@ -256,7 +256,7 @@ function BudAgeGatePopup({ onComplete }: { onComplete: (f: FulfillmentType) => v
       <div className="bg-[#FFFFFF] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" style={{ animation: "fadeInUp 0.4s ease-out" }}>
         {/* Bud character header */}
         <div className="bg-[#231F20] px-6 pt-6 pb-4 text-center relative">
-          <img src="/bud-puppet.png" alt="Bud" className="w-20 h-20 mx-auto mb-2 object-contain" />
+          <img src="/bud-puppet.webp" alt="Bud" className="w-20 h-20 mx-auto mb-2 object-contain" />
           <h2 className="text-[#B3D335] text-xl font-bold">{step === 1 ? "Hey! I'm Bud." : "How do you want your order?"}</h2>
           <p className="text-[#FFFFFF] text-sm mt-1">{step === 1 ? "Before we get started, I need to verify your age." : "Choose your preferred fulfillment method."}</p>
         </div>
@@ -343,7 +343,7 @@ function FulfillmentSelectorModal({ currentFulfillment, onSelect, onClose }: { c
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ backgroundColor: "rgba(35,31,32,0.85)" }}>
       <div className="bg-[#FFFFFF] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" style={{ animation: "fadeInUp 0.4s ease-out" }}>
         <div className="bg-[#231F20] px-6 pt-6 pb-4 text-center relative">
-          <img src="/bud-puppet.png" alt="Bud" className="w-16 h-16 mx-auto mb-2 object-contain" />
+          <img src="/bud-puppet.webp" alt="Bud" className="w-16 h-16 mx-auto mb-2 object-contain" />
           <h2 className="text-[#B3D335] text-xl font-bold">Switch fulfillment method</h2>
           <p className="text-[#FFFFFF] text-sm mt-1">Choose how you'd like to get your order.</p>
           <button onClick={onClose} className="absolute top-3 right-3 text-[#FFFFFF]/60 hover:text-[#FFFFFF]"><X className="h-5 w-5" /></button>
