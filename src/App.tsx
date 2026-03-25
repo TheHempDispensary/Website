@@ -1777,7 +1777,7 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
   const discount = promoApplied ? Math.round(subtotal * 0.15) : 0;
   const discountedSubtotal = subtotal - discount;
   const selectedRate = shippingRates.find(r => r.id === selectedRateId);
-  const shippingCost = selectedRate ? selectedRate.amount_cents : 0;
+  const shippingCost = (fulfillment && fulfillment.startsWith("pickup")) ? 0 : (selectedRate ? selectedRate.amount_cents : 0);
   const taxRate = getTaxRate(form.state);
   const tax = Math.round(discountedSubtotal * taxRate);
   const total = discountedSubtotal + shippingCost + tax;
@@ -2001,8 +2001,9 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
     );
   }
 
+  const isPickup = fulfillment && fulfillment.startsWith("pickup");
   const canProceedInfo = form.firstName && form.lastName && form.email && form.phone;
-  const canProceedShipping = form.address && form.city && form.state && form.zip && selectedRateId;
+  const canProceedShipping = isPickup ? true : (form.address && form.city && form.state && form.zip && selectedRateId);
 
   const handlePlaceOrder = async () => {
     if (!cloverRef.current) {
@@ -2063,11 +2064,11 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
     setSubmitting(false);
   };
 
-  const steps = [
+  const steps: Array<{ key: "info" | "shipping" | "payment"; label: string; icon: typeof Phone }> = [
     { key: "info", label: "Contact", icon: Phone },
-    { key: "shipping", label: "Shipping", icon: Truck },
+    { key: "shipping", label: isPickup ? "Pickup" : "Shipping", icon: isPickup ? MapPin : Truck },
     { key: "payment", label: "Payment", icon: CreditCard },
-  ] as const;
+  ];
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -2103,117 +2104,134 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
               </div>
               <div className="mt-8 flex justify-between">
                 <button onClick={() => navigate("/shop")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Shop</button>
-                <button onClick={() => setStep("shipping")} disabled={!canProceedInfo} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedInfo ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>Continue to Shipping</button>
+                <button onClick={() => setStep("shipping")} disabled={!canProceedInfo} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedInfo ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>{isPickup ? "Continue to Pickup" : "Continue to Shipping"}</button>
               </div>
             </div>
           )}
 
           {step === "shipping" && (
             <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/20 p-6 sm:p-8">
-              <h2 className="text-xl font-bold text-[#231F20] mb-6">Shipping Address</h2>
-              <div className="space-y-4">
-                <div className="relative">
-                  <label className={labelClass}>Street Address *</label>
-                  <input
-                    type="text"
-                    value={form.address}
-                    onChange={(e) => { setField("address", e.target.value); searchAddress(e.target.value); }}
-                    onFocus={() => { if (addressSuggestions.length > 0) setShowSuggestions(true); }}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    placeholder="Start typing your address..."
-                    autoComplete="street-address"
-                    className={inputClass}
-                  />
-                  {showSuggestions && addressSuggestions.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg shadow-xl max-h-48 overflow-y-auto">
-                      {addressSuggestions.map((s, i) => (
-                        <button
-                          key={i}
-                          className="w-full text-left px-4 py-3 text-sm text-[#231F20] hover:bg-[#FFFFFF] transition-colors border-b border-[#231F20]/10 last:border-b-0"
-                          onMouseDown={(e) => e.preventDefault()}
-                          onClick={() => {
-                            setForm((prev) => ({ ...prev, address: s.address, city: s.city, state: s.state, zip: s.zip }));
-                            setShowSuggestions(false);
-                            setAddressSuggestions([]);
-                          }}
-                        >
-                          <span className="flex items-center gap-2">
-                            <MapPin className="h-3.5 w-3.5 text-[#126A44] flex-shrink-0" />
-                            <span className="truncate">{s.display}</span>
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div><label className={labelClass}>Apartment, suite, etc.</label><input type="text" value={form.apartment} onChange={(e) => setField("apartment", e.target.value)} placeholder="Apt 4B" autoComplete="address-line2" className={inputClass} /></div>
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <div><label className={labelClass}>City *</label><input type="text" value={form.city} onChange={(e) => setField("city", e.target.value)} placeholder="Spring Hill" autoComplete="address-level2" className={inputClass} /></div>
-                  <div><label className={labelClass}>State *</label><input type="text" value={form.state} onChange={(e) => setField("state", e.target.value)} placeholder="FL" autoComplete="address-level1" className={inputClass} /></div>
-                  <div><label className={labelClass}>ZIP Code *</label><input type="text" value={form.zip} onChange={(e) => setField("zip", e.target.value)} placeholder="34609" autoComplete="postal-code" className={inputClass} /></div>
-                </div>
-                <div><label className={labelClass}>Order Notes (optional)</label><textarea value={form.notes} onChange={(e) => setField("notes", e.target.value)} placeholder="Any special instructions..." rows={3} className={inputClass} /></div>
-              </div>
+              <h2 className="text-xl font-bold text-[#231F20] mb-6">{isPickup ? "Pickup Details" : "Shipping Address"}</h2>
 
-              {/* Shipping Rate Selection */}
-              {form.address && form.city && form.state && form.zip && (
-                <div className="mt-6 border-t border-[#231F20]/10 pt-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-[#231F20]">Shipping Method</h3>
-                    <button
-                      onClick={() => fetchShippingRates({ address: form.address, apartment: form.apartment, city: form.city, state: form.state, zip: form.zip })}
-                      disabled={ratesLoading}
-                      className="text-sm text-[#126A44] hover:text-[#58BA49] font-medium transition-colors"
-                    >
-                      {ratesLoading ? "Loading..." : shippingRates.length > 0 ? "Refresh Rates" : "Get Shipping Rates"}
-                    </button>
+              {isPickup ? (
+                <div className="space-y-4">
+                  <div className="p-5 rounded-xl border-2 border-[#B3D335] bg-[#B3D335]/5">
+                    <div className="flex items-center gap-3 mb-2">
+                      <MapPin className="h-5 w-5 text-[#126A44]" />
+                      <h3 className="font-semibold text-[#231F20]">{fulfillment === "pickup_west" ? "West Location" : "East Location"}</h3>
+                    </div>
+                    <p className="text-[#231F20] text-sm">{fulfillment === "pickup_west" ? "6175 Deltona Blvd, Suite 104, Spring Hill, FL 34606" : "14312 Spring Hill Dr, Spring Hill, FL 34609"}</p>
+                    <p className="text-[#126A44] text-sm font-medium mt-2">Ready for pickup in ~5 minutes</p>
+                  </div>
+                  <div><label className={labelClass}>Order Notes (optional)</label><textarea value={form.notes} onChange={(e) => setField("notes", e.target.value)} placeholder="Any special instructions..." rows={3} className={inputClass} /></div>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <label className={labelClass}>Street Address *</label>
+                      <input
+                        type="text"
+                        value={form.address}
+                        onChange={(e) => { setField("address", e.target.value); searchAddress(e.target.value); }}
+                        onFocus={() => { if (addressSuggestions.length > 0) setShowSuggestions(true); }}
+                        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                        placeholder="Start typing your address..."
+                        autoComplete="street-address"
+                        className={inputClass}
+                      />
+                      {showSuggestions && addressSuggestions.length > 0 && (
+                        <div className="absolute z-50 w-full mt-1 bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+                          {addressSuggestions.map((s, i) => (
+                            <button
+                              key={i}
+                              className="w-full text-left px-4 py-3 text-sm text-[#231F20] hover:bg-[#FFFFFF] transition-colors border-b border-[#231F20]/10 last:border-b-0"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => {
+                                setForm((prev) => ({ ...prev, address: s.address, city: s.city, state: s.state, zip: s.zip }));
+                                setShowSuggestions(false);
+                                setAddressSuggestions([]);
+                              }}
+                            >
+                              <span className="flex items-center gap-2">
+                                <MapPin className="h-3.5 w-3.5 text-[#126A44] flex-shrink-0" />
+                                <span className="truncate">{s.display}</span>
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div><label className={labelClass}>Apartment, suite, etc.</label><input type="text" value={form.apartment} onChange={(e) => setField("apartment", e.target.value)} placeholder="Apt 4B" autoComplete="address-line2" className={inputClass} /></div>
+                    <div className="grid sm:grid-cols-3 gap-4">
+                      <div><label className={labelClass}>City *</label><input type="text" value={form.city} onChange={(e) => setField("city", e.target.value)} placeholder="Spring Hill" autoComplete="address-level2" className={inputClass} /></div>
+                      <div><label className={labelClass}>State *</label><input type="text" value={form.state} onChange={(e) => setField("state", e.target.value)} placeholder="FL" autoComplete="address-level1" className={inputClass} /></div>
+                      <div><label className={labelClass}>ZIP Code *</label><input type="text" value={form.zip} onChange={(e) => setField("zip", e.target.value)} placeholder="34609" autoComplete="postal-code" className={inputClass} /></div>
+                    </div>
+                    <div><label className={labelClass}>Order Notes (optional)</label><textarea value={form.notes} onChange={(e) => setField("notes", e.target.value)} placeholder="Any special instructions..." rows={3} className={inputClass} /></div>
                   </div>
 
-                  {ratesLoading && (
-                    <div className="flex items-center gap-3 py-6 justify-center">
-                      <div className="h-5 w-5 border-2 border-[#B3D335] border-t-transparent rounded-full animate-spin" />
-                      <span className="text-sm text-[#231F20]">Fetching USPS rates...</span>
-                    </div>
-                  )}
-
-                  {ratesError && <p className="text-red-500 text-sm mb-3">{ratesError}</p>}
-
-                  {!ratesLoading && shippingRates.length === 0 && !ratesError && (
-                    <p className="text-[#231F20]/60 text-sm">Click &quot;Get Shipping Rates&quot; to see available USPS shipping options for your address.</p>
-                  )}
-
-                  {!ratesLoading && shippingRates.length > 0 && (
-                    <div className="space-y-2">
-                      {shippingRates.map((rate) => (
+                  {/* Shipping Rate Selection */}
+                  {form.address && form.city && form.state && form.zip && (
+                    <div className="mt-6 border-t border-[#231F20]/10 pt-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-[#231F20]">Shipping Method</h3>
                         <button
-                          key={rate.id}
-                          onClick={() => setSelectedRateId(rate.id)}
-                          className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all text-left ${
-                            selectedRateId === rate.id
-                              ? "border-[#B3D335] bg-[#B3D335]/5"
-                              : "border-[#231F20]/10 hover:border-[#231F20]/30"
-                          }`}
+                          onClick={() => fetchShippingRates({ address: form.address, apartment: form.apartment, city: form.city, state: form.state, zip: form.zip })}
+                          disabled={ratesLoading}
+                          className="text-sm text-[#126A44] hover:text-[#58BA49] font-medium transition-colors"
                         >
-                          <div className="flex items-center gap-3">
-                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedRateId === rate.id ? "border-[#B3D335]" : "border-[#231F20]/30"}`}>
-                              {selectedRateId === rate.id && <div className="w-2.5 h-2.5 rounded-full bg-[#B3D335]" />}
-                            </div>
-                            <div>
-                              <p className="font-medium text-[#231F20] text-sm">{rate.service_level}</p>
-                              {rate.estimated_days && (
-                                <p className="text-xs text-[#231F20]/60">{rate.estimated_days} business day{rate.estimated_days !== 1 ? "s" : ""}</p>
-                              )}
-                              {rate.duration_terms && !rate.estimated_days && (
-                                <p className="text-xs text-[#231F20]/60">{rate.duration_terms}</p>
-                              )}
-                            </div>
-                          </div>
-                          <span className="font-semibold text-[#231F20]">${rate.amount}</span>
+                          {ratesLoading ? "Loading..." : shippingRates.length > 0 ? "Refresh Rates" : "Get Shipping Rates"}
                         </button>
-                      ))}
+                      </div>
+
+                      {ratesLoading && (
+                        <div className="flex items-center gap-3 py-6 justify-center">
+                          <div className="h-5 w-5 border-2 border-[#B3D335] border-t-transparent rounded-full animate-spin" />
+                          <span className="text-sm text-[#231F20]">Fetching USPS rates...</span>
+                        </div>
+                      )}
+
+                      {ratesError && <p className="text-red-500 text-sm mb-3">{ratesError}</p>}
+
+                      {!ratesLoading && shippingRates.length === 0 && !ratesError && (
+                        <p className="text-[#231F20]/60 text-sm">Click &quot;Get Shipping Rates&quot; to see available USPS shipping options for your address.</p>
+                      )}
+
+                      {!ratesLoading && shippingRates.length > 0 && (
+                        <div className="space-y-2">
+                          {shippingRates.map((rate) => (
+                            <button
+                              key={rate.id}
+                              onClick={() => setSelectedRateId(rate.id)}
+                              className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all text-left ${
+                                selectedRateId === rate.id
+                                  ? "border-[#B3D335] bg-[#B3D335]/5"
+                                  : "border-[#231F20]/10 hover:border-[#231F20]/30"
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedRateId === rate.id ? "border-[#B3D335]" : "border-[#231F20]/30"}`}>
+                                  {selectedRateId === rate.id && <div className="w-2.5 h-2.5 rounded-full bg-[#B3D335]" />}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-[#231F20] text-sm">{rate.service_level}</p>
+                                  {rate.estimated_days && (
+                                    <p className="text-xs text-[#231F20]/60">{rate.estimated_days} business day{rate.estimated_days !== 1 ? "s" : ""}</p>
+                                  )}
+                                  {rate.duration_terms && !rate.estimated_days && (
+                                    <p className="text-xs text-[#231F20]/60">{rate.duration_terms}</p>
+                                  )}
+                                </div>
+                              </div>
+                              <span className="font-semibold text-[#231F20]">${rate.amount}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
-                </div>
+                </>
               )}
 
               <div className="mt-8 flex justify-between">
@@ -2237,14 +2255,23 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
                 <p className="text-[#231F20] text-sm">{form.email} &bull; {form.phone}</p>
               </div>
 
-              {/* Shipping summary */}
+              {/* Shipping/Pickup summary */}
               <div className="mb-4 p-4 bg-[#FFFFFF] rounded-xl">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold text-[#231F20]">Shipping Address</h3>
+                  <h3 className="text-sm font-semibold text-[#231F20]">{isPickup ? "Pickup Location" : "Shipping Address"}</h3>
                   <button onClick={() => setStep("shipping")} className="text-xs text-[#B3D335] hover:text-[#126A44]">Edit</button>
                 </div>
-                <p className="text-[#FFFFFF] text-sm">{form.address}{form.apartment ? `, ${form.apartment}` : ""}</p>
-                <p className="text-[#231F20] text-sm">{form.city}, {form.state} {form.zip}</p>
+                {isPickup ? (
+                  <>
+                    <p className="text-[#231F20] text-sm font-medium">{fulfillment === "pickup_west" ? "West Location" : "East Location"}</p>
+                    <p className="text-[#231F20] text-sm">{fulfillment === "pickup_west" ? "6175 Deltona Blvd, Suite 104, Spring Hill, FL 34606" : "14312 Spring Hill Dr, Spring Hill, FL 34609"}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-[#FFFFFF] text-sm">{form.address}{form.apartment ? `, ${form.apartment}` : ""}</p>
+                    <p className="text-[#231F20] text-sm">{form.city}, {form.state} {form.zip}</p>
+                  </>
+                )}
               </div>
 
               {/* Items */}
@@ -2386,7 +2413,7 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
             <div className="border-t border-[#231F20]/20 pt-4 space-y-2">
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Subtotal</span><span className="text-[#231F20]">{formatPrice(subtotal)}</span></div>
               {promoApplied && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Discount (15%)</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
-              <div className="flex justify-between text-sm"><span className="text-[#231F20]">Shipping{selectedRate ? ` (${selectedRate.service_level})` : ""}</span><span className="text-[#231F20]">{selectedRate ? formatPrice(shippingCost) : "Select a rate"}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-[#231F20]">{isPickup ? "Pickup" : `Shipping${selectedRate ? ` (${selectedRate.service_level})` : ""}`}</span><span className="text-[#231F20]">{isPickup ? "FREE" : (selectedRate ? formatPrice(shippingCost) : "Select a rate")}</span></div>
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Tax ({(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 2)}%)</span><span className="text-[#231F20]">{formatPrice(tax)}</span></div>
               <div className="border-t border-[#231F20]/20 pt-3 flex justify-between"><span className="text-[#231F20] font-semibold">Total</span><span className="text-xl font-bold text-[#231F20]">{formatPrice(total)}</span></div>
             </div>
