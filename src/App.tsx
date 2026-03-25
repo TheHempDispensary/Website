@@ -3852,15 +3852,22 @@ function App() {
   }, [route]);
 
   useEffect(() => {
-    // Load from localStorage cache first for instant display — no TTL, always use if available
+    // Load from localStorage cache for instant display — 60s TTL to avoid stale images
     let hadCachedData = false;
     try {
       const cached = localStorage.getItem("thd-products-cache");
       if (cached) {
-        const { products: cp, categories: cc } = JSON.parse(cached);
-        if (cp && cp.length > 0) {
-          setProducts(cp);
-          setCategories(cc);
+        const parsed = JSON.parse(cached);
+        const age = Date.now() - (parsed.timestamp || 0);
+        if (parsed.products && parsed.products.length > 0 && age < 60000) {
+          setProducts(parsed.products);
+          setCategories(parsed.categories);
+          setLoading(false);
+          hadCachedData = true;
+        } else if (parsed.products && parsed.products.length > 0) {
+          // Cache is stale but use as fallback while fetching fresh data
+          setProducts(parsed.products);
+          setCategories(parsed.categories);
           setLoading(false);
           hadCachedData = true;
         }
