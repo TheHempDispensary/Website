@@ -77,9 +77,9 @@ function saveFulfillment(choice: FulfillmentChoice) {
 }
 
 function getFulfillmentLabel(f: FulfillmentType): string {
-  if (f === "pickup_west") return "Picking up at West";
-  if (f === "pickup_east") return "Picking up at East";
-  return "Shipping to me";
+  if (f === "pickup_west") return "Picking Up At West";
+  if (f === "pickup_east") return "Picking Up At East";
+  return "Shipping To Me";
 }
 
 function getStockForFulfillment(product: Product, f: FulfillmentType): number {
@@ -875,13 +875,13 @@ function ProductGridCard({ product, onQuickAdd, fulfillment }: { product: Produc
                       {effect.icon} {effect.label}
                     </span>
           {fulfillment && isPickup && <span className="inline-block bg-[#58BA49] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ready in 5 min</span>}
-          {fulfillment && !isPickup && <span className="inline-block bg-[#3D8C32] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ships 1–3 days</span>}
+          {fulfillment && !isPickup && <span className="inline-block bg-[#3D8C32] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ships 1–2 Days</span>}
           {effectiveStock <= 5 && <span className="inline-block bg-[#ADD038] text-[#231F20] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Only {Math.floor(effectiveStock)} Left</span>}
         </div>
         <h3 className="text-[#231F20] text-[13px] sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#126A44] transition-colors">{titleCase(product.online_name || product.name)}</h3>
         <div className="flex items-center justify-between mb-2">
                     <span className="text-[#231F20] font-semibold text-[14px] sm:text-lg">{formatPrice(product.price)}</span>
-                    <span className="text-[11px] sm:text-[10px] text-[#3D8C32] sm:inline">{fulfillment && isPickup ? <><span className="text-[#58BA49]">●</span> 5 Minute Pickup</> : fulfillment && !isPickup ? <><span className="text-[#3D8C32]">●</span> Ships to You</> : isLeafLife(product) ? <><span className="text-[#126A44]">●</span> Shipping Only</> : <><span className="text-[#126A44]">●</span> 5 Minute Pickup</>}</span>
+                    <span className="text-[11px] sm:text-[10px] text-[#3D8C32] sm:inline">{fulfillment && isPickup ? <><span className="text-[#58BA49]">●</span> 5 Minute Pickup</> : fulfillment && !isPickup ? <><span className="text-[#3D8C32]">●</span> Ships To You</> : isLeafLife(product) ? <><span className="text-[#126A44]">●</span> Shipping Only</> : <><span className="text-[#126A44]">●</span> 5 Minute Pickup</>}</span>
         </div>
         {/* Quick Add to Cart button */}
         {onQuickAdd && product.available && (
