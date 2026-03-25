@@ -898,7 +898,7 @@ function ProductGridCard({ product, onQuickAdd, fulfillment }: { product: Produc
 }
 
 /* ======================== PRODUCT DETAIL (Light Theme) ======================== */
-function ProductDetail({ productId, products, onAddToCart }: { productId: string; products: Product[]; onAddToCart: (product: Product, qty: number) => void }) {
+function ProductDetail({ productId, products, onAddToCart, fulfillment }: { productId: string; products: Product[]; onAddToCart: (product: Product, qty: number) => void; fulfillment?: FulfillmentType | null }) {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
@@ -1048,9 +1048,16 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
               )}
             </div>
 
-            {/* Ready for pickup message */}
-            <div className={`${isLeafLife(product) ? 'bg-[#ADD038]/20 border-[#ADD038]/30' : 'bg-[#ADD038]/20 border-[#ADD038]/30'} border rounded-lg px-4 py-2 mb-4`}>
-              <p className={`text-sm font-medium ${isLeafLife(product) ? 'text-[#126A44]' : 'text-[#126A44]'}`}>{isLeafLife(product) ? <>{"\u{1F4E6}"} This Product Ships From Our Partner {"\u2013"} Shipping Only</> : <>{"\u26A1"} Ready For Pickup Today In About 5 Minutes</>}</p>
+            {/* Fulfillment message */}
+            <div className="bg-[#ADD038]/20 border-[#ADD038]/30 border rounded-lg px-4 py-2 mb-4">
+              <p className="text-sm font-medium text-[#126A44]">
+                {isLeafLife(product)
+                  ? <>{"\u{1F4E6}"} This Product Ships From Our Partner {"\u2013"} Shipping Only</>
+                  : fulfillment === "ship"
+                    ? <>{"\u{1F4E6}"} Ships In 1{"\u2013"}2 Business Days</>
+                    : <>{"\u26A1"} Ready For Pickup Today In About 5 Minutes</>
+                }
+              </p>
             </div>
 
             {/* Add to cart */}
@@ -1850,7 +1857,7 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
         );
         const data = await resp.json();
         const suggestions = data
-          .filter((r: Record<string, unknown>) => r.address && (r.type === "house" || r.type === "residential" || r.class === "place" || r.class === "building" || r.type === "yes" || r.type === "commercial" || r.type === "retail" || r.osm_type === "way" || r.osm_type === "node"))
+          .filter((r: Record<string, unknown>) => r.address)
           .map((r: Record<string, Record<string, string>>) => {
             const a = r.address || {};
             const house = a.house_number || "";
@@ -1859,7 +1866,7 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
             return {
               display: r.display_name as unknown as string,
               address: street,
-              city: a.city || a.town || a.village || a.hamlet || "",
+              city: a.city || a.town || a.village || a.hamlet || a.county?.replace(" County", "") || "",
               state: a.state || "FL",
               zip: a.postcode || "",
             };
@@ -3975,7 +3982,7 @@ function App() {
     </div>
   );
 
-  if (route.startsWith("/product/")) return shell(<ProductDetail productId={route.replace("/product/", "")} products={products} onAddToCart={addToCart} />);
+  if (route.startsWith("/product/")) return shell(<ProductDetail productId={route.replace("/product/", "")} products={products} onAddToCart={addToCart} fulfillment={fulfillment} />);
   if (route.startsWith("/shop")) {
     const catSlug = route.replace("/shop/", "").replace("/shop", "");
     return shell(loading
