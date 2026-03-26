@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, Package, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, MessageCircle, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, Instagram, Heart, DollarSign, Target } from "lucide-react";
+import { Search, ShoppingCart, Package, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, MessageCircle, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, Instagram, Heart, DollarSign, Target, RefreshCw } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -42,10 +42,50 @@ interface Product {
   description: string;
   categories: string[];
   stock: number;
+  stock_hq: number;
+  stock_west: number;
+  stock_east: number;
   available: boolean;
   image_url: string | null;
   is_age_restricted: boolean;
   shipping_only?: boolean;
+}
+
+type FulfillmentType = "pickup_west" | "pickup_east" | "ship";
+
+interface FulfillmentChoice {
+  fulfillment: FulfillmentType;
+  timestamp: number;
+}
+
+const FULFILLMENT_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+function loadFulfillment(): FulfillmentChoice | null {
+  try {
+    const stored = localStorage.getItem("thd-fulfillment");
+    if (stored) {
+      const parsed: FulfillmentChoice = JSON.parse(stored);
+      if (Date.now() - parsed.timestamp < FULFILLMENT_TTL) return parsed;
+      localStorage.removeItem("thd-fulfillment");
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
+function saveFulfillment(choice: FulfillmentChoice) {
+  localStorage.setItem("thd-fulfillment", JSON.stringify(choice));
+}
+
+function getFulfillmentLabel(f: FulfillmentType): string {
+  if (f === "pickup_west") return "Picking Up At West";
+  if (f === "pickup_east") return "Picking Up At East";
+  return "Shipping To Me";
+}
+
+function getStockForFulfillment(product: Product, f: FulfillmentType): number {
+  if (f === "pickup_west") return product.stock_west ?? 0;
+  if (f === "pickup_east") return product.stock_east ?? 0;
+  return product.stock_hq ?? product.stock ?? 0;
 }
 
 interface ProductsResponse {
@@ -73,6 +113,21 @@ function navigate(path: string) {
 
 function formatPrice(cents: number): string {
   return "$" + (cents / 100).toFixed(2);
+}
+
+/* State sales tax rates (state-level only) */
+const STATE_TAX_RATES: Record<string, number> = {
+  AL: 0.04, AK: 0, AZ: 0.056, AR: 0.065, CA: 0.0725, CO: 0.029, CT: 0.0635,
+  DE: 0, DC: 0.06, FL: 0.06, GA: 0.04, HI: 0.04, ID: 0.06, IL: 0.0625,
+  IN: 0.07, IA: 0.06, KS: 0.065, KY: 0.06, LA: 0.0445, ME: 0.055, MD: 0.06,
+  MA: 0.0625, MI: 0.06, MN: 0.06875, MS: 0.07, MO: 0.04225, MT: 0, NE: 0.055,
+  NV: 0.0685, NH: 0, NJ: 0.06625, NM: 0.05125, NY: 0.04, NC: 0.0475, ND: 0.05,
+  OH: 0.0575, OK: 0.045, OR: 0, PA: 0.06, RI: 0.07, SC: 0.06, SD: 0.042,
+  TN: 0.07, TX: 0.0625, UT: 0.061, VT: 0.06, VA: 0.053, WA: 0.065, WV: 0.06,
+  WI: 0.05, WY: 0.04,
+};
+function getTaxRate(state: string): number {
+  return STATE_TAX_RATES[state.toUpperCase()] ?? 0;
 }
 
 /* Unsplash fallback images for accessory products without real photos */
@@ -154,6 +209,218 @@ function getProductBenefit(product: Product): string {
 }
 
 
+/* ======================== BUD AGE GATE + FULFILLMENT POPUP ======================== */
+function BudAgeGatePopup({ onComplete }: { onComplete: (f: FulfillmentType) => void }) {
+  const [step, setStep] = useState<1 | 2>(1);
+  const [dobMonth, setDobMonth] = useState("");
+  const [dobDay, setDobDay] = useState("");
+  const [dobYear, setDobYear] = useState("");
+  const [ageError, setAgeError] = useState("");
+  const [selected, setSelected] = useState<FulfillmentType | "">("");
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(true), 4000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleAgeCheck = () => {
+    setAgeError("");
+    const month = parseInt(dobMonth);
+    const day = parseInt(dobDay);
+    const year = parseInt(dobYear);
+    if (!month || !day || !year) { setAgeError("Please select your full date of birth."); return; }
+    const dob = new Date(year, month - 1, day);
+    const now = new Date();
+    let age = now.getFullYear() - dob.getFullYear();
+    const monthDiff = now.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < dob.getDate())) age--;
+    if (age < 21) { setAgeError("Sorry, we can only provide our products to individuals over 21 years of age."); return; }
+    setStep(2);
+  };
+
+  const handleConfirm = () => {
+    if (!selected) return;
+    onComplete(selected);
+  };
+
+  if (!visible) return null;
+
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ backgroundColor: "rgba(35,31,32,0.85)" }}>
+      <div className="bg-[#FFFFFF] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" style={{ animation: "fadeInUp 0.4s ease-out" }}>
+        {/* Bud character header */}
+        <div className="bg-[#231F20] px-6 pt-6 pb-4 text-center relative">
+          <img src="/bud-puppet.webp" alt="Bud" className="w-20 h-20 mx-auto mb-2 object-contain" />
+          <h2 className="text-[#B3D335] text-xl font-bold">{step === 1 ? "Hey! I'm Bud." : "How do you want your order?"}</h2>
+          <p className="text-[#FFFFFF] text-sm mt-1">{step === 1 ? "Before we get started, I need to verify your age." : "Choose your preferred fulfillment method."}</p>
+        </div>
+
+        <div className="px-6 py-5">
+          {step === 1 ? (
+            <>
+              <p className="text-[#231F20] text-sm font-medium mb-3">Date of Birth</p>
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                <select value={dobMonth} onChange={(e) => setDobMonth(e.target.value)} className="bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-2 py-2.5 text-sm text-[#231F20] focus:outline-none focus:border-[#B3D335]">
+                  <option value="">Month</option>
+                  {months.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                </select>
+                <select value={dobDay} onChange={(e) => setDobDay(e.target.value)} className="bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-2 py-2.5 text-sm text-[#231F20] focus:outline-none focus:border-[#B3D335]">
+                  <option value="">Day</option>
+                  {days.map((d) => <option key={d} value={d}>{d}</option>)}
+                </select>
+                <select value={dobYear} onChange={(e) => setDobYear(e.target.value)} className="bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-2 py-2.5 text-sm text-[#231F20] focus:outline-none focus:border-[#B3D335]">
+                  <option value="">Year</option>
+                  {years.map((y) => <option key={y} value={y}>{y}</option>)}
+                </select>
+              </div>
+              {ageError && <p className="text-red-600 text-sm mb-3 font-medium">{ageError}</p>}
+              <button onClick={handleAgeCheck} className="w-full py-3 rounded-xl font-bold text-[#231F20] transition-colors" style={{ backgroundColor: "#B3D335" }}>
+                I'm 21 or older — Let's go!
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="space-y-3 mb-4">
+                {/* West pickup */}
+                <button onClick={() => setSelected("pickup_west")} className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selected === "pickup_west" ? "border-[#231F20] bg-[#231F20] text-[#B3D335]" : "border-[#231F20]/20 bg-[#FFFFFF] text-[#231F20] hover:border-[#231F20]/50"}`}>
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-sm">PICK UP AT SPRING HILL WEST</p>
+                      <p className={`text-xs mt-1 ${selected === "pickup_west" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>6175 Deltona Blvd, Suite 104, Spring Hill FL</p>
+                      <p className={`text-xs ${selected === "pickup_west" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Mon-Fri 6am-12am, Sat-Sun 10am-8pm</p>
+                      <p className={`text-xs font-semibold mt-1 ${selected === "pickup_west" ? "text-[#B3D335]" : "text-[#58BA49]"}`}>Ready in 5 minutes</p>
+                    </div>
+                  </div>
+                </button>
+                {/* East pickup */}
+                <button onClick={() => setSelected("pickup_east")} className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selected === "pickup_east" ? "border-[#231F20] bg-[#231F20] text-[#B3D335]" : "border-[#231F20]/20 bg-[#FFFFFF] text-[#231F20] hover:border-[#231F20]/50"}`}>
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-sm">PICK UP AT SPRING HILL EAST</p>
+                      <p className={`text-xs mt-1 ${selected === "pickup_east" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>14312 Spring Hill Dr, Spring Hill FL</p>
+                      <p className={`text-xs ${selected === "pickup_east" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Daily 6am-10pm</p>
+                      <p className={`text-xs font-semibold mt-1 ${selected === "pickup_east" ? "text-[#B3D335]" : "text-[#58BA49]"}`}>Ready in 5 minutes</p>
+                    </div>
+                  </div>
+                </button>
+                {/* Ship to me */}
+                <button onClick={() => setSelected("ship")} className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selected === "ship" ? "border-[#231F20] bg-[#231F20] text-[#B3D335]" : "border-[#231F20]/20 bg-[#FFFFFF] text-[#231F20] hover:border-[#231F20]/50"}`}>
+                  <div className="flex items-start gap-3">
+                    <Truck className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-sm">SHIP TO ME</p>
+                      <p className={`text-xs mt-1 ${selected === "ship" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Delivered to your door</p>
+                      <p className={`text-xs font-semibold mt-1 ${selected === "ship" ? "text-[#B3D335]" : "text-[#3D8C32]"}`}>Ships in 1-2 days</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+              <button onClick={handleConfirm} disabled={!selected} className={`w-full py-3 rounded-xl font-bold transition-colors ${selected ? "bg-[#B3D335] text-[#231F20] hover:bg-[#58BA49]" : "bg-[#231F20]/10 text-[#231F20]/30 cursor-not-allowed"}`}>
+                Let's Shop!
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+      <style>{`@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+    </div>
+  );
+}
+
+/* ======================== FULFILLMENT SELECTOR (Step 2 only, for header pill) ======================== */
+function FulfillmentSelectorModal({ currentFulfillment, onSelect, onClose }: { currentFulfillment: FulfillmentType; onSelect: (f: FulfillmentType) => void; onClose: () => void }) {
+  const [selected, setSelected] = useState<FulfillmentType>(currentFulfillment);
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ backgroundColor: "rgba(35,31,32,0.85)" }}>
+      <div className="bg-[#FFFFFF] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" style={{ animation: "fadeInUp 0.4s ease-out" }}>
+        <div className="bg-[#231F20] px-6 pt-6 pb-4 text-center relative">
+          <img src="/bud-puppet.webp" alt="Bud" className="w-16 h-16 mx-auto mb-2 object-contain" />
+          <h2 className="text-[#B3D335] text-xl font-bold">Switch fulfillment method</h2>
+          <p className="text-[#FFFFFF] text-sm mt-1">Choose how you'd like to get your order.</p>
+          <button onClick={onClose} className="absolute top-3 right-3 text-[#FFFFFF]/60 hover:text-[#FFFFFF]"><X className="h-5 w-5" /></button>
+        </div>
+        <div className="px-6 py-5">
+          <div className="space-y-3 mb-4">
+            <button onClick={() => setSelected("pickup_west")} className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selected === "pickup_west" ? "border-[#231F20] bg-[#231F20] text-[#B3D335]" : "border-[#231F20]/20 bg-[#FFFFFF] text-[#231F20] hover:border-[#231F20]/50"}`}>
+              <div className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-sm">PICK UP AT SPRING HILL WEST</p>
+                  <p className={`text-xs mt-1 ${selected === "pickup_west" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>6175 Deltona Blvd, Suite 104, Spring Hill FL</p>
+                  <p className={`text-xs font-semibold mt-1 ${selected === "pickup_west" ? "text-[#B3D335]" : "text-[#58BA49]"}`}>Ready in 5 minutes</p>
+                </div>
+              </div>
+            </button>
+            <button onClick={() => setSelected("pickup_east")} className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selected === "pickup_east" ? "border-[#231F20] bg-[#231F20] text-[#B3D335]" : "border-[#231F20]/20 bg-[#FFFFFF] text-[#231F20] hover:border-[#231F20]/50"}`}>
+              <div className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-sm">PICK UP AT SPRING HILL EAST</p>
+                  <p className={`text-xs mt-1 ${selected === "pickup_east" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>14312 Spring Hill Dr, Spring Hill FL</p>
+                  <p className={`text-xs font-semibold mt-1 ${selected === "pickup_east" ? "text-[#B3D335]" : "text-[#58BA49]"}`}>Ready in 5 minutes</p>
+                </div>
+              </div>
+            </button>
+            <button onClick={() => setSelected("ship")} className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selected === "ship" ? "border-[#231F20] bg-[#231F20] text-[#B3D335]" : "border-[#231F20]/20 bg-[#FFFFFF] text-[#231F20] hover:border-[#231F20]/50"}`}>
+              <div className="flex items-start gap-3">
+                <Truck className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-sm">SHIP TO ME</p>
+                  <p className={`text-xs mt-1 ${selected === "ship" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Delivered to your door</p>
+                  <p className={`text-xs font-semibold mt-1 ${selected === "ship" ? "text-[#B3D335]" : "text-[#3D8C32]"}`}>Ships in 1-2 days</p>
+                </div>
+              </div>
+            </button>
+          </div>
+          <button onClick={() => { onSelect(selected); onClose(); }} className="w-full py-3 rounded-xl font-bold bg-[#B3D335] text-[#231F20] hover:bg-[#58BA49] transition-colors">
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ======================== FULFILLMENT SWITCH NOTIFICATION ======================== */
+function FulfillmentSwitchNotification({ removedItems, newLabel, onClose }: { removedItems: string[]; newLabel: string; onClose: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 8000);
+    return () => clearTimeout(t);
+  }, [onClose]);
+
+  return (
+    <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[90] w-full max-w-md px-4" style={{ animation: "fadeInUp 0.3s ease-out" }}>
+      <div className="bg-[#FFFFFF] rounded-xl shadow-2xl border border-[#D9A32C]/30 p-4">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 text-[#D9A32C] flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-[#231F20] text-sm font-semibold">Some items were removed</p>
+            <p className="text-[#231F20]/70 text-xs mt-1">These items aren't available for {newLabel}:</p>
+            <ul className="mt-2 space-y-1">
+              {removedItems.map((name, i) => (
+                <li key={i} className="text-xs text-[#231F20]/60 flex items-center gap-1.5">
+                  <X className="h-3 w-3 text-[#D9A32C]" />
+                  {name}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <button onClick={onClose} className="text-[#231F20]/30 hover:text-[#231F20]"><X className="h-4 w-4" /></button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ======================== STICKY TOP BAR ======================== */
 function StickyTopBar() {
   return (
@@ -166,7 +433,7 @@ function StickyTopBar() {
 }
 
 /* ======================== HEADER (Light Theme) ======================== */
-function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSearch: () => void; onCartOpen: () => void }) {
+function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentClick }: { cartCount: number; onSearch: () => void; onCartOpen: () => void; fulfillment: FulfillmentType | null; onFulfillmentClick: () => void }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const categories = ["FLOWER", "EDIBLES", "CONCENTRATES", "VAPOR", "TOPICALS", "TINCTURES", "ACCESSORIES"];
 
@@ -184,6 +451,14 @@ function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSear
             <img src="/logo.webp" alt="The Hemp Dispensary" className="h-10 sm:h-12 w-auto object-contain" width="120" height="48" />
           </a>
           <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
+            {/* Fulfillment pill */}
+            {fulfillment && (
+              <button onClick={onFulfillmentClick} className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#231F20] text-[#B3D335] rounded-full text-xs font-medium hover:bg-[#231F20]/80 transition-colors" title="Change fulfillment method">
+                {fulfillment.startsWith("pickup") ? <MapPin className="h-3.5 w-3.5" /> : <Truck className="h-3.5 w-3.5" />}
+                <span>{getFulfillmentLabel(fulfillment)}</span>
+                <RefreshCw className="h-3 w-3" />
+              </button>
+            )}
             <a href="/loyalty" onClick={(e) => { e.preventDefault(); navigate("/loyalty"); }} className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#126A44] transition-colors flex items-center gap-1" title="Hemp Rewards">
               <Gift className="h-5 w-5" />
               <span className="hidden md:inline text-xs font-medium">Rewards</span>
@@ -201,6 +476,16 @@ function Header({ cartCount, onSearch, onCartOpen }: { cartCount: number; onSear
             </button>
           </div>
         </div>
+        {/* Mobile fulfillment pill */}
+        {fulfillment && (
+          <div className="sm:hidden flex justify-center pb-1.5">
+            <button onClick={onFulfillmentClick} className="flex items-center gap-1.5 px-3 py-1 bg-[#231F20] text-[#B3D335] rounded-full text-[11px] font-medium">
+              {fulfillment.startsWith("pickup") ? <MapPin className="h-3 w-3" /> : <Truck className="h-3 w-3" />}
+              <span>{getFulfillmentLabel(fulfillment)}</span>
+              <RefreshCw className="h-2.5 w-2.5" />
+            </button>
+          </div>
+        )}
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center justify-center gap-1 pb-2 overflow-x-auto">
           {categories.map((cat) => (
@@ -333,10 +618,11 @@ function TrustStrip() {
 }
 
 /* ======================== SHOP BY CATEGORY ======================== */
-function ShopByCategory({ productsByCategory }: { categories: string[]; productsByCategory: Record<string, Product[]> }) {
+function ShopByCategory({ productsByCategory, fulfillment }: { categories: string[]; productsByCategory: Record<string, Product[]>; fulfillment?: FulfillmentType | null }) {
+  const stockFor = (p: Product) => fulfillment ? getStockForFulfillment(p, fulfillment) : p.stock;
   const displayCats = ["Flower", "Edibles", "Concentrates", "Vapor", "Topicals", "Tinctures", "Accessories"].filter(c => {
     const prods = productsByCategory[c] || [];
-    return prods.some(p => p.stock > 0);
+    return prods.some(p => stockFor(p) > 0);
   });
   if (displayCats.length === 0) return null;
 
@@ -353,7 +639,7 @@ function ShopByCategory({ productsByCategory }: { categories: string[]; products
             <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="bg-[#FFFFFF] rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-all group border border-[#231F20]/15 hover:border-[#B3D335]">
               <IconComp className="h-10 w-10 text-[#3D8C32] mx-auto mb-3" />
               <h3 className="text-lg font-semibold text-[#231F20] group-hover:text-[#126A44] transition-colors">{cat}</h3>
-              <p className="text-sm text-[#231F20] mt-1">{(productsByCategory[cat] || []).filter(p => p.stock > 0).length} products</p>
+              <p className="text-sm text-[#231F20] mt-1">{(productsByCategory[cat] || []).filter(p => stockFor(p) > 0).length} products</p>
             </button>
             );
           })}
@@ -560,9 +846,11 @@ function LocationSection() {
 
 
 /* ======================== PRODUCT GRID CARD (Floating Design + Quick Add) ======================== */
-function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd?: (product: Product) => void }) {
-  if (product.stock <= 0) return null;
+function ProductGridCard({ product, onQuickAdd, fulfillment }: { product: Product; onQuickAdd?: (product: Product) => void; fulfillment?: FulfillmentType | null }) {
+  const effectiveStock = fulfillment ? getStockForFulfillment(product, fulfillment) : product.stock;
+  if (effectiveStock <= 0) return null;
   const effect = getProductEffect(product);
+  const isPickup = fulfillment && fulfillment.startsWith("pickup");
   return (
     <div className="cursor-pointer group" onClick={() => navigate(`/product/${product.id}`)}>
       <div className="bg-[#FFFFFF] rounded-2xl p-[10px] sm:p-4 transition-all duration-300 hover:shadow-xl relative border border-[#231F20]/35">
@@ -586,12 +874,14 @@ function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd
                     <span className="inline-block text-[11px] sm:text-xs font-medium px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>
                       {effect.icon} {effect.label}
                     </span>
-          {product.stock <= 5 && <span className="inline-block bg-[#ADD038] text-[#231F20] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Only {Math.floor(product.stock)} Left</span>}
+          {fulfillment && isPickup && <span className="inline-block bg-[#58BA49] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ready in 5 min</span>}
+          {fulfillment && !isPickup && <span className="inline-block bg-[#3D8C32] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ships 1–2 Days</span>}
+          {effectiveStock <= 5 && <span className="inline-block bg-[#ADD038] text-[#231F20] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Only {Math.floor(effectiveStock)} Left</span>}
         </div>
         <h3 className="text-[#231F20] text-[13px] sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#126A44] transition-colors">{titleCase(product.online_name || product.name)}</h3>
         <div className="flex items-center justify-between mb-2">
                     <span className="text-[#231F20] font-semibold text-[14px] sm:text-lg">{formatPrice(product.price)}</span>
-                    <span className="text-[11px] sm:text-[10px] text-[#3D8C32] sm:inline">{isLeafLife(product) ? <><span className="text-[#126A44]">●</span> Shipping Only</> : <><span className="text-[#126A44]">●</span> 5 Minute Pickup</>}</span>
+                    <span className="text-[11px] sm:text-[10px] text-[#3D8C32] sm:inline">{fulfillment && isPickup ? <><span className="text-[#58BA49]">●</span> 5 Minute Pickup</> : fulfillment && !isPickup ? <><span className="text-[#3D8C32]">●</span> Ships To You</> : isLeafLife(product) ? <><span className="text-[#126A44]">●</span> Shipping Only</> : <><span className="text-[#126A44]">●</span> 5 Minute Pickup</>}</span>
         </div>
         {/* Quick Add to Cart button */}
         {onQuickAdd && product.available && (
@@ -608,7 +898,7 @@ function ProductGridCard({ product, onQuickAdd }: { product: Product; onQuickAdd
 }
 
 /* ======================== PRODUCT DETAIL (Light Theme) ======================== */
-function ProductDetail({ productId, products, onAddToCart }: { productId: string; products: Product[]; onAddToCart: (product: Product, qty: number) => void }) {
+function ProductDetail({ productId, products, onAddToCart, fulfillment }: { productId: string; products: Product[]; onAddToCart: (product: Product, qty: number) => void; fulfillment?: FulfillmentType | null }) {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
@@ -758,9 +1048,16 @@ function ProductDetail({ productId, products, onAddToCart }: { productId: string
               )}
             </div>
 
-            {/* Ready for pickup message */}
-            <div className={`${isLeafLife(product) ? 'bg-[#ADD038]/20 border-[#ADD038]/30' : 'bg-[#ADD038]/20 border-[#ADD038]/30'} border rounded-lg px-4 py-2 mb-4`}>
-              <p className={`text-sm font-medium ${isLeafLife(product) ? 'text-[#126A44]' : 'text-[#126A44]'}`}>{isLeafLife(product) ? <>{"\u{1F4E6}"} This Product Ships From Our Partner {"\u2013"} Shipping Only</> : <>{"\u26A1"} Ready For Pickup Today In About 5 Minutes</>}</p>
+            {/* Fulfillment message */}
+            <div className="bg-[#ADD038]/20 border-[#ADD038]/30 border rounded-lg px-4 py-2 mb-4">
+              <p className="text-sm font-medium text-[#126A44]">
+                {isLeafLife(product)
+                  ? <>{"\u{1F4E6}"} This Product Ships From Our Partner {"\u2013"} Shipping Only</>
+                  : fulfillment === "ship"
+                    ? <>{"\u{1F4E6}"} Ships In 1{"\u2013"}2 Business Days</>
+                    : <>{"\u26A1"} Ready For Pickup Today In About 5 Minutes</>
+                }
+              </p>
             </div>
 
             {/* Add to cart */}
@@ -883,13 +1180,15 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
 }
 
 /* ======================== SHOP PAGE (Light Theme) ======================== */
-function ShopPage({ products, categories, selectedCategory, onAddToCart }: { products: Product[]; categories: string[]; selectedCategory: string; onAddToCart: (product: Product) => void }) {
+function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfillment }: { products: Product[]; categories: string[]; selectedCategory: string; onAddToCart: (product: Product) => void; fulfillment: FulfillmentType | null }) {
   const [sortBy, setSortBy] = useState("name");
   const feelingLabels = ["relax", "sleep", "energy", "focus"];
   const isFeelingFilter = feelingLabels.includes(selectedCategory.toLowerCase());
 
   const filtered = useMemo(() => {
-    let items = products.filter(p => p.stock > 0);
+    let items = fulfillment
+      ? products.filter(p => getStockForFulfillment(p, fulfillment) > 0)
+      : products.filter(p => p.stock > 0);
     if (selectedCategory && selectedCategory !== "all") {
       const catLower = selectedCategory.toLowerCase();
       if (isFeelingFilter) {
@@ -902,7 +1201,7 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart }: { pro
     else if (sortBy === "price-high") items.sort((a, b) => b.price - a.price);
     else items.sort((a, b) => a.name.localeCompare(b.name));
     return items;
-  }, [products, selectedCategory, sortBy, isFeelingFilter]);
+  }, [products, selectedCategory, sortBy, isFeelingFilter, fulfillment]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -927,7 +1226,7 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart }: { pro
         ))}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-        {filtered.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} />)}
+        {filtered.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} fulfillment={fulfillment} />)}
       </div>
       {filtered.length === 0 && (
         <div className="text-center py-16">
@@ -1091,7 +1390,7 @@ function ShippingPage() {
       <h1 className="text-4xl font-bold text-[#231F20] mb-6">Shipping & Pickup</h1>
       <div className="prose prose-lg text-[#231F20]">
         <p className="mb-4">Most orders are ready for pickup in about 5 minutes! We offer fast, convenient pickup at both of our Spring Hill locations.</p>
-        <p className="mb-4">Standard shipping is a flat rate of $7.99. Most orders ship within 1-2 business days and arrive in 3-5 business days.</p>
+        <p className="mb-4">Shipping rates are calculated at checkout based on your address using USPS. Most orders ship within 1-2 business days.</p>
         <p>For local customers, we recommend our pickup option for the fastest service.</p>
       </div>
     </div>
@@ -1540,7 +1839,7 @@ function ChatbotBud({ products }: { products: Product[] }) {
 
 /* ======================== CHECKOUT PAGE (Preserved) ======================== */
 
-function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (productId: string, qty: number) => void; onRemove: (productId: string) => void; onClear: () => void }) {
+function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpdateQty: (productId: string, qty: number) => void; onRemove: (productId: string) => void; onClear: () => void; fulfillment: FulfillmentType | null }) {
   const [step, setStep] = useState<"info" | "shipping" | "payment" | "confirmed">("info");
   const [submitting, setSubmitting] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
@@ -1551,6 +1850,10 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoError, setPromoError] = useState("");
+  const [shippingRates, setShippingRates] = useState<Array<{ id: string; provider: string; service_level: string; amount: string; amount_cents: number; estimated_days: number | null; duration_terms: string }>>([]);
+  const [selectedRateId, setSelectedRateId] = useState("");
+  const [ratesLoading, setRatesLoading] = useState(false);
+  const [ratesError, setRatesError] = useState("");
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", phone: "",
     address: "", apartment: "", city: "", state: "FL", zip: "",
@@ -1566,19 +1869,67 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const discount = promoApplied ? Math.round(subtotal * 0.15) : 0;
   const discountedSubtotal = subtotal - discount;
-  const shippingCost = 799;
-  const tax = Math.round(discountedSubtotal * 0.07);
+  const selectedRate = shippingRates.find(r => r.id === selectedRateId);
+  const shippingCost = (fulfillment && fulfillment.startsWith("pickup")) ? 0 : (selectedRate ? selectedRate.amount_cents : 0);
+  const taxRate = getTaxRate(form.state);
+  const tax = Math.round(discountedSubtotal * taxRate);
   const total = discountedSubtotal + shippingCost + tax;
 
-  const applyPromo = () => {
-    const code = promoCode.trim().toUpperCase();
-    if (code === "FIRST15") {
-      setPromoApplied(true);
-      setPromoError("");
-    } else {
-      setPromoApplied(false);
-      setPromoError("Invalid promo code");
+  const fetchShippingRates = useCallback(async (addr: { address: string; apartment: string; city: string; state: string; zip: string }) => {
+    if (!addr.address || !addr.city || !addr.state || !addr.zip) return;
+    setRatesLoading(true);
+    setRatesError("");
+    try {
+      const productNames = cart.map(item => item.product.online_name || item.product.name);
+      const resp = await fetch(`${API_URL}/api/shipping/rates`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ street1: addr.address, street2: addr.apartment || "", city: addr.city, state: addr.state, zip_code: addr.zip, product_names: productNames }),
+      });
+      if (!resp.ok) throw new Error("Failed to fetch rates");
+      const data = await resp.json();
+      setShippingRates(data.rates || []);
+      if (data.rates?.length > 0) setSelectedRateId(data.rates[0].id);
+    } catch {
+      setRatesError("Unable to load shipping rates. Please verify your address.");
+      setShippingRates([]);
     }
+    setRatesLoading(false);
+  }, [cart]);
+
+  const [promoLoading, setPromoLoading] = useState(false);
+  const applyPromo = async () => {
+    const code = promoCode.trim().toUpperCase();
+    if (!code) { setPromoError("Please enter a promo code"); return; }
+    const email = form.email.trim();
+    if (!email) { setPromoError("Please enter your email first so we can validate the promo code"); return; }
+    setPromoLoading(true);
+    setPromoError("");
+    try {
+      const resp = await fetch(`${API_URL}/api/ecommerce/validate-promo`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ promo_code: code, email }),
+      });
+      const data = await resp.json();
+      if (data.valid) {
+        setPromoApplied(true);
+        setPromoError("");
+      } else {
+        setPromoApplied(false);
+        setPromoError(data.reason || "Invalid promo code");
+      }
+    } catch {
+      // Fallback to client-side validation if backend is unreachable
+      if (code === "FIRST15") {
+        setPromoApplied(true);
+        setPromoError("");
+      } else {
+        setPromoApplied(false);
+        setPromoError("Invalid promo code");
+      }
+    }
+    setPromoLoading(false);
   };
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -1599,7 +1950,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
         );
         const data = await resp.json();
         const suggestions = data
-          .filter((r: Record<string, unknown>) => r.address && (r.type === "house" || r.type === "residential" || r.class === "place" || r.class === "building" || r.type === "yes" || r.type === "commercial" || r.type === "retail" || r.osm_type === "way" || r.osm_type === "node"))
+          .filter((r: Record<string, unknown>) => r.address)
           .map((r: Record<string, Record<string, string>>) => {
             const a = r.address || {};
             const house = a.house_number || "";
@@ -1608,7 +1959,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
             return {
               display: r.display_name as unknown as string,
               address: street,
-              city: a.city || a.town || a.village || a.hamlet || "",
+              city: a.city || a.town || a.village || a.hamlet || a.county?.replace(" County", "") || "",
               state: a.state || "FL",
               zip: a.postcode || "",
             };
@@ -1743,8 +2094,9 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
     );
   }
 
+  const isPickup = fulfillment && fulfillment.startsWith("pickup");
   const canProceedInfo = form.firstName && form.lastName && form.email && form.phone;
-  const canProceedShipping = form.address && form.city && form.state && form.zip;
+  const canProceedShipping = isPickup ? true : (form.address && form.city && form.state && form.zip && selectedRateId);
 
   const handlePlaceOrder = async () => {
     if (!cloverRef.current) {
@@ -1777,9 +2129,11 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
         shipping_address: { address: form.address, apartment: form.apartment, city: form.city, state: form.state, zip: form.zip },
         items: cart.map((item) => ({ product_id: item.product.id, name: item.product.name, sku: item.product.sku, price: item.product.price, quantity: item.quantity })),
         subtotal, discount, shipping_cost: shippingCost, tax, total, notes: form.notes,
+        shipping_service: selectedRate?.service_level || "",
         promo_code: promoApplied ? "FIRST15" : null,
         payment_token: tokenResult.token,
         loyalty_number: form.loyaltyNumber,
+        fulfillment_type: fulfillment || "shipping",
       };
 
       const resp = await fetch(`${API_URL}/api/ecommerce/orders`, {
@@ -1803,11 +2157,11 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
     setSubmitting(false);
   };
 
-  const steps = [
+  const steps: Array<{ key: "info" | "shipping" | "payment"; label: string; icon: typeof Phone }> = [
     { key: "info", label: "Contact", icon: Phone },
-    { key: "shipping", label: "Shipping", icon: Truck },
+    { key: "shipping", label: isPickup ? "Pickup" : "Shipping", icon: isPickup ? MapPin : Truck },
     { key: "payment", label: "Payment", icon: CreditCard },
-  ] as const;
+  ];
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -1843,57 +2197,136 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
               </div>
               <div className="mt-8 flex justify-between">
                 <button onClick={() => navigate("/shop")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Shop</button>
-                <button onClick={() => setStep("shipping")} disabled={!canProceedInfo} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedInfo ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>Continue to Shipping</button>
+                <button onClick={() => setStep("shipping")} disabled={!canProceedInfo} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedInfo ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>{isPickup ? "Continue to Pickup" : "Continue to Shipping"}</button>
               </div>
             </div>
           )}
 
           {step === "shipping" && (
             <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/20 p-6 sm:p-8">
-              <h2 className="text-xl font-bold text-[#231F20] mb-6">Shipping Address</h2>
-              <div className="space-y-4">
-                <div className="relative">
-                  <label className={labelClass}>Street Address *</label>
-                  <input
-                    type="text"
-                    value={form.address}
-                    onChange={(e) => { setField("address", e.target.value); searchAddress(e.target.value); }}
-                    onFocus={() => { if (addressSuggestions.length > 0) setShowSuggestions(true); }}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    placeholder="Start typing your address..."
-                    autoComplete="street-address"
-                    className={inputClass}
-                  />
-                  {showSuggestions && addressSuggestions.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg shadow-xl max-h-48 overflow-y-auto">
-                      {addressSuggestions.map((s, i) => (
+              <h2 className="text-xl font-bold text-[#231F20] mb-6">{isPickup ? "Pickup Details" : "Shipping Address"}</h2>
+
+              {isPickup ? (
+                <div className="space-y-4">
+                  <div className="p-5 rounded-xl border-2 border-[#B3D335] bg-[#B3D335]/5">
+                    <div className="flex items-center gap-3 mb-2">
+                      <MapPin className="h-5 w-5 text-[#126A44]" />
+                      <h3 className="font-semibold text-[#231F20]">{fulfillment === "pickup_west" ? "West Location" : "East Location"}</h3>
+                    </div>
+                    <p className="text-[#231F20] text-sm">{fulfillment === "pickup_west" ? "6175 Deltona Blvd, Suite 104, Spring Hill, FL 34606" : "14312 Spring Hill Dr, Spring Hill, FL 34609"}</p>
+                    <p className="text-[#126A44] text-sm font-medium mt-2">Ready for pickup in ~5 minutes</p>
+                  </div>
+                  <div><label className={labelClass}>Order Notes (optional)</label><textarea value={form.notes} onChange={(e) => setField("notes", e.target.value)} placeholder="Any special instructions..." rows={3} className={inputClass} /></div>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <label className={labelClass}>Street Address *</label>
+                      <input
+                        type="text"
+                        value={form.address}
+                        onChange={(e) => { setField("address", e.target.value); searchAddress(e.target.value); }}
+                        onFocus={() => { if (addressSuggestions.length > 0) setShowSuggestions(true); }}
+                        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                        placeholder="Start typing your address..."
+                        autoComplete="street-address"
+                        className={inputClass}
+                      />
+                      {showSuggestions && addressSuggestions.length > 0 && (
+                        <div className="absolute z-50 w-full mt-1 bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+                          {addressSuggestions.map((s, i) => (
+                            <button
+                              key={i}
+                              className="w-full text-left px-4 py-3 text-sm text-[#231F20] hover:bg-[#FFFFFF] transition-colors border-b border-[#231F20]/10 last:border-b-0"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => {
+                                setForm((prev) => ({ ...prev, address: s.address, city: s.city, state: s.state, zip: s.zip }));
+                                setShowSuggestions(false);
+                                setAddressSuggestions([]);
+                              }}
+                            >
+                              <span className="flex items-center gap-2">
+                                <MapPin className="h-3.5 w-3.5 text-[#126A44] flex-shrink-0" />
+                                <span className="truncate">{s.display}</span>
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div><label className={labelClass}>Apartment, suite, etc.</label><input type="text" value={form.apartment} onChange={(e) => setField("apartment", e.target.value)} placeholder="Apt 4B" autoComplete="address-line2" className={inputClass} /></div>
+                    <div className="grid sm:grid-cols-3 gap-4">
+                      <div><label className={labelClass}>City *</label><input type="text" value={form.city} onChange={(e) => setField("city", e.target.value)} placeholder="Spring Hill" autoComplete="address-level2" className={inputClass} /></div>
+                      <div><label className={labelClass}>State *</label><input type="text" value={form.state} onChange={(e) => setField("state", e.target.value)} placeholder="FL" autoComplete="address-level1" className={inputClass} /></div>
+                      <div><label className={labelClass}>ZIP Code *</label><input type="text" value={form.zip} onChange={(e) => setField("zip", e.target.value)} placeholder="34609" autoComplete="postal-code" className={inputClass} /></div>
+                    </div>
+                    <div><label className={labelClass}>Order Notes (optional)</label><textarea value={form.notes} onChange={(e) => setField("notes", e.target.value)} placeholder="Any special instructions..." rows={3} className={inputClass} /></div>
+                  </div>
+
+                  {/* Shipping Rate Selection */}
+                  {form.address && form.city && form.state && form.zip && (
+                    <div className="mt-6 border-t border-[#231F20]/10 pt-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-[#231F20]">Shipping Method</h3>
                         <button
-                          key={i}
-                          className="w-full text-left px-4 py-3 text-sm text-[#231F20] hover:bg-[#FFFFFF] transition-colors border-b border-[#231F20]/10 last:border-b-0"
-                          onMouseDown={(e) => e.preventDefault()}
-                          onClick={() => {
-                            setForm((prev) => ({ ...prev, address: s.address, city: s.city, state: s.state, zip: s.zip }));
-                            setShowSuggestions(false);
-                            setAddressSuggestions([]);
-                          }}
+                          onClick={() => fetchShippingRates({ address: form.address, apartment: form.apartment, city: form.city, state: form.state, zip: form.zip })}
+                          disabled={ratesLoading}
+                          className="text-sm text-[#126A44] hover:text-[#58BA49] font-medium transition-colors"
                         >
-                          <span className="flex items-center gap-2">
-                            <MapPin className="h-3.5 w-3.5 text-[#126A44] flex-shrink-0" />
-                            <span className="truncate">{s.display}</span>
-                          </span>
+                          {ratesLoading ? "Loading..." : shippingRates.length > 0 ? "Refresh Rates" : "Get Shipping Rates"}
                         </button>
-                      ))}
+                      </div>
+
+                      {ratesLoading && (
+                        <div className="flex items-center gap-3 py-6 justify-center">
+                          <div className="h-5 w-5 border-2 border-[#B3D335] border-t-transparent rounded-full animate-spin" />
+                          <span className="text-sm text-[#231F20]">Fetching USPS rates...</span>
+                        </div>
+                      )}
+
+                      {ratesError && <p className="text-red-500 text-sm mb-3">{ratesError}</p>}
+
+                      {!ratesLoading && shippingRates.length === 0 && !ratesError && (
+                        <p className="text-[#231F20]/60 text-sm">Click &quot;Get Shipping Rates&quot; to see available USPS shipping options for your address.</p>
+                      )}
+
+                      {!ratesLoading && shippingRates.length > 0 && (
+                        <div className="space-y-2">
+                          {shippingRates.map((rate) => (
+                            <button
+                              key={rate.id}
+                              onClick={() => setSelectedRateId(rate.id)}
+                              className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all text-left ${
+                                selectedRateId === rate.id
+                                  ? "border-[#B3D335] bg-[#B3D335]/5"
+                                  : "border-[#231F20]/10 hover:border-[#231F20]/30"
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedRateId === rate.id ? "border-[#B3D335]" : "border-[#231F20]/30"}`}>
+                                  {selectedRateId === rate.id && <div className="w-2.5 h-2.5 rounded-full bg-[#B3D335]" />}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-[#231F20] text-sm">{rate.service_level}</p>
+                                  {rate.estimated_days && (
+                                    <p className="text-xs text-[#231F20]/60">{rate.estimated_days} business day{rate.estimated_days !== 1 ? "s" : ""}</p>
+                                  )}
+                                  {rate.duration_terms && !rate.estimated_days && (
+                                    <p className="text-xs text-[#231F20]/60">{rate.duration_terms}</p>
+                                  )}
+                                </div>
+                              </div>
+                              <span className="font-semibold text-[#231F20]">${rate.amount}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
-                </div>
-                <div><label className={labelClass}>Apartment, suite, etc.</label><input type="text" value={form.apartment} onChange={(e) => setField("apartment", e.target.value)} placeholder="Apt 4B" autoComplete="address-line2" className={inputClass} /></div>
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <div><label className={labelClass}>City *</label><input type="text" value={form.city} onChange={(e) => setField("city", e.target.value)} placeholder="Spring Hill" autoComplete="address-level2" className={inputClass} /></div>
-                  <div><label className={labelClass}>State *</label><input type="text" value={form.state} onChange={(e) => setField("state", e.target.value)} placeholder="FL" autoComplete="address-level1" className={inputClass} /></div>
-                  <div><label className={labelClass}>ZIP Code *</label><input type="text" value={form.zip} onChange={(e) => setField("zip", e.target.value)} placeholder="34609" autoComplete="postal-code" className={inputClass} /></div>
-                </div>
-                <div><label className={labelClass}>Order Notes (optional)</label><textarea value={form.notes} onChange={(e) => setField("notes", e.target.value)} placeholder="Any special instructions..." rows={3} className={inputClass} /></div>
-              </div>
+                </>
+              )}
+
               <div className="mt-8 flex justify-between">
                 <button onClick={() => setStep("info")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back</button>
                 <button onClick={() => setStep("payment")} disabled={!canProceedShipping} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedShipping ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>Continue to Payment</button>
@@ -1915,14 +2348,23 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                 <p className="text-[#231F20] text-sm">{form.email} &bull; {form.phone}</p>
               </div>
 
-              {/* Shipping summary */}
+              {/* Shipping/Pickup summary */}
               <div className="mb-4 p-4 bg-[#FFFFFF] rounded-xl">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold text-[#231F20]">Shipping Address</h3>
+                  <h3 className="text-sm font-semibold text-[#231F20]">{isPickup ? "Pickup Location" : "Shipping Address"}</h3>
                   <button onClick={() => setStep("shipping")} className="text-xs text-[#B3D335] hover:text-[#126A44]">Edit</button>
                 </div>
-                <p className="text-[#FFFFFF] text-sm">{form.address}{form.apartment ? `, ${form.apartment}` : ""}</p>
-                <p className="text-[#231F20] text-sm">{form.city}, {form.state} {form.zip}</p>
+                {isPickup ? (
+                  <>
+                    <p className="text-[#231F20] text-sm font-medium">{fulfillment === "pickup_west" ? "West Location" : "East Location"}</p>
+                    <p className="text-[#231F20] text-sm">{fulfillment === "pickup_west" ? "6175 Deltona Blvd, Suite 104, Spring Hill, FL 34606" : "14312 Spring Hill Dr, Spring Hill, FL 34609"}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-[#FFFFFF] text-sm">{form.address}{form.apartment ? `, ${form.apartment}` : ""}</p>
+                    <p className="text-[#231F20] text-sm">{form.city}, {form.state} {form.zip}</p>
+                  </>
+                )}
               </div>
 
               {/* Items */}
@@ -2055,7 +2497,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                 {promoApplied ? (
                   <button onClick={() => { setPromoApplied(false); setPromoCode(""); }} className="px-4 py-2 text-sm font-medium text-[#231F20] border border-[#231F20]/20 rounded-lg hover:bg-[#231F20]/5 transition-colors">Remove</button>
                 ) : (
-                  <button onClick={applyPromo} className="px-4 py-2 text-sm font-medium bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg transition-colors">Apply</button>
+                  <button onClick={applyPromo} disabled={promoLoading} className="px-4 py-2 text-sm font-medium bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg transition-colors disabled:opacity-50">{promoLoading ? "Checking..." : "Apply"}</button>
                 )}
               </div>
               {promoError && <p className="text-red-500 text-xs mt-1">{promoError}</p>}
@@ -2064,8 +2506,8 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
             <div className="border-t border-[#231F20]/20 pt-4 space-y-2">
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Subtotal</span><span className="text-[#231F20]">{formatPrice(subtotal)}</span></div>
               {promoApplied && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Discount (15%)</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
-              <div className="flex justify-between text-sm"><span className="text-[#231F20]">Shipping</span><span className="text-[#231F20]">{formatPrice(shippingCost)}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-[#231F20]">Tax (7%)</span><span className="text-[#231F20]">{formatPrice(tax)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-[#231F20]">{isPickup ? "Pickup" : `Shipping${selectedRate ? ` (${selectedRate.service_level})` : ""}`}</span><span className="text-[#231F20]">{isPickup ? "FREE" : (selectedRate ? formatPrice(shippingCost) : "Select a rate")}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-[#231F20]">Tax ({(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 2)}%)</span><span className="text-[#231F20]">{formatPrice(tax)}</span></div>
               <div className="border-t border-[#231F20]/20 pt-3 flex justify-between"><span className="text-[#231F20] font-semibold">Total</span><span className="text-xl font-bold text-[#231F20]">{formatPrice(total)}</span></div>
             </div>
           </div>
@@ -3423,6 +3865,43 @@ function App() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
 
+  // Fulfillment state
+  const [fulfillment, setFulfillment] = useState<FulfillmentType | null>(() => {
+    const stored = loadFulfillment();
+    return stored ? stored.fulfillment : null;
+  });
+  const [showAgeGate, setShowAgeGate] = useState(() => !loadFulfillment());
+  const [showFulfillmentModal, setShowFulfillmentModal] = useState(false);
+  const [switchNotification, setSwitchNotification] = useState<{ removedItems: string[]; newLabel: string } | null>(null);
+
+  const handleAgeGateComplete = useCallback((f: FulfillmentType) => {
+    setFulfillment(f);
+    saveFulfillment({ fulfillment: f, timestamp: Date.now() });
+    setShowAgeGate(false);
+  }, []);
+
+  const handleFulfillmentSwitch = useCallback((newF: FulfillmentType) => {
+    if (newF === fulfillment) return;
+    // Cart protection: re-check every item against new location stock
+    const removedNames: string[] = [];
+    const keptItems: CartItem[] = [];
+    cart.forEach((item) => {
+      const newStock = getStockForFulfillment(item.product, newF);
+      if (newStock > 0) {
+        keptItems.push(item);
+      } else {
+        removedNames.push(item.product.online_name || item.product.name);
+      }
+    });
+    if (removedNames.length > 0) {
+      setSwitchNotification({ removedItems: removedNames, newLabel: getFulfillmentLabel(newF) });
+      setCart(keptItems);
+      saveCart(keptItems);
+    }
+    setFulfillment(newF);
+    saveFulfillment({ fulfillment: newF, timestamp: Date.now() });
+  }, [fulfillment, cart]);
+
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const updateCart = useCallback((newCart: CartItem[]) => {
@@ -3500,15 +3979,22 @@ function App() {
   }, [route]);
 
   useEffect(() => {
-    // Load from localStorage cache first for instant display — no TTL, always use if available
+    // Load from localStorage cache for instant display — 60s TTL to avoid stale images
     let hadCachedData = false;
     try {
       const cached = localStorage.getItem("thd-products-cache");
       if (cached) {
-        const { products: cp, categories: cc } = JSON.parse(cached);
-        if (cp && cp.length > 0) {
-          setProducts(cp);
-          setCategories(cc);
+        const parsed = JSON.parse(cached);
+        const age = Date.now() - (parsed.timestamp || 0);
+        if (parsed.products && parsed.products.length > 0 && age < 60000) {
+          setProducts(parsed.products);
+          setCategories(parsed.categories);
+          setLoading(false);
+          hadCachedData = true;
+        } else if (parsed.products && parsed.products.length > 0) {
+          // Cache is stale but use as fallback while fetching fresh data
+          setProducts(parsed.products);
+          setCategories(parsed.categories);
           setLoading(false);
           hadCachedData = true;
         }
@@ -3590,36 +4076,41 @@ function App() {
     return map;
   }, [products]);
 
+  const stockForFulfillment = useCallback((p: Product) => fulfillment ? getStockForFulfillment(p, fulfillment) : p.stock, [fulfillment]);
+
   const homeCategories = useMemo(() => {
     const preferred = ["Flower", "Concentrates", "Edibles", "Topicals", "Tinctures", "Vapor", "Accessories", "Pets"];
     return preferred.filter((c) => {
       const prods = productsByCategory[c] || [];
-      return prods.some(p => p.stock > 0);
+      return prods.some(p => stockForFulfillment(p) > 0);
     });
-  }, [productsByCategory]);
+  }, [productsByCategory, stockForFulfillment]);
 
   const shell = (content: React.ReactNode) => (
     <div className="min-h-screen bg-[#FFFFFF]">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-0 focus:top-0 focus:z-[9999] focus:bg-[#FFFFFF] focus:px-4 focus:py-2 focus:text-[#231F20] focus:underline">Skip to main content</a>
       <StickyTopBar />
-      <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} />
+      <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} fulfillment={fulfillment} onFulfillmentClick={() => setShowFulfillmentModal(true)} />
       <main id="main-content">{content}</main>
       <SiteFooter />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} products={products} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />
       <ChatbotBud products={products} />
+      {showAgeGate && <BudAgeGatePopup onComplete={handleAgeGateComplete} />}
+      {showFulfillmentModal && <FulfillmentSelectorModal currentFulfillment={fulfillment || "ship"} onSelect={handleFulfillmentSwitch} onClose={() => setShowFulfillmentModal(false)} />}
+      {switchNotification && <FulfillmentSwitchNotification removedItems={switchNotification.removedItems} newLabel={switchNotification.newLabel} onClose={() => setSwitchNotification(null)} />}
     </div>
   );
 
-  if (route.startsWith("/product/")) return shell(<ProductDetail productId={route.replace("/product/", "")} products={products} onAddToCart={addToCart} />);
+  if (route.startsWith("/product/")) return shell(<ProductDetail productId={route.replace("/product/", "")} products={products} onAddToCart={addToCart} fulfillment={fulfillment} />);
   if (route.startsWith("/shop")) {
     const catSlug = route.replace("/shop/", "").replace("/shop", "");
     return shell(loading
       ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
       : fetchError ? <div className="flex flex-col items-center justify-center py-24"><AlertCircle className="h-12 w-12 text-[#D9A32C] mb-4" /><p className="text-[#231F20] text-lg font-medium mb-2">Unable to load products</p><p className="text-[#231F20] text-sm mb-4">Please check your connection and try again.</p><button onClick={retryFetch} className="px-6 py-3 bg-[#B3D335] hover:bg-[#126A44] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors">Try Again</button></div>
-      : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} onAddToCart={(p) => addToCart(p, 1)} />);
+      : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} />);
   }
-  if (route === "/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />);
+  if (route === "/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} fulfillment={fulfillment} />);
   if (route === "/about") return shell(<AboutPage />);
   if (route === "/terms") return shell(<TermsPage />);
   if (route === "/privacy") return shell(<PrivacyPage />);
@@ -3636,7 +4127,7 @@ function App() {
     <div className="min-h-screen bg-[#FFFFFF]">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-0 focus:top-0 focus:z-[9999] focus:bg-[#FFFFFF] focus:px-4 focus:py-2 focus:text-[#231F20] focus:underline">Skip to main content</a>
       <StickyTopBar />
-      <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} />
+      <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} fulfillment={fulfillment} onFulfillmentClick={() => setShowFulfillmentModal(true)} />
       <main id="main-content">
       <HeroSection />
       <TrustStrip />
@@ -3651,11 +4142,11 @@ function App() {
         </div>
       ) : (
         <>
-          <ShopByCategory categories={categories} productsByCategory={productsByCategory} />
+          <ShopByCategory categories={categories} productsByCategory={productsByCategory} fulfillment={fulfillment} />
           <ShopByFeeling products={products} />
           {/* Product carousels by category */}
           {homeCategories.map((cat) => {
-            const inStock = (productsByCategory[cat] || []).filter(p => p.stock > 0);
+            const inStock = (productsByCategory[cat] || []).filter(p => stockForFulfillment(p) > 0);
             const catProducts = inStock.filter(p => p.image_url && !p.image_url.includes('product-placeholder'));
             const displayProducts = catProducts.length >= 4 ? catProducts.slice(0, 4) : inStock.slice(0, 4);
             if (displayProducts.length === 0) return null;
@@ -3668,7 +4159,7 @@ function App() {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                     {displayProducts.map((product) => (
-                      <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => addToCart(p, 1)} />
+                      <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => addToCart(p, 1)} fulfillment={fulfillment} />
                     ))}
                   </div>
                 </div>
@@ -3686,6 +4177,9 @@ function App() {
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} products={products} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />
       <ChatbotBud products={products} />
+      {showAgeGate && <BudAgeGatePopup onComplete={handleAgeGateComplete} />}
+      {showFulfillmentModal && <FulfillmentSelectorModal currentFulfillment={fulfillment || "ship"} onSelect={handleFulfillmentSwitch} onClose={() => setShowFulfillmentModal(false)} />}
+      {switchNotification && <FulfillmentSwitchNotification removedItems={switchNotification.removedItems} newLabel={switchNotification.newLabel} onClose={() => setSwitchNotification(null)} />}
     </div>
   );
 }
