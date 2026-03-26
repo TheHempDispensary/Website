@@ -178,6 +178,20 @@ function isLeafLife(product: Product): boolean {
   return LEAFLIFE_KEYWORDS.some(kw => name.includes(kw));
 }
 
+function enforceLeafLifePriceFloor(product: Product): Product {
+  const sku = product.sku || "";
+  if (!sku.startsWith("LF-")) return product;
+  const skuUpper = sku.toUpperCase();
+  const nameUpper = product.name.toUpperCase();
+  let minPrice = 0;
+  if (skuUpper.endsWith("-28") || nameUpper.includes("28 GRAM")) minPrice = 10000;
+  else if (skuUpper.endsWith("-14") || nameUpper.includes("14 GRAM")) minPrice = 9500;
+  else if (skuUpper.endsWith("-7 G") || skuUpper.endsWith("-7G") || nameUpper.includes("7 GRAM")) minPrice = 5500;
+  else if (skuUpper.endsWith("-3.5") || nameUpper.includes("3.5 GRAM")) minPrice = 2500;
+  if (minPrice > 0 && product.price < minPrice) return { ...product, price: minPrice };
+  return product;
+}
+
 function titleCase(str: string): string {
   const KEEP_UPPER = /\b(CBC|CBD|CBG|CBN|CBT|THC)\b/gi;
   return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).replace(KEEP_UPPER, m => m.toUpperCase());
@@ -3988,7 +4002,7 @@ function App() {
         const parsed = JSON.parse(cached);
         const age = Date.now() - (parsed.timestamp || 0);
         if (parsed.products && parsed.products.length > 0 && age < 60000) {
-          setProducts(parsed.products);
+          setProducts(parsed.products.map(enforceLeafLifePriceFloor));
           setCategories(parsed.categories);
           setLoading(false);
           hadCachedData = true;
@@ -4013,11 +4027,12 @@ function App() {
         try {
           const r = await fetchWithTimeout(`${API_URL}/api/ecommerce/products?limit=1000`, 20000);
           const data: ProductsResponse = await r.json();
-          setProducts(data.products);
+          const enforced = data.products.map(enforceLeafLifePriceFloor);
+          setProducts(enforced);
           setCategories(data.categories);
           setLoading(false);
           setFetchError(false);
-          try { localStorage.setItem("thd-products-cache", JSON.stringify({ products: data.products, categories: data.categories, timestamp: Date.now() })); } catch { /* quota */ }
+          try { localStorage.setItem("thd-products-cache", JSON.stringify({ products: enforced, categories: data.categories, timestamp: Date.now() })); } catch { /* quota */ }
           return;
         } catch (err) {
           console.error(`Failed to load products (attempt ${attempt + 1}/${retries + 1}):`, err);
@@ -4047,11 +4062,12 @@ function App() {
         try {
           const r = await fetchWithTimeout2(`${API_URL}/api/ecommerce/products?limit=1000`, 20000);
           const data: ProductsResponse = await r.json();
-          setProducts(data.products);
+          const enforced = data.products.map(enforceLeafLifePriceFloor);
+          setProducts(enforced);
           setCategories(data.categories);
           setLoading(false);
           setFetchError(false);
-          try { localStorage.setItem("thd-products-cache", JSON.stringify({ products: data.products, categories: data.categories, timestamp: Date.now() })); } catch { /* quota */ }
+          try { localStorage.setItem("thd-products-cache", JSON.stringify({ products: enforced, categories: data.categories, timestamp: Date.now() })); } catch { /* quota */ }
           return;
         } catch (err) {
           console.error(`Retry failed (attempt ${attempt + 1}/3):`, err);
