@@ -1,1 +1,58 @@
+# Category redirects with query strings
+/flower?*        /shop/flower    301
+/edibles?*       /shop/edibles   301
+/tinctures?*     /shop/tinctures 301
+/concentrates?*  /shop/concentrates 301
+/gummies?*       /shop/edibles   301
+/misc?*          /                301
+/pre-roll-joints?* /             301
+/on-sale?*       /                301
+/pets?*          /shop/pets       301
+
+# Category slug redirects (no query string)
+/flower          /shop/flower       301
+/edibles         /shop/edibles      301
+/tinctures       /shop/tinctures    301
+/concentrates    /shop/concentrates 301
+/gummies         /shop/edibles      301
+/misc            /                  301
+/pre-roll-joints /                  301
+/on-sale         /                  301
+/pets            /shop/pets         301
+
+# Old store paths
+/store/*         /                  301
+
+# Old single-word pages
+/bud             /                  301
+/energy          /                  301
+/chocolate       /                  301
+/5-gram          /                  301
+/100-ounces      /                  301
+/mood-enhancement /                 301
+/clothing        /                  301
+/treats          /                  301
+/cbg             /                  301
+/help-save-hemp  /                  301
+/newpage95b2d746 /                  301
+/affiliate-program /               301
+/exotic_thca_flower /              301
+/home            /                  301
+/thca            /shop/flower       301
+/cbd/cbg/vapor   /shop/vapor        301
+/cbd/cbg/2-gram-disposable /       301
+
+# Old product URLs (discontinued products -> homepage)
+/product/Delta8THCChocolateBar/1941                                    /  301
+/product/diamonds-thca-concentrate/1986                                /  301
+/product/delta-9-thc-35mg-gummies-watermelon-flavor-dye-free/1652      /  301
+/product/delta-9-thc-lemonade/1650                                     /  301
+/product/3000mgCBD-CBG-CBNTincture/1418                                /  301
+/product/delta-9-thc-coconut-cacao-bites/2103                          /  301
+/product/chimera-thca-pre-rolled-joint/2251                            /  301
+
+# Alias pages
+/shipping-policy /shipping          301
+
+# SPA fallback (must be last)
 /*    /index.html   200
