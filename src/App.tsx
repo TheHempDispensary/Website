@@ -1541,7 +1541,8 @@ function ChatbotBud({ products }: { products: Product[] }) {
 /* ======================== CHECKOUT PAGE (Preserved) ======================== */
 
 function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (productId: string, qty: number) => void; onRemove: (productId: string) => void; onClear: () => void }) {
-  const [step, setStep] = useState<"info" | "shipping" | "payment" | "confirmed">("info");
+  const [step, setStep] = useState<"info" | "fulfillment" | "shipping" | "payment" | "confirmed">("info");
+  const [fulfillment, setFulfillment] = useState<"ship" | "pickup-west" | "pickup-east">("ship");
   const [submitting, setSubmitting] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
   const [paymentError, setPaymentError] = useState("");
@@ -1566,9 +1567,12 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const discount = promoApplied ? Math.round(subtotal * 0.15) : 0;
   const discountedSubtotal = subtotal - discount;
-  const shippingCost = 799;
+  const isPickup = fulfillment.startsWith("pickup");
+  const shippingCost = isPickup ? 0 : 799;
   const tax = Math.round(discountedSubtotal * 0.07);
   const total = discountedSubtotal + shippingCost + tax;
+  const pickupLocationName = fulfillment === "pickup-west" ? "Spring Hill West" : fulfillment === "pickup-east" ? "Spring Hill East" : "";
+  const pickupAddress = fulfillment === "pickup-west" ? "6175 Deltona Blvd, Ste 104, Spring Hill, FL 34606" : fulfillment === "pickup-east" ? "14312 Spring Hill Dr, Spring Hill, FL 34609" : "";
 
   const applyPromo = () => {
     const code = promoCode.trim().toUpperCase();
@@ -1733,7 +1737,11 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
           <div className="space-y-3 text-sm text-[#231F20]">
             <div className="flex gap-3"><Mail className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>A confirmation email will be sent to <span className="font-semibold text-[#231F20]">{form.email}</span></p></div>
             <div className="flex gap-3"><Package className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>Your order will be prepared and packaged</p></div>
-            <div className="flex gap-3"><Truck className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>You'll receive shipping details once dispatched</p></div>
+            {isPickup ? (
+              <div className="flex gap-3"><MapPin className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>Pick up at <strong>{pickupLocationName}</strong> — ready in about 5 minutes!</p></div>
+            ) : (
+              <div className="flex gap-3"><Truck className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>You'll receive shipping details once dispatched</p></div>
+            )}
           </div>
         </div>
         <div className="flex gap-3 justify-center">
@@ -1744,7 +1752,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
   }
 
   const canProceedInfo = form.firstName && form.lastName && form.email && form.phone;
-  const canProceedShipping = form.address && form.city && form.state && form.zip;
+  const canProceedShipping = isPickup || (form.address && form.city && form.state && form.zip);
 
   const handlePlaceOrder = async () => {
     if (!cloverRef.current) {
@@ -1774,7 +1782,9 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
       // Step 2: Send token + order data to backend for charge + order creation
       const orderData = {
         customer: { first_name: form.firstName, last_name: form.lastName, email: form.email, phone: form.phone },
-        shipping_address: { address: form.address, apartment: form.apartment, city: form.city, state: form.state, zip: form.zip },
+        shipping_address: isPickup ? null : { address: form.address, apartment: form.apartment, city: form.city, state: form.state, zip: form.zip },
+        fulfillment_type: fulfillment,
+        pickup_location: isPickup ? pickupLocationName : null,
         items: cart.map((item) => ({ product_id: item.product.id, name: item.product.name, sku: item.product.sku, price: item.product.price, quantity: item.quantity })),
         subtotal, discount, shipping_cost: shippingCost, tax, total, notes: form.notes,
         promo_code: promoApplied ? "FIRST15" : null,
@@ -1803,11 +1813,18 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
     setSubmitting(false);
   };
 
-  const steps = [
-    { key: "info", label: "Contact", icon: Phone },
-    { key: "shipping", label: "Shipping", icon: Truck },
-    { key: "payment", label: "Payment", icon: CreditCard },
-  ] as const;
+  const steps = isPickup
+    ? [
+        { key: "info" as const, label: "Contact", icon: Phone },
+        { key: "fulfillment" as const, label: "Pickup", icon: MapPin },
+        { key: "payment" as const, label: "Payment", icon: CreditCard },
+      ]
+    : [
+        { key: "info" as const, label: "Contact", icon: Phone },
+        { key: "fulfillment" as const, label: "Method", icon: Truck },
+        { key: "shipping" as const, label: "Address", icon: MapPin },
+        { key: "payment" as const, label: "Payment", icon: CreditCard },
+      ];
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -1843,12 +1860,66 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
               </div>
               <div className="mt-8 flex justify-between">
                 <button onClick={() => navigate("/shop")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Shop</button>
-                <button onClick={() => setStep("shipping")} disabled={!canProceedInfo} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedInfo ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>Continue to Shipping</button>
+                <button onClick={() => setStep("fulfillment")} disabled={!canProceedInfo} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedInfo ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>Continue</button>
               </div>
             </div>
           )}
 
-          {step === "shipping" && (
+          {step === "fulfillment" && (
+            <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/20 p-6 sm:p-8">
+              <h2 className="text-xl font-bold text-[#231F20] mb-6">How would you like to get your order?</h2>
+              <div className="space-y-3">
+                {/* Ship to Me */}
+                <button
+                  onClick={() => setFulfillment("ship")}
+                  className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
+                    fulfillment === "ship" ? "border-[#B3D335] bg-[#B3D335]/10" : "border-[#231F20]/15 hover:border-[#231F20]/30"
+                  }`}
+                >
+                  <Truck className={`h-6 w-6 flex-shrink-0 ${fulfillment === "ship" ? "text-[#126A44]" : "text-[#231F20]/50"}`} />
+                  <div className="flex-1">
+                    <p className="font-semibold text-[#231F20]">Ship to Me</p>
+                    <p className="text-sm text-[#231F20]/60">$7.99 flat rate &bull; Ships in 1–2 business days</p>
+                  </div>
+                  {fulfillment === "ship" && <CheckCircle className="h-5 w-5 text-[#126A44]" />}
+                </button>
+                {/* Pickup West */}
+                <button
+                  onClick={() => setFulfillment("pickup-west")}
+                  className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
+                    fulfillment === "pickup-west" ? "border-[#B3D335] bg-[#B3D335]/10" : "border-[#231F20]/15 hover:border-[#231F20]/30"
+                  }`}
+                >
+                  <MapPin className={`h-6 w-6 flex-shrink-0 ${fulfillment === "pickup-west" ? "text-[#126A44]" : "text-[#231F20]/50"}`} />
+                  <div className="flex-1">
+                    <p className="font-semibold text-[#231F20]">Pickup — Spring Hill West</p>
+                    <p className="text-sm text-[#231F20]/60">FREE &bull; 6175 Deltona Blvd, Ste 104 &bull; Ready in ~5 min</p>
+                  </div>
+                  {fulfillment === "pickup-west" && <CheckCircle className="h-5 w-5 text-[#126A44]" />}
+                </button>
+                {/* Pickup East */}
+                <button
+                  onClick={() => setFulfillment("pickup-east")}
+                  className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
+                    fulfillment === "pickup-east" ? "border-[#B3D335] bg-[#B3D335]/10" : "border-[#231F20]/15 hover:border-[#231F20]/30"
+                  }`}
+                >
+                  <MapPin className={`h-6 w-6 flex-shrink-0 ${fulfillment === "pickup-east" ? "text-[#126A44]" : "text-[#231F20]/50"}`} />
+                  <div className="flex-1">
+                    <p className="font-semibold text-[#231F20]">Pickup — Spring Hill East</p>
+                    <p className="text-sm text-[#231F20]/60">FREE &bull; 14312 Spring Hill Dr &bull; Ready in ~5 min</p>
+                  </div>
+                  {fulfillment === "pickup-east" && <CheckCircle className="h-5 w-5 text-[#126A44]" />}
+                </button>
+              </div>
+              <div className="mt-8 flex justify-between">
+                <button onClick={() => setStep("info")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back</button>
+                <button onClick={() => setStep(isPickup ? "payment" : "shipping")} className="px-8 py-3 rounded-full font-medium transition-all bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]">Continue</button>
+              </div>
+            </div>
+          )}
+
+          {step === "shipping" && !isPickup && (
             <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/20 p-6 sm:p-8">
               <h2 className="text-xl font-bold text-[#231F20] mb-6">Shipping Address</h2>
               <div className="space-y-4">
@@ -1895,7 +1966,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                 <div><label className={labelClass}>Order Notes (optional)</label><textarea value={form.notes} onChange={(e) => setField("notes", e.target.value)} placeholder="Any special instructions..." rows={3} className={inputClass} /></div>
               </div>
               <div className="mt-8 flex justify-between">
-                <button onClick={() => setStep("info")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back</button>
+                <button onClick={() => setStep("fulfillment")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back</button>
                 <button onClick={() => setStep("payment")} disabled={!canProceedShipping} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedShipping ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>Continue to Payment</button>
               </div>
             </div>
@@ -1915,14 +1986,24 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
                 <p className="text-[#231F20] text-sm">{form.email} &bull; {form.phone}</p>
               </div>
 
-              {/* Shipping summary */}
+              {/* Fulfillment / Shipping summary */}
               <div className="mb-4 p-4 bg-[#FFFFFF] rounded-xl">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold text-[#231F20]">Shipping Address</h3>
-                  <button onClick={() => setStep("shipping")} className="text-xs text-[#B3D335] hover:text-[#126A44]">Edit</button>
+                  <h3 className="text-sm font-semibold text-[#231F20]">{isPickup ? "Pickup Location" : "Shipping Address"}</h3>
+                  <button onClick={() => setStep(isPickup ? "fulfillment" : "shipping")} className="text-xs text-[#B3D335] hover:text-[#126A44]">Edit</button>
                 </div>
-                <p className="text-[#FFFFFF] text-sm">{form.address}{form.apartment ? `, ${form.apartment}` : ""}</p>
-                <p className="text-[#231F20] text-sm">{form.city}, {form.state} {form.zip}</p>
+                {isPickup ? (
+                  <>
+                    <p className="text-[#231F20] text-sm font-medium">{pickupLocationName}</p>
+                    <p className="text-[#231F20] text-sm">{pickupAddress}</p>
+                    <p className="text-[#126A44] text-xs mt-1 font-medium">FREE pickup — Ready in ~5 minutes</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-[#231F20] text-sm">{form.address}{form.apartment ? `, ${form.apartment}` : ""}</p>
+                    <p className="text-[#231F20] text-sm">{form.city}, {form.state} {form.zip}</p>
+                  </>
+                )}
               </div>
 
               {/* Items */}
@@ -2007,7 +2088,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
               )}
 
               <div className="mt-6 flex justify-between">
-                <button onClick={() => setStep("shipping")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back</button>
+                <button onClick={() => setStep(isPickup ? "fulfillment" : "shipping")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back</button>
                 <button
                   onClick={handlePlaceOrder}
                   disabled={submitting}
@@ -2064,7 +2145,7 @@ function CheckoutPage({ cart, onClear }: { cart: CartItem[]; onUpdateQty: (produ
             <div className="border-t border-[#231F20]/20 pt-4 space-y-2">
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Subtotal</span><span className="text-[#231F20]">{formatPrice(subtotal)}</span></div>
               {promoApplied && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Discount (15%)</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
-              <div className="flex justify-between text-sm"><span className="text-[#231F20]">Shipping</span><span className="text-[#231F20]">{formatPrice(shippingCost)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-[#231F20]">{isPickup ? "Pickup" : "Shipping"}</span><span className={`${isPickup ? "text-[#126A44] font-medium" : "text-[#231F20]"}`}>{isPickup ? "FREE" : formatPrice(shippingCost)}</span></div>
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Tax (7%)</span><span className="text-[#231F20]">{formatPrice(tax)}</span></div>
               <div className="border-t border-[#231F20]/20 pt-3 flex justify-between"><span className="text-[#231F20] font-semibold">Total</span><span className="text-xl font-bold text-[#231F20]">{formatPrice(total)}</span></div>
             </div>
