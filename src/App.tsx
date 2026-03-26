@@ -1115,6 +1115,99 @@ function ContactPage() {
 }
 
 
+/* ======================== OUR LOCATIONS PAGE ======================== */
+function OurLocationsPage() {
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-16">
+      <h1 className="text-4xl font-bold text-[#231F20] mb-2 text-center">Our Locations</h1>
+      <p className="text-center text-[#231F20]/70 mb-10">Visit us at either of our two Spring Hill, Florida locations.</p>
+      <div className="grid md:grid-cols-2 gap-8">
+        {/* Spring Hill West */}
+        <div className="bg-[#FFFFFF] rounded-xl border border-[#231F20]/15 overflow-hidden">
+          <iframe
+            title="The Hemp Dispensary - Spring Hill West"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3494.7!2d-82.5932!3d28.4786!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjjCsDI4JzQzLjAiTiA4MsKwMzUnMzUuNSJX!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus&q=6175+Deltona+Blvd+Suite+104+Spring+Hill+FL+34606"
+            width="100%" height="250" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
+          />
+          <div className="p-6">
+            <h2 className="text-2xl font-bold text-[#231F20] mb-4">Spring Hill West</h2>
+            <div className="space-y-3 text-[#231F20]">
+              <p className="flex items-center gap-3"><MapPin className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /> 6175 Deltona Blvd, Suite 104, Spring Hill, FL 34606</p>
+              <p className="flex items-center gap-3"><Clock className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /> Mon–Fri 6am–12am &nbsp;|&nbsp; Sat–Sun 10am–8pm</p>
+              <p className="flex items-center gap-3"><Phone className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /><a href="tel:+13523405860" className="hover:text-[#126A44] underline">(352) 340-5860</a></p>
+            </div>
+            <div className="mt-5">
+              <a href="https://www.google.com/maps/search/The+Hemp+Dispensary+Cannabis+Spring+Hill+West+6175+Deltona+Blvd" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 bg-[#126A44] text-[#FFFFFF] px-5 py-2 rounded-full font-semibold text-sm hover:bg-[#0e5536] transition-colors">Get Directions <ChevronRight className="h-4 w-4" /></a>
+            </div>
+          </div>
+        </div>
+        {/* Spring Hill East */}
+        <div className="bg-[#FFFFFF] rounded-xl border border-[#231F20]/15 overflow-hidden">
+          <iframe
+            title="The Hemp Dispensary - Spring Hill East"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3494.7!2d-82.5432!3d28.4786!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjjCsDI4JzQzLjAiTiA4MsKwMzInMzUuNSJX!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus&q=14312+Spring+Hill+Dr+Spring+Hill+FL+34609"
+            width="100%" height="250" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
+          />
+          <div className="p-6">
+            <h2 className="text-2xl font-bold text-[#231F20] mb-4">Spring Hill East</h2>
+            <div className="space-y-3 text-[#231F20]">
+              <p className="flex items-center gap-3"><MapPin className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /> 14312 Spring Hill Dr, Spring Hill, FL 34609</p>
+              <p className="flex items-center gap-3"><Clock className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /> Open Daily 6am–10pm</p>
+              <p className="flex items-center gap-3"><Phone className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /><a href="tel:+13525155370" className="hover:text-[#126A44] underline">(352) 515-5370</a></p>
+            </div>
+            <div className="mt-5">
+              <a href="https://www.google.com/maps/search/The+Hemp+Dispensary+Cannabis+Spring+Hill+East+14312+Spring+Hill+Dr" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 bg-[#126A44] text-[#FFFFFF] px-5 py-2 rounded-full font-semibold text-sm hover:bg-[#0e5536] transition-colors">Get Directions <ChevronRight className="h-4 w-4" /></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* JSON-LD for the locations page */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "The Hemp Dispensary",
+        "url": "https://www.thehempdispensary.com",
+        "location": [
+          { "@type": "LocalBusiness", "name": "The Hemp Dispensary - Spring Hill West", "address": { "@type": "PostalAddress", "streetAddress": "6175 Deltona Blvd, Suite 104", "addressLocality": "Spring Hill", "addressRegion": "FL", "postalCode": "34606" }, "telephone": "+1-352-340-5860" },
+          { "@type": "LocalBusiness", "name": "The Hemp Dispensary - Spring Hill East", "address": { "@type": "PostalAddress", "streetAddress": "14312 Spring Hill Dr", "addressLocality": "Spring Hill", "addressRegion": "FL", "postalCode": "34609" }, "telephone": "+1-352-515-5370" }
+        ]
+      }) }} />
+    </div>
+  );
+}
+
+/* ======================== SHIPPING POLICY PAGE ======================== */
+function ShippingPolicyPage() {
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-16">
+      <h1 className="text-4xl font-bold text-[#231F20] mb-6">Shipping Policy</h1>
+      <div className="prose prose-lg text-[#231F20]">
+        <h2 className="text-2xl font-semibold text-[#231F20] mt-6 mb-3">Shipping Rates</h2>
+        <p className="mb-4">Standard shipping is a flat rate of <strong>$7.99</strong> via USPS for all orders within the United States.</p>
+
+        <h2 className="text-2xl font-semibold text-[#231F20] mt-6 mb-3">Processing Time</h2>
+        <p className="mb-4">Most orders are processed and shipped within <strong>1–2 business days</strong>. You will receive a confirmation email with tracking information once your order ships.</p>
+
+        <h2 className="text-2xl font-semibold text-[#231F20] mt-6 mb-3">Delivery Time</h2>
+        <p className="mb-4">Standard delivery typically takes <strong>3–5 business days</strong> after shipment, depending on your location.</p>
+
+        <h2 className="text-2xl font-semibold text-[#231F20] mt-6 mb-3">In-Store Pickup</h2>
+        <p className="mb-4">We also offer <strong>free in-store pickup</strong> at both of our Spring Hill locations. Most pickup orders are ready in about 5 minutes!</p>
+        <ul className="list-disc pl-6 mb-4">
+          <li><strong>Spring Hill West</strong> — 6175 Deltona Blvd, Suite 104, Spring Hill, FL 34606</li>
+          <li><strong>Spring Hill East</strong> — 14312 Spring Hill Dr, Spring Hill, FL 34609</li>
+        </ul>
+
+        <h2 className="text-2xl font-semibold text-[#231F20] mt-6 mb-3">Shipping Restrictions</h2>
+        <p className="mb-4">We ship to all 50 US states in compliance with federal and state hemp regulations. All products contain less than 0.3% Delta-9 THC as required by the 2018 Farm Bill.</p>
+
+        <h2 className="text-2xl font-semibold text-[#231F20] mt-6 mb-3">Questions?</h2>
+        <p className="mb-4">Contact us at <a href="mailto:support@thehempdispensary.com" className="text-[#126A44] underline">support@thehempdispensary.com</a> or call <a href="tel:+13523405860" className="text-[#126A44] underline">(352) 340-5860</a> for any shipping questions.</p>
+      </div>
+    </div>
+  );
+}
+
 /* ======================== FOOTER (Dark Background) ======================== */
 function SiteFooter() {
   return (
@@ -3535,6 +3628,8 @@ function App() {
   if (route === "/account") return shell(<AccountPage />);
   if (route === "/games") return shell(<GamesPage />);
   if (route === "/contact") return shell(<><ContactPage /><LocationSection /></>);
+  if (route === "/our-locations") return shell(<OurLocationsPage />);
+  if (route === "/shipping-policy") return shell(<ShippingPolicyPage />);
 
   // Homepage
   return (

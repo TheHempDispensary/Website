@@ -14,6 +14,120 @@
     <meta property="og:description" content="Spring Hill FL's trusted hemp store. Shop premium flower, edibles, concentrates, vapes, topicals, and tinctures online." />
     <meta property="og:image" content="https://www.thehempdispensary.com/logo.webp" />
     <title>The Hemp Dispensary</title>
+    <!-- LocalBusiness JSON-LD: Spring Hill West -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "The Hemp Dispensary - Spring Hill West",
+      "image": "https://www.thehempdispensary.com/logo.webp",
+      "url": "https://www.thehempdispensary.com",
+      "telephone": "+13523405860",
+      "priceRange": "$$",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "6175 Deltona Blvd, Suite 104",
+        "addressLocality": "Spring Hill",
+        "addressRegion": "FL",
+        "postalCode": "34606",
+        "addressCountry": "US"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 28.4736,
+        "longitude": -82.5371
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "Monday","Tuesday","Wednesday",
+            "Thursday","Friday"
+          ],
+          "opens": "06:00",
+          "closes": "00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Saturday","Sunday"],
+          "opens": "10:00",
+          "closes": "20:00"
+        }
+      ],
+      "sameAs": [
+        "https://www.google.com/maps/search/The+Hemp+Dispensary+Spring+Hill+West"
+      ],
+      "hasMap": "https://maps.google.com/?q=6175+Deltona+Blvd+Suite+104+Spring+Hill+FL+34606",
+      "description": "The Hemp Dispensary Spring Hill West \u2014 lab-tested hemp flower, edibles, concentrates, tinctures, and accessories. Open Mon\u2013Fri 6am\u201312am, Sat\u2013Sun 10am\u20138pm. Spring Hill FL.",
+      "areaServed": "Spring Hill, FL",
+      "currenciesAccepted": "USD",
+      "paymentAccepted": "Cash, Credit Card, Debit Card"
+    }
+    </script>
+    <!-- LocalBusiness JSON-LD: Spring Hill East -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "The Hemp Dispensary - Spring Hill East",
+      "image": "https://www.thehempdispensary.com/logo.webp",
+      "url": "https://www.thehempdispensary.com",
+      "telephone": "+13525155370",
+      "priceRange": "$$",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "14312 Spring Hill Dr",
+        "addressLocality": "Spring Hill",
+        "addressRegion": "FL",
+        "postalCode": "34609",
+        "addressCountry": "US"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 28.4857,
+        "longitude": -82.5124
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "Monday","Tuesday","Wednesday","Thursday",
+            "Friday","Saturday","Sunday"
+          ],
+          "opens": "06:00",
+          "closes": "22:00"
+        }
+      ],
+      "sameAs": [
+        "https://www.google.com/maps/search/The+Hemp+Dispensary+Spring+Hill+East"
+      ],
+      "hasMap": "https://maps.google.com/?q=14312+Spring+Hill+Dr+Spring+Hill+FL+34609",
+      "description": "The Hemp Dispensary Spring Hill East \u2014 lab-tested hemp flower, edibles, concentrates, tinctures, and accessories. Open daily 6am to 10pm. Spring Hill FL.",
+      "areaServed": "Spring Hill, FL",
+      "currenciesAccepted": "USD",
+      "paymentAccepted": "Cash, Credit Card, Debit Card"
+    }
+    </script>
+    <!-- Hash-bang redirect: old site used #!/ URLs that Google still indexes -->
+    <script>
+      (function() {
+        var hash = window.location.hash;
+        if (hash && hash.indexOf('#!/') === 0) {
+          var path = window.location.pathname.replace(/\/+$/, '').toLowerCase();
+          var categoryMap = {
+            '/flower': '/shop/flower',
+            '/edibles': '/shop/edibles',
+            '/tinctures': '/shop/tinctures',
+            '/concentrates': '/shop/concentrates',
+            '/misc': '/',
+            '/pets': '/shop/pets',
+            '/gummies': '/shop/edibles'
+          };
+          var dest = categoryMap[path] || '/';
+          window.location.replace(dest);
+        }
+      })();
+    </script>
     <!-- Critical inline CSS: instant render before React hydrates -->
     <style>
       body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:#FFFFFF;color:#231F20}
