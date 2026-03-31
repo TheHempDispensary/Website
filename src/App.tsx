@@ -628,6 +628,12 @@ function ShopByCategory({ productsByCategory, fulfillment }: { categories: strin
 
   const catIconComponents: Record<string, React.ComponentType<{ className?: string }>> = { Flower: Leaf, Edibles: Candy, Concentrates: Droplets, Vapor: Wind, Topicals: Pipette, Tinctures: Pill, Accessories: Wrench };
 
+  const getCategoryImage = (cat: string): string | null => {
+    const prods = productsByCategory[cat] || [];
+    const withImage = prods.find(p => p.image_url && stockFor(p) > 0);
+    return withImage?.image_url || null;
+  };
+
   return (
     <section className="bg-[#FFFFFF] py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4">
@@ -635,9 +641,16 @@ function ShopByCategory({ productsByCategory, fulfillment }: { categories: strin
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
           {displayCats.map((cat) => {
             const IconComp = catIconComponents[cat] || Package;
+            const catImage = getCategoryImage(cat);
             return (
             <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="bg-[#FFFFFF] rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-all group border border-[#231F20]/15 hover:border-[#B3D335]">
-              <IconComp className="h-10 w-10 text-[#3D8C32] mx-auto mb-3" />
+              {catImage ? (
+                <div className="w-16 h-16 mx-auto mb-3 rounded-xl overflow-hidden">
+                  <img src={catImage} alt={cat} className="w-full h-full object-cover" onError={handleImgError} loading="lazy" />
+                </div>
+              ) : (
+                <IconComp className="h-10 w-10 text-[#3D8C32] mx-auto mb-3" />
+              )}
               <h3 className="text-lg font-semibold text-[#231F20] group-hover:text-[#126A44] transition-colors">{cat}</h3>
               <p className="text-sm text-[#231F20] mt-1">{(productsByCategory[cat] || []).filter(p => stockFor(p) > 0).length} products</p>
             </button>
