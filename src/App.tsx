@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, Package, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, MessageCircle, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, Instagram, Heart, DollarSign, Target, RefreshCw } from "lucide-react";
+import { Search, ShoppingCart, Package, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, MessageCircle, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, Instagram, Heart, DollarSign, RefreshCw } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -2561,7 +2561,6 @@ const WAYS_TO_EARN = [
   { label: "Refer a Friend", pts: 500, icon: Users, desc: "After friend's first purchase" },
   { label: "Birthday Bonus", pts: 100, icon: Cake, desc: "Awarded in your birthday month" },
   { label: "Daily Bud Puppet", pts: 10, icon: Gamepad2, desc: "Play once per day" },
-  { label: "Scratch Card Win", pts: 25, icon: Target, desc: "Win the daily scratch card" },
 ];
 
 function LoyaltyPage() {
@@ -3282,267 +3281,6 @@ function AccountPage() {
 
 /* ======================== GAMES (Preserved) ======================== */
 
-function ScratchCardGame() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isScratching, setIsScratching] = useState(false);
-  const [revealed, setRevealed] = useState(false);
-  const [prize, setPrize] = useState("");
-  const [prizeEmoji, setPrizeEmoji] = useState("");
-  const [scratchPercent, setScratchPercent] = useState(0);
-  const [hasStarted, setHasStarted] = useState(false);
-  const scratchedPixels = useRef(0);
-  const totalPixels = useRef(0);
-
-  // Auth gating state
-  const [scratchPhone, setScratchPhone] = useState("");
-  const [scratchAuthed, setScratchAuthed] = useState(false);
-  const [scratchAuthName, setScratchAuthName] = useState("");
-  const [scratchAuthLoading, setScratchAuthLoading] = useState(false);
-  const [scratchAuthError, setScratchAuthError] = useState("");
-  const [scratchCooldown, setScratchCooldown] = useState(false);
-  const [shared, setShared] = useState(false);
-
-  // Check cooldown on mount / after auth
-  useEffect(() => {
-    if (scratchAuthed && scratchPhone) {
-      const key = `thd-scratch-${scratchPhone}`;
-      const lastPlay = localStorage.getItem(key);
-      if (lastPlay && Date.now() - Number(lastPlay) < 86400000) {
-        setScratchCooldown(true);
-      }
-    }
-  }, [scratchAuthed, scratchPhone]);
-
-  const handleScratchAuth = async () => {
-    if (!scratchPhone) return;
-    setScratchAuthLoading(true);
-    setScratchAuthError("");
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
-      const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/lookup?phone=${encodeURIComponent(scratchPhone)}`, { signal: controller.signal });
-      clearTimeout(timeout);
-      if (resp.ok) {
-        const data = await resp.json();
-        if (data.found) {
-          const name = data.customer ? `${data.customer.first_name} ${data.customer.last_name || ""}`.trim() : (data.name || data.first_name || "Member");
-          setScratchAuthName(name);
-          setScratchAuthed(true);
-          // Check cooldown
-          const key = `thd-scratch-${scratchPhone}`;
-          const lastPlay = localStorage.getItem(key);
-          if (lastPlay && Date.now() - Number(lastPlay) < 86400000) {
-            setScratchCooldown(true);
-          }
-        } else {
-          setScratchAuthError("No rewards account found. Sign up at the Rewards page first!");
-        }
-      } else {
-        setScratchAuthError("Could not verify your account. Please try again.");
-      }
-    } catch {
-      setScratchAuthError("Connection error. Please try again.");
-    }
-    setScratchAuthLoading(false);
-  };
-
-  const prizes = [
-    { text: "10% OFF", emoji: "\u{1F389}", desc: "Use code HEMP10 at checkout" },
-    { text: "15% OFF", emoji: "\u{1F38A}", desc: "Use code HEMP15 at checkout" },
-    { text: "15% OFF", emoji: "\u{1F525}", desc: "Use code FIRST15 at checkout" },
-    { text: "20% OFF", emoji: "\u{1F69A}", desc: "Use code HEMP20 at checkout" },
-    { text: "500 POINTS", emoji: "\u2B50", desc: "Added to your Hemp Rewards" },
-    { text: "BUY 1 GET 1", emoji: "\u{1F381}", desc: "On select products" },
-    { text: "$5 OFF", emoji: "\u{1F4B5}", desc: "Use code SAVE5 at checkout" },
-    { text: "MYSTERY GIFT", emoji: "\u{1F381}", desc: "Free gift with next purchase" },
-  ];
-
-  useEffect(() => {
-    const p = prizes[Math.floor(Math.random() * prizes.length)];
-    setPrize(p.text);
-    setPrizeEmoji(p.emoji);
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    canvas.width = 320;
-    canvas.height = 200;
-    totalPixels.current = canvas.width * canvas.height;
-    // Draw scratch overlay
-    const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    grad.addColorStop(0, "#126A44");
-    grad.addColorStop(0.5, "#126A44");
-    grad.addColorStop(1, "#126A44");
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // Draw pattern
-    ctx.strokeStyle = "rgba(255,255,255,0.08)";
-    ctx.lineWidth = 1;
-    for (let i = -canvas.height; i < canvas.width; i += 12) {
-      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + canvas.height, canvas.height); ctx.stroke();
-    }
-    // Draw text
-    ctx.fillStyle = "rgba(255,255,255,0.5)";
-    ctx.font = "bold 18px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("SCRATCH HERE", canvas.width / 2, canvas.height / 2 - 10);
-    ctx.font = "14px sans-serif";
-    ctx.fillText("to reveal your prize!", canvas.width / 2, canvas.height / 2 + 15);
-    // Cannabis leaf symbols
-    ctx.font = "24px serif";
-    ctx.fillText("\u{1F33F} \u{1F33F} \u{1F33F}", canvas.width / 2, canvas.height - 20);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const scratch = (x: number, y: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const rect = canvas.getBoundingClientRect();
-    const cx = (x - rect.left) * (canvas.width / rect.width);
-    const cy = (y - rect.top) * (canvas.height / rect.height);
-    ctx.globalCompositeOperation = "destination-out";
-    ctx.beginPath();
-    ctx.arc(cx, cy, 22, 0, Math.PI * 2);
-    ctx.fill();
-    scratchedPixels.current += 22 * 22 * Math.PI;
-    const pct = Math.min(100, (scratchedPixels.current / totalPixels.current) * 100);
-    setScratchPercent(pct);
-    if (pct > 55 && !revealed) {
-      setRevealed(true);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Record play time for 24h cooldown
-      if (scratchPhone) {
-        localStorage.setItem(`thd-scratch-${scratchPhone}`, String(Date.now()));
-      }
-    }
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => { setIsScratching(true); setHasStarted(true); scratch(e.clientX, e.clientY); };
-  const handleMouseMove = (e: React.MouseEvent) => { if (isScratching) scratch(e.clientX, e.clientY); };
-  const handleMouseUp = () => setIsScratching(false);
-  const handleTouchStart = (e: React.TouchEvent) => { setHasStarted(true); const t = e.touches[0]; scratch(t.clientX, t.clientY); };
-  const handleTouchMove = (e: React.TouchEvent) => { e.preventDefault(); const t = e.touches[0]; scratch(t.clientX, t.clientY); };
-
-  const handleShareWin = () => {
-    const shareText = `I just won ${prize} at The Hemp Dispensary! Use code FIRST15 for 15% off your first order \u2192 https://www.thehempdispensary.com`;
-    if (navigator.share) {
-      navigator.share({ title: "I won at The Hemp Dispensary!", text: shareText, url: "https://www.thehempdispensary.com" }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(shareText).then(() => setShared(true)).catch(() => {});
-    }
-  };
-
-  const currentPrize = prizes.find(p => p.text === prize);
-
-  // Auth gate
-  if (!scratchAuthed) {
-    return (
-      <div className="max-w-2xl mx-auto px-4 py-12">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-[#231F20] mb-2">Scratch & Win!</h1>
-          <p className="text-[#231F20]">Enter your rewards number to play</p>
-        </div>
-        <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/15 p-8 text-center max-w-md mx-auto">
-          <Gift className="h-12 w-12 text-[#126A44] mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-[#231F20] mb-2">Rewards Members Only</h2>
-          <p className="text-[#231F20] text-sm mb-6">Enter your rewards phone number to unlock your daily scratch card. Not a member? <a href="/loyalty" onClick={(e) => { e.preventDefault(); navigate("/loyalty"); }} className="text-[#126A44] underline">Sign up free</a></p>
-          <input type="tel" placeholder="(555) 555-5555" value={scratchPhone} onChange={(e) => setScratchPhone(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleScratchAuth()}
-            className="w-full px-4 py-3 rounded-xl border border-[#231F20]/15 text-[#231F20] text-center text-lg mb-4 focus:outline-none focus:border-[#B3D335]" />
-          {scratchAuthError && <p className="text-[#231F20] text-sm mb-3">{scratchAuthError}</p>}
-          <button onClick={handleScratchAuth} disabled={scratchAuthLoading || !scratchPhone}
-            className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-xl font-semibold transition-colors disabled:opacity-50">
-            {scratchAuthLoading ? "Verifying..." : "Unlock My Scratch Card"}
-          </button>
-        </div>
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3">
-          {prizes.map((p, i) => (
-            <div key={i} className="bg-[#FFFFFF] border border-[#231F20]/10 rounded-lg p-3 text-center">
-              <span className="text-2xl">{p.emoji}</span>
-              <p className="text-xs text-[#231F20] mt-1 font-medium">{p.text}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // Cooldown gate
-  if (scratchCooldown) {
-    const key = `thd-scratch-${scratchPhone}`;
-    const lastPlay = Number(localStorage.getItem(key) || "0");
-    const nextPlay = lastPlay + 86400000;
-    const hoursLeft = Math.max(0, Math.ceil((nextPlay - Date.now()) / 3600000));
-    return (
-      <div className="max-w-2xl mx-auto px-4 py-12">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-[#231F20] mb-2">Scratch & Win!</h1>
-          <p className="text-[#231F20]">Welcome back, {scratchAuthName}!</p>
-        </div>
-        <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/15 p-8 text-center max-w-md mx-auto">
-          <Clock className="h-12 w-12 text-[#D9A32C] mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-[#231F20] mb-2">Come Back Tomorrow!</h2>
-          <p className="text-[#231F20] text-sm mb-4">You already played today. Your next scratch card unlocks in <span className="font-bold text-[#231F20]">{hoursLeft} hour{hoursLeft !== 1 ? "s" : ""}</span>.</p>
-          <p className="text-[#231F20] text-xs mb-6">Make a purchase to earn an extra scratch card!</p>
-          <button onClick={() => navigate("/shop")} className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-xl font-semibold transition-colors">Shop Now</button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="max-w-2xl mx-auto px-4 py-12">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-[#231F20] mb-2">Scratch & Win!</h1>
-        <p className="text-[#231F20]">Welcome, {scratchAuthName}! Scratch the card below to reveal your prize</p>
-      </div>
-      <div className="bg-[#231F20] rounded-2xl border border-[#231F20] p-8 text-center">
-        <div className="relative inline-block rounded-xl overflow-hidden border-4 border-[#B3D335] shadow-lg shadow-[#B3D335]/30" style={{ width: 320, height: 200 }}>
-          {/* Prize underneath */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#231F20] via-[#231F20] to-[#231F20]">
-            <span className="text-5xl mb-2">{prizeEmoji}</span>
-            <span className="text-2xl font-bold text-[#B3D335]">{prize}</span>
-            {currentPrize && <span className="text-sm text-[#231F20] mt-1">{currentPrize.desc}</span>}
-          </div>
-          {/* Scratch canvas on top */}
-          <canvas
-            ref={canvasRef}
-            className="absolute inset-0 cursor-pointer" style={{ width: 320, height: 200, touchAction: "none" }}
-            onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
-            onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}
-          />
-        </div>
-        {hasStarted && !revealed && <div className="mt-4"><div className="w-64 mx-auto bg-[#231F20]/10 rounded-full h-2"><div className="bg-[#B3D335] h-2 rounded-full transition-all" style={{ width: `${scratchPercent}%` }} /></div><p className="text-xs text-[#231F20] mt-1">{Math.round(scratchPercent)}% scratched</p></div>}
-        {revealed && (
-          <div className="mt-6">
-            <p className="text-[#B3D335] text-lg font-semibold mb-4 animate-pulse">Congratulations, {scratchAuthName}! You won {prize}!</p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button onClick={handleShareWin}
-                className="px-6 py-2 bg-[#58BA49] hover:bg-[#3D8C32] text-[#FFFFFF] rounded-full font-medium transition-all">
-                {shared ? "Copied!" : "Share your win \u{1F389}"}
-              </button>
-              <button onClick={() => navigate("/loyalty")}
-                className="px-6 py-2 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-medium transition-all">
-                Check Rewards Balance
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-      <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3">
-        {prizes.map((p, i) => (
-          <div key={i} className="bg-[#231F20]/50 border border-[#231F20] rounded-lg p-3 text-center">
-            <span className="text-2xl">{p.emoji}</span>
-            <p className="text-xs text-[#231F20] mt-1 font-medium">{p.text}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /* ======================== ROLL A JOINT GAME ======================== */
 const STRAINS = [
   { name: "OG Kush", color: "#3D8C32", desc: "Classic earthy pine" },
@@ -3823,14 +3561,8 @@ function RollAJointGame() {
 
 /* ======================== GAMES HUB PAGE ======================== */
 function GamesPage() {
-  const [activeGame, setActiveGame] = useState<"none" | "scratch" | "roll">("none");
+  const [activeGame, setActiveGame] = useState<"none" | "roll">("none");
 
-  if (activeGame === "scratch") return (
-    <div>
-      <div className="max-w-2xl mx-auto px-4 pt-8"><button onClick={() => setActiveGame("none")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Games</button></div>
-      <ScratchCardGame />
-    </div>
-  );
   if (activeGame === "roll") return (
     <div>
       <div className="max-w-2xl mx-auto px-4 pt-8"><button onClick={() => setActiveGame("none")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Games</button></div>
@@ -3845,15 +3577,7 @@ function GamesPage() {
         <p className="text-[#231F20] text-lg">Play games, win prizes, and have fun!</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Scratch Card */}
-        <button onClick={() => setActiveGame("scratch")}
-          className="bg-[#FFFFFF] border-2 border-[#B3D335]/50 hover:border-[#B3D335] rounded-2xl p-8 text-left transition-all hover:scale-105 group">
-          <div className="text-5xl mb-4">{"\u{1F3B0}"}</div>
-          <h2 className="text-2xl font-bold text-[#FFFFFF] mb-2">Scratch & Win</h2>
-          <p className="text-[#231F20]">Scratch the card to reveal exclusive prizes — discounts, bonus points, and more!</p>
-          <span className="inline-block mt-4 text-[#126A44] font-semibold group-hover:translate-x-1 transition-transform">        Play Now {"\u2192"}</span>
-                </button>
-                {/* Roll a Joint */}
+        {/* Roll a Joint */}
         <button onClick={() => setActiveGame("roll")}
           className="bg-[#FFFFFF] border-2 border-[#FFCB08]/50 hover:border-[#FFCB08] rounded-2xl p-8 text-left transition-all hover:scale-105 group">
           <div className="text-5xl mb-4">{"\u{1F525}"}</div>
@@ -3977,7 +3701,7 @@ function App() {
       "/shop/tinctures": "CBD, CBG, CBN and full spectrum hemp tinctures. Sublingual oils for sleep, pain, focus, and daily wellness. Lab-tested, fast pickup or shipping.",
       "/shop/accessories": "Hemp accessories including glass pipes, rolling papers, grinders, storage, and butane. Everything you need in one stop.",
       "/loyalty": "Hemp Rewards — earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary.",
-      "/games": "Play games and win prizes at The Hemp Dispensary. Scratch cards, Roll-a-Joint, and more — all free to play for rewards members.",
+      "/games": "Play games and win prizes at The Hemp Dispensary. Roll-a-Joint and more — all free to play for rewards members.",
       "/about": "Our Story — how two Spring Hill locals built The Hemp Dispensary from a road trip idea to 15 locations, lost 13 overnight, and kept going.",
     };
     const key = route.startsWith("/shop/") ? route : (route === "/" || route === "" ? "/" : route);
