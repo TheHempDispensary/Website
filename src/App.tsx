@@ -3573,17 +3573,17 @@ function GamesPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold text-[#FFFFFF] mb-3">Hemp Games</h1>
+        <h1 className="text-4xl font-bold text-[#231F20] mb-3">Hemp Games</h1>
         <p className="text-[#231F20] text-lg">Play games, win prizes, and have fun!</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Roll a Joint */}
         <button onClick={() => setActiveGame("roll")}
           className="bg-[#FFFFFF] border-2 border-[#FFCB08]/50 hover:border-[#FFCB08] rounded-2xl p-8 text-left transition-all hover:scale-105 group">
-          <div className="text-5xl mb-4">{"\u{1F525}"}</div>
-          <h2 className="text-2xl font-bold text-[#FFFFFF] mb-2">Roll a Joint</h2>
+          <img src="https://thd-inventory-api.fly.dev/api/inventory/images/2025754319266?v=2" alt="Pre-rolled joint" className="h-20 w-20 object-contain mb-4 rounded-lg" />
+          <h2 className="text-2xl font-bold text-[#231F20] mb-2">Roll a Joint</h2>
           <p className="text-[#231F20]">Pick your flower, grind it, roll it, light it! Watch your cannabis nut character enjoy the ride.</p>
-          <span className="inline-block mt-4 text-[#FFCB08] font-semibold group-hover:translate-x-1 transition-transform">      Play Now {"\u2192"}</span>
+          <span className="inline-block mt-4 text-[#FFCB08] font-semibold group-hover:translate-x-1 transition-transform">Play Now {"\u2192"}</span>
               </button>
             </div>
     </div>
