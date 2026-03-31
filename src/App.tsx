@@ -3374,7 +3374,7 @@ function RollAJointGame() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
       <div className="text-center mb-6">
-        <h1 className="text-4xl font-bold text-[#FFFFFF] mb-2">Roll a Joint!</h1>
+        <h1 className="text-4xl font-bold text-[#231F20] mb-2">Roll a Joint!</h1>
         <p className="text-[#231F20]">Help Bud Puppet grind, roll, light, and enjoy</p>
         <div className="flex items-center justify-center gap-6 mt-3">
           <span className="text-[#B3D335] font-bold">Round {round}</span>
@@ -3400,7 +3400,7 @@ function RollAJointGame() {
                   <div className="w-16 h-16 mx-auto rounded-full mb-3 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-110" style={{ background: s.color }}>
                     <img src="/bud-puppet.webp" alt={s.name} className="w-12 h-12 object-contain" />
                   </div>
-                  <p className="text-[#FFFFFF] font-semibold">{s.name}</p>
+                  <p className="text-[#231F20] font-semibold">{s.name}</p>
                   <p className="text-[#231F20] text-xs mt-1">{s.desc}</p>
                 </button>
               ))}
