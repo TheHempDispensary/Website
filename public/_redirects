@@ -1,58 +1,75 @@
 # Category redirects with query strings
-/flower?*        /shop/flower    301
-/edibles?*       /shop/edibles   301
-/tinctures?*     /shop/tinctures 301
-/concentrates?*  /shop/concentrates 301
-/gummies?*       /shop/edibles   301
-/misc?*          /                301
+/flower?*        /products       301
+/edibles?*       /products       301
+/tinctures?*     /products       301
+/concentrates?*  /products       301
+/gummies?*       /products       301
+/misc?*          /products       301
 /pre-roll-joints?* /             301
-/on-sale?*       /                301
-/pets?*          /shop/pets       301
+/on-sale?*       /               301
+/pets?*          /products       301
+/beverages?*     /products       301
+/chocolate?*     /products       301
+/clothing?*      /products       301
+/accessories?*   /products       301
+/wax?*           /products       301
+/cbg?*           /products       301
+/isolate?*       /products       301
+/scales?*        /products       301
+/energy?*        /products       301
+/multi-blend?*   /products       301
+/cakes---cookies?* /products     301
+/100-ounces?*    /products       301
 
 # Category slug redirects (no query string)
-/flower          /shop/flower       301
-/edibles         /shop/edibles      301
-/tinctures       /shop/tinctures    301
-/concentrates    /shop/concentrates 301
-/gummies         /shop/edibles      301
-/misc            /                  301
+/flower          /products          301
+/edibles         /products          301
+/tinctures       /products          301
+/concentrates    /products          301
+/gummies         /products          301
+/misc            /products          301
 /pre-roll-joints /                  301
 /on-sale         /                  301
-/pets            /shop/pets         301
+/pets            /products          301
+/beverages       /products          301
+/chocolate       /products          301
+/clothing        /products          301
+/accessories     /products          301
+/wax             /products          301
+/cbg             /products          301
+/isolate         /products          301
+/scales          /products          301
+/energy          /products          301
+/multi-blend     /products          301
+/cakes---cookies /products          301
+/100-ounces      /products          301
 
-# Old store paths
-/store/*         /                  301
+# Specific page redirects
+/our-locations      /locations         301
+/shipping-policy    /                  301
+/affiliate-program  /                  301
+/help-save-hemp     /                  301
+/bud                /                  301
+/newpage95b2d746    /                  301
 
 # Old single-word pages
-/bud             /                  301
-/energy          /                  301
-/chocolate       /                  301
 /5-gram          /                  301
-/100-ounces      /                  301
 /mood-enhancement /                 301
-/clothing        /                  301
 /treats          /                  301
-/cbg             /                  301
-/help-save-hemp  /                  301
-/newpage95b2d746 /                  301
-/affiliate-program /               301
 /exotic_thca_flower /              301
 /home            /                  301
-/thca            /shop/flower       301
-/cbd/cbg/vapor   /shop/vapor        301
-/cbd/cbg/2-gram-disposable /       301
+/thca            /products          301
 
-# Old product URLs (discontinued products -> homepage)
-/product/Delta8THCChocolateBar/1941                                    /  301
-/product/diamonds-thca-concentrate/1986                                /  301
-/product/delta-9-thc-35mg-gummies-watermelon-flavor-dye-free/1652      /  301
-/product/delta-9-thc-lemonade/1650                                     /  301
-/product/3000mgCBD-CBG-CBNTincture/1418                                /  301
-/product/delta-9-thc-coconut-cacao-bites/2103                          /  301
-/product/chimera-thca-pre-rolled-joint/2251                            /  301
+# Old cbd/cbg sub-paths (specific before wildcard)
+/cbd/cbg/vapor           /products     301
+/cbd/cbg/2-gram-disposable /          301
+/cbd/cbg/*               /products     301
 
-# Alias pages
-/shipping-policy /shipping          301
+# Old product URLs (wildcard catches all /product/ paths)
+/product/*       /products          301
+
+# Old store paths (Ecwid store URLs)
+/store/*         /products          301
 
 # SPA fallback (must be last)
 /*    /index.html   200
