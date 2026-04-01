@@ -1495,7 +1495,7 @@ function ShippingPolicyPage() {
       <h1 className="text-4xl font-bold text-[#231F20] mb-6">Shipping Policy</h1>
       <div className="prose prose-lg text-[#231F20]">
         <h2 className="text-2xl font-semibold text-[#231F20] mt-6 mb-3">Shipping Rates</h2>
-        <p className="mb-4">Standard shipping is a flat rate of <strong>$7.99</strong> via USPS for all orders within the United States.</p>
+        <p className="mb-4">Shipping rates are calculated at checkout based on your address via <strong>USPS Ground Advantage</strong>.</p>
 
         <h2 className="text-2xl font-semibold text-[#231F20] mt-6 mb-3">Processing Time</h2>
         <p className="mb-4">Most orders are processed and shipped within <strong>1–2 business days</strong>. You will receive a confirmation email with tracking information once your order ships.</p>
