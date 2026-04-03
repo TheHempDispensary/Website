@@ -1,3 +1,12 @@
+# Redirect /?ref=* to / (referral parameter URLs)
+[[redirects]]
+  from = "/"
+  to = "/"
+  status = 301
+  force = true
+  [redirects.query]
+    ref = ":ref"
+
 [[headers]]
   for = "/*"
   [headers.values]

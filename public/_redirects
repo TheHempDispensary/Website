@@ -1,6 +1,3 @@
-# Referral parameter URLs
-/?ref=*            /                  301
-
 # Specific page redirects
 /our-locations      /locations         301
 /shipping-policy    /                  301
