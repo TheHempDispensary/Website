@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, Package, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, MessageCircle, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, Instagram, Heart, DollarSign, RefreshCw } from "lucide-react";
+import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, MessageCircle, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, Instagram, Heart, DollarSign, RefreshCw } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -435,7 +435,7 @@ function StickyTopBar() {
 /* ======================== HEADER (Light Theme) ======================== */
 function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentClick }: { cartCount: number; onSearch: () => void; onCartOpen: () => void; fulfillment: FulfillmentType | null; onFulfillmentClick: () => void }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const categories = ["FLOWER", "EDIBLES", "CONCENTRATES", "VAPOR", "TOPICALS", "TINCTURES", "ACCESSORIES"];
+  const categories = ["FLOWER", "EDIBLES", "CONCENTRATES", "VAPOR", "TOPICALS", "TINCTURES", "ACCESSORIES", "PACKAGING"];
 
   return (
     <header className="bg-[#FFFFFF] sticky top-0 z-50 border-b border-[#231F20]/15 shadow-sm">
@@ -620,13 +620,13 @@ function TrustStrip() {
 /* ======================== SHOP BY CATEGORY ======================== */
 function ShopByCategory({ productsByCategory, fulfillment }: { categories: string[]; productsByCategory: Record<string, Product[]>; fulfillment?: FulfillmentType | null }) {
   const stockFor = (p: Product) => fulfillment ? getStockForFulfillment(p, fulfillment) : p.stock;
-  const displayCats = ["Flower", "Edibles", "Concentrates", "Vapor", "Topicals", "Tinctures", "Accessories"].filter(c => {
+  const displayCats = ["Flower", "Edibles", "Concentrates", "Vapor", "Topicals", "Tinctures", "Accessories", "Packaging"].filter(c => {
     const prods = productsByCategory[c] || [];
     return prods.some(p => stockFor(p) > 0);
   });
   if (displayCats.length === 0) return null;
 
-  const catIconComponents: Record<string, React.ComponentType<{ className?: string }>> = { Flower: Leaf, Edibles: Candy, Concentrates: Droplets, Vapor: Wind, Topicals: Pipette, Tinctures: Pill, Accessories: Wrench };
+  const catIconComponents: Record<string, React.ComponentType<{ className?: string }>> = { Flower: Leaf, Edibles: Candy, Concentrates: Droplets, Vapor: Wind, Topicals: Pipette, Tinctures: Pill, Accessories: Wrench, Packaging: Box };
 
   const getCategoryImage = (cat: string): string | null => {
     const prods = productsByCategory[cat] || [];
@@ -1537,6 +1537,7 @@ function SiteFooter() {
               <a href="/shop/edibles" onClick={(e) => { e.preventDefault(); navigate("/shop/edibles"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Edibles</a>
               <a href="/shop/concentrates" onClick={(e) => { e.preventDefault(); navigate("/shop/concentrates"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Concentrates</a>
               <a href="/shop/vapor" onClick={(e) => { e.preventDefault(); navigate("/shop/vapor"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Vapor</a>
+              <a href="/shop/packaging" onClick={(e) => { e.preventDefault(); navigate("/shop/packaging"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Packaging</a>
             </div>
           </div>
           <div>
@@ -3700,6 +3701,7 @@ function App() {
       "/shop/topicals": "Hemp topicals including CBD muscle creams, balms, roll-ons, and transdermal patches. Targeted relief, lab-tested, available in-store and online.",
       "/shop/tinctures": "CBD, CBG, CBN and full spectrum hemp tinctures. Sublingual oils for sleep, pain, focus, and daily wellness. Lab-tested, fast pickup or shipping.",
       "/shop/accessories": "Hemp accessories including glass pipes, rolling papers, grinders, storage, and butane. Everything you need in one stop.",
+      "/shop/packaging": "Wholesale packaging supplies — containers, bags, jars, and more from top manufacturers like Chubby Gorilla. Available at The Hemp Dispensary.",
       "/loyalty": "Hemp Rewards — earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary.",
       "/games": "Play games and win prizes at The Hemp Dispensary. Roll-a-Joint and more — all free to play for rewards members.",
       "/about": "Our Story — how two Spring Hill locals built The Hemp Dispensary from a road trip idea to 15 locations, lost 13 overnight, and kept going.",
