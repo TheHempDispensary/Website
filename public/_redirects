@@ -1,87 +1,135 @@
-# Category redirects with query strings
-/flower?*        /products       301
-/edibles?*       /products       301
-/tinctures?*     /products       301
-/concentrates?*  /products       301
-/gummies?*       /products       301
-/misc?*          /products       301
-/pre-roll-joints?* /             301
-/on-sale?*       /               301
-/pets?*          /products       301
-/beverages?*     /products       301
-/chocolate?*     /products       301
-/clothing?*      /products       301
-/accessories?*   /products       301
-/wax?*           /products       301
-/cbg?*           /products       301
-/isolate?*       /products       301
-/scales?*        /products       301
-/energy?*        /products       301
-/multi-blend?*   /products       301
-/cakes---cookies?* /products     301
-/100-ounces?*    /products       301
-
-# Category slug redirects (no query string)
-/flower          /products          301
-/edibles         /products          301
-/tinctures       /products          301
-/concentrates    /products          301
-/gummies         /products          301
-/misc            /products          301
-/pre-roll-joints /                  301
-/on-sale         /                  301
-/pets            /products          301
-/beverages       /products          301
-/chocolate       /products          301
-/clothing        /products          301
-/accessories     /products          301
-/wax             /products          301
-/cbg             /products          301
-/isolate         /products          301
-/scales          /products          301
-/energy          /products          301
-/multi-blend     /products          301
-/cakes---cookies /products          301
-/100-ounces      /products          301
-
 # Specific page redirects
 /our-locations      /locations         301
 /shipping-policy    /                  301
 /affiliate-program  /                  301
 /help-save-hemp     /                  301
-/bud                /                  301
 /newpage95b2d746    /                  301
+/5-gram             /                  301
+/exotic_thca_flower /                  301
+/home               /                  301
+/thca               /shop              301
+/beverages          /shop              301
+/beverages?*        /shop              301
+/cakes---cookies    /shop              301
+/cakes---cookies?*  /shop              301
+/cbg                /shop              301
+/cbg?*              /shop              301
+/accessories        /shop/accessories  301
+/accessories?*      /shop/accessories  301
 
-# Old single-word pages
-/5-gram          /                  301
-/mood-enhancement /                 301
-/treats          /                  301
-/exotic_thca_flower /              301
-/home            /                  301
-/thca            /products          301
+# Legacy Ecwid category redirects — flower
+/flower             /shop/flower       301
+/flower?*           /shop/flower       301
+/flower/*           /shop/flower       301
+/bud                /shop/flower       301
+/bud/*              /shop/flower       301
+/kief               /shop/flower       301
+/kief/*             /shop/flower       301
+/shake              /shop/flower       301
+/shake/*            /shop/flower       301
+/100-ounces         /shop/flower       301
+/100-ounces?*       /shop/flower       301
+/100-ounces/*       /shop/flower       301
+/pre-roll-joints    /shop/flower       301
+/pre-roll-joints?*  /shop/flower       301
+/pre-roll-joints/*  /shop/flower       301
 
-# Old cbd/cbg sub-paths (specific before wildcard)
-/cbd/cbg/vapor           /products     301
-/cbd/cbg/2-gram-disposable /          301
-/cbd/cbg/*               /products     301
+# Legacy Ecwid category redirects — concentrates
+/concentrates       /shop/concentrates 301
+/concentrates?*     /shop/concentrates 301
+/concentrates/*     /shop/concentrates 301
+/crumble            /shop/concentrates 301
+/crumble/*          /shop/concentrates 301
+/badder             /shop/concentrates 301
+/badder/*           /shop/concentrates 301
+/wax                /shop/concentrates 301
+/wax?*              /shop/concentrates 301
+/wax/*              /shop/concentrates 301
+
+# Legacy Ecwid category redirects — edibles
+/edibles            /shop/edibles      301
+/edibles?*          /shop/edibles      301
+/edibles/*          /shop/edibles      301
+/syrups             /shop/edibles      301
+/syrups/*           /shop/edibles      301
+/gummies            /shop/edibles      301
+/gummies?*          /shop/edibles      301
+/gummies/*          /shop/edibles      301
+/chocolate          /shop/edibles      301
+/chocolate?*        /shop/edibles      301
+/chocolate/*        /shop/edibles      301
+/delta-9-thc        /shop/edibles      301
+/delta-9-thc/*      /shop/edibles      301
+/treats             /shop/edibles      301
+/treats/*           /shop/edibles      301
+
+# Legacy Ecwid category redirects — tinctures
+/tinctures          /shop/tinctures    301
+/tinctures?*        /shop/tinctures    301
+/tinctures/*        /shop/tinctures    301
+
+# Legacy Ecwid category redirects — accessories
+/clothing           /shop/accessories  301
+/clothing?*         /shop/accessories  301
+/clothing/*         /shop/accessories  301
+/scales             /shop/accessories  301
+/scales?*           /shop/accessories  301
+/scales/*           /shop/accessories  301
+/stickers           /shop/accessories  301
+/stickers/*         /shop/accessories  301
+
+# Legacy Ecwid category redirects — pets
+/pets               /shop/pets         301
+/pets?*             /shop/pets         301
+/pets/*             /shop/pets         301
+
+# Legacy Ecwid category redirects — general shop
+/cereal             /shop              301
+/cereal/*           /shop              301
+/misc               /shop              301
+/misc?*             /shop              301
+/misc/*             /shop              301
+/on-sale            /shop              301
+/on-sale?*          /shop              301
+/on-sale/*          /shop              301
+/multi-blend        /shop              301
+/multi-blend?*      /shop              301
+/multi-blend/*      /shop              301
+/mood-enhancement   /shop              301
+/mood-enhancement/* /shop              301
+/relaxation         /shop              301
+/relaxation/*       /shop              301
+/health             /shop              301
+/health/*           /shop              301
+/energy             /shop              301
+/energy?*           /shop              301
+/energy/*           /shop              301
+/benefits           /shop              301
+/benefits/*         /shop              301
+/isolate            /shop              301
+/isolate?*          /shop              301
+/isolate/*          /shop              301
+
+# Old cbd/cbg sub-paths
+/cbd/cbg/*          /shop              301
 
 # Old product URLs (wildcard catches all /product/ paths)
-/product/*       /products          301
+/product/*          /shop              301
 
 # Old store paths (Ecwid store URLs)
-/store/*         /products          301
+/store/*            /shop              301
 
-# Spanish locale (not a real page — redirect to homepage)
-/es              /                  301
-/es/             /                  301
-/es/*            /                  301
+# Spanish locale (not a real page)
+/es                 /                  301
+/es/                /                  301
+/es/*               /                  301
 
 # Legacy /products paths (old Ecwid storefront URLs still in Google index)
-/products/delta-8-thc-gummies-90mg-fruit-variety  /shop/edibles  301
+/products/delta-8-thc-gummies-90mg-fruit-variety  /shop/edibles       301
 /products/concentrates                             /shop/concentrates  301
-/products        /shop              301
-/products/       /shop              301
-/products/*      /shop              301
+/products           /shop              301
+/products/          /shop              301
+/products/*         /shop              301
 
 # SPA fallback (must be last)
 /*    /index.html   200
