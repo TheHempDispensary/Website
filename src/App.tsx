@@ -3715,6 +3715,29 @@ function App() {
     meta.content = desc;
   }, [route]);
 
+  // Dynamic canonical + og:url per route — self-referencing, www, no trailing slash on paths
+  useEffect(() => {
+    const base = "https://www.thehempdispensary.com";
+    const path = route === "/" || route === "" ? "/" : route.replace(/\/+$/, "");
+    const canonical = path === "/" ? base + "/" : base + path;
+
+    let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "canonical";
+      document.head.appendChild(link);
+    }
+    link.href = canonical;
+
+    let ogUrl = document.querySelector('meta[property="og:url"]') as HTMLMetaElement | null;
+    if (!ogUrl) {
+      ogUrl = document.createElement("meta");
+      ogUrl.setAttribute("property", "og:url");
+      document.head.appendChild(ogUrl);
+    }
+    ogUrl.content = canonical;
+  }, [route]);
+
   useEffect(() => {
     // Load from localStorage cache for instant display — 60s TTL to avoid stale images
     let hadCachedData = false;

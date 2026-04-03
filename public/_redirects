@@ -71,5 +71,17 @@
 # Old store paths (Ecwid store URLs)
 /store/*         /products          301
 
+# Spanish locale (not a real page — redirect to homepage)
+/es              /                  301
+/es/             /                  301
+/es/*            /                  301
+
+# Legacy /products paths (old Ecwid storefront URLs still in Google index)
+/products/delta-8-thc-gummies-90mg-fruit-variety  /shop/edibles  301
+/products/concentrates                             /shop/concentrates  301
+/products        /shop              301
+/products/       /shop              301
+/products/*      /shop              301
+
 # SPA fallback (must be last)
 /*    /index.html   200
