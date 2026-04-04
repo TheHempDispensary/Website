@@ -126,8 +126,27 @@ const STATE_TAX_RATES: Record<string, number> = {
   TN: 0.07, TX: 0.0625, UT: 0.061, VT: 0.06, VA: 0.053, WA: 0.065, WV: 0.06,
   WI: 0.05, WY: 0.04,
 };
+/* Map full state names to abbreviations so address autocomplete works */
+const STATE_NAME_TO_ABBR: Record<string, string> = {
+  ALABAMA: "AL", ALASKA: "AK", ARIZONA: "AZ", ARKANSAS: "AR", CALIFORNIA: "CA",
+  COLORADO: "CO", CONNECTICUT: "CT", DELAWARE: "DE", "DISTRICT OF COLUMBIA": "DC",
+  FLORIDA: "FL", GEORGIA: "GA", HAWAII: "HI", IDAHO: "ID", ILLINOIS: "IL",
+  INDIANA: "IN", IOWA: "IA", KANSAS: "KS", KENTUCKY: "KY", LOUISIANA: "LA",
+  MAINE: "ME", MARYLAND: "MD", MASSACHUSETTS: "MA", MICHIGAN: "MI", MINNESOTA: "MN",
+  MISSISSIPPI: "MS", MISSOURI: "MO", MONTANA: "MT", NEBRASKA: "NE", NEVADA: "NV",
+  "NEW HAMPSHIRE": "NH", "NEW JERSEY": "NJ", "NEW MEXICO": "NM", "NEW YORK": "NY",
+  "NORTH CAROLINA": "NC", "NORTH DAKOTA": "ND", OHIO: "OH", OKLAHOMA: "OK",
+  OREGON: "OR", PENNSYLVANIA: "PA", "RHODE ISLAND": "RI", "SOUTH CAROLINA": "SC",
+  "SOUTH DAKOTA": "SD", TENNESSEE: "TN", TEXAS: "TX", UTAH: "UT", VERMONT: "VT",
+  VIRGINIA: "VA", WASHINGTON: "WA", "WEST VIRGINIA": "WV", WISCONSIN: "WI", WYOMING: "WY",
+};
+function normalizeState(state: string): string {
+  const upper = state.trim().toUpperCase();
+  if (STATE_TAX_RATES[upper] !== undefined) return upper;
+  return STATE_NAME_TO_ABBR[upper] || upper;
+}
 function getTaxRate(state: string): number {
-  return STATE_TAX_RATES[state.toUpperCase()] ?? 0;
+  return STATE_TAX_RATES[normalizeState(state)] ?? 0;
 }
 
 /* Unsplash fallback images for accessory products without real photos */
@@ -1974,7 +1993,7 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
               display: r.display_name as unknown as string,
               address: street,
               city: a.city || a.town || a.village || a.hamlet || a.county?.replace(" County", "") || "",
-              state: a.state || "FL",
+              state: normalizeState(a.state || "FL"),
               zip: a.postcode || "",
             };
           })
