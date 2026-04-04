@@ -145,8 +145,12 @@ function normalizeState(state: string): string {
   if (STATE_TAX_RATES[upper] !== undefined) return upper;
   return STATE_NAME_TO_ABBR[upper] || upper;
 }
-function getTaxRate(state: string): number {
-  return STATE_TAX_RATES[normalizeState(state)] ?? 0;
+/* FL local surtax for in-store pickup (Hernando County 0.5%) */
+const FL_PICKUP_RATE = 0.065;
+function getTaxRate(state: string, isPickup: boolean = false): number {
+  const abbr = normalizeState(state);
+  if (abbr === "FL" && isPickup) return FL_PICKUP_RATE;
+  return STATE_TAX_RATES[abbr] ?? 0;
 }
 
 /* Unsplash fallback images for accessory products without real photos */
@@ -1904,7 +1908,8 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
   const discountedSubtotal = subtotal - discount;
   const selectedRate = shippingRates.find(r => r.id === selectedRateId);
   const shippingCost = (fulfillment && fulfillment.startsWith("pickup")) ? 0 : (selectedRate ? selectedRate.amount_cents : 0);
-  const taxRate = getTaxRate(form.state);
+  const isPickup = !!(fulfillment && fulfillment.startsWith("pickup"));
+  const taxRate = getTaxRate(form.state, isPickup);
   const tax = Math.round(discountedSubtotal * taxRate);
   const total = discountedSubtotal + shippingCost + tax;
 
@@ -2127,7 +2132,6 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
     );
   }
 
-  const isPickup = fulfillment && fulfillment.startsWith("pickup");
   const canProceedInfo = form.firstName && form.lastName && form.email && form.phone;
   const canProceedShipping = isPickup ? true : (form.address && form.city && form.state && form.zip && selectedRateId);
 
