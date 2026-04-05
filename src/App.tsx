@@ -1040,7 +1040,7 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
             {product.description && (
               <div className="mb-4">
                 <h3 className="text-sm font-semibold text-[#231F20] uppercase tracking-wider mb-2">Description</h3>
-                <p className="text-[#231F20] leading-relaxed text-sm">{product.description}</p>
+                <div className="text-[#231F20] leading-relaxed text-sm product-description" dangerouslySetInnerHTML={{ __html: product.description }} />
               </div>
             )}
 
@@ -1097,27 +1097,6 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
         </div>
       </div>
 
-      {/* You Might Also Like */}
-      {related.length > 0 && (
-        <div className="mt-10">
-          <h2 className="text-2xl font-bold text-[#231F20] mb-6">You Might Also Like</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {related.map((p) => (
-              <div key={p.id} className="flex items-center gap-3 bg-[#FFFFFF] rounded-xl p-3 border border-[#231F20]/10 hover:shadow-md transition-all cursor-pointer" onClick={() => navigate(`/product/${p.id}`)}>
-                <div className="w-20 h-20 flex-shrink-0 bg-[#FFFFFF] rounded-lg overflow-hidden flex items-center justify-center">
-                  <img src={p.image_url || placeholderUrl(p.name, 200)} alt={p.name} className="max-h-full max-w-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={handleImgError} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-[#231F20] line-clamp-2 hover:text-[#126A44] transition-colors">{titleCase(p.online_name || p.name)}</h3>
-                  <p className="text-[#126A44] font-bold text-sm mt-1">{formatPrice(p.price)}</p>
-                </div>
-                <button onClick={(e) => { e.stopPropagation(); onAddToCart(p, 1); }} className="flex-shrink-0 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg px-3 py-2 text-xs font-semibold transition-colors">Add</button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Size variants with savings */}
       {sizeVariants.length > 0 && (
         <div className="mt-8">
@@ -1136,6 +1115,27 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* You Might Also Like */}
+      {related.length > 0 && (
+        <div className="mt-10">
+          <h2 className="text-2xl font-bold text-[#231F20] mb-6">You Might Also Like</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {related.map((p) => (
+              <div key={p.id} className="flex items-center gap-3 bg-[#FFFFFF] rounded-xl p-3 border border-[#231F20]/10 hover:shadow-md transition-all cursor-pointer" onClick={() => navigate(`/product/${p.id}`)}>
+                <div className="w-20 h-20 flex-shrink-0 bg-[#FFFFFF] rounded-lg overflow-hidden flex items-center justify-center">
+                  <img src={p.image_url || placeholderUrl(p.name, 200)} alt={p.name} className="max-h-full max-w-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={handleImgError} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-medium text-[#231F20] line-clamp-2 hover:text-[#126A44] transition-colors">{titleCase(p.online_name || p.name)}</h3>
+                  <p className="text-[#126A44] font-bold text-sm mt-1">{formatPrice(p.price)}</p>
+                </div>
+                <button onClick={(e) => { e.stopPropagation(); onAddToCart(p, 1); }} className="flex-shrink-0 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg px-3 py-2 text-xs font-semibold transition-colors">Add</button>
+              </div>
+            ))}
           </div>
         </div>
       )}
