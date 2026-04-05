@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, Package, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, MessageCircle, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, Instagram, Heart, DollarSign, RefreshCw } from "lucide-react";
+import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, MessageCircle, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, Instagram, Heart, DollarSign, RefreshCw } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -83,6 +83,7 @@ function getFulfillmentLabel(f: FulfillmentType): string {
 }
 
 function getStockForFulfillment(product: Product, f: FulfillmentType): number {
+  if (f.startsWith("pickup") && isLeafLife(product)) return 0; // LeafLife ships from partner — pickup not available
   if (f === "pickup_west") return product.stock_west ?? 0;
   if (f === "pickup_east") return product.stock_east ?? 0;
   return product.stock_hq ?? product.stock ?? 0;
@@ -126,8 +127,31 @@ const STATE_TAX_RATES: Record<string, number> = {
   TN: 0.07, TX: 0.0625, UT: 0.061, VT: 0.06, VA: 0.053, WA: 0.065, WV: 0.06,
   WI: 0.05, WY: 0.04,
 };
-function getTaxRate(state: string): number {
-  return STATE_TAX_RATES[state.toUpperCase()] ?? 0;
+/* Map full state names to abbreviations so address autocomplete works */
+const STATE_NAME_TO_ABBR: Record<string, string> = {
+  ALABAMA: "AL", ALASKA: "AK", ARIZONA: "AZ", ARKANSAS: "AR", CALIFORNIA: "CA",
+  COLORADO: "CO", CONNECTICUT: "CT", DELAWARE: "DE", "DISTRICT OF COLUMBIA": "DC",
+  FLORIDA: "FL", GEORGIA: "GA", HAWAII: "HI", IDAHO: "ID", ILLINOIS: "IL",
+  INDIANA: "IN", IOWA: "IA", KANSAS: "KS", KENTUCKY: "KY", LOUISIANA: "LA",
+  MAINE: "ME", MARYLAND: "MD", MASSACHUSETTS: "MA", MICHIGAN: "MI", MINNESOTA: "MN",
+  MISSISSIPPI: "MS", MISSOURI: "MO", MONTANA: "MT", NEBRASKA: "NE", NEVADA: "NV",
+  "NEW HAMPSHIRE": "NH", "NEW JERSEY": "NJ", "NEW MEXICO": "NM", "NEW YORK": "NY",
+  "NORTH CAROLINA": "NC", "NORTH DAKOTA": "ND", OHIO: "OH", OKLAHOMA: "OK",
+  OREGON: "OR", PENNSYLVANIA: "PA", "RHODE ISLAND": "RI", "SOUTH CAROLINA": "SC",
+  "SOUTH DAKOTA": "SD", TENNESSEE: "TN", TEXAS: "TX", UTAH: "UT", VERMONT: "VT",
+  VIRGINIA: "VA", WASHINGTON: "WA", "WEST VIRGINIA": "WV", WISCONSIN: "WI", WYOMING: "WY",
+};
+function normalizeState(state: string): string {
+  const upper = state.trim().toUpperCase();
+  if (STATE_TAX_RATES[upper] !== undefined) return upper;
+  return STATE_NAME_TO_ABBR[upper] || upper;
+}
+/* FL local surtax for in-store pickup (Hernando County 0.5%) */
+const FL_PICKUP_RATE = 0.065;
+function getTaxRate(state: string, isPickup: boolean = false): number {
+  const abbr = normalizeState(state);
+  if (abbr === "FL" && isPickup) return FL_PICKUP_RATE;
+  return STATE_TAX_RATES[abbr] ?? 0;
 }
 
 /* Unsplash fallback images for accessory products without real photos */
@@ -427,7 +451,7 @@ function StickyTopBar() {
     <div className="bg-[#231F20] text-[#FFFFFF] text-center py-2 px-4 text-sm font-medium">
       <span className="hidden sm:inline">{"\u{1F680}"} Order Online {"\u2013"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | Open Late | </span>
       <span className="sm:hidden">{"\u{1F680}"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | </span>
-      <span className="text-[#FFCB08] font-bold">FIRST15 = 15% Off</span>
+      <span className="text-[#FFCB08] font-bold">FIRST10 = 10% Off</span>
     </div>
   );
 }
@@ -435,7 +459,7 @@ function StickyTopBar() {
 /* ======================== HEADER (Light Theme) ======================== */
 function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentClick }: { cartCount: number; onSearch: () => void; onCartOpen: () => void; fulfillment: FulfillmentType | null; onFulfillmentClick: () => void }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const categories = ["FLOWER", "EDIBLES", "CONCENTRATES", "VAPOR", "TOPICALS", "TINCTURES", "ACCESSORIES"];
+  const categories = ["FLOWER", "EDIBLES", "CONCENTRATES", "VAPOR", "TOPICALS", "TINCTURES", "ACCESSORIES", "PACKAGING"];
 
   return (
     <header className="bg-[#FFFFFF] sticky top-0 z-50 border-b border-[#231F20]/15 shadow-sm">
@@ -523,7 +547,7 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear }: { o
         </div>
         {/* FIRST20 promo banner */}
         <div className="bg-[#FFCB08]/10 border-b border-[#FFCB08]/20 px-4 py-2 text-center">
-          <p className="text-sm font-medium text-[#231F20]">{"\u{1F525}"} Use code <span className="font-bold text-[#126A44]">FIRST15</span> for 15% off your first order!</p>
+          <p className="text-sm font-medium text-[#231F20]">{"\u{1F525}"} Use code <span className="font-bold text-[#126A44]">FIRST10</span> for 10% off your first order!</p>
         </div>
         <div className="flex-1 overflow-y-auto p-4">
           {cart.length === 0 ? (
@@ -581,10 +605,10 @@ function HeroSection() {
         </h1>
         <p className="text-[#FFFFFF]/80 text-base sm:text-xl mb-6 max-w-2xl mx-auto">Fast pickup. Lab-tested. Trusted locally.</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button onClick={() => navigate("/shop")} className="px-8 py-3.5 sm:py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors shadow-lg">Shop Now</button>
+          <button onClick={() => navigate("/shop")} className="px-8 py-3.5 sm:py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors shadow-lg">Shop All</button>
           <button onClick={() => { const el = document.getElementById('locations-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else navigate('/contact'); }} className="px-8 py-3.5 sm:py-4 border-2 border-[#FFFFFF] hover:bg-[#FFFFFF] text-[#FFFFFF] hover:text-[#231F20] rounded-full font-bold text-lg transition-colors">Find Nearest Location</button>
         </div>
-        <p className="mt-4 text-[#FFCB08] font-medium text-sm">{"\u{1F525}"} First-time customers: 15% OFF with code FIRST15</p>
+        <p className="mt-4 text-[#FFCB08] font-medium text-sm">{"\u{1F525}"} First-time customers: 10% OFF with code FIRST10</p>
       </div>
       {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#231F20]/50 pointer-events-none" />
@@ -620,13 +644,13 @@ function TrustStrip() {
 /* ======================== SHOP BY CATEGORY ======================== */
 function ShopByCategory({ productsByCategory, fulfillment }: { categories: string[]; productsByCategory: Record<string, Product[]>; fulfillment?: FulfillmentType | null }) {
   const stockFor = (p: Product) => fulfillment ? getStockForFulfillment(p, fulfillment) : p.stock;
-  const displayCats = ["Flower", "Edibles", "Concentrates", "Vapor", "Topicals", "Tinctures", "Accessories"].filter(c => {
+  const displayCats = ["Flower", "Edibles", "Concentrates", "Vapor", "Topicals", "Tinctures", "Accessories", "Packaging"].filter(c => {
     const prods = productsByCategory[c] || [];
     return prods.some(p => stockFor(p) > 0);
   });
   if (displayCats.length === 0) return null;
 
-  const catIconComponents: Record<string, React.ComponentType<{ className?: string }>> = { Flower: Leaf, Edibles: Candy, Concentrates: Droplets, Vapor: Wind, Topicals: Pipette, Tinctures: Pill, Accessories: Wrench };
+  const catIconComponents: Record<string, React.ComponentType<{ className?: string }>> = { Flower: Leaf, Edibles: Candy, Concentrates: Droplets, Vapor: Wind, Topicals: Pipette, Tinctures: Pill, Accessories: Wrench, Packaging: Box };
 
   const getCategoryImage = (cat: string): string | null => {
     const prods = productsByCategory[cat] || [];
@@ -700,7 +724,7 @@ function PromoBanner() {
     <section className="bg-[#231F20] py-8 sm:py-10">
       <div className="max-w-3xl mx-auto px-4 text-center">
         <p className="text-[#FFCB08] font-bold text-lg sm:text-2xl mb-2">{"\u{1F525}"} First-Time Customer?</p>
-        <p className="text-[#FFFFFF] text-sm sm:text-base mb-4">Get <span className="text-[#B3D335] font-bold">15% OFF</span> your entire order with code <span className="bg-[#FFFFFF]/10 px-2 py-0.5 rounded font-mono font-bold">FIRST15</span></p>
+        <p className="text-[#FFFFFF] text-sm sm:text-base mb-4">Get <span className="text-[#B3D335] font-bold">10% OFF</span> your entire order with code <span className="bg-[#FFFFFF]/10 px-2 py-0.5 rounded font-mono font-bold">FIRST10</span></p>
         <button onClick={() => navigate('/shop')} className="px-8 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold transition-colors">Shop Now &amp; Save</button>
       </div>
     </section>
@@ -977,7 +1001,7 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
 
       {/* FIRST20 promo */}
       <div className="bg-[#FFCB08]/10 border border-[#FFCB08]/30 rounded-xl px-4 py-3 mb-6 text-center">
-        <p className="text-sm font-medium text-[#231F20]">{"\u{1F525}"} First-time customers: <span className="font-bold">15% OFF</span> with code <span className="font-bold text-[#126A44]">FIRST15</span></p>
+        <p className="text-sm font-medium text-[#231F20]">{"\u{1F525}"} First-time customers: <span className="font-bold">10% OFF</span> with code <span className="font-bold text-[#126A44]">FIRST10</span></p>
       </div>
 
       <div className="bg-[#FFFFFF] rounded-2xl sm:rounded-3xl overflow-hidden border border-[#231F20]/10 shadow-sm">
@@ -1040,7 +1064,7 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
             {product.description && (
               <div className="mb-4">
                 <h3 className="text-sm font-semibold text-[#231F20] uppercase tracking-wider mb-2">Description</h3>
-                <p className="text-[#231F20] leading-relaxed text-sm">{product.description}</p>
+                <div className="text-[#231F20] leading-relaxed text-sm product-description" dangerouslySetInnerHTML={{ __html: product.description }} />
               </div>
             )}
 
@@ -1097,27 +1121,6 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
         </div>
       </div>
 
-      {/* You Might Also Like */}
-      {related.length > 0 && (
-        <div className="mt-10">
-          <h2 className="text-2xl font-bold text-[#231F20] mb-6">You Might Also Like</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {related.map((p) => (
-              <div key={p.id} className="flex items-center gap-3 bg-[#FFFFFF] rounded-xl p-3 border border-[#231F20]/10 hover:shadow-md transition-all cursor-pointer" onClick={() => navigate(`/product/${p.id}`)}>
-                <div className="w-20 h-20 flex-shrink-0 bg-[#FFFFFF] rounded-lg overflow-hidden flex items-center justify-center">
-                  <img src={p.image_url || placeholderUrl(p.name, 200)} alt={p.name} className="max-h-full max-w-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={handleImgError} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-[#231F20] line-clamp-2 hover:text-[#126A44] transition-colors">{titleCase(p.online_name || p.name)}</h3>
-                  <p className="text-[#126A44] font-bold text-sm mt-1">{formatPrice(p.price)}</p>
-                </div>
-                <button onClick={(e) => { e.stopPropagation(); onAddToCart(p, 1); }} className="flex-shrink-0 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg px-3 py-2 text-xs font-semibold transition-colors">Add</button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Size variants with savings */}
       {sizeVariants.length > 0 && (
         <div className="mt-8">
@@ -1136,6 +1139,27 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* You Might Also Like */}
+      {related.length > 0 && (
+        <div className="mt-10">
+          <h2 className="text-2xl font-bold text-[#231F20] mb-6">You Might Also Like</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {related.map((p) => (
+              <div key={p.id} className="flex items-center gap-3 bg-[#FFFFFF] rounded-xl p-3 border border-[#231F20]/10 hover:shadow-md transition-all cursor-pointer" onClick={() => navigate(`/product/${p.id}`)}>
+                <div className="w-20 h-20 flex-shrink-0 bg-[#FFFFFF] rounded-lg overflow-hidden flex items-center justify-center">
+                  <img src={p.image_url || placeholderUrl(p.name, 200)} alt={p.name} className="max-h-full max-w-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={handleImgError} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-medium text-[#231F20] line-clamp-2 hover:text-[#126A44] transition-colors">{titleCase(p.online_name || p.name)}</h3>
+                  <p className="text-[#126A44] font-bold text-sm mt-1">{formatPrice(p.price)}</p>
+                </div>
+                <button onClick={(e) => { e.stopPropagation(); onAddToCart(p, 1); }} className="flex-shrink-0 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg px-3 py-2 text-xs font-semibold transition-colors">Add</button>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -1537,6 +1561,7 @@ function SiteFooter() {
               <a href="/shop/edibles" onClick={(e) => { e.preventDefault(); navigate("/shop/edibles"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Edibles</a>
               <a href="/shop/concentrates" onClick={(e) => { e.preventDefault(); navigate("/shop/concentrates"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Concentrates</a>
               <a href="/shop/vapor" onClick={(e) => { e.preventDefault(); navigate("/shop/vapor"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Vapor</a>
+              <a href="/shop/packaging" onClick={(e) => { e.preventDefault(); navigate("/shop/packaging"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Packaging</a>
             </div>
           </div>
           <div>
@@ -1738,7 +1763,7 @@ function ChatbotBud({ products }: { products: Product[] }) {
     } else if (msg.includes("safe") || msg.includes("test") || msg.includes("lab") || msg.includes("quality")) {
       response = { from: "bot", text: "\u{1F6E1}\uFE0F All our products are lab-tested and sourced carefully. Quality and safety are our top priority!" };
     } else if (msg.includes("first") || msg.includes("new") || msg.includes("discount") || msg.includes("code") || msg.includes("coupon")) {
-      response = { from: "bot", text: "\u{1F389} Use code FIRST15 for 15% off your first order! Works on everything in the store." };
+      response = { from: "bot", text: "\u{1F389} Use code FIRST10 for 10% off your first order! Works on everything in the store." };
     } else if (msg.includes("recommend") || msg.includes("suggest") || msg.includes("what should")) {
       response = {
         from: "bot",
@@ -1867,6 +1892,11 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
   const [selectedRateId, setSelectedRateId] = useState("");
   const [ratesLoading, setRatesLoading] = useState(false);
   const [ratesError, setRatesError] = useState("");
+  const [loyaltyData, setLoyaltyData] = useState<{ name: string; points: number; rewards: Array<{ id: number; name: string; points_required: number; reward_value: number; can_redeem: boolean }> } | null>(null);
+  const [loyaltyLooking, setLoyaltyLooking] = useState(false);
+  const [loyaltyError, setLoyaltyError] = useState("");
+  const [loyaltyRedeemId, setLoyaltyRedeemId] = useState<number | null>(null);
+  const [loyaltyDiscount, setLoyaltyDiscount] = useState(0);
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", phone: "",
     address: "", apartment: "", city: "", state: "FL", zip: "",
@@ -1880,13 +1910,15 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
   const sdkLoadedRef = useRef(false);
 
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const discount = promoApplied ? Math.round(subtotal * 0.15) : 0;
+  const discount = promoApplied ? Math.round(subtotal * 0.10) : 0;
   const discountedSubtotal = subtotal - discount;
   const selectedRate = shippingRates.find(r => r.id === selectedRateId);
   const shippingCost = (fulfillment && fulfillment.startsWith("pickup")) ? 0 : (selectedRate ? selectedRate.amount_cents : 0);
-  const taxRate = getTaxRate(form.state);
+  const isPickup = !!(fulfillment && fulfillment.startsWith("pickup"));
+  const taxRate = getTaxRate(form.state, isPickup);
   const tax = Math.round(discountedSubtotal * taxRate);
-  const total = discountedSubtotal + shippingCost + tax;
+  const effectiveLoyaltyDiscount = Math.min(loyaltyDiscount, discountedSubtotal + shippingCost + tax);
+  const total = discountedSubtotal + shippingCost + tax - effectiveLoyaltyDiscount;
 
   const fetchShippingRates = useCallback(async (addr: { address: string; apartment: string; city: string; state: string; zip: string }) => {
     if (!addr.address || !addr.city || !addr.state || !addr.zip) return;
@@ -1934,7 +1966,7 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
       }
     } catch {
       // Fallback to client-side validation if backend is unreachable
-      if (code === "FIRST15") {
+      if (code === "FIRST10") {
         setPromoApplied(true);
         setPromoError("");
       } else {
@@ -1944,6 +1976,45 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
     }
     setPromoLoading(false);
   };
+
+  const lookupLoyalty = async () => {
+    const input = form.loyaltyNumber.trim();
+    if (!input) { setLoyaltyError("Enter your phone number or loyalty number"); return; }
+    setLoyaltyLooking(true);
+    setLoyaltyError("");
+    try {
+      const digits = input.replace(/\D/g, "");
+      const query = digits.length >= 7 ? `phone=${encodeURIComponent(digits)}` : `phone=${encodeURIComponent(input)}`;
+      const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/lookup?${query}`);
+      const data = await resp.json();
+      if (data.found && data.customer) {
+        setLoyaltyData({
+          name: `${data.customer.first_name} ${data.customer.last_name || ""}`.trim(),
+          points: data.customer.points_balance || 0,
+          rewards: (data.available_rewards || []).map((r: Record<string, unknown>) => ({
+            id: r.id as number, name: r.name as string, points_required: r.points_required as number,
+            reward_value: r.reward_value as number, can_redeem: r.can_redeem as boolean,
+          })),
+        });
+      } else {
+        setLoyaltyError("No rewards account found. Sign up at any location or on the Rewards page!");
+      }
+    } catch {
+      setLoyaltyError("Unable to look up rewards. Try again later.");
+    }
+    setLoyaltyLooking(false);
+  };
+
+  const selectLoyaltyReward = (rewardId: number, rewardValue: number) => {
+    if (loyaltyRedeemId === rewardId) {
+      setLoyaltyRedeemId(null);
+      setLoyaltyDiscount(0);
+    } else {
+      setLoyaltyRedeemId(rewardId);
+      setLoyaltyDiscount(Math.round(rewardValue * 100));
+    }
+  };
+
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const setField = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
@@ -1973,7 +2044,7 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
               display: r.display_name as unknown as string,
               address: street,
               city: a.city || a.town || a.village || a.hamlet || a.county?.replace(" County", "") || "",
-              state: a.state || "FL",
+              state: normalizeState(a.state || "FL"),
               zip: a.postcode || "",
             };
           })
@@ -2107,7 +2178,6 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
     );
   }
 
-  const isPickup = fulfillment && fulfillment.startsWith("pickup");
   const canProceedInfo = form.firstName && form.lastName && form.email && form.phone;
   const canProceedShipping = isPickup ? true : (form.address && form.city && form.state && form.zip && selectedRateId);
 
@@ -2141,11 +2211,12 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
         customer: { first_name: form.firstName, last_name: form.lastName, email: form.email, phone: form.phone },
         shipping_address: { address: form.address, apartment: form.apartment, city: form.city, state: form.state, zip: form.zip },
         items: cart.map((item) => ({ product_id: item.product.id, name: item.product.name, sku: item.product.sku, price: item.product.price, quantity: item.quantity })),
-        subtotal, discount, shipping_cost: shippingCost, tax, total, notes: form.notes,
+        subtotal, discount, loyalty_discount: effectiveLoyaltyDiscount, shipping_cost: shippingCost, tax, total, notes: form.notes,
         shipping_service: selectedRate?.service_level || "",
-        promo_code: promoApplied ? "FIRST15" : null,
+        promo_code: promoApplied ? "FIRST10" : null,
         payment_token: tokenResult.token,
         loyalty_number: form.loyaltyNumber,
+        loyalty_reward_id: loyaltyRedeemId,
         fulfillment_type: fulfillment || "shipping",
       };
 
@@ -2434,20 +2505,59 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
                 </p>
               </div>
 
-              {/* Loyalty Number */}
+              {/* Loyalty / Rewards */}
               <div className="mb-6 p-4 bg-[#FFFFFF] rounded-xl border border-[#231F20]/20">
                 <div className="flex items-center gap-2 mb-3">
                   <Gift className="h-4 w-4 text-[#126A44]" />
-                  <h3 className="text-[#231F20] text-sm font-semibold">Hemp Rewards (optional)</h3>
+                  <h3 className="text-[#231F20] text-sm font-semibold">Hemp Rewards</h3>
                 </div>
-                <input
-                  type="text"
-                  value={form.loyaltyNumber}
-                  onChange={(e) => setField("loyaltyNumber", e.target.value)}
-                  placeholder="Enter your loyalty number or phone number"
-                  className={inputClass}
-                />
-                <p className="text-xs text-[#231F20] mt-2">Enter your rewards number to earn points on this purchase</p>
+                {!loyaltyData ? (
+                  <>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={form.loyaltyNumber}
+                        onChange={(e) => setField("loyaltyNumber", e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") lookupLoyalty(); }}
+                        placeholder="Enter your phone number"
+                        className="flex-1 bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-3 py-2 text-sm text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335] focus:ring-1 focus:ring-[#B3D335] transition-colors"
+                      />
+                      <button onClick={lookupLoyalty} disabled={loyaltyLooking} className="px-4 py-2 text-sm font-medium bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg transition-colors disabled:opacity-50">{loyaltyLooking ? "Looking up..." : "Look Up"}</button>
+                    </div>
+                    {loyaltyError && <p className="text-red-500 text-xs mt-1">{loyaltyError}</p>}
+                    <p className="text-xs text-[#231F20] mt-2">Look up your rewards to see your points balance and redeem rewards</p>
+                  </>
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="text-sm font-medium text-[#231F20]">Welcome, {loyaltyData.name}!</p>
+                        <p className="text-xs text-[#231F20]">Points balance: <span className="font-bold text-[#126A44]">{loyaltyData.points}</span></p>
+                      </div>
+                      <button onClick={() => { setLoyaltyData(null); setLoyaltyRedeemId(null); setLoyaltyDiscount(0); setLoyaltyError(""); }} className="text-xs text-[#231F20]/50 hover:text-[#231F20] transition-colors">Change</button>
+                    </div>
+                    {loyaltyData.rewards.length > 0 && (
+                      <div>
+                        <p className="text-xs font-semibold text-[#231F20] mb-2">Redeem a reward:</p>
+                        <div className="space-y-1.5">
+                          {loyaltyData.rewards.map((rw) => (
+                            <button
+                              key={rw.id}
+                              onClick={() => rw.can_redeem && selectLoyaltyReward(rw.id, rw.reward_value)}
+                              disabled={!rw.can_redeem}
+                              className={`w-full flex items-center justify-between p-2.5 rounded-lg border text-left text-xs transition-colors ${loyaltyRedeemId === rw.id ? "border-[#58BA49] bg-[#58BA49]/10" : rw.can_redeem ? "border-[#231F20]/15 hover:border-[#B3D335]" : "border-[#231F20]/10 opacity-40 cursor-not-allowed"}`}
+                            >
+                              <span className="font-medium text-[#231F20]">{rw.name}</span>
+                              <span className={`font-bold ${rw.can_redeem ? "text-[#126A44]" : "text-[#231F20]/40"}`}>{rw.points_required} pts</span>
+                            </button>
+                          ))}
+                        </div>
+                        {loyaltyRedeemId && <p className="text-[#126A44] text-xs mt-2 font-medium">Reward applied — {formatPrice(effectiveLoyaltyDiscount)} off!</p>}
+                      </div>
+                    )}
+                    {loyaltyData.rewards.length === 0 && <p className="text-xs text-[#231F20]">No rewards available to redeem yet. Keep earning points!</p>}
+                  </div>
+                )}
               </div>
 
               {/* Error display */}
@@ -2514,13 +2624,14 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
                 )}
               </div>
               {promoError && <p className="text-red-500 text-xs mt-1">{promoError}</p>}
-              {promoApplied && <p className="text-[#126A44] text-xs mt-1 font-medium">FIRST15 applied — 15% off!</p>}
+              {promoApplied && <p className="text-[#126A44] text-xs mt-1 font-medium">FIRST10 applied — 10% off!</p>}
             </div>
             <div className="border-t border-[#231F20]/20 pt-4 space-y-2">
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Subtotal</span><span className="text-[#231F20]">{formatPrice(subtotal)}</span></div>
-              {promoApplied && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Discount (15%)</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
+              {promoApplied && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Discount (10%)</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">{isPickup ? "Pickup" : `Shipping${selectedRate ? ` (${selectedRate.service_level})` : ""}`}</span><span className="text-[#231F20]">{isPickup ? "FREE" : (selectedRate ? formatPrice(shippingCost) : "Select a rate")}</span></div>
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Tax ({(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 2)}%)</span><span className="text-[#231F20]">{formatPrice(tax)}</span></div>
+              {effectiveLoyaltyDiscount > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Rewards Discount</span><span className="text-[#126A44] font-medium">-{formatPrice(effectiveLoyaltyDiscount)}</span></div>}
               <div className="border-t border-[#231F20]/20 pt-3 flex justify-between"><span className="text-[#231F20] font-semibold">Total</span><span className="text-xl font-bold text-[#231F20]">{formatPrice(total)}</span></div>
             </div>
           </div>
@@ -3700,6 +3811,7 @@ function App() {
       "/shop/topicals": "Hemp topicals including CBD muscle creams, balms, roll-ons, and transdermal patches. Targeted relief, lab-tested, available in-store and online.",
       "/shop/tinctures": "CBD, CBG, CBN and full spectrum hemp tinctures. Sublingual oils for sleep, pain, focus, and daily wellness. Lab-tested, fast pickup or shipping.",
       "/shop/accessories": "Hemp accessories including glass pipes, rolling papers, grinders, storage, and butane. Everything you need in one stop.",
+      "/shop/packaging": "Wholesale packaging supplies — containers, bags, jars, and more from top manufacturers like Chubby Gorilla. Available at The Hemp Dispensary.",
       "/loyalty": "Hemp Rewards — earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary.",
       "/games": "Play games and win prizes at The Hemp Dispensary. Roll-a-Joint and more — all free to play for rewards members.",
       "/about": "Our Story — how two Spring Hill locals built The Hemp Dispensary from a road trip idea to 15 locations, lost 13 overnight, and kept going.",
