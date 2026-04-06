@@ -342,7 +342,7 @@ function BudAgeGatePopup({ onComplete }: { onComplete: (f: FulfillmentType) => v
                     <div>
                       <p className="font-bold text-sm">PICK UP AT SPRING HILL WEST</p>
                       <p className={`text-xs mt-1 ${selected === "pickup_west" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>6175 Deltona Blvd, Suite 104, Spring Hill FL</p>
-                      <p className={`text-xs ${selected === "pickup_west" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Mon-Fri 6am-12am, Sat-Sun 10am-8pm</p>
+                      <p className={`text-xs ${selected === "pickup_west" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Open Daily 9am-10pm</p>
                       <p className={`text-xs font-semibold mt-1 ${selected === "pickup_west" ? "text-[#B3D335]" : "text-[#58BA49]"}`}>Ready in 5 minutes</p>
                     </div>
                   </div>
@@ -354,7 +354,7 @@ function BudAgeGatePopup({ onComplete }: { onComplete: (f: FulfillmentType) => v
                     <div>
                       <p className="font-bold text-sm">PICK UP AT SPRING HILL EAST</p>
                       <p className={`text-xs mt-1 ${selected === "pickup_east" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>14312 Spring Hill Dr, Spring Hill FL</p>
-                      <p className={`text-xs ${selected === "pickup_east" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Daily 6am-10pm</p>
+                      <p className={`text-xs ${selected === "pickup_east" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Open Daily 7am-10pm</p>
                       <p className={`text-xs font-semibold mt-1 ${selected === "pickup_east" ? "text-[#B3D335]" : "text-[#58BA49]"}`}>Ready in 5 minutes</p>
                     </div>
                   </div>
@@ -473,7 +473,7 @@ function FulfillmentSwitchNotification({ removedItems, newLabel, onClose }: { re
 function StickyTopBar() {
   return (
     <div className="bg-[#231F20] text-[#FFFFFF] text-center py-2 px-4 text-sm font-medium">
-      <span className="hidden sm:inline">{"\u{1F680}"} Order Online {"\u2013"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | Open Late | </span>
+      <span className="hidden sm:inline">{"\u{1F680}"} Order Online {"\u2013"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | Open Daily | 
       <span className="sm:hidden">{"\u{1F680}"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | </span>
       <span className="text-[#FFCB08] font-bold">FIRST10 = 10% Off</span>
     </div>
@@ -646,7 +646,7 @@ function TrustStrip() {
     { icon: Shield, label: "Lab Tested", sub: "Clean & Safe" },
     { icon: MapPin, label: "2 Locations", sub: "Spring Hill, FL" },
     { icon: Zap, label: "Ready In 5 Minutes", sub: "Fast Pickup" },
-    { icon: Clock, label: "Open Late", sub: "West Til 12am | East Til 10pm" },
+    { icon: Clock, label: "Open Daily", sub: "East 7am-10pm | West 9am-10pm" },
   ];
   return (
     <section className="bg-[#FFFFFF] border-b border-[#231F20]/10 cursor-pointer" onClick={() => navigate('/shop')}>
@@ -873,8 +873,8 @@ function ReviewsSection() {
 /* ======================== LOCATION SECTION ======================== */
 function LocationSection() {
   const locations = [
-    { name: "Spring Hill East", address: "14312 Spring Hill Dr, Spring Hill, FL 34609", hours: "Open Daily 6am\u201310pm", phone: "(352) 515-5370", mapsQuery: "The Hemp Dispensary Cannabis Spring Hill East", googleUrl: "https://www.google.com/maps/search/The+Hemp+Dispensary+Cannabis+Spring+Hill+East+14312+Spring+Hill+Dr" },
-    { name: "Spring Hill West", address: "6175 Deltona Blvd, Ste 104, Spring Hill, FL 34606", hours: "Mon\u2013Fri 6am\u201312am | Sat\u2013Sun 10am\u20138pm", phone: "(352) 340-5860", mapsQuery: "The Hemp Dispensary Cannabis Spring Hill West", googleUrl: "https://www.google.com/maps/search/The+Hemp+Dispensary+Cannabis+Spring+Hill+West+6175+Deltona+Blvd" },
+    { name: "Spring Hill East", address: "14312 Spring Hill Dr, Spring Hill, FL 34609", hours: "Open Daily 7am\u201310pm", phone: "(352) 515-5370", mapsQuery: "The Hemp Dispensary Cannabis Spring Hill East", googleUrl: "https://www.google.com/maps/search/The+Hemp+Dispensary+Cannabis+Spring+Hill+East+14312+Spring+Hill+Dr" },
+    { name: "Spring Hill West", address: "6175 Deltona Blvd, Ste 104, Spring Hill, FL 34606", hours: "Open Daily 9am\u201310pm", phone: "(352) 340-5860", mapsQuery: "The Hemp Dispensary Cannabis Spring Hill West", googleUrl: "https://www.google.com/maps/search/The+Hemp+Dispensary+Cannabis+Spring+Hill+West+6175+Deltona+Blvd" },
   ];
   return (
     <section id="locations-section" className="bg-[#FFFFFF] py-12 sm:py-16">
@@ -1495,7 +1495,7 @@ function OurLocationsPage() {
             <h2 className="text-2xl font-bold text-[#231F20] mb-4">Spring Hill West</h2>
             <div className="space-y-3 text-[#231F20]">
               <p className="flex items-center gap-3"><MapPin className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /> 6175 Deltona Blvd, Suite 104, Spring Hill, FL 34606</p>
-              <p className="flex items-center gap-3"><Clock className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /> Mon–Fri 6am–12am &nbsp;|&nbsp; Sat–Sun 10am–8pm</p>
+              <p className="flex items-center gap-3"><Clock className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /> Open Daily 9am–10pm</p>
               <p className="flex items-center gap-3"><Phone className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /><a href="tel:+13523405860" className="hover:text-[#126A44] underline">(352) 340-5860</a></p>
             </div>
             <div className="mt-5">
@@ -1514,7 +1514,7 @@ function OurLocationsPage() {
             <h2 className="text-2xl font-bold text-[#231F20] mb-4">Spring Hill East</h2>
             <div className="space-y-3 text-[#231F20]">
               <p className="flex items-center gap-3"><MapPin className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /> 14312 Spring Hill Dr, Spring Hill, FL 34609</p>
-              <p className="flex items-center gap-3"><Clock className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /> Open Daily 6am–10pm</p>
+              <p className="flex items-center gap-3"><Clock className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /> Open Daily 7am–10pm</p>
               <p className="flex items-center gap-3"><Phone className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /><a href="tel:+13525155370" className="hover:text-[#126A44] underline">(352) 515-5370</a></p>
             </div>
             <div className="mt-5">
@@ -1783,7 +1783,7 @@ function ChatbotBud({ products }: { products: Product[] }) {
       handleVibeSelect("focus");
       return;
     } else if (msg.includes("location") || msg.includes("where") || msg.includes("address") || msg.includes("store")) {
-      response = { from: "bot", text: "\u{1F4CD} We have 2 locations in Spring Hill, FL:\n\n\u2022 HQ: 1233 Pinehurst Dr\n\u2022 East: 2480 Commercial Way\n\nBoth open Mon-Sat 10am-9pm, Sun 11am-7pm!" };
+      response = { from: "bot", text: "\u{1F4CD} We have 2 locations in Spring Hill, FL:\n\n\u2022 HQ: 1233 Pinehurst Dr\n\u2022 East: 2480 Commercial Way\n\nEast open Daily 7am-10pm, West open Daily 9am-10pm!" };
     } else if (msg.includes("pickup") || msg.includes("fast") || msg.includes("how long") || msg.includes("ready")) {
       response = { from: "bot", text: "\u26A1 Most orders are ready in about 5 minutes for pickup! Just place your order and swing by." };
     } else if (msg.includes("safe") || msg.includes("test") || msg.includes("lab") || msg.includes("quality")) {
