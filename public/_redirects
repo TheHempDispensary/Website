@@ -1,5 +1,5 @@
 # Specific page redirects
-/our-locations      /locations         301
+/locations          /our-locations     301
 /shipping-policy    /                  301
 /affiliate-program  /                  301
 /help-save-hemp     /                  301
