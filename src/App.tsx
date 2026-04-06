@@ -51,6 +51,7 @@ interface Product {
   shipping_only?: boolean;
   effect?: string | null;
   strength?: string | null;
+  product_type?: string | null;
 }
 
 type FulfillmentType = "pickup_west" | "pickup_east" | "ship";
@@ -934,6 +935,7 @@ function ProductGridCard({ product, onQuickAdd, fulfillment }: { product: Produc
                     <span className="inline-block text-[11px] sm:text-xs font-medium px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>
                       {effect.icon} {effect.label}
                     </span>
+          {product.product_type && <span className="inline-block text-[11px] sm:text-xs font-medium px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full bg-[#E8F5E9] text-[#2E7D32]">{product.product_type}</span>}
           {fulfillment && isPickup && <span className="inline-block bg-[#58BA49] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ready in 5 min</span>}
           {fulfillment && !isPickup && <span className="inline-block bg-[#3D8C32] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ships 1–2 Days</span>}
           {effectiveStock <= 5 && <span className="inline-block bg-[#ADD038] text-[#231F20] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Only {Math.floor(effectiveStock)} Left</span>}
@@ -1059,9 +1061,10 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
 
             <h1 className="text-2xl md:text-3xl font-bold text-[#231F20] mb-2">{titleCase(product.online_name || product.name)}</h1>
 
-            {/* Effect & Strength badges */}
-            <div className="flex gap-2 mb-4">
+            {/* Effect, Type & Strength badges */}
+            <div className="flex gap-2 mb-4 flex-wrap">
               <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>{effect.icon} {effect.label}</span>
+              {product.product_type && <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#E8F5E9] text-[#2E7D32]">{product.product_type}</span>}
               <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#FFCB08]" style={{ color: "#231F20" }}>Strength: {strength.label}</span>
             </div>
 
