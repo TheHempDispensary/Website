@@ -49,6 +49,9 @@ interface Product {
   image_url: string | null;
   is_age_restricted: boolean;
   shipping_only?: boolean;
+  effect?: string | null;
+  strength?: string | null;
+  product_type?: string | null;
 }
 
 type FulfillmentType = "pickup_west" | "pickup_east" | "ship";
@@ -177,6 +180,17 @@ function placeholderUrl(name: string, _size = 400): string {
 
 /* ======================== HELPER: Product Effect Detection ======================== */
 function getProductEffect(product: Product): { label: string; color: string; bg: string; icon: string } {
+  // Use stored effect from HempVentory if available
+  if (product.effect) {
+    const effectMap: Record<string, { label: string; color: string; bg: string; icon: string }> = {
+      "Sleep": { label: "Sleep", color: "#231F20", bg: "#ADD038", icon: "\u{1F634}" },
+      "Energy": { label: "Energy", color: "#231F20", bg: "#ADD038", icon: "\u26A1" },
+      "Focus": { label: "Focus", color: "#231F20", bg: "#ADD038", icon: "\u{1F9E0}" },
+      "Relax": { label: "Relax", color: "#231F20", bg: "#ADD038", icon: "\u{1F60C}" },
+    };
+    if (effectMap[product.effect]) return effectMap[product.effect];
+  }
+  // Fallback: auto-detect from product name/description
   const name = (product.name + " " + (product.description || "")).toLowerCase();
   if (name.includes("sleep") || name.includes("night") || name.includes("dream") || name.includes("rest") || name.includes("melatonin") || name.includes("cbn"))
     return { label: "Sleep", color: "#231F20", bg: "#ADD038", icon: "\u{1F634}" };
@@ -188,6 +202,16 @@ function getProductEffect(product: Product): { label: string; color: string; bg:
 }
 
 function getProductStrength(product: Product): { label: string; color: string } {
+  // Use stored strength from HempVentory if available
+  if (product.strength) {
+    const strengthMap: Record<string, { label: string; color: string }> = {
+      "High": { label: "High", color: "#FFCB08" },
+      "Medium": { label: "Medium", color: "#FFCB08" },
+      "Low": { label: "Low", color: "#B3D335" },
+    };
+    if (strengthMap[product.strength]) return strengthMap[product.strength];
+  }
+  // Fallback: auto-detect from price
   const price = product.price;
   if (price >= 5000) return { label: "High", color: "#FFCB08" };
   if (price >= 2000) return { label: "Medium", color: "#FFCB08" };
@@ -464,14 +488,14 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
   return (
     <header className="bg-[#FFFFFF] sticky top-0 z-50 border-b border-[#231F20]/15 shadow-sm">
       <div className="max-w-7xl mx-auto px-3 sm:px-4">
-        <div className="h-14 sm:h-16 flex items-center justify-between">
+        <div className="h-14 sm:h-16 flex items-center justify-between relative">
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-[#231F20] hover:text-[#126A44] transition-colors" aria-label="Open navigation menu">
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>}
             </button>
             <button onClick={onSearch} className="p-2 text-[#231F20] hover:text-[#126A44] transition-colors" aria-label="Search products"><Search className="h-5 w-5" /></button>
           </div>
-          <a href="/" onClick={(e) => { e.preventDefault(); navigate("/"); }} className="flex items-center flex-shrink-0">
+          <a href="/" onClick={(e) => { e.preventDefault(); navigate("/"); }} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
             <img src="/logo.webp" alt="The Hemp Dispensary" className="h-10 sm:h-12 w-auto object-contain" width="120" height="48" />
           </a>
           <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
@@ -911,6 +935,7 @@ function ProductGridCard({ product, onQuickAdd, fulfillment }: { product: Produc
                     <span className="inline-block text-[11px] sm:text-xs font-medium px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>
                       {effect.icon} {effect.label}
                     </span>
+          {product.product_type && <span className="inline-block text-[11px] sm:text-xs font-medium px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full bg-[#E8F5E9] text-[#2E7D32]">{product.product_type}</span>}
           {fulfillment && isPickup && <span className="inline-block bg-[#58BA49] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ready in 5 min</span>}
           {fulfillment && !isPickup && <span className="inline-block bg-[#3D8C32] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ships 1–2 Days</span>}
           {effectiveStock <= 5 && <span className="inline-block bg-[#ADD038] text-[#231F20] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Only {Math.floor(effectiveStock)} Left</span>}
@@ -1036,9 +1061,10 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
 
             <h1 className="text-2xl md:text-3xl font-bold text-[#231F20] mb-2">{titleCase(product.online_name || product.name)}</h1>
 
-            {/* Effect & Strength badges */}
-            <div className="flex gap-2 mb-4">
+            {/* Effect, Type & Strength badges */}
+            <div className="flex gap-2 mb-4 flex-wrap">
               <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>{effect.icon} {effect.label}</span>
+              {product.product_type && <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#E8F5E9] text-[#2E7D32]">{product.product_type}</span>}
               <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#FFCB08]" style={{ color: "#231F20" }}>Strength: {strength.label}</span>
             </div>
 
