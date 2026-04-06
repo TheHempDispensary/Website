@@ -473,7 +473,7 @@ function FulfillmentSwitchNotification({ removedItems, newLabel, onClose }: { re
 function StickyTopBar() {
   return (
     <div className="bg-[#231F20] text-[#FFFFFF] text-center py-2 px-4 text-sm font-medium">
-      <span className="hidden sm:inline">{"\u{1F680}"} Order Online {"\u2013"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | Open Daily | 
+      <span className="hidden sm:inline">{"\u{1F680}"} Order Online {"\u2013"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | Open Daily | </span>
       <span className="sm:hidden">{"\u{1F680}"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | </span>
       <span className="text-[#FFCB08] font-bold">FIRST10 = 10% Off</span>
     </div>
