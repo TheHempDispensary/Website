@@ -464,14 +464,14 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
   return (
     <header className="bg-[#FFFFFF] sticky top-0 z-50 border-b border-[#231F20]/15 shadow-sm">
       <div className="max-w-7xl mx-auto px-3 sm:px-4">
-        <div className="h-14 sm:h-16 flex items-center justify-between">
+        <div className="h-14 sm:h-16 flex items-center justify-between relative">
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-[#231F20] hover:text-[#126A44] transition-colors" aria-label="Open navigation menu">
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>}
             </button>
             <button onClick={onSearch} className="p-2 text-[#231F20] hover:text-[#126A44] transition-colors" aria-label="Search products"><Search className="h-5 w-5" /></button>
           </div>
-          <a href="/" onClick={(e) => { e.preventDefault(); navigate("/"); }} className="flex items-center flex-shrink-0">
+          <a href="/" onClick={(e) => { e.preventDefault(); navigate("/"); }} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
             <img src="/logo.webp" alt="The Hemp Dispensary" className="h-10 sm:h-12 w-auto object-contain" width="120" height="48" />
           </a>
           <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
