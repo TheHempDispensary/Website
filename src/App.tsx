@@ -49,6 +49,8 @@ interface Product {
   image_url: string | null;
   is_age_restricted: boolean;
   shipping_only?: boolean;
+  effect?: string | null;
+  strength?: string | null;
 }
 
 type FulfillmentType = "pickup_west" | "pickup_east" | "ship";
@@ -177,6 +179,17 @@ function placeholderUrl(name: string, _size = 400): string {
 
 /* ======================== HELPER: Product Effect Detection ======================== */
 function getProductEffect(product: Product): { label: string; color: string; bg: string; icon: string } {
+  // Use stored effect from HempVentory if available
+  if (product.effect) {
+    const effectMap: Record<string, { label: string; color: string; bg: string; icon: string }> = {
+      "Sleep": { label: "Sleep", color: "#231F20", bg: "#ADD038", icon: "\u{1F634}" },
+      "Energy": { label: "Energy", color: "#231F20", bg: "#ADD038", icon: "\u26A1" },
+      "Focus": { label: "Focus", color: "#231F20", bg: "#ADD038", icon: "\u{1F9E0}" },
+      "Relax": { label: "Relax", color: "#231F20", bg: "#ADD038", icon: "\u{1F60C}" },
+    };
+    if (effectMap[product.effect]) return effectMap[product.effect];
+  }
+  // Fallback: auto-detect from product name/description
   const name = (product.name + " " + (product.description || "")).toLowerCase();
   if (name.includes("sleep") || name.includes("night") || name.includes("dream") || name.includes("rest") || name.includes("melatonin") || name.includes("cbn"))
     return { label: "Sleep", color: "#231F20", bg: "#ADD038", icon: "\u{1F634}" };
@@ -188,6 +201,16 @@ function getProductEffect(product: Product): { label: string; color: string; bg:
 }
 
 function getProductStrength(product: Product): { label: string; color: string } {
+  // Use stored strength from HempVentory if available
+  if (product.strength) {
+    const strengthMap: Record<string, { label: string; color: string }> = {
+      "High": { label: "High", color: "#FFCB08" },
+      "Medium": { label: "Medium", color: "#FFCB08" },
+      "Low": { label: "Low", color: "#B3D335" },
+    };
+    if (strengthMap[product.strength]) return strengthMap[product.strength];
+  }
+  // Fallback: auto-detect from price
   const price = product.price;
   if (price >= 5000) return { label: "High", color: "#FFCB08" };
   if (price >= 2000) return { label: "Medium", color: "#FFCB08" };
