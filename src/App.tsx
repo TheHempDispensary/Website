@@ -1700,7 +1700,7 @@ function ChatbotBud() {
     if (!initialized) {
       setMessages([{
         from: "bot",
-        text: "Hey there! I'm Bud, your hemp guide at The Hemp Dispensary. Whether you're looking for something to help you relax, sleep better, or just curious about our products, I'm here to help! What can I do for you today?",
+        text: "Hey there! Welcome to The Hemp Dispensary! \ud83d\udc4b I'm Bud, your Virtual Budtender. Whether you're looking for something to help you relax, sleep better, or just curious about our products, I'm here to help! What can I do for you today?",
       }]);
       setInitialized(true);
     }
@@ -1730,7 +1730,7 @@ function ChatbotBud() {
     } catch {
       setMessages(prev => [...prev, {
         from: "bot",
-        text: "Sorry, I'm having a little trouble right now. You can reach our team at 352-842-6185 or stop by either Spring Hill location!",
+        text: "Sorry, I'm having a little trouble right now. You can reach our West Store at 352-340-5860 or our East Store at 352-515-5370, or stop by either Spring Hill location!",
       }]);
     } finally {
       setLoading(false);

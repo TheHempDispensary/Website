@@ -29,3 +29,67 @@
   margin-bottom: 0.25rem;
 }
 
+/* ======================== BUD CHARACTER ANIMATIONS ======================== */
+@keyframes bud-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@keyframes bud-blink {
+  0%, 42%, 44%, 100% { transform: scaleY(1); }
+  43% { transform: scaleY(0.1); }
+}
+@keyframes bud-blink-sleep {
+  0%, 100% { transform: scaleY(0.1); }
+}
+@keyframes bud-think-eyes {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(3px); }
+  75% { transform: translateX(-3px); }
+}
+@keyframes bud-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  25% { transform: translateY(-8px) scale(1.05); }
+  50% { transform: translateY(0) scale(0.98); }
+  75% { transform: translateY(-4px) scale(1.02); }
+}
+@keyframes bud-wave-leaf {
+  0%, 100% { transform: rotate(-15deg); }
+  25% { transform: rotate(15deg); }
+  50% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
+}
+@keyframes bud-zzz {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  50% { opacity: 1; transform: translate(6px, -10px) scale(1); }
+  100% { opacity: 0; transform: translate(12px, -20px) scale(0.6); }
+}
+@keyframes bud-sparkle {
+  0%, 100% { opacity: 0; transform: scale(0); }
+  50% { opacity: 1; transform: scale(1); }
+}
+@keyframes bud-pulse-glow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(179,211,53,0.3)); }
+  50% { filter: drop-shadow(0 0 14px rgba(179,211,53,0.6)); }
+}
+@keyframes bud-chat-pop {
+  0% { transform: scale(0) translateY(10px); opacity: 0; }
+  60% { transform: scale(1.08) translateY(-2px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+@keyframes bud-float-in {
+  0% { transform: translateY(20px) scale(0.8); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes bud-smile-grow {
+  0% { d: path("M 18 32 Q 25 34 32 32"); }
+  100% { d: path("M 16 31 Q 25 38 34 31"); }
+}
+.bud-idle { animation: bud-bob 3s ease-in-out infinite, bud-pulse-glow 4s ease-in-out infinite; }
+.bud-think { animation: bud-bob 2s ease-in-out infinite; }
+.bud-think .bud-eyes { animation: bud-think-eyes 1.2s ease-in-out infinite; }
+.bud-excited { animation: bud-bounce 0.6s ease-in-out infinite; }
+.bud-wave .bud-leaf-right { animation: bud-wave-leaf 0.5s ease-in-out 4; transform-origin: bottom center; }
+.bud-sleep { animation: bud-bob 5s ease-in-out infinite; }
+.bud-sleep .bud-eyes { animation: bud-blink-sleep 2s ease-in-out infinite; }
+.bud-idle .bud-eyes { animation: bud-blink 4s ease-in-out infinite; }
+
