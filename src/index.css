@@ -29,22 +29,10 @@
   margin-bottom: 0.25rem;
 }
 
-/* ======================== BUD CHARACTER ANIMATIONS ======================== */
+/* ======================== BUD CHARACTER ANIMATIONS (PSD Art) ======================== */
 @keyframes bud-bob {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
-}
-@keyframes bud-blink {
-  0%, 42%, 44%, 100% { transform: scaleY(1); }
-  43% { transform: scaleY(0.1); }
-}
-@keyframes bud-blink-sleep {
-  0%, 100% { transform: scaleY(0.1); }
-}
-@keyframes bud-think-eyes {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(3px); }
-  75% { transform: translateX(-3px); }
 }
 @keyframes bud-bounce {
   0%, 100% { transform: translateY(0) scale(1); }
@@ -52,16 +40,17 @@
   50% { transform: translateY(0) scale(0.98); }
   75% { transform: translateY(-4px) scale(1.02); }
 }
-@keyframes bud-wave-leaf {
-  0%, 100% { transform: rotate(-15deg); }
-  25% { transform: rotate(15deg); }
-  50% { transform: rotate(-10deg); }
-  75% { transform: rotate(10deg); }
+@keyframes bud-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-5deg); }
+  40% { transform: rotate(5deg); }
+  60% { transform: rotate(-3deg); }
+  80% { transform: rotate(3deg); }
 }
 @keyframes bud-zzz {
   0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
-  50% { opacity: 1; transform: translate(6px, -10px) scale(1); }
-  100% { opacity: 0; transform: translate(12px, -20px) scale(0.6); }
+  50% { opacity: 1; transform: translate(4px, -8px) scale(1); }
+  100% { opacity: 0; transform: translate(8px, -16px) scale(0.6); }
 }
 @keyframes bud-sparkle {
   0%, 100% { opacity: 0; transform: scale(0); }
@@ -70,6 +59,11 @@
 @keyframes bud-pulse-glow {
   0%, 100% { filter: drop-shadow(0 0 6px rgba(179,211,53,0.3)); }
   50% { filter: drop-shadow(0 0 14px rgba(179,211,53,0.6)); }
+}
+@keyframes bud-think-sway {
+  0%, 100% { transform: translateX(0) translateY(-2px); }
+  25% { transform: translateX(2px) translateY(0); }
+  75% { transform: translateX(-2px) translateY(0); }
 }
 @keyframes bud-chat-pop {
   0% { transform: scale(0) translateY(10px); opacity: 0; }
@@ -80,18 +74,23 @@
   0% { transform: translateY(20px) scale(0.8); opacity: 0; }
   100% { transform: translateY(0) scale(1); opacity: 1; }
 }
-@keyframes bud-smile-grow {
-  0% { d: path("M 18 32 Q 25 34 32 32"); }
-  100% { d: path("M 16 31 Q 25 38 34 31"); }
-}
+
+/* Mood animation classes — applied to .bud-character wrapper */
 .bud-idle { animation: bud-bob 3s ease-in-out infinite, bud-pulse-glow 4s ease-in-out infinite; }
-.bud-think { animation: bud-bob 2s ease-in-out infinite; }
-.bud-think .bud-eyes { animation: bud-think-eyes 1.2s ease-in-out infinite; }
+.bud-think { animation: bud-think-sway 1.2s ease-in-out infinite; }
 .bud-excited { animation: bud-bounce 0.6s ease-in-out infinite; }
-.bud-wave .bud-leaf-right { animation: bud-wave-leaf 0.5s ease-in-out 4; transform-origin: bottom center; }
-.bud-sleep { animation: bud-bob 5s ease-in-out infinite; }
-.bud-sleep .bud-eyes { animation: bud-blink-sleep 2s ease-in-out infinite; }
-.bud-idle .bud-eyes { animation: bud-blink 4s ease-in-out infinite; }
+.bud-wave { animation: bud-wiggle 0.5s ease-in-out 3; }
+.bud-sleep { animation: bud-bob 5s ease-in-out infinite; opacity: 0.75; }
+
+/* Sleep zzz floating text */
+.bud-zzz-1 { animation: bud-zzz 2s ease-in-out infinite; }
+.bud-zzz-2 { animation: bud-zzz 2s ease-in-out infinite 0.5s; }
+.bud-zzz-3 { animation: bud-zzz 2s ease-in-out infinite 1s; }
+
+/* Excited sparkle dots */
+.bud-sparkle-dot { animation: bud-sparkle 0.8s ease-in-out infinite; }
+.bud-sparkle-delay-1 { animation-delay: 0.3s; }
+.bud-sparkle-delay-2 { animation-delay: 0.6s; }
 
 /* ======================== PRODUCT CARD IMAGE NORMALIZATION ======================== */
 .product-card-img {
