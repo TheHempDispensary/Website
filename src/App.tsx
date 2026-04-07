@@ -1716,8 +1716,18 @@ function ChatbotBud() {
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [budMood, setBudMood] = useState<BudMood>("idle");
+  const [showHint, setShowHint] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hintIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
+
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const BUD_IDLE_SIZE = isMobile ? 110 : 150;
+  const BUD_ACTIVE_SIZE = isMobile ? 160 : 220;
+  const BUBBLE_MAX_W = isMobile ? "85vw" : "280px";
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -1731,9 +1741,7 @@ function ChatbotBud() {
 
   // Set mood based on loading state
   useEffect(() => {
-    if (loading) {
-      setBudMood("think");
-    }
+    if (loading) setBudMood("think");
   }, [loading]);
 
   // When new bot message arrives, get excited briefly
@@ -1753,6 +1761,43 @@ function ChatbotBud() {
     return () => clearTimeout(sleepTimer);
   }, [open, messages, loading]);
 
+  // Idle hint: show after 10s, repeat every 30s
+  useEffect(() => {
+    if (open) {
+      // Clear hint timers when chat is open
+      if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+      if (hintIntervalRef.current) clearInterval(hintIntervalRef.current);
+      setShowHint(false);
+      return;
+    }
+    // First hint after 10s
+    hintTimerRef.current = setTimeout(() => {
+      setShowHint(true);
+      setTimeout(() => setShowHint(false), 4000);
+      // Then repeat every 30s
+      hintIntervalRef.current = setInterval(() => {
+        setShowHint(true);
+        setTimeout(() => setShowHint(false), 4000);
+      }, 30000);
+    }, 10000);
+    return () => {
+      if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+      if (hintIntervalRef.current) clearInterval(hintIntervalRef.current);
+    };
+  }, [open]);
+
+  // Close on outside tap (mobile)
+  useEffect(() => {
+    if (!open || !isMobile) return;
+    const handler = (e: MouseEvent) => {
+      if (backdropRef.current && e.target === backdropRef.current) {
+        closeChat();
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open, isMobile]);
+
   const openChat = () => {
     setOpen(true);
     setBudMood("wave");
@@ -1764,6 +1809,13 @@ function ChatbotBud() {
       }]);
       setInitialized(true);
     }
+    // Focus input after animation
+    setTimeout(() => inputRef.current?.focus(), 400);
+  };
+
+  const closeChat = () => {
+    setOpen(false);
+    setBudMood("idle");
   };
 
   const sendMessage = async (userText: string) => {
@@ -1801,88 +1853,155 @@ function ChatbotBud() {
     sendMessage(input);
   };
 
+  /* ---------- IDLE STATE (Bud floating in corner) ---------- */
+  if (!open) {
+    return (
+      <div className="fixed bottom-4 right-4 z-50" style={{ width: BUD_IDLE_SIZE, height: BUD_IDLE_SIZE }}>
+        {/* Idle hint speech bubble */}
+        {showHint && (
+          <div
+            className="bud-hint-enter absolute bg-[#FFFFFF] text-[#231F20] text-xs font-semibold px-3 py-2 rounded-xl shadow-lg border border-[#B3D335]/20"
+            style={{ bottom: BUD_IDLE_SIZE - 8, right: 10, whiteSpace: "nowrap", zIndex: 51 }}
+          >
+            Need help finding something? 👋
+            <div className="bud-speech-tail" />
+          </div>
+        )}
+        <button
+          onClick={openChat}
+          aria-label="Chat with Bud"
+          style={{ background: "none", border: "none", padding: 0, cursor: "pointer", width: "100%", height: "100%" }}
+        >
+          <BudCharacter size={BUD_IDLE_SIZE} mood="idle" />
+        </button>
+      </div>
+    );
+  }
+
+  /* ---------- ACTIVE STATE (Bud expanded with speech bubbles) ---------- */
   return (
     <>
-      {/* Floating Bud character button */}
-      {!open && (
-        <button onClick={openChat} className="fixed bottom-4 right-4 z-50 group" aria-label="Chat with Bud" style={{ background: "none", border: "none", padding: 0 }}>
-          <div className="relative">
-            <BudCharacter size={64} mood="idle" />
-            {/* Speech hint bubble */}
-            <div className="absolute -top-8 -left-16 bg-[#FFFFFF] text-[#231F20] text-[10px] font-semibold px-2 py-1 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-[#B3D335]/30">
-              Ask me anything!
-              <div className="absolute bottom-[-4px] right-4 w-2 h-2 bg-[#FFFFFF] rotate-45 border-r border-b border-[#B3D335]/30" />
-            </div>
-          </div>
-        </button>
+      {/* Mobile backdrop for outside-tap-to-close */}
+      {isMobile && (
+        <div ref={backdropRef} className="fixed inset-0 z-40" style={{ background: "rgba(0,0,0,0.15)" }} />
       )}
 
-      {/* Chat window */}
-      {open && (
-        <div className="fixed bottom-4 right-4 z-50 w-[340px] sm:w-[380px] max-h-[520px] bg-[#FFFFFF] rounded-2xl shadow-2xl border border-[#231F20]/15 flex flex-col overflow-hidden" style={{ animation: "bud-chat-pop 0.35s ease-out" }}>
-          {/* Header with animated Bud */}
-          <div className="bg-gradient-to-r from-[#B3D335] to-[#58BA49] text-[#231F20] px-4 py-2.5 flex items-center justify-between flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="bg-[#FFFFFF]/20 rounded-full p-0.5">
-                <BudCharacter size={34} mood={budMood} />
-              </div>
-              <div>
-                <p className="font-bold text-sm">Bud</p>
-                <p className="text-xs text-[#FFFFFF]/80">Virtual Budtender</p>
-              </div>
-            </div>
-            <button onClick={() => setOpen(false)} className="p-1 hover:bg-[#FFFFFF]/20 rounded-full transition-colors" aria-label="Close chat"><X className="h-5 w-5" /></button>
-          </div>
-
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-[200px] max-h-[360px]">
+      <div
+        className="fixed z-50 flex flex-col items-end"
+        style={{
+          bottom: isMobile ? 0 : 16,
+          right: isMobile ? 0 : 16,
+          paddingBottom: isMobile ? "env(safe-area-inset-bottom, 0px)" : 0,
+          maxWidth: isMobile ? "100vw" : "auto",
+        }}
+      >
+        {/* Speech bubble area — messages stack above Bud */}
+        <div
+          className="bud-speech-scroll relative mb-2"
+          style={{
+            maxWidth: BUBBLE_MAX_W,
+            maxHeight: isMobile ? "50vh" : "360px",
+            overflowY: "auto",
+            overflowX: "hidden",
+            marginRight: isMobile ? 8 : 0,
+            paddingRight: 4,
+          }}
+        >
+          <div className="flex flex-col gap-2 pb-1">
             {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
-                {msg.from === "bot" && (
-                  <div className="flex-shrink-0 mr-1.5 mt-1">
-                    <BudCharacter size={22} mood="idle" />
+              <div
+                key={i}
+                className={`bud-bubble-enter ${msg.from === "user" ? "self-end" : "self-start"}`}
+                style={{ animationDelay: `${Math.min(i * 0.05, 0.2)}s` }}
+              >
+                {msg.from === "bot" ? (
+                  <div
+                    className="relative bg-[#FFFFFF] text-[#231F20] rounded-2xl px-4 py-3 shadow-lg border border-[#231F20]/8"
+                    style={{ maxWidth: BUBBLE_MAX_W }}
+                  >
+                    <p className="text-sm leading-relaxed whitespace-pre-line">{msg.text}</p>
+                    {/* Close X on most recent bot bubble */}
+                    {i === messages.length - 1 && msg.from === "bot" && (
+                      <button
+                        onClick={closeChat}
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-[#FFFFFF] border border-[#231F20]/15 rounded-full flex items-center justify-center shadow-sm hover:bg-[#F5F5F5] transition-colors"
+                        aria-label="Close chat"
+                      >
+                        <X className="h-3 w-3 text-[#231F20]/60" />
+                      </button>
+                    )}
+                    {/* Tail on last bot message */}
+                    {i === messages.length - 1 && <div className="bud-speech-tail" />}
+                  </div>
+                ) : (
+                  <div
+                    className="bg-[#B3D335] text-[#231F20] rounded-2xl rounded-br-sm px-4 py-2.5 shadow-md"
+                    style={{ maxWidth: isMobile ? "70vw" : "200px" }}
+                  >
+                    <p className="text-sm leading-relaxed whitespace-pre-line">{msg.text}</p>
                   </div>
                 )}
-                <div className={`max-w-[80%] ${msg.from === "user" ? "bg-[#B3D335] text-[#231F20] rounded-2xl rounded-br-md px-3 py-2" : "bg-[#F8FBF0] text-[#231F20] rounded-2xl rounded-bl-md px-3 py-2 shadow-sm border border-[#B3D335]/15"}`}>
-                  <p className="text-sm whitespace-pre-line">{msg.text}</p>
-                </div>
               </div>
             ))}
             {loading && (
-              <div className="flex justify-start">
-                <div className="flex-shrink-0 mr-1.5 mt-1">
-                  <BudCharacter size={22} mood="think" />
-                </div>
-                <div className="bg-[#F8FBF0] text-[#231F20] rounded-2xl rounded-bl-md px-3 py-2 shadow-sm border border-[#B3D335]/15">
-                  <div className="flex gap-1 items-center py-1">
+              <div className="bud-bubble-enter self-start">
+                <div className="relative bg-[#FFFFFF] text-[#231F20] rounded-2xl px-4 py-3 shadow-lg border border-[#231F20]/8" style={{ maxWidth: BUBBLE_MAX_W }}>
+                  <div className="flex gap-1.5 items-center py-0.5">
                     <span className="w-2 h-2 bg-[#B3D335] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                     <span className="w-2 h-2 bg-[#B3D335] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
                     <span className="w-2 h-2 bg-[#B3D335] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                   </div>
+                  <div className="bud-speech-tail" />
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
-
-          {/* Input */}
-          <div className="border-t border-[#231F20]/10 p-3 flex gap-2 flex-shrink-0 bg-[#FAFAFA]">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && !loading) handleSend(); }}
-              placeholder="Ask Bud anything..."
-              className="flex-1 bg-[#FFFFFF] border border-[#231F20]/15 rounded-full px-4 py-2 text-sm text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335] focus:ring-1 focus:ring-[#B3D335]/30"
-              disabled={loading}
-              onFocus={() => { if (budMood === "sleep") setBudMood("idle"); }}
-            />
-            <button onClick={handleSend} disabled={loading} className="p-2 bg-[#58BA49] hover:bg-[#126A44] text-[#FFFFFF] rounded-full transition-colors disabled:opacity-50" aria-label="Send message">
-              <Send className="h-4 w-4" />
-            </button>
-          </div>
         </div>
-      )}
+
+        {/* Pill-shaped input — floats just above Bud */}
+        <div
+          className="flex items-center gap-2 mb-2"
+          style={{
+            width: isMobile ? "calc(100vw - 16px)" : "320px",
+            marginRight: isMobile ? 8 : 0,
+            marginLeft: isMobile ? 8 : 0,
+          }}
+        >
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !loading) handleSend(); }}
+            placeholder="Ask Bud anything..."
+            className="flex-1 bg-[#FFFFFF] border border-[#231F20]/12 rounded-full px-4 py-2.5 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335] focus:ring-2 focus:ring-[#B3D335]/20 shadow-lg"
+            style={{ fontSize: isMobile ? 16 : 14 }}
+            disabled={loading}
+            onFocus={() => { if (budMood === "sleep") setBudMood("idle"); }}
+          />
+          <button
+            onClick={handleSend}
+            disabled={loading}
+            className="flex-shrink-0 w-10 h-10 bg-[#58BA49] hover:bg-[#126A44] text-[#FFFFFF] rounded-full flex items-center justify-center shadow-lg transition-colors disabled:opacity-50"
+            aria-label="Send message"
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Bud character — larger when active */}
+        <div
+          className="self-end"
+          style={{
+            marginRight: isMobile ? 8 : 0,
+            transition: "all 0.3s ease",
+            animation: "bud-slide-up 0.3s ease-out",
+          }}
+        >
+          <BudCharacter size={BUD_ACTIVE_SIZE} mood={budMood} />
+        </div>
+      </div>
     </>
   );
 }
