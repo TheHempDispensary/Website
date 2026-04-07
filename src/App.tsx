@@ -2219,39 +2219,22 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
   const inputClass = "w-full bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-4 py-3 text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335] focus:ring-1 focus:ring-[#B3D335] transition-colors";
   const labelClass = "block text-sm font-medium text-[#231F20] mb-1.5";
 
-  // Address autocomplete using Nominatim (free, no API key)
+  // Address autocomplete via backend proxy (avoids browser CORS/rate-limit issues with Nominatim)
   const searchAddress = useCallback((query: string) => {
     if (addressTimeoutRef.current) clearTimeout(addressTimeoutRef.current);
     if (query.length < 3) { setAddressSuggestions([]); setShowSuggestions(false); return; }
     addressTimeoutRef.current = setTimeout(async () => {
       try {
         const resp = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&countrycodes=us&limit=5`,
-          { headers: { "Accept": "application/json" } }
+          `${API_URL}/api/ecommerce/address/autocomplete?q=${encodeURIComponent(query)}`
         );
-        const data = await resp.json();
-        const suggestions = data
-          .filter((r: Record<string, unknown>) => r.address)
-          .map((r: Record<string, Record<string, string>>) => {
-            const a = r.address || {};
-            const house = a.house_number || "";
-            const road = a.road || "";
-            const street = house ? `${house} ${road}` : road;
-            return {
-              display: r.display_name as unknown as string,
-              address: street,
-              city: a.city || a.town || a.village || a.hamlet || a.county?.replace(" County", "") || "",
-              state: normalizeState(a.state || "FL"),
-              zip: a.postcode || "",
-            };
-          })
-          .filter((s: { address: string }) => s.address);
+        const suggestions: Array<{ display: string; address: string; city: string; state: string; zip: string }> = await resp.json();
         setAddressSuggestions(suggestions);
         setShowSuggestions(suggestions.length > 0);
       } catch {
         setShowSuggestions(false);
       }
-    }, 400);
+    }, 500);
   }, []);
 
   // Load Clover SDK script once
@@ -2519,7 +2502,7 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
                           {addressSuggestions.map((s, i) => (
                             <button
                               key={i}
-                              className="w-full text-left px-4 py-3 text-sm text-[#231F20] hover:bg-[#FFFFFF] transition-colors border-b border-[#231F20]/10 last:border-b-0"
+                              className="w-full text-left px-4 py-3 text-sm text-[#231F20] hover:bg-[#F5F5F0] transition-colors border-b border-[#231F20]/10 last:border-b-0"
                               onMouseDown={(e) => e.preventDefault()}
                               onClick={() => {
                                 setForm((prev) => ({ ...prev, address: s.address, city: s.city, state: s.state, zip: s.zip }));
