@@ -1838,7 +1838,11 @@ function ChatbotBud() {
       });
       if (!resp.ok) throw new Error("Chat API error");
       const data = await resp.json();
-      setMessages(prev => [...prev, { from: "bot", text: data.message }]);
+      // Safety net: strip any trailing JSON fragment the backend may have left
+      let botText = data.message || "";
+      const jsonIdx = botText.indexOf('{"message"');
+      if (jsonIdx > 0) botText = botText.substring(0, jsonIdx).trim();
+      setMessages(prev => [...prev, { from: "bot", text: botText }]);
     } catch {
       setMessages(prev => [...prev, {
         from: "bot",
