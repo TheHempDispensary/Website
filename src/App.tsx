@@ -1664,14 +1664,30 @@ function SiteFooter() {
 interface ChatMessage {
   from: "bot" | "user";
   text: string;
-  buttons?: { label: string; value: string }[];
-  products?: Product[];
 }
 
-function ChatbotBud({ products }: { products: Product[] }) {
+function getSessionId(): string {
+  const key = "bud-session-id";
+  let id = localStorage.getItem(key);
+  if (!id) {
+    id = "bud-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem(key, id);
+  }
+  return id;
+}
+
+function getDeviceType(): string {
+  const w = window.innerWidth;
+  if (w < 768) return "mobile";
+  if (w < 1024) return "tablet";
+  return "desktop";
+}
+
+function ChatbotBud() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -1684,180 +1700,45 @@ function ChatbotBud({ products }: { products: Product[] }) {
     if (!initialized) {
       setMessages([{
         from: "bot",
-        text: "\u{1F44B} I'm Bud. What kind of vibe are you going for today?",
-        buttons: [
-          { label: "Relax \u{1F60C}", value: "relax" },
-          { label: "Sleep \u{1F634}", value: "sleep" },
-          { label: "Energy \u26A1", value: "energy" },
-          { label: "Focus \u{1F9E0}", value: "focus" },
-        ],
+        text: "Hey there! I'm Bud, your hemp guide at The Hemp Dispensary. Whether you're looking for something to help you relax, sleep better, or just curious about our products, I'm here to help! What can I do for you today?",
       }]);
       setInitialized(true);
     }
   };
 
-  const findProducts = (vibe: string): Product[] => {
-    const keywords: Record<string, string[]> = {
-      relax: ["relax", "calm", "chill", "indica", "hybrid", "cbd"],
-      sleep: ["sleep", "night", "dream", "rest", "melatonin", "cbn", "indica"],
-      energy: ["energy", "sativa", "boost", "uplift", "focus"],
-      focus: ["focus", "clarity", "brain", "mental", "sativa"],
-    };
-    const terms = keywords[vibe] || keywords.relax;
-    const matches = products.filter(p => {
-      if (p.stock <= 0) return false;
-      const text = (p.name + " " + (p.description || "")).toLowerCase();
-      return terms.some(t => text.includes(t));
-    });
-    if (matches.length > 0) return matches.slice(0, 3);
-    // Fallback: return top in-stock products
-    return products.filter(p => p.stock > 0).slice(0, 3);
-  };
+  const sendMessage = async (userText: string) => {
+    if (!userText.trim() || loading) return;
+    const trimmed = userText.trim();
+    setMessages(prev => [...prev, { from: "user", text: trimmed }]);
+    setInput("");
+    setLoading(true);
 
-  const handleVibeSelect = (vibe: string) => {
-    const vibeLabels: Record<string, string> = { relax: "Relax \u{1F60C}", sleep: "Sleep \u{1F634}", energy: "Energy \u26A1", focus: "Focus \u{1F9E0}" };
-    setMessages(prev => [...prev, { from: "user", text: vibeLabels[vibe] || vibe }]);
-
-    const recommended = findProducts(vibe);
-
-    setTimeout(() => {
+    try {
+      const resp = await fetch(`${API_URL}/api/chat/message`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: getSessionId(),
+          message: trimmed,
+          page_url: window.location.href,
+          device_type: getDeviceType(),
+        }),
+      });
+      if (!resp.ok) throw new Error("Chat API error");
+      const data = await resp.json();
+      setMessages(prev => [...prev, { from: "bot", text: data.message }]);
+    } catch {
       setMessages(prev => [...prev, {
         from: "bot",
-        text: `Great choice! Here are my top picks for ${vibe}:`,
-        products: recommended,
+        text: "Sorry, I'm having a little trouble right now. You can reach our team at 352-842-6185 or stop by either Spring Hill location!",
       }]);
-      setTimeout(() => {
-        setMessages(prev => [...prev, {
-          from: "bot",
-          text: `\u{1F525} Most people pair these with something from our edibles. Want me to show you some?`,
-          buttons: [
-            { label: "Yes, show me!", value: "upsell_edibles" },
-            { label: "Take me to checkout", value: "checkout" },
-            { label: "Browse more", value: "browse" },
-          ],
-        }]);
-      }, 800);
-    }, 500);
-  };
-
-  const handleButtonClick = (value: string) => {
-    if (["relax", "sleep", "energy", "focus"].includes(value)) {
-      handleVibeSelect(value);
-      return;
-    }
-
-    const labelMap: Record<string, string> = {
-      upsell_edibles: "Yes, show me!",
-      checkout: "Take me to checkout",
-      browse: "Browse more",
-      go_checkout: "Go to checkout",
-      keep_shopping: "Keep shopping",
-    };
-    setMessages(prev => [...prev, { from: "user", text: labelMap[value] || value }]);
-
-    if (value === "checkout" || value === "go_checkout") {
-      setTimeout(() => {
-        setMessages(prev => [...prev, {
-          from: "bot",
-          text: "\u{1F525} You're all set! Taking you to checkout. \u26A1 Ready in about 5 minutes for pickup!",
-        }]);
-        setTimeout(() => { navigate("/checkout"); setOpen(false); }, 1000);
-      }, 400);
-      return;
-    }
-
-    if (value === "upsell_edibles") {
-      const edibles = products.filter(p => p.stock > 0 && p.categories.some(c => c.toLowerCase().includes("edible"))).slice(0, 3);
-      setTimeout(() => {
-        setMessages(prev => [...prev, {
-          from: "bot",
-          text: "Here are some popular edibles to pair with your order:",
-          products: edibles.length > 0 ? edibles : products.filter(p => p.stock > 0).slice(0, 3),
-        }]);
-        setTimeout(() => {
-          setMessages(prev => [...prev, {
-            from: "bot",
-            text: "\u{1F525} Want me to take you to checkout?",
-            buttons: [
-              { label: "Go to checkout", value: "go_checkout" },
-              { label: "Keep shopping", value: "keep_shopping" },
-            ],
-          }]);
-        }, 600);
-      }, 500);
-      return;
-    }
-
-    if (value === "browse" || value === "keep_shopping") {
-      setTimeout(() => {
-        setMessages(prev => [...prev, {
-          from: "bot",
-          text: "No problem! Browse our full selection. \u26A1 Remember, orders are ready in about 5 minutes for pickup!",
-          buttons: [
-            { label: "Relax \u{1F60C}", value: "relax" },
-            { label: "Sleep \u{1F634}", value: "sleep" },
-            { label: "Energy \u26A1", value: "energy" },
-            { label: "Focus \u{1F9E0}", value: "focus" },
-          ],
-        }]);
-      }, 400);
-      return;
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSend = () => {
-    if (!input.trim()) return;
-    const msg = input.trim().toLowerCase();
-    setMessages(prev => [...prev, { from: "user", text: input.trim() }]);
-    setInput("");
-
-    let response: ChatMessage;
-
-    if (msg.includes("sleep") || msg.includes("night")) {
-      handleVibeSelect("sleep");
-      return;
-    } else if (msg.includes("relax") || msg.includes("calm") || msg.includes("chill")) {
-      handleVibeSelect("relax");
-      return;
-    } else if (msg.includes("energy") || msg.includes("boost") || msg.includes("wake")) {
-      handleVibeSelect("energy");
-      return;
-    } else if (msg.includes("focus") || msg.includes("clarity") || msg.includes("brain")) {
-      handleVibeSelect("focus");
-      return;
-    } else if (msg.includes("location") || msg.includes("where") || msg.includes("address") || msg.includes("store")) {
-      response = { from: "bot", text: "\u{1F4CD} We have 2 locations in Spring Hill, FL:\n\n\u2022 HQ: 1233 Pinehurst Dr\n\u2022 East: 2480 Commercial Way\n\nEast open Daily 7am-10pm, West open Daily 9am-10pm!" };
-    } else if (msg.includes("pickup") || msg.includes("fast") || msg.includes("how long") || msg.includes("ready")) {
-      response = { from: "bot", text: "\u26A1 Most orders are ready in about 5 minutes for pickup! Just place your order and swing by." };
-    } else if (msg.includes("safe") || msg.includes("test") || msg.includes("lab") || msg.includes("quality")) {
-      response = { from: "bot", text: "\u{1F6E1}\uFE0F All our products are lab-tested and sourced carefully. Quality and safety are our top priority!" };
-    } else if (msg.includes("first") || msg.includes("new") || msg.includes("discount") || msg.includes("code") || msg.includes("coupon")) {
-      response = { from: "bot", text: "\u{1F389} Use code FIRST10 for 10% off your first order! Works on everything in the store." };
-    } else if (msg.includes("recommend") || msg.includes("suggest") || msg.includes("what should")) {
-      response = {
-        from: "bot",
-        text: "What kind of vibe are you going for?",
-        buttons: [
-          { label: "Relax \u{1F60C}", value: "relax" },
-          { label: "Sleep \u{1F634}", value: "sleep" },
-          { label: "Energy \u26A1", value: "energy" },
-          { label: "Focus \u{1F9E0}", value: "focus" },
-        ],
-      };
-    } else {
-      response = {
-        from: "bot",
-        text: "I can help you find the perfect product! What vibe are you going for?",
-        buttons: [
-          { label: "Relax \u{1F60C}", value: "relax" },
-          { label: "Sleep \u{1F634}", value: "sleep" },
-          { label: "Energy \u26A1", value: "energy" },
-          { label: "Focus \u{1F9E0}", value: "focus" },
-        ],
-      };
-    }
-
-    setTimeout(() => setMessages(prev => [...prev, response]), 400);
+    sendMessage(input);
   };
 
   return (
@@ -1879,7 +1760,7 @@ function ChatbotBud({ products }: { products: Product[] }) {
               <img src="/bud-puppet.webp" alt="Bud" className="w-8 h-8 object-contain rounded-full bg-[#FFFFFF]/20 p-0.5" width="70" height="70" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               <div>
                 <p className="font-bold text-sm">Bud</p>
-                <p className="text-xs text-[#FFFFFF]/80">Your hemp guide</p>
+                <p className="text-xs text-[#FFFFFF]/80">AI-powered hemp guide</p>
               </div>
             </div>
             <button onClick={() => setOpen(false)} className="p-1 hover:bg-[#FFFFFF]/20 rounded-full transition-colors" aria-label="Close chat"><X className="h-5 w-5" /></button>
@@ -1889,37 +1770,22 @@ function ChatbotBud({ products }: { products: Product[] }) {
           <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-[200px] max-h-[340px]">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] ${msg.from === "user" ? "bg-[#B3D335] text-[#231F20] rounded-2xl rounded-br-md px-3 py-2" : "bg-[#FFFFFF] text-[#231F20] rounded-2xl rounded-bl-md px-3 py-2"}`}>
+                <div className={`max-w-[85%] ${msg.from === "user" ? "bg-[#B3D335] text-[#231F20] rounded-2xl rounded-br-md px-3 py-2" : "bg-[#FFFFFF] text-[#231F20] rounded-2xl rounded-bl-md px-3 py-2 shadow-sm border border-[#231F20]/5"}`}>
                   <p className="text-sm whitespace-pre-line">{msg.text}</p>
-                  {/* Product cards */}
-                  {msg.products && msg.products.length > 0 && (
-                    <div className="mt-2 space-y-2">
-                      {msg.products.map(p => (
-                        <div key={p.id} className="bg-[#FFFFFF] rounded-lg p-2 border border-[#231F20]/10 cursor-pointer hover:shadow-sm transition-shadow" onClick={() => { navigate(`/product/${p.id}`); setOpen(false); }}>
-                          <div className="flex items-center gap-2">
-                            <img src={p.image_url || placeholderUrl(p.name, 60)} alt={p.name} className="w-10 h-10 object-contain rounded" onError={handleImgError} />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium text-[#231F20] truncate">{p.online_name || p.name}</p>
-                              <p className="text-xs text-[#126A44] font-bold">{formatPrice(p.price)}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {/* Buttons */}
-                  {msg.buttons && msg.buttons.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {msg.buttons.map((btn, j) => (
-                        <button key={j} onClick={() => handleButtonClick(btn.value)} className="px-3 py-1.5 bg-[#B3D335] text-[#231F20] rounded-full text-xs font-medium hover:bg-[#58BA49] transition-colors border-0">
-                          {btn.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
+            {loading && (
+              <div className="flex justify-start">
+                <div className="bg-[#FFFFFF] text-[#231F20] rounded-2xl rounded-bl-md px-3 py-2 shadow-sm border border-[#231F20]/5">
+                  <div className="flex gap-1 items-center py-1">
+                    <span className="w-2 h-2 bg-[#B3D335] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-2 h-2 bg-[#B3D335] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-2 h-2 bg-[#B3D335] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
 
@@ -1929,11 +1795,12 @@ function ChatbotBud({ products }: { products: Product[] }) {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
+              onKeyDown={(e) => { if (e.key === "Enter" && !loading) handleSend(); }}
               placeholder="Ask Bud anything..."
               className="flex-1 bg-[#FFFFFF] border border-[#231F20]/15 rounded-full px-4 py-2 text-sm text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]"
+              disabled={loading}
             />
-            <button onClick={handleSend} className="p-2 bg-[#58BA49] hover:bg-[#126A44] text-[#FFFFFF] rounded-full transition-colors" aria-label="Send message">
+            <button onClick={handleSend} disabled={loading} className="p-2 bg-[#58BA49] hover:bg-[#126A44] text-[#FFFFFF] rounded-full transition-colors disabled:opacity-50" aria-label="Send message">
               <Send className="h-4 w-4" />
             </button>
           </div>
@@ -4037,7 +3904,7 @@ function App() {
       <SiteFooter />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} products={products} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />
-      <ChatbotBud products={products} />
+      <ChatbotBud />
       {showAgeGate && <BudAgeGatePopup onComplete={handleAgeGateComplete} />}
       {showFulfillmentModal && <FulfillmentSelectorModal currentFulfillment={fulfillment || "ship"} onSelect={handleFulfillmentSwitch} onClose={() => setShowFulfillmentModal(false)} />}
       {switchNotification && <FulfillmentSwitchNotification removedItems={switchNotification.removedItems} newLabel={switchNotification.newLabel} onClose={() => setSwitchNotification(null)} />}
@@ -4121,7 +3988,7 @@ function App() {
       <SiteFooter />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} products={products} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />
-      <ChatbotBud products={products} />
+      <ChatbotBud />
       {showAgeGate && <BudAgeGatePopup onComplete={handleAgeGateComplete} />}
       {showFulfillmentModal && <FulfillmentSelectorModal currentFulfillment={fulfillment || "ship"} onSelect={handleFulfillmentSwitch} onClose={() => setShowFulfillmentModal(false)} />}
       {switchNotification && <FulfillmentSwitchNotification removedItems={switchNotification.removedItems} newLabel={switchNotification.newLabel} onClose={() => setSwitchNotification(null)} />}
