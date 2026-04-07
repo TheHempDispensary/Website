@@ -1479,10 +1479,69 @@ function ContactPage() {
 
 /* ======================== OUR LOCATIONS PAGE ======================== */
 function OurLocationsPage() {
+  useEffect(() => {
+    document.title = "Our Locations | The Hemp Dispensary \u2013 Spring Hill, FL";
+    return () => { document.title = "The Hemp Dispensary | Spring Hill FL"; };
+  }, []);
+
+  const westSchema = {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    "name": "The Hemp Dispensary \u2013 Spring Hill West",
+    "url": "https://www.thehempdispensary.com/our-locations",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "6175 Deltona Blvd",
+      "addressLocality": "Spring Hill",
+      "addressRegion": "FL",
+      "postalCode": "34606",
+      "addressCountry": "US"
+    },
+    "telephone": "+1-352-340-5860",
+    "openingHoursSpecification": [
+      { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"], "opens": "09:00", "closes": "22:00" },
+      { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "09:00", "closes": "22:00" },
+      { "@type": "OpeningHoursSpecification", "dayOfWeek": "Sunday", "opens": "09:00", "closes": "22:00" }
+    ],
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 28.4717,
+      "longitude": -82.5651
+    }
+  };
+
+  const eastSchema = {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    "name": "The Hemp Dispensary \u2013 Spring Hill East",
+    "url": "https://www.thehempdispensary.com/our-locations",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "14312 Spring Hill Dr",
+      "addressLocality": "Spring Hill",
+      "addressRegion": "FL",
+      "postalCode": "34609",
+      "addressCountry": "US"
+    },
+    "telephone": "+1-352-515-5370",
+    "openingHoursSpecification": [
+      { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"], "opens": "07:00", "closes": "22:00" },
+      { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "07:00", "closes": "22:00" },
+      { "@type": "OpeningHoursSpecification", "dayOfWeek": "Sunday", "opens": "07:00", "closes": "22:00" }
+    ],
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 28.4786,
+      "longitude": -82.5432
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-16">
-      <h1 className="text-4xl font-bold text-[#231F20] mb-2 text-center">Our Locations</h1>
-      <p className="text-center text-[#231F20]/70 mb-10">Visit us at either of our two Spring Hill, Florida locations.</p>
+      <h1 className="text-4xl font-bold text-[#231F20] mb-4 text-center">Our Locations</h1>
+      <p className="text-center text-[#231F20]/80 mb-12 max-w-3xl mx-auto leading-relaxed">
+        The Hemp Dispensary has two retail locations in Spring Hill, Florida, both stocked with our full selection of hemp flower, THCA products, delta-8, delta-9, CBD, concentrates, vapes, edibles, and accessories. Our knowledgeable staff is ready to help you find the right product. Stop in today &mdash; no appointment needed.
+      </p>
       <div className="grid md:grid-cols-2 gap-8">
         {/* Spring Hill West */}
         <div className="bg-[#FFFFFF] rounded-xl border border-[#231F20]/15 overflow-hidden">
@@ -1494,9 +1553,17 @@ function OurLocationsPage() {
           <div className="p-6">
             <h2 className="text-2xl font-bold text-[#231F20] mb-4">Spring Hill West</h2>
             <div className="space-y-3 text-[#231F20]">
-              <p className="flex items-center gap-3"><MapPin className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /> 6175 Deltona Blvd, Suite 104, Spring Hill, FL 34606</p>
-              <p className="flex items-center gap-3"><Clock className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /> Open Daily 9am–10pm</p>
-              <p className="flex items-center gap-3"><Phone className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /><a href="tel:+13523405860" className="hover:text-[#126A44] underline">(352) 340-5860</a></p>
+              <p className="flex items-start gap-3"><MapPin className="h-5 w-5 text-[#3D8C32] flex-shrink-0 mt-0.5" /> 6175 Deltona Blvd, Spring Hill, FL 34606</p>
+              <p className="flex items-start gap-3"><Phone className="h-5 w-5 text-[#3D8C32] flex-shrink-0 mt-0.5" /><a href="tel:+13523405860" className="hover:text-[#126A44] underline">(352) 340-5860</a></p>
+              <div className="flex items-start gap-3">
+                <Clock className="h-5 w-5 text-[#3D8C32] flex-shrink-0 mt-0.5" />
+                <div className="text-sm leading-relaxed">
+                  <p className="font-semibold mb-1">Hours</p>
+                  <p>Monday &ndash; Friday: 9:00 AM &ndash; 10:00 PM</p>
+                  <p>Saturday: 9:00 AM &ndash; 10:00 PM</p>
+                  <p>Sunday: 9:00 AM &ndash; 10:00 PM</p>
+                </div>
+              </div>
             </div>
             <div className="mt-5">
               <a href="https://www.google.com/maps/search/The+Hemp+Dispensary+Cannabis+Spring+Hill+West+6175+Deltona+Blvd" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 bg-[#126A44] text-[#FFFFFF] px-5 py-2 rounded-full font-semibold text-sm hover:bg-[#0e5536] transition-colors">Get Directions <ChevronRight className="h-4 w-4" /></a>
@@ -1513,9 +1580,17 @@ function OurLocationsPage() {
           <div className="p-6">
             <h2 className="text-2xl font-bold text-[#231F20] mb-4">Spring Hill East</h2>
             <div className="space-y-3 text-[#231F20]">
-              <p className="flex items-center gap-3"><MapPin className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /> 14312 Spring Hill Dr, Spring Hill, FL 34609</p>
-              <p className="flex items-center gap-3"><Clock className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /> Open Daily 7am–10pm</p>
-              <p className="flex items-center gap-3"><Phone className="h-5 w-5 text-[#3D8C32] flex-shrink-0" /><a href="tel:+13525155370" className="hover:text-[#126A44] underline">(352) 515-5370</a></p>
+              <p className="flex items-start gap-3"><MapPin className="h-5 w-5 text-[#3D8C32] flex-shrink-0 mt-0.5" /> 14312 Spring Hill Dr, Spring Hill, FL 34609</p>
+              <p className="flex items-start gap-3"><Phone className="h-5 w-5 text-[#3D8C32] flex-shrink-0 mt-0.5" /><a href="tel:+13525155370" className="hover:text-[#126A44] underline">(352) 515-5370</a></p>
+              <div className="flex items-start gap-3">
+                <Clock className="h-5 w-5 text-[#3D8C32] flex-shrink-0 mt-0.5" />
+                <div className="text-sm leading-relaxed">
+                  <p className="font-semibold mb-1">Hours</p>
+                  <p>Monday &ndash; Friday: 7:00 AM &ndash; 10:00 PM</p>
+                  <p>Saturday: 7:00 AM &ndash; 10:00 PM</p>
+                  <p>Sunday: 7:00 AM &ndash; 10:00 PM</p>
+                </div>
+              </div>
             </div>
             <div className="mt-5">
               <a href="https://www.google.com/maps/search/The+Hemp+Dispensary+Cannabis+Spring+Hill+East+14312+Spring+Hill+Dr" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 bg-[#126A44] text-[#FFFFFF] px-5 py-2 rounded-full font-semibold text-sm hover:bg-[#0e5536] transition-colors">Get Directions <ChevronRight className="h-4 w-4" /></a>
@@ -1523,17 +1598,10 @@ function OurLocationsPage() {
           </div>
         </div>
       </div>
-      {/* JSON-LD for the locations page */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "The Hemp Dispensary",
-        "url": "https://www.thehempdispensary.com",
-        "location": [
-          { "@type": "LocalBusiness", "name": "The Hemp Dispensary - Spring Hill West", "address": { "@type": "PostalAddress", "streetAddress": "6175 Deltona Blvd, Suite 104", "addressLocality": "Spring Hill", "addressRegion": "FL", "postalCode": "34606" }, "telephone": "+1-352-340-5860" },
-          { "@type": "LocalBusiness", "name": "The Hemp Dispensary - Spring Hill East", "address": { "@type": "PostalAddress", "streetAddress": "14312 Spring Hill Dr", "addressLocality": "Spring Hill", "addressRegion": "FL", "postalCode": "34609" }, "telephone": "+1-352-515-5370" }
-        ]
-      }) }} />
+      {/* JSON-LD: Spring Hill West */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(westSchema) }} />
+      {/* JSON-LD: Spring Hill East */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eastSchema) }} />
     </div>
   );
 }
@@ -3841,6 +3909,7 @@ function App() {
       "/loyalty": "Hemp Rewards — earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary.",
       "/games": "Play games and win prizes at The Hemp Dispensary. Roll-a-Joint and more — all free to play for rewards members.",
       "/about": "Our Story — how two Spring Hill locals built The Hemp Dispensary from a road trip idea to 15 locations, lost 13 overnight, and kept going.",
+      "/our-locations": "Visit The Hemp Dispensary in Spring Hill, FL. Two locations on Deltona Blvd and Spring Hill Dr. Hemp flower, THCA, CBD, delta-8, edibles, vapes, and more.",
     };
     const key = route.startsWith("/shop/") ? route : (route === "/" || route === "" ? "/" : route);
     const desc = descriptions[key] || descriptions["/"];
