@@ -1564,7 +1564,7 @@ function ThcaPage({ products, onAddToCart, fulfillment }: { products: Product[];
           THCA (tetrahydrocannabinolic acid) is the non-psychoactive precursor to THC found naturally in raw hemp and cannabis plants. When exposed to heat through smoking, vaping, or dabbing &mdash; a process called decarboxylation &mdash; THCA converts to active THC, producing the effects associated with traditional cannabis.
         </p>
         <p className="text-[#231F20]/80 leading-relaxed">
-          At The Hemp Dispensary, our THCA products are derived from federally compliant hemp and meet Florida&rsquo;s hemp regulations. Whether you&rsquo;re looking for THCA flower, pre-rolls, concentrates, or vape cartridges, our Spring Hill stores carry a rotating selection of premium genetics and lab-tested options. Every product comes with a certificate of analysis (COA) verifying cannabinoid content and purity.
+          At The Hemp Dispensary, our THCA products are sourced from fully compliant, licensed out-of-state partners and shipped directly to your door. You can browse our selection and place your order online, or stop into either of our Spring Hill locations to shop with a budtender in person &mdash; we&rsquo;ll handle the rest and ship straight to you. Every product comes with a certificate of analysis (COA) verifying cannabinoid content and purity.
         </p>
       </div>
       <p className="text-[#231F20] text-sm mb-6">{thcaProducts.length} products</p>
