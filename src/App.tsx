@@ -1539,6 +1539,49 @@ function OurLocationsPage() {
 }
 
 /* ======================== SHIPPING POLICY PAGE ======================== */
+function ThcaPage({ products, onAddToCart, fulfillment }: { products: Product[]; onAddToCart: (product: Product) => void; fulfillment: FulfillmentType | null }) {
+  useEffect(() => {
+    document.title = "THCA Products | The Hemp Dispensary \u2013 Spring Hill, FL";
+    return () => { document.title = "The Hemp Dispensary | Spring Hill FL"; };
+  }, []);
+
+  const thcaProducts = useMemo(() => {
+    const items = fulfillment
+      ? products.filter(p => getStockForFulfillment(p, fulfillment) > 0)
+      : products.filter(p => p.stock > 0);
+    return items.filter(p => {
+      const name = (p.online_name || p.name).toLowerCase();
+      const desc = (p.description || "").toLowerCase();
+      return name.includes("thca") || name.includes("thc-a") || desc.includes("thca") || desc.includes("thc-a");
+    }).sort((a, b) => a.name.localeCompare(b.name));
+  }, [products, fulfillment]);
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-3xl mb-10">
+        <h1 className="text-3xl sm:text-4xl font-bold text-[#231F20] mb-4">THCA Products</h1>
+        <p className="text-[#231F20]/80 leading-relaxed mb-4">
+          THCA (tetrahydrocannabinolic acid) is the non-psychoactive precursor to THC found naturally in raw hemp and cannabis plants. When exposed to heat through smoking, vaping, or dabbing &mdash; a process called decarboxylation &mdash; THCA converts to active THC, producing the effects associated with traditional cannabis.
+        </p>
+        <p className="text-[#231F20]/80 leading-relaxed">
+          At The Hemp Dispensary, our THCA products are derived from federally compliant hemp and meet Florida&rsquo;s hemp regulations. Whether you&rsquo;re looking for THCA flower, pre-rolls, concentrates, or vape cartridges, our Spring Hill stores carry a rotating selection of premium genetics and lab-tested options. Every product comes with a certificate of analysis (COA) verifying cannabinoid content and purity.
+        </p>
+      </div>
+      <p className="text-[#231F20] text-sm mb-6">{thcaProducts.length} products</p>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+        {thcaProducts.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} fulfillment={fulfillment} />)}
+      </div>
+      {thcaProducts.length === 0 && (
+        <div className="text-center py-16">
+          <Package className="mx-auto h-12 w-12 text-[#231F20] mb-3" />
+          <p className="text-[#231F20]">No THCA products currently available</p>
+          <button onClick={() => navigate("/shop")} className="mt-4 px-6 py-2 bg-[#B3D335] text-[#231F20] rounded-full font-semibold text-sm hover:bg-[#126A44] hover:text-[#FFFFFF] transition-colors">Browse All Products</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ShippingPolicyPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-16">
@@ -3841,6 +3884,7 @@ function App() {
       "/loyalty": "Hemp Rewards — earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary.",
       "/games": "Play games and win prizes at The Hemp Dispensary. Roll-a-Joint and more — all free to play for rewards members.",
       "/about": "Our Story — how two Spring Hill locals built The Hemp Dispensary from a road trip idea to 15 locations, lost 13 overnight, and kept going.",
+      "/thca": "Shop THCA flower, pre-rolls, concentrates, and vapes at The Hemp Dispensary in Spring Hill, FL. Federally compliant hemp, lab-tested, COA available on every product.",
     };
     const key = route.startsWith("/shop/") ? route : (route === "/" || route === "" ? "/" : route);
     const desc = descriptions[key] || descriptions["/"];
@@ -4018,6 +4062,9 @@ function App() {
   if (route === "/games") return shell(<GamesPage />);
   if (route === "/contact") return shell(<><ContactPage /><LocationSection /></>);
   if (route === "/our-locations") return shell(<OurLocationsPage />);
+  if (route === "/thca") return shell(loading
+    ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
+    : <ThcaPage products={products} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} />);
   if (route === "/shipping-policy") return shell(<ShippingPolicyPage />);
 
   // Homepage
