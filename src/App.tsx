@@ -1802,11 +1802,15 @@ function ChatbotBud() {
     setOpen(true);
     setBudMood("wave");
     resetMoodAfter(2000);
-    if (!initialized) {
+    const greetingKey = "bud-greeted-" + getSessionId();
+    if (!initialized && !sessionStorage.getItem(greetingKey)) {
       setMessages([{
         from: "bot",
         text: "Hey there! Welcome to The Hemp Dispensary! \ud83d\udc4b I'm Bud, your Virtual Budtender. Whether you're looking for something to help you relax, sleep better, or just curious about our products, I'm here to help! What can I do for you today?",
       }]);
+      sessionStorage.setItem(greetingKey, "1");
+      setInitialized(true);
+    } else if (!initialized) {
       setInitialized(true);
     }
     // Focus input after animation
@@ -1904,7 +1908,7 @@ function ChatbotBud() {
           className="bud-speech-scroll relative mb-2"
           style={{
             maxWidth: BUBBLE_MAX_W,
-            maxHeight: isMobile ? "50vh" : "360px",
+            maxHeight: isMobile ? "60vh" : "360px",
             overflowY: "auto",
             overflowX: "hidden",
             marginRight: isMobile ? 8 : 0,
@@ -1924,16 +1928,6 @@ function ChatbotBud() {
                     style={{ maxWidth: BUBBLE_MAX_W }}
                   >
                     <p className="text-sm leading-relaxed whitespace-pre-line">{msg.text}</p>
-                    {/* Close X on most recent bot bubble */}
-                    {i === messages.length - 1 && msg.from === "bot" && (
-                      <button
-                        onClick={closeChat}
-                        className="absolute -top-2 -right-2 w-6 h-6 bg-[#FFFFFF] border border-[#231F20]/15 rounded-full flex items-center justify-center shadow-sm hover:bg-[#F5F5F5] transition-colors"
-                        aria-label="Close chat"
-                      >
-                        <X className="h-3 w-3 text-[#231F20]/60" />
-                      </button>
-                    )}
                     {/* Tail on last bot message */}
                     {i === messages.length - 1 && <div className="bud-speech-tail" />}
                   </div>
@@ -1994,15 +1988,31 @@ function ChatbotBud() {
           </button>
         </div>
 
-        {/* Bud character — larger when active */}
+        {/* Bud character — larger when active, with close button above */}
         <div
-          className="self-end"
+          className="self-end relative"
           style={{
             marginRight: isMobile ? 8 : 0,
             transition: "all 0.3s ease",
             animation: "bud-slide-up 0.3s ease-out",
           }}
         >
+          {/* Close button — centered above Bud's head */}
+          <button
+            onClick={closeChat}
+            className="absolute flex items-center justify-center rounded-full shadow-lg transition-colors z-10"
+            style={{
+              width: 44,
+              height: 44,
+              top: -18,
+              left: "50%",
+              transform: "translateX(-50%)",
+              background: "rgba(35,31,32,0.75)",
+            }}
+            aria-label="Close chat"
+          >
+            <X className="h-5 w-5 text-[#FFFFFF]" />
+          </button>
           <BudCharacter size={BUD_ACTIVE_SIZE} mood={budMood} />
         </div>
       </div>
