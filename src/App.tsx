@@ -916,7 +916,7 @@ function ProductGridCard({ product, onQuickAdd, fulfillment }: { product: Produc
     <div className="cursor-pointer group" onClick={() => navigate(`/product/${product.id}`)}>
       <div className="bg-[#FFFFFF] rounded-2xl p-[10px] sm:p-4 transition-all duration-300 hover:shadow-xl relative border border-[#231F20]/35">
         {/* Floating product image */}
-        <div className="flex items-center justify-center mb-2 sm:mb-3 bg-[#FFFFFF] rounded-xl overflow-hidden">
+        <div className="flex items-center justify-center mb-2 sm:mb-3 bg-[#FFFFFF] rounded-xl overflow-hidden h-[160px] sm:h-[200px]">
           <img
             src={product.image_url || placeholderUrl(product.name)}
             alt={product.name}
@@ -1226,7 +1226,7 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
           {results.map((product) => (
             <div key={product.id} className="cursor-pointer group" onClick={() => { navigate(`/product/${product.id}`); onClose(); setQuery(""); }}>
               <div className="bg-[#FFFFFF] rounded-xl p-3 transition-all hover:shadow-md">
-                <div className="flex items-center justify-center mb-2 bg-[#FFFFFF] rounded-lg overflow-hidden">
+                <div className="flex items-center justify-center mb-2 bg-[#FFFFFF] rounded-lg overflow-hidden h-[120px]">
                   <img src={product.image_url || placeholderUrl(product.name, 200)} alt={product.name} loading="lazy" className="product-card-img" onError={handleImgError} />
                 </div>
                 <h3 className="text-xs font-medium text-[#231F20] line-clamp-2 group-hover:text-[#126A44] transition-colors">{titleCase(product.online_name || product.name)}</h3>
@@ -1659,77 +1659,29 @@ function SiteFooter() {
 }
 
 
-/* ======================== ANIMATED BUD CHARACTER ======================== */
+/* ======================== ANIMATED BUD CHARACTER (PSD Art) ======================== */
 type BudMood = "idle" | "think" | "excited" | "wave" | "sleep";
 
-function BudCharacterSVG({ size = 50, mood = "idle" }: { size?: number; mood?: BudMood }) {
+function BudCharacter({ size = 50, mood = "idle" }: { size?: number; mood?: BudMood }) {
   const moodClass = mood === "think" ? "bud-think" : mood === "excited" ? "bud-excited" : mood === "wave" ? "bud-wave" : mood === "sleep" ? "bud-sleep" : "bud-idle";
+  const src = size <= 64 ? "/bud/bud-64.png" : size <= 120 ? "/bud/bud-120.png" : "/bud/bud-200.png";
   return (
-    <div className={moodClass} style={{ width: size, height: size, lineHeight: 0 }}>
-      <svg viewBox="0 0 50 50" width={size} height={size} xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bud character">
-        {/* Left leaf arm */}
-        <g className="bud-leaf-left" style={{ transformOrigin: "12px 30px" }}>
-          <ellipse cx="8" cy="28" rx="6" ry="3.5" fill="#58BA49" transform="rotate(-35 8 28)" />
-          <line x1="8" y1="28" x2="14" y2="30" stroke="#3d8a35" strokeWidth="0.5" />
-        </g>
-        {/* Right leaf arm */}
-        <g className="bud-leaf-right" style={{ transformOrigin: "38px 30px" }}>
-          <ellipse cx="42" cy="28" rx="6" ry="3.5" fill="#58BA49" transform="rotate(35 42 28)" />
-          <line x1="42" y1="28" x2="36" y2="30" stroke="#3d8a35" strokeWidth="0.5" />
-        </g>
-        {/* Body - round cannabis bud shape */}
-        <ellipse cx="25" cy="28" rx="13" ry="14" fill="#7BC24A" />
-        {/* Bud texture bumps */}
-        <circle cx="18" cy="22" r="4" fill="#6DB443" />
-        <circle cx="32" cy="22" r="4" fill="#6DB443" />
-        <circle cx="25" cy="18" r="4.5" fill="#6DB443" />
-        <circle cx="20" cy="32" r="3.5" fill="#6DB443" />
-        <circle cx="30" cy="32" r="3.5" fill="#6DB443" />
-        {/* Top leaf / hair */}
-        <ellipse cx="25" cy="14" rx="4" ry="6" fill="#58BA49" transform="rotate(0 25 14)" />
-        <ellipse cx="20" cy="16" rx="3" ry="5" fill="#4EA83E" transform="rotate(-20 20 16)" />
-        <ellipse cx="30" cy="16" rx="3" ry="5" fill="#4EA83E" transform="rotate(20 30 16)" />
-        {/* Trichome sparkles */}
-        <circle cx="19" cy="20" r="0.8" fill="#FFFFFF" opacity="0.6" />
-        <circle cx="31" cy="20" r="0.8" fill="#FFFFFF" opacity="0.6" />
-        <circle cx="25" cy="16" r="0.8" fill="#FFFFFF" opacity="0.7" />
-        {/* Eyes */}
-        <g className="bud-eyes">
-          <ellipse cx="21" cy="27" rx="2.2" ry="2.5" fill="#FFFFFF" />
-          <ellipse cx="29" cy="27" rx="2.2" ry="2.5" fill="#FFFFFF" />
-          <circle cx="21.5" cy="27" r="1.3" fill="#231F20" />
-          <circle cx="29.5" cy="27" r="1.3" fill="#231F20" />
-          <circle cx="22" cy="26.2" r="0.5" fill="#FFFFFF" />
-          <circle cx="30" cy="26.2" r="0.5" fill="#FFFFFF" />
-        </g>
-        {/* Mouth */}
-        {mood === "excited" ? (
-          <ellipse cx="25" cy="33" rx="3" ry="2" fill="#E85D5D" />
-        ) : mood === "sleep" ? (
-          <path d="M 22 33 Q 25 34 28 33" stroke="#231F20" strokeWidth="0.8" fill="none" strokeLinecap="round" />
-        ) : (
-          <path d="M 21 32 Q 25 36 29 32" stroke="#231F20" strokeWidth="0.8" fill="none" strokeLinecap="round" />
-        )}
-        {/* Blush cheeks */}
-        <circle cx="17" cy="30" r="2" fill="#FFB7B7" opacity="0.35" />
-        <circle cx="33" cy="30" r="2" fill="#FFB7B7" opacity="0.35" />
-        {/* Sleep Zzz */}
-        {mood === "sleep" && (
-          <g>
-            <text x="34" y="20" fontSize="5" fill="#B3D335" opacity="0.8" style={{ animation: "bud-zzz 2s ease-in-out infinite" }}>z</text>
-            <text x="37" y="15" fontSize="7" fill="#B3D335" opacity="0.6" style={{ animation: "bud-zzz 2s ease-in-out infinite 0.5s" }}>z</text>
-            <text x="40" y="9" fontSize="9" fill="#B3D335" opacity="0.4" style={{ animation: "bud-zzz 2s ease-in-out infinite 1s" }}>z</text>
-          </g>
-        )}
-        {/* Excited sparkles */}
-        {mood === "excited" && (
-          <g>
-            <circle cx="10" cy="18" r="1.5" fill="#FFCB08" style={{ animation: "bud-sparkle 0.8s ease-in-out infinite" }} />
-            <circle cx="40" cy="18" r="1.5" fill="#FFCB08" style={{ animation: "bud-sparkle 0.8s ease-in-out infinite 0.3s" }} />
-            <circle cx="25" cy="8" r="1.5" fill="#FFCB08" style={{ animation: "bud-sparkle 0.8s ease-in-out infinite 0.6s" }} />
-          </g>
-        )}
-      </svg>
+    <div className={`bud-character ${moodClass}`} style={{ width: size, height: size, position: "relative", lineHeight: 0 }}>
+      <img src={src} alt="Bud" width={size} height={size} style={{ width: size, height: size, objectFit: "contain" }} draggable={false} />
+      {mood === "sleep" && (
+        <div className="bud-zzz-container" style={{ position: "absolute", top: 0, right: 0, pointerEvents: "none" }}>
+          <span className="bud-zzz-1" style={{ position: "absolute", right: 0, top: "10%", fontSize: size * 0.12, color: "#B3D335", fontWeight: 700 }}>z</span>
+          <span className="bud-zzz-2" style={{ position: "absolute", right: -size * 0.06, top: "0%", fontSize: size * 0.16, color: "#B3D335", fontWeight: 700 }}>z</span>
+          <span className="bud-zzz-3" style={{ position: "absolute", right: -size * 0.12, top: "-12%", fontSize: size * 0.2, color: "#B3D335", fontWeight: 700 }}>z</span>
+        </div>
+      )}
+      {mood === "excited" && (
+        <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+          <span className="bud-sparkle-dot" style={{ position: "absolute", left: "5%", top: "15%", width: size * 0.08, height: size * 0.08, borderRadius: "50%", background: "#FFCB08" }} />
+          <span className="bud-sparkle-dot bud-sparkle-delay-1" style={{ position: "absolute", right: "5%", top: "15%", width: size * 0.08, height: size * 0.08, borderRadius: "50%", background: "#FFCB08" }} />
+          <span className="bud-sparkle-dot bud-sparkle-delay-2" style={{ position: "absolute", left: "42%", top: "2%", width: size * 0.08, height: size * 0.08, borderRadius: "50%", background: "#FFCB08" }} />
+        </div>
+      )}
     </div>
   );
 }
@@ -1855,7 +1807,7 @@ function ChatbotBud() {
       {!open && (
         <button onClick={openChat} className="fixed bottom-4 right-4 z-50 group" aria-label="Chat with Bud" style={{ background: "none", border: "none", padding: 0 }}>
           <div className="relative">
-            <BudCharacterSVG size={64} mood="idle" />
+            <BudCharacter size={64} mood="idle" />
             {/* Speech hint bubble */}
             <div className="absolute -top-8 -left-16 bg-[#FFFFFF] text-[#231F20] text-[10px] font-semibold px-2 py-1 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-[#B3D335]/30">
               Ask me anything!
@@ -1872,7 +1824,7 @@ function ChatbotBud() {
           <div className="bg-gradient-to-r from-[#B3D335] to-[#58BA49] text-[#231F20] px-4 py-2.5 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2">
               <div className="bg-[#FFFFFF]/20 rounded-full p-0.5">
-                <BudCharacterSVG size={34} mood={budMood} />
+                <BudCharacter size={34} mood={budMood} />
               </div>
               <div>
                 <p className="font-bold text-sm">Bud</p>
@@ -1888,7 +1840,7 @@ function ChatbotBud() {
               <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
                 {msg.from === "bot" && (
                   <div className="flex-shrink-0 mr-1.5 mt-1">
-                    <BudCharacterSVG size={22} mood="idle" />
+                    <BudCharacter size={22} mood="idle" />
                   </div>
                 )}
                 <div className={`max-w-[80%] ${msg.from === "user" ? "bg-[#B3D335] text-[#231F20] rounded-2xl rounded-br-md px-3 py-2" : "bg-[#F8FBF0] text-[#231F20] rounded-2xl rounded-bl-md px-3 py-2 shadow-sm border border-[#B3D335]/15"}`}>
@@ -1899,7 +1851,7 @@ function ChatbotBud() {
             {loading && (
               <div className="flex justify-start">
                 <div className="flex-shrink-0 mr-1.5 mt-1">
-                  <BudCharacterSVG size={22} mood="think" />
+                  <BudCharacter size={22} mood="think" />
                 </div>
                 <div className="bg-[#F8FBF0] text-[#231F20] rounded-2xl rounded-bl-md px-3 py-2 shadow-sm border border-[#B3D335]/15">
                   <div className="flex gap-1 items-center py-1">
