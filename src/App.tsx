@@ -1760,7 +1760,7 @@ function ChatbotBud() {
               <img src="/bud-puppet.webp" alt="Bud" className="w-8 h-8 object-contain rounded-full bg-[#FFFFFF]/20 p-0.5" width="70" height="70" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               <div>
                 <p className="font-bold text-sm">Bud</p>
-                <p className="text-xs text-[#FFFFFF]/80">AI-powered hemp guide</p>
+                <p className="text-xs text-[#FFFFFF]/80">Virtual Budtender</p>
               </div>
             </div>
             <button onClick={() => setOpen(false)} className="p-1 hover:bg-[#FFFFFF]/20 rounded-full transition-colors" aria-label="Close chat"><X className="h-5 w-5" /></button>
