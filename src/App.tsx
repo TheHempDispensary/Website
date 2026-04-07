@@ -2033,6 +2033,9 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
   const [loyaltyError, setLoyaltyError] = useState("");
   const [loyaltyRedeemId, setLoyaltyRedeemId] = useState<number | null>(null);
   const [loyaltyDiscount, setLoyaltyDiscount] = useState(0);
+  const [loyaltyShowSignup, setLoyaltyShowSignup] = useState(false);
+  const [loyaltySigningUp, setLoyaltySigningUp] = useState(false);
+  const [loyaltySignupSuccess, setLoyaltySignupSuccess] = useState("");
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", phone: "",
     address: "", apartment: "", city: "", state: "FL", zip: "",
@@ -2115,12 +2118,15 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
 
   const lookupLoyalty = async () => {
     const input = form.loyaltyNumber.trim();
-    if (!input) { setLoyaltyError("Enter your phone number or loyalty number"); return; }
+    if (!input) { setLoyaltyError("Enter your phone number or email"); return; }
     setLoyaltyLooking(true);
     setLoyaltyError("");
+    setLoyaltyShowSignup(false);
     try {
-      const digits = input.replace(/\D/g, "");
-      const query = digits.length >= 7 ? `phone=${encodeURIComponent(digits)}` : `phone=${encodeURIComponent(input)}`;
+      const isEmail = input.includes("@");
+      const query = isEmail
+        ? `email=${encodeURIComponent(input)}`
+        : `phone=${encodeURIComponent(input.replace(/\D/g, ""))}`;
       const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/lookup?${query}`);
       const data = await resp.json();
       if (data.found && data.customer) {
@@ -2133,12 +2139,57 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
           })),
         });
       } else {
-        setLoyaltyError("No rewards account found. Sign up at any location or on the Rewards page!");
+        setLoyaltyError("No rewards account found.");
+        setLoyaltyShowSignup(true);
       }
     } catch {
       setLoyaltyError("Unable to look up rewards. Try again later.");
     }
     setLoyaltyLooking(false);
+  };
+
+  const signupLoyalty = async () => {
+    const phone = form.phone.replace(/\D/g, "");
+    if (!phone || phone.length < 10) { setLoyaltyError("Valid phone number is required to sign up"); return; }
+    if (!form.firstName.trim()) { setLoyaltyError("First name is required to sign up"); return; }
+    setLoyaltySigningUp(true);
+    setLoyaltyError("");
+    try {
+      const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone,
+          first_name: form.firstName.trim(),
+          last_name: form.lastName.trim(),
+          email: form.email.trim(),
+        }),
+      });
+      const data = await resp.json();
+      if (data.status === "created" || data.status === "existing") {
+        setLoyaltySignupSuccess(data.message || "Welcome to Hemp Rewards!");
+        setLoyaltyShowSignup(false);
+        setField("loyaltyNumber", phone);
+        // Auto-lookup to load their rewards data
+        const lookupResp = await fetch(`${LOYALTY_API_URL}/api/loyalty/lookup?phone=${encodeURIComponent(phone)}`);
+        const lookupData = await lookupResp.json();
+        if (lookupData.found && lookupData.customer) {
+          setLoyaltyData({
+            name: `${lookupData.customer.first_name} ${lookupData.customer.last_name || ""}`.trim(),
+            points: lookupData.customer.points_balance || 0,
+            rewards: (lookupData.available_rewards || []).map((r: Record<string, unknown>) => ({
+              id: r.id as number, name: r.name as string, points_required: r.points_required as number,
+              reward_value: r.reward_value as number, can_redeem: r.can_redeem as boolean,
+            })),
+          });
+        }
+      } else {
+        setLoyaltyError(data.detail || "Unable to sign up. Please try again.");
+      }
+    } catch {
+      setLoyaltyError("Unable to sign up. Please try again later.");
+    }
+    setLoyaltySigningUp(false);
   };
 
   const selectLoyaltyReward = (rewardId: number, rewardValue: number) => {
@@ -2647,6 +2698,11 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
                   <Gift className="h-4 w-4 text-[#126A44]" />
                   <h3 className="text-[#231F20] text-sm font-semibold">Hemp Rewards</h3>
                 </div>
+                {loyaltySignupSuccess && !loyaltyData && (
+                  <div className="mb-3 p-2.5 bg-[#126A44]/10 border border-[#126A44]/20 rounded-lg">
+                    <p className="text-[#126A44] text-xs font-medium">{loyaltySignupSuccess}</p>
+                  </div>
+                )}
                 {!loyaltyData ? (
                   <>
                     <div className="flex gap-2">
@@ -2655,13 +2711,27 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
                         value={form.loyaltyNumber}
                         onChange={(e) => setField("loyaltyNumber", e.target.value)}
                         onKeyDown={(e) => { if (e.key === "Enter") lookupLoyalty(); }}
-                        placeholder="Enter your phone number"
+                        placeholder="Phone number or email"
                         className="flex-1 bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-3 py-2 text-sm text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335] focus:ring-1 focus:ring-[#B3D335] transition-colors"
                       />
                       <button onClick={lookupLoyalty} disabled={loyaltyLooking} className="px-4 py-2 text-sm font-medium bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg transition-colors disabled:opacity-50">{loyaltyLooking ? "Looking up..." : "Look Up"}</button>
                     </div>
                     {loyaltyError && <p className="text-red-500 text-xs mt-1">{loyaltyError}</p>}
-                    <p className="text-xs text-[#231F20] mt-2">Look up your rewards to see your points balance and redeem rewards</p>
+                    {loyaltyShowSignup ? (
+                      <div className="mt-3 p-3 bg-[#F8FBF0] rounded-lg border border-[#B3D335]/20">
+                        <p className="text-xs font-semibold text-[#231F20] mb-2">Sign up for Hemp Rewards — earn points on every purchase!</p>
+                        <p className="text-xs text-[#231F20]/60 mb-3">We'll use the name, email, and phone from your order info.</p>
+                        <button
+                          onClick={signupLoyalty}
+                          disabled={loyaltySigningUp}
+                          className="w-full px-4 py-2.5 text-sm font-medium bg-[#126A44] hover:bg-[#58BA49] text-[#FFFFFF] rounded-lg transition-colors disabled:opacity-50"
+                        >
+                          {loyaltySigningUp ? "Signing up..." : "Join Hemp Rewards"}
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-[#231F20] mt-2">Look up your rewards by phone or email to redeem points</p>
+                    )}
                   </>
                 ) : (
                   <div>
