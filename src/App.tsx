@@ -916,7 +916,7 @@ function ProductGridCard({ product, onQuickAdd, fulfillment }: { product: Produc
     <div className="cursor-pointer group" onClick={() => navigate(`/product/${product.id}`)}>
       <div className="bg-[#FFFFFF] rounded-2xl p-[10px] sm:p-4 transition-all duration-300 hover:shadow-xl relative border border-[#231F20]/35">
         {/* Floating product image */}
-        <div className="h-[140px] sm:h-48 flex items-center justify-center mb-2 sm:mb-3 bg-[#FFFFFF] rounded-xl overflow-hidden">
+        <div className="flex items-center justify-center mb-2 sm:mb-3 bg-[#FFFFFF] rounded-xl overflow-hidden">
           <img
             src={product.image_url || placeholderUrl(product.name)}
             alt={product.name}
@@ -925,8 +925,7 @@ function ProductGridCard({ product, onQuickAdd, fulfillment }: { product: Produc
             height="300"
             sizes="(max-width: 768px) 150px, 300px"
             srcSet={imageSrcSet(product.image_url)}
-            className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
-            style={{ backgroundColor: '#FFFFFF' }}
+            className="product-card-img transition-transform duration-300 group-hover:scale-105"
             onError={handleImgError}
           />
         </div>
@@ -1227,8 +1226,8 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
           {results.map((product) => (
             <div key={product.id} className="cursor-pointer group" onClick={() => { navigate(`/product/${product.id}`); onClose(); setQuery(""); }}>
               <div className="bg-[#FFFFFF] rounded-xl p-3 transition-all hover:shadow-md">
-                <div className="h-28 flex items-center justify-center mb-2 bg-[#FFFFFF] rounded-lg overflow-hidden">
-                  <img src={product.image_url || placeholderUrl(product.name, 200)} alt={product.name} loading="lazy" className="max-h-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={handleImgError} />
+                <div className="flex items-center justify-center mb-2 bg-[#FFFFFF] rounded-lg overflow-hidden">
+                  <img src={product.image_url || placeholderUrl(product.name, 200)} alt={product.name} loading="lazy" className="product-card-img" onError={handleImgError} />
                 </div>
                 <h3 className="text-xs font-medium text-[#231F20] line-clamp-2 group-hover:text-[#126A44] transition-colors">{titleCase(product.online_name || product.name)}</h3>
                 <p className="text-[#126A44] font-bold text-sm mt-1">{formatPrice(product.price)}</p>
@@ -1660,6 +1659,81 @@ function SiteFooter() {
 }
 
 
+/* ======================== ANIMATED BUD CHARACTER ======================== */
+type BudMood = "idle" | "think" | "excited" | "wave" | "sleep";
+
+function BudCharacterSVG({ size = 50, mood = "idle" }: { size?: number; mood?: BudMood }) {
+  const moodClass = mood === "think" ? "bud-think" : mood === "excited" ? "bud-excited" : mood === "wave" ? "bud-wave" : mood === "sleep" ? "bud-sleep" : "bud-idle";
+  return (
+    <div className={moodClass} style={{ width: size, height: size, lineHeight: 0 }}>
+      <svg viewBox="0 0 50 50" width={size} height={size} xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bud character">
+        {/* Left leaf arm */}
+        <g className="bud-leaf-left" style={{ transformOrigin: "12px 30px" }}>
+          <ellipse cx="8" cy="28" rx="6" ry="3.5" fill="#58BA49" transform="rotate(-35 8 28)" />
+          <line x1="8" y1="28" x2="14" y2="30" stroke="#3d8a35" strokeWidth="0.5" />
+        </g>
+        {/* Right leaf arm */}
+        <g className="bud-leaf-right" style={{ transformOrigin: "38px 30px" }}>
+          <ellipse cx="42" cy="28" rx="6" ry="3.5" fill="#58BA49" transform="rotate(35 42 28)" />
+          <line x1="42" y1="28" x2="36" y2="30" stroke="#3d8a35" strokeWidth="0.5" />
+        </g>
+        {/* Body - round cannabis bud shape */}
+        <ellipse cx="25" cy="28" rx="13" ry="14" fill="#7BC24A" />
+        {/* Bud texture bumps */}
+        <circle cx="18" cy="22" r="4" fill="#6DB443" />
+        <circle cx="32" cy="22" r="4" fill="#6DB443" />
+        <circle cx="25" cy="18" r="4.5" fill="#6DB443" />
+        <circle cx="20" cy="32" r="3.5" fill="#6DB443" />
+        <circle cx="30" cy="32" r="3.5" fill="#6DB443" />
+        {/* Top leaf / hair */}
+        <ellipse cx="25" cy="14" rx="4" ry="6" fill="#58BA49" transform="rotate(0 25 14)" />
+        <ellipse cx="20" cy="16" rx="3" ry="5" fill="#4EA83E" transform="rotate(-20 20 16)" />
+        <ellipse cx="30" cy="16" rx="3" ry="5" fill="#4EA83E" transform="rotate(20 30 16)" />
+        {/* Trichome sparkles */}
+        <circle cx="19" cy="20" r="0.8" fill="#FFFFFF" opacity="0.6" />
+        <circle cx="31" cy="20" r="0.8" fill="#FFFFFF" opacity="0.6" />
+        <circle cx="25" cy="16" r="0.8" fill="#FFFFFF" opacity="0.7" />
+        {/* Eyes */}
+        <g className="bud-eyes">
+          <ellipse cx="21" cy="27" rx="2.2" ry="2.5" fill="#FFFFFF" />
+          <ellipse cx="29" cy="27" rx="2.2" ry="2.5" fill="#FFFFFF" />
+          <circle cx="21.5" cy="27" r="1.3" fill="#231F20" />
+          <circle cx="29.5" cy="27" r="1.3" fill="#231F20" />
+          <circle cx="22" cy="26.2" r="0.5" fill="#FFFFFF" />
+          <circle cx="30" cy="26.2" r="0.5" fill="#FFFFFF" />
+        </g>
+        {/* Mouth */}
+        {mood === "excited" ? (
+          <ellipse cx="25" cy="33" rx="3" ry="2" fill="#E85D5D" />
+        ) : mood === "sleep" ? (
+          <path d="M 22 33 Q 25 34 28 33" stroke="#231F20" strokeWidth="0.8" fill="none" strokeLinecap="round" />
+        ) : (
+          <path d="M 21 32 Q 25 36 29 32" stroke="#231F20" strokeWidth="0.8" fill="none" strokeLinecap="round" />
+        )}
+        {/* Blush cheeks */}
+        <circle cx="17" cy="30" r="2" fill="#FFB7B7" opacity="0.35" />
+        <circle cx="33" cy="30" r="2" fill="#FFB7B7" opacity="0.35" />
+        {/* Sleep Zzz */}
+        {mood === "sleep" && (
+          <g>
+            <text x="34" y="20" fontSize="5" fill="#B3D335" opacity="0.8" style={{ animation: "bud-zzz 2s ease-in-out infinite" }}>z</text>
+            <text x="37" y="15" fontSize="7" fill="#B3D335" opacity="0.6" style={{ animation: "bud-zzz 2s ease-in-out infinite 0.5s" }}>z</text>
+            <text x="40" y="9" fontSize="9" fill="#B3D335" opacity="0.4" style={{ animation: "bud-zzz 2s ease-in-out infinite 1s" }}>z</text>
+          </g>
+        )}
+        {/* Excited sparkles */}
+        {mood === "excited" && (
+          <g>
+            <circle cx="10" cy="18" r="1.5" fill="#FFCB08" style={{ animation: "bud-sparkle 0.8s ease-in-out infinite" }} />
+            <circle cx="40" cy="18" r="1.5" fill="#FFCB08" style={{ animation: "bud-sparkle 0.8s ease-in-out infinite 0.3s" }} />
+            <circle cx="25" cy="8" r="1.5" fill="#FFCB08" style={{ animation: "bud-sparkle 0.8s ease-in-out infinite 0.6s" }} />
+          </g>
+        )}
+      </svg>
+    </div>
+  );
+}
+
 /* ======================== CHATBOT BUD (Sales-Focused) ======================== */
 interface ChatMessage {
   from: "bot" | "user";
@@ -1689,14 +1763,48 @@ function ChatbotBud() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [budMood, setBudMood] = useState<BudMood>("idle");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Reset mood to idle after a delay
+  const resetMoodAfter = useCallback((ms: number) => {
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = setTimeout(() => setBudMood("idle"), ms);
+  }, []);
+
+  // Set mood based on loading state
+  useEffect(() => {
+    if (loading) {
+      setBudMood("think");
+    }
+  }, [loading]);
+
+  // When new bot message arrives, get excited briefly
+  useEffect(() => {
+    if (messages.length > 0 && messages[messages.length - 1].from === "bot" && initialized) {
+      setBudMood("excited");
+      resetMoodAfter(1500);
+    }
+  }, [messages, initialized, resetMoodAfter]);
+
+  // Sleep after inactivity
+  useEffect(() => {
+    if (!open) return;
+    const sleepTimer = setTimeout(() => {
+      if (!loading) setBudMood("sleep");
+    }, 60000);
+    return () => clearTimeout(sleepTimer);
+  }, [open, messages, loading]);
+
   const openChat = () => {
     setOpen(true);
+    setBudMood("wave");
+    resetMoodAfter(2000);
     if (!initialized) {
       setMessages([{
         from: "bot",
@@ -1743,21 +1851,29 @@ function ChatbotBud() {
 
   return (
     <>
-      {/* Floating button */}
+      {/* Floating Bud character button */}
       {!open && (
-        <button onClick={openChat} className="fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full bg-[#B3D335] hover:bg-[#58BA49] shadow-lg flex items-center justify-center transition-all hover:scale-110" aria-label="Open Bud hemp guide">
-          <img src="/bud-puppet.webp" alt="Bud" className="w-10 h-10 object-contain" width="70" height="70" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-          <MessageCircle className="h-6 w-6 text-[#FFFFFF] absolute" style={{ display: 'none' }} />
+        <button onClick={openChat} className="fixed bottom-4 right-4 z-50 group" aria-label="Chat with Bud" style={{ background: "none", border: "none", padding: 0 }}>
+          <div className="relative">
+            <BudCharacterSVG size={64} mood="idle" />
+            {/* Speech hint bubble */}
+            <div className="absolute -top-8 -left-16 bg-[#FFFFFF] text-[#231F20] text-[10px] font-semibold px-2 py-1 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-[#B3D335]/30">
+              Ask me anything!
+              <div className="absolute bottom-[-4px] right-4 w-2 h-2 bg-[#FFFFFF] rotate-45 border-r border-b border-[#B3D335]/30" />
+            </div>
+          </div>
         </button>
       )}
 
       {/* Chat window */}
       {open && (
-        <div className="fixed bottom-4 right-4 z-50 w-[340px] sm:w-[380px] max-h-[500px] bg-[#FFFFFF] rounded-2xl shadow-2xl border border-[#231F20]/15 flex flex-col overflow-hidden">
-          {/* Header */}
-          <div className="bg-[#B3D335] text-[#231F20] px-4 py-3 flex items-center justify-between flex-shrink-0">
+        <div className="fixed bottom-4 right-4 z-50 w-[340px] sm:w-[380px] max-h-[520px] bg-[#FFFFFF] rounded-2xl shadow-2xl border border-[#231F20]/15 flex flex-col overflow-hidden" style={{ animation: "bud-chat-pop 0.35s ease-out" }}>
+          {/* Header with animated Bud */}
+          <div className="bg-gradient-to-r from-[#B3D335] to-[#58BA49] text-[#231F20] px-4 py-2.5 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2">
-              <img src="/bud-puppet.webp" alt="Bud" className="w-8 h-8 object-contain rounded-full bg-[#FFFFFF]/20 p-0.5" width="70" height="70" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              <div className="bg-[#FFFFFF]/20 rounded-full p-0.5">
+                <BudCharacterSVG size={34} mood={budMood} />
+              </div>
               <div>
                 <p className="font-bold text-sm">Bud</p>
                 <p className="text-xs text-[#FFFFFF]/80">Virtual Budtender</p>
@@ -1767,17 +1883,25 @@ function ChatbotBud() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-[200px] max-h-[340px]">
+          <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-[200px] max-h-[360px]">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] ${msg.from === "user" ? "bg-[#B3D335] text-[#231F20] rounded-2xl rounded-br-md px-3 py-2" : "bg-[#FFFFFF] text-[#231F20] rounded-2xl rounded-bl-md px-3 py-2 shadow-sm border border-[#231F20]/5"}`}>
+                {msg.from === "bot" && (
+                  <div className="flex-shrink-0 mr-1.5 mt-1">
+                    <BudCharacterSVG size={22} mood="idle" />
+                  </div>
+                )}
+                <div className={`max-w-[80%] ${msg.from === "user" ? "bg-[#B3D335] text-[#231F20] rounded-2xl rounded-br-md px-3 py-2" : "bg-[#F8FBF0] text-[#231F20] rounded-2xl rounded-bl-md px-3 py-2 shadow-sm border border-[#B3D335]/15"}`}>
                   <p className="text-sm whitespace-pre-line">{msg.text}</p>
                 </div>
               </div>
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-[#FFFFFF] text-[#231F20] rounded-2xl rounded-bl-md px-3 py-2 shadow-sm border border-[#231F20]/5">
+                <div className="flex-shrink-0 mr-1.5 mt-1">
+                  <BudCharacterSVG size={22} mood="think" />
+                </div>
+                <div className="bg-[#F8FBF0] text-[#231F20] rounded-2xl rounded-bl-md px-3 py-2 shadow-sm border border-[#B3D335]/15">
                   <div className="flex gap-1 items-center py-1">
                     <span className="w-2 h-2 bg-[#B3D335] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                     <span className="w-2 h-2 bg-[#B3D335] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
@@ -1790,15 +1914,16 @@ function ChatbotBud() {
           </div>
 
           {/* Input */}
-          <div className="border-t border-[#231F20]/15 p-3 flex gap-2 flex-shrink-0">
+          <div className="border-t border-[#231F20]/10 p-3 flex gap-2 flex-shrink-0 bg-[#FAFAFA]">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !loading) handleSend(); }}
               placeholder="Ask Bud anything..."
-              className="flex-1 bg-[#FFFFFF] border border-[#231F20]/15 rounded-full px-4 py-2 text-sm text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335]"
+              className="flex-1 bg-[#FFFFFF] border border-[#231F20]/15 rounded-full px-4 py-2 text-sm text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335] focus:ring-1 focus:ring-[#B3D335]/30"
               disabled={loading}
+              onFocus={() => { if (budMood === "sleep") setBudMood("idle"); }}
             />
             <button onClick={handleSend} disabled={loading} className="p-2 bg-[#58BA49] hover:bg-[#126A44] text-[#FFFFFF] rounded-full transition-colors disabled:opacity-50" aria-label="Send message">
               <Send className="h-4 w-4" />
