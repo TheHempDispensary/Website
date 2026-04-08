@@ -931,6 +931,7 @@ function ProductGridCard({ product, onQuickAdd, fulfillment }: { product: Produc
         </div>
         {/* Badges row */}
         <div className="flex items-center gap-1 flex-wrap mb-1.5">
+          <span className="inline-block text-[11px] sm:text-xs font-bold px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full bg-[#D9A32C]/15 text-[#D9A32C] border border-[#D9A32C]/30">21+</span>
                     <span className="inline-block text-[11px] sm:text-xs font-medium px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>
                       {effect.icon} {effect.label}
                     </span>
@@ -1079,12 +1080,10 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
             {/* Benefit description */}
             <p className="text-[#231F20] text-sm mb-4">{benefit}</p>
 
-            {product.is_age_restricted && (
-              <div className="flex items-center gap-2 mb-4 bg-[#FFCB08]/10 border border-[#FFCB08]/30 rounded-lg px-4 py-2">
-                <span className="text-[#D9A32C] font-bold">21+</span>
-                <span className="text-[#231F20] text-sm">Age verification required</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2 mb-4 bg-[#FFCB08]/10 border border-[#FFCB08]/30 rounded-lg px-4 py-2">
+              <span className="text-[#D9A32C] font-bold">21+</span>
+              <span className="text-[#231F20] text-sm">Age verification required</span>
+            </div>
 
             {product.description && (
               <div className="mb-4">
