@@ -17,6 +17,17 @@ interface CartItem {
   quantity: number;
 }
 
+interface VolumeDiscount {
+  id: number;
+  product_sku: string;
+  product_name: string;
+  min_quantity: number;
+  discount_type: string;
+  discount_value: number;
+  customer_label: string;
+  is_active: number;
+}
+
 function loadCart(): CartItem[] {
   try {
     const stored = localStorage.getItem("hemp-cart");
@@ -256,6 +267,29 @@ function getProductBenefit(product: Product): string {
   }
 }
 
+
+/* ======================== VOLUME DISCOUNT HELPERS ======================== */
+function calcVolumeDiscountSavings(vd: VolumeDiscount, unitPrice: number, qty: number): number {
+  if (qty < vd.min_quantity) return 0;
+  const normalTotal = unitPrice * qty;
+  switch (vd.discount_type) {
+    case "fixed_total": return normalTotal - (vd.discount_value * Math.floor(qty / vd.min_quantity) + unitPrice * (qty % vd.min_quantity));
+    case "amount_off": return vd.discount_value * qty;
+    case "percent_off": return Math.round(normalTotal * (vd.discount_value / 100));
+    default: return 0;
+  }
+}
+
+
+function getVolumeDiscountSavingsLabel(vd: VolumeDiscount, unitPrice: number): string {
+  const normalTotal = unitPrice * vd.min_quantity;
+  switch (vd.discount_type) {
+    case "fixed_total": return `Buy ${vd.min_quantity} for ${formatPrice(vd.discount_value)} \u2014 Save ${formatPrice(normalTotal - vd.discount_value)}!`;
+    case "amount_off": return `Buy ${vd.min_quantity}+, save ${formatPrice(vd.discount_value)} each!`;
+    case "percent_off": return `Buy ${vd.min_quantity}+, get ${vd.discount_value}% off \u2014 Save ${formatPrice(Math.round(normalTotal * (vd.discount_value / 100)))}!`;
+    default: return `Buy ${vd.min_quantity}+ and save!`;
+  }
+}
 
 /* ======================== BUD AGE GATE + FULFILLMENT POPUP ======================== */
 function BudAgeGatePopup({ onComplete }: { onComplete: (f: FulfillmentType) => void }) {
@@ -965,6 +999,15 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [volumeDiscounts, setVolumeDiscounts] = useState<VolumeDiscount[]>([]);
+
+  // Fetch active volume discounts
+  useEffect(() => {
+    fetch(`${API_URL}/api/ecommerce/volume-discounts/active`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setVolumeDiscounts(Array.isArray(data) ? data : []))
+      .catch(() => setVolumeDiscounts([]));
+  }, []);
 
   useEffect(() => {
     // Normalize slug: replace / " ( ) $ ' with clean chars to handle old URLs with special characters
@@ -1078,6 +1121,17 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
                 </span>
               )}
             </div>
+
+            {/* Volume Discount Savings Callout */}
+            {(() => {
+              const vd = volumeDiscounts.find(d => d.product_sku === product.sku && d.is_active);
+              if (!vd) return null;
+              return (
+                <div className="bg-[#FFCB08]/15 border border-[#FFCB08]/40 rounded-xl px-4 py-3 mb-4">
+                  <p className="text-sm font-bold text-[#231F20]">{"\uD83D\uDD25"} {getVolumeDiscountSavingsLabel(vd, product.price)}</p>
+                </div>
+              );
+            })()}
 
             {/* Benefit description */}
             <p className="text-[#231F20] text-sm mb-4">{benefit}</p>
@@ -2162,10 +2216,29 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
   const elementsRef = useRef<Record<string, any>>({});
   /* eslint-enable @typescript-eslint/no-explicit-any */
   const sdkLoadedRef = useRef(false);
+  const [volumeDiscounts, setVolumeDiscounts] = useState<VolumeDiscount[]>([]);
+
+  // Fetch active volume discounts on mount
+  useEffect(() => {
+    fetch(`${API_URL}/api/ecommerce/volume-discounts/active`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setVolumeDiscounts(Array.isArray(data) ? data : []))
+      .catch(() => setVolumeDiscounts([]));
+  }, []);
+
+  // Calculate volume discount savings per cart item
+  const volumeDiscountTotal = useMemo(() => {
+    let total = 0;
+    for (const item of cart) {
+      const vd = volumeDiscounts.find(d => d.product_sku === item.product.sku && d.is_active);
+      if (vd) total += calcVolumeDiscountSavings(vd, item.product.price, item.quantity);
+    }
+    return Math.round(total);
+  }, [cart, volumeDiscounts]);
 
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const discount = promoApplied ? Math.round(subtotal * 0.10) : 0;
-  const discountedSubtotal = subtotal - discount;
+  const discountedSubtotal = subtotal - discount - volumeDiscountTotal;
   const selectedRate = shippingRates.find(r => r.id === selectedRateId);
   const shippingCost = (fulfillment && fulfillment.startsWith("pickup")) ? 0 : (selectedRate ? selectedRate.amount_cents : 0);
   const isPickup = !!(fulfillment && fulfillment.startsWith("pickup"));
@@ -2496,7 +2569,7 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
         customer: { first_name: form.firstName, last_name: form.lastName, email: form.email, phone: form.phone },
         shipping_address: { address: form.address, apartment: form.apartment, city: form.city, state: form.state, zip: form.zip },
         items: cart.map((item) => ({ product_id: item.product.id, name: item.product.name, sku: item.product.sku, price: item.product.price, quantity: item.quantity })),
-        subtotal, discount, loyalty_discount: effectiveLoyaltyDiscount, shipping_cost: shippingCost, tax, total, notes: form.notes,
+        subtotal, discount, volume_discount: volumeDiscountTotal, loyalty_discount: effectiveLoyaltyDiscount, shipping_cost: shippingCost, tax, total, notes: form.notes,
         shipping_service: selectedRate?.service_level || "",
         promo_code: promoApplied ? "FIRST10" : null,
         payment_token: tokenResult.token,
@@ -2933,6 +3006,7 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
             <div className="border-t border-[#231F20]/20 pt-4 space-y-2">
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Subtotal</span><span className="text-[#231F20]">{formatPrice(subtotal)}</span></div>
               {promoApplied && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Discount (10%)</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
+              {volumeDiscountTotal > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Volume Discount</span><span className="text-[#126A44] font-medium">-{formatPrice(volumeDiscountTotal)}</span></div>}
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">{isPickup ? "Pickup" : `Shipping${selectedRate ? ` (${selectedRate.service_level})` : ""}`}</span><span className="text-[#231F20]">{isPickup ? "FREE" : (selectedRate ? formatPrice(shippingCost) : "Select a rate")}</span></div>
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Tax ({(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 2)}%)</span><span className="text-[#231F20]">{formatPrice(tax)}</span></div>
               {effectiveLoyaltyDiscount > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Rewards Discount</span><span className="text-[#126A44] font-medium">-{formatPrice(effectiveLoyaltyDiscount)}</span></div>}
