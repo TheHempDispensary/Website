@@ -3633,40 +3633,247 @@ function AccountPage() {
     setSignupLoading(false);
   };
 
+  // ── Order History state ──
+  const [orders, setOrders] = useState<Array<{
+    order_number: string; status: string; customer_first_name: string; customer_last_name: string;
+    subtotal: number; shipping_cost: number; tax: number; total: number; discount: number;
+    promo_code: string; fulfillment_type: string; shipping_service: string;
+    tracking_number: string; tracking_url: string; tracking_status: string;
+    payment_status: string; created_at: string;
+    items: Array<{ product_name: string; sku: string; price: number; quantity: number }>;
+  }>>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState("");
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"rewards" | "orders">("rewards");
+
+  const fetchOrders = async (email: string, phone: string) => {
+    setOrdersLoading(true);
+    setOrdersError("");
+    try {
+      const params = new URLSearchParams();
+      if (email) params.set("email", email);
+      if (phone) params.set("phone", phone);
+      const resp = await fetch(`${API_URL}/api/ecommerce/orders/lookup?${params.toString()}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        setOrders(data.orders || []);
+      } else {
+        setOrdersError("Unable to load orders.");
+      }
+    } catch {
+      setOrdersError("Unable to connect. Please try again.");
+    }
+    setOrdersLoading(false);
+  };
+
+  useEffect(() => {
+    if (loggedIn && memberData) {
+      fetchOrders(memberData.email, memberData.phone);
+    }
+  }, [loggedIn, memberData]);
+
+  const formatOrderDate = (dateStr: string) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr.includes("Z") ? dateStr : dateStr + "Z");
+    return d.toLocaleDateString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", year: "numeric" }) +
+      " at " + d.toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" });
+  };
+
+  const getStatusColor = (status: string) => {
+    if (status === "delivered") return "bg-[#58BA49]/10 text-[#58BA49]";
+    if (status === "shipped" || status === "in_transit") return "bg-[#3D8C32]/10 text-[#3D8C32]";
+    if (status === "refunded") return "bg-[#D9A32C]/10 text-[#D9A32C]";
+    if (status === "paid" || status === "confirmed") return "bg-[#126A44]/10 text-[#126A44]";
+    return "bg-[#231F20]/10 text-[#231F20]";
+  };
+
+  const getOrderFulfillmentLabel = (type: string) => {
+    if (type === "pickup_west") return "Pickup — West";
+    if (type === "pickup_east") return "Pickup — East";
+    return "Shipping";
+  };
+
   if (loggedIn && memberData) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-16">
-        <div className="bg-[#FFFFFF] rounded-2xl p-8 border border-[#231F20]/20 shadow-sm">
-          <div className="text-center mb-8">
+      <div className="max-w-3xl mx-auto px-4 py-16">
+        {/* Profile Header */}
+        <div className="bg-[#FFFFFF] rounded-2xl p-8 border border-[#231F20]/20 shadow-sm mb-6">
+          <div className="text-center mb-4">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-[#B3D335]/20 rounded-full mb-4">
               <User className="h-8 w-8 text-[#126A44]" />
             </div>
             <h1 className="text-2xl font-bold text-[#231F20]">{memberData.name}</h1>
             <p className="text-[#231F20]">{memberData.phone} {memberData.email ? `| ${memberData.email}` : ""}</p>
           </div>
-          <div className="bg-[#FFFFFF] rounded-xl p-6 text-center mb-6">
-            <p className="text-[#231F20] text-sm mb-1">Your Reward Points</p>
-            <p className="text-4xl font-bold text-[#B3D335]">{memberData.points}</p>
-            <p className="text-[#231F20] text-xs mt-1">Points work across all locations + online</p>
-          </div>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-[#FFFFFF] rounded-lg">
-              <span className="text-[#231F20]">100 points</span>
-              <span className="text-[#126A44] font-semibold">$5 off</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-[#FFFFFF] rounded-lg">
-              <span className="text-[#231F20]">200 points</span>
-              <span className="text-[#126A44] font-semibold">$12 off</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-[#FFFFFF] rounded-lg">
-              <span className="text-[#231F20]">500 points</span>
-              <span className="text-[#126A44] font-semibold">$35 off</span>
-            </div>
-          </div>
-          <button onClick={() => { setLoggedIn(false); setMemberData(null); setSignupResult(null); }} className="w-full mt-6 py-3 border border-[#231F20]/20 text-[#231F20] hover:text-[#231F20] rounded-lg transition-colors">
-            Sign Out
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setActiveTab("rewards")}
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors ${activeTab === "rewards" ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/20"}`}
+          >
+            Hemp Rewards
+          </button>
+          <button
+            onClick={() => setActiveTab("orders")}
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors ${activeTab === "orders" ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/20"}`}
+          >
+            My Orders {orders.length > 0 && <span className="ml-1 text-xs bg-[#231F20]/10 px-2 py-0.5 rounded-full">{orders.length}</span>}
           </button>
         </div>
+
+        {/* Rewards Tab */}
+        {activeTab === "rewards" && (
+          <div className="bg-[#FFFFFF] rounded-2xl p-8 border border-[#231F20]/20 shadow-sm">
+            <div className="bg-[#FFFFFF] rounded-xl p-6 text-center mb-6">
+              <p className="text-[#231F20] text-sm mb-1">Your Reward Points</p>
+              <p className="text-4xl font-bold text-[#B3D335]">{memberData.points}</p>
+              <p className="text-[#231F20] text-xs mt-1">Points work across all locations + online</p>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center p-3 bg-[#FFFFFF] rounded-lg">
+                <span className="text-[#231F20]">100 points</span>
+                <span className="text-[#126A44] font-semibold">$5 off</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-[#FFFFFF] rounded-lg">
+                <span className="text-[#231F20]">200 points</span>
+                <span className="text-[#126A44] font-semibold">$12 off</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-[#FFFFFF] rounded-lg">
+                <span className="text-[#231F20]">500 points</span>
+                <span className="text-[#126A44] font-semibold">$35 off</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Orders Tab */}
+        {activeTab === "orders" && (
+          <div className="space-y-4">
+            {ordersLoading && (
+              <div className="text-center py-12 text-[#231F20]">Loading your orders...</div>
+            )}
+            {ordersError && (
+              <div className="text-center py-12 text-[#D9A32C]">{ordersError}</div>
+            )}
+            {!ordersLoading && !ordersError && orders.length === 0 && (
+              <div className="bg-[#FFFFFF] rounded-2xl p-8 border border-[#231F20]/20 shadow-sm text-center">
+                <Package className="h-12 w-12 text-[#231F20]/30 mx-auto mb-4" />
+                <p className="text-[#231F20] font-medium mb-2">No orders yet</p>
+                <p className="text-[#231F20]/60 text-sm">Your order history will appear here after your first purchase.</p>
+              </div>
+            )}
+            {orders.map((order) => (
+              <div key={order.order_number} className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/20 shadow-sm overflow-hidden">
+                <button
+                  onClick={() => setExpandedOrder(expandedOrder === order.order_number ? null : order.order_number)}
+                  className="w-full p-5 text-left hover:bg-[#231F20]/5 transition-colors"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold text-[#231F20]">#{order.order_number}</span>
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusColor(order.status)}`}>
+                      {(order.status || "pending").replace(/_/g, " ").toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-[#231F20]/70">
+                    <span>{formatOrderDate(order.created_at)}</span>
+                    <span className="font-medium text-[#231F20]">${((order.total || 0) / 100).toFixed(2)}</span>
+                    <span className="text-xs px-2 py-0.5 rounded bg-[#231F20]/5">{getOrderFulfillmentLabel(order.fulfillment_type)}</span>
+                    <span>{order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? "s" : ""}</span>
+                    {expandedOrder === order.order_number ? <ChevronUp className="h-4 w-4 ml-auto" /> : <ChevronDown className="h-4 w-4 ml-auto" />}
+                  </div>
+                </button>
+
+                {expandedOrder === order.order_number && (
+                  <div className="border-t border-[#231F20]/10 p-5 space-y-4">
+                    <div>
+                      <h3 className="text-sm font-semibold text-[#231F20] mb-2">Items</h3>
+                      <div className="space-y-2">
+                        {order.items?.map((item, idx) => (
+                          <div key={idx} className="flex justify-between items-center text-sm">
+                            <div>
+                              <span className="text-[#231F20]">{item.product_name}</span>
+                              {item.quantity > 1 && <span className="text-[#231F20]/50 ml-1">x{item.quantity}</span>}
+                            </div>
+                            <span className="text-[#231F20] font-medium">${((item.price || 0) / 100 * item.quantity).toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="border-t border-[#231F20]/10 pt-3 space-y-1 text-sm">
+                      <div className="flex justify-between text-[#231F20]/70">
+                        <span>Subtotal</span><span>${((order.subtotal || 0) / 100).toFixed(2)}</span>
+                      </div>
+                      {(order.shipping_cost || 0) > 0 && (
+                        <div className="flex justify-between text-[#231F20]/70">
+                          <span>Shipping{order.shipping_service ? ` (${order.shipping_service})` : ""}</span>
+                          <span>${((order.shipping_cost || 0) / 100).toFixed(2)}</span>
+                        </div>
+                      )}
+                      {(order.discount || 0) > 0 && (
+                        <div className="flex justify-between text-[#58BA49]">
+                          <span>Discount{order.promo_code ? ` (${order.promo_code})` : ""}</span>
+                          <span>-${((order.discount || 0) / 100).toFixed(2)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-[#231F20]/70">
+                        <span>Tax</span><span>${((order.tax || 0) / 100).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between font-semibold text-[#231F20] pt-1 border-t border-[#231F20]/10">
+                        <span>Total</span><span>${((order.total || 0) / 100).toFixed(2)}</span>
+                      </div>
+                    </div>
+
+                    {order.tracking_number && (
+                      <div className="bg-[#B3D335]/10 rounded-lg p-4">
+                        <h3 className="text-sm font-semibold text-[#231F20] mb-2">Tracking</h3>
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-[#231F20]/70">Tracking Number</span>
+                            <span className="text-[#231F20] font-mono text-xs">{order.tracking_number}</span>
+                          </div>
+                          {order.tracking_status && (
+                            <div className="flex justify-between">
+                              <span className="text-[#231F20]/70">Status</span>
+                              <span className="text-[#126A44] font-medium">{order.tracking_status.replace(/_/g, " ")}</span>
+                            </div>
+                          )}
+                          {order.tracking_url && (
+                            <a href={order.tracking_url} target="_blank" rel="noopener noreferrer" className="inline-block mt-2 px-4 py-2 bg-[#126A44] text-white rounded-lg text-sm font-medium hover:bg-[#3D8C32] transition-colors">
+                              Track Package
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {!order.tracking_number && order.fulfillment_type === "shipping" && (
+                      <div className="bg-[#FFCB08]/10 rounded-lg p-4 text-sm text-[#231F20]">
+                        Your order is being prepared for shipment. Tracking info will be available once your package ships.
+                      </div>
+                    )}
+
+                    {(order.fulfillment_type === "pickup_west" || order.fulfillment_type === "pickup_east") && (
+                      <div className="bg-[#B3D335]/10 rounded-lg p-4 text-sm text-[#231F20]">
+                        {order.fulfillment_type === "pickup_west"
+                          ? "Ready for pickup at Spring Hill West — 6175 Deltona Blvd, Suite 104"
+                          : "Ready for pickup at Spring Hill East — 14312 Spring Hill Dr"}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Sign Out */}
+        <button onClick={() => { setLoggedIn(false); setMemberData(null); setSignupResult(null); setOrders([]); setActiveTab("rewards"); }} className="w-full mt-6 py-3 border border-[#231F20]/20 text-[#231F20] hover:text-[#231F20] rounded-lg transition-colors">
+          Sign Out
+        </button>
       </div>
     );
   }
