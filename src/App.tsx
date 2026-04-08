@@ -293,7 +293,6 @@ function getVolumeDiscountSavingsLabel(vd: VolumeDiscount, unitPrice: number): s
     default: return `Buy ${vd.min_quantity}+ and save!`;
   }
 }
-
 /* ======================== BUD AGE GATE + FULFILLMENT POPUP ======================== */
 function BudAgeGatePopup({ onComplete }: { onComplete: (f: FulfillmentType) => void }) {
   const [step, setStep] = useState<1 | 2>(1);
