@@ -11,7 +11,7 @@
 /beverages?*        /shop              301
 /cakes---cookies    /shop              301
 /cakes---cookies?*  /shop              301
-/cbg                /shop              301
+# /cbg is now a real cannabinoid education page — no redirect needed
 /cbg?*              /shop              301
 /accessories        /shop/accessories  301
 /accessories?*      /shop/accessories  301

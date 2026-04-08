@@ -1581,6 +1581,94 @@ function ThcaPage({ products, onAddToCart, fulfillment }: { products: Product[];
   );
 }
 
+/* ======================== CANNABINOID EDUCATION PAGES ======================== */
+function CannabinoidPage({ products, onAddToCart, fulfillment, config }: {
+  products: Product[];
+  onAddToCart: (product: Product) => void;
+  fulfillment: FulfillmentType | null;
+  config: { title: string; heading: string; para1: string; para2: string; keywords: string[]; pageTitle: string };
+}) {
+  useEffect(() => {
+    document.title = config.pageTitle;
+    return () => { document.title = "The Hemp Dispensary | Spring Hill FL"; };
+  }, [config.pageTitle]);
+
+  const filtered = useMemo(() => {
+    const items = fulfillment
+      ? products.filter(p => getStockForFulfillment(p, fulfillment) > 0)
+      : products.filter(p => p.stock > 0);
+    return items.filter(p => {
+      const name = (p.online_name || p.name).toLowerCase();
+      const desc = (p.description || "").toLowerCase();
+      return config.keywords.some(kw => name.includes(kw) || desc.includes(kw));
+    }).sort((a, b) => a.name.localeCompare(b.name));
+  }, [products, fulfillment, config.keywords]);
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-3xl mb-10">
+        <h1 className="text-3xl sm:text-4xl font-bold text-[#231F20] mb-4">{config.heading}</h1>
+        <p className="text-[#231F20]/80 leading-relaxed mb-4">{config.para1}</p>
+        <p className="text-[#231F20]/80 leading-relaxed">{config.para2}</p>
+      </div>
+      <p className="text-[#231F20] text-sm mb-6">{filtered.length} products</p>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+        {filtered.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} fulfillment={fulfillment} />)}
+      </div>
+      {filtered.length === 0 && (
+        <div className="text-center py-16">
+          <Package className="mx-auto h-12 w-12 text-[#231F20] mb-3" />
+          <p className="text-[#231F20]">No {config.title} products currently available</p>
+          <button onClick={() => navigate("/shop")} className="mt-4 px-6 py-2 bg-[#B3D335] text-[#231F20] rounded-full font-semibold text-sm hover:bg-[#126A44] hover:text-[#FFFFFF] transition-colors">Browse All Products</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const CANNABINOID_CONFIGS: Record<string, { title: string; heading: string; para1: string; para2: string; keywords: string[]; pageTitle: string }> = {
+  "delta-8": {
+    title: "Delta-8 THC",
+    heading: "Delta-8 THC Products",
+    para1: "Delta-8 THC is a naturally occurring cannabinoid found in hemp plants, offering a milder psychoactive experience compared to traditional THC. Many users describe Delta-8 as producing clear-headed, relaxing effects without the intensity or anxiety sometimes associated with Delta-9 THC.",
+    para2: "At The Hemp Dispensary, our Delta-8 products are derived from federally compliant hemp and available in flower, gummies, vapes, wax, and tinctures. All products are third-party lab tested with certificates of analysis available. Visit either of our Spring Hill locations or order online for home delivery.",
+    keywords: ["delta-8", "delta 8", "d8"],
+    pageTitle: "Delta-8 THC Products | The Hemp Dispensary \u2013 Spring Hill, FL",
+  },
+  "delta-9": {
+    title: "Delta-9 THC",
+    heading: "Delta-9 THC Products",
+    para1: "Delta-9 THC is the primary psychoactive cannabinoid in hemp and the compound most people associate with traditional cannabis effects. Hemp-derived Delta-9 products contain 0.3% or less Delta-9 THC by dry weight, making them federally compliant while still delivering noticeable effects.",
+    para2: "The Hemp Dispensary carries a carefully curated selection of hemp-derived Delta-9 edibles, beverages, and tinctures \u2014 all lab-tested and compliant with Florida hemp regulations. Shop online or visit us in Spring Hill.",
+    keywords: ["delta-9", "delta 9", "d9"],
+    pageTitle: "Delta-9 THC Products | The Hemp Dispensary \u2013 Spring Hill, FL",
+  },
+  "cbd": {
+    title: "CBD",
+    heading: "CBD Products",
+    para1: "CBD (cannabidiol) is the most well-known non-psychoactive cannabinoid found in hemp. Unlike THC, CBD does not produce intoxicating effects and is widely used as a daily wellness supplement in tinctures, topicals, edibles, and flower.",
+    para2: "At The Hemp Dispensary, we carry a full range of CBD products including full-spectrum, broad-spectrum, and isolate options. Every product is lab-tested for cannabinoid content and purity. Available in-store at both Spring Hill locations or shipped directly to your door.",
+    keywords: ["cbd", "cannabidiol"],
+    pageTitle: "CBD Products | The Hemp Dispensary \u2013 Spring Hill, FL",
+  },
+  "cbg": {
+    title: "CBG",
+    heading: "CBG Products",
+    para1: "CBG (cannabigerol) is often called the \u201cmother cannabinoid\u201d because it\u2019s the precursor from which other cannabinoids like CBD and THC are synthesized. CBG is non-psychoactive and is gaining popularity for its unique properties that complement other cannabinoids in full-spectrum products.",
+    para2: "Our CBG products at The Hemp Dispensary include tinctures, wax, gummies, and flower \u2014 all sourced from compliant hemp farms and third-party lab tested. Ask our budtenders at either Spring Hill location for recommendations.",
+    keywords: ["cbg", "cannabigerol"],
+    pageTitle: "CBG Products | The Hemp Dispensary \u2013 Spring Hill, FL",
+  },
+  "cbn": {
+    title: "CBN",
+    heading: "CBN Products",
+    para1: "CBN (cannabinol) is a mildly psychoactive cannabinoid that forms as THC ages and oxidizes. It\u2019s found in smaller concentrations in hemp and is often included in products specifically formulated for nighttime use and relaxation.",
+    para2: "The Hemp Dispensary carries CBN gummies, tinctures, and multi-blend products that combine CBN with other cannabinoids for an enhanced effect. All products are lab-tested and federally compliant. Available in both Spring Hill locations and online.",
+    keywords: ["cbn", "cannabinol"],
+    pageTitle: "CBN Products | The Hemp Dispensary \u2013 Spring Hill, FL",
+  },
+};
+
 function ShippingPolicyPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-16">
@@ -1617,19 +1705,34 @@ function SiteFooter() {
   return (
     <footer className="bg-[#231F20] text-[#FFFFFF]">
       <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          <div className="col-span-2 md:col-span-1">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+          <div className="col-span-2 md:col-span-3 lg:col-span-1">
             <img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-12 w-auto mb-4" />
             <p className="text-[#FFFFFF]/70 text-sm">Spring Hill's trusted source for premium hemp products.</p>
           </div>
           <div>
-            <h3 className="font-semibold text-[#3D8C32] mb-3">Shop</h3>
+            <h3 className="font-semibold text-[#3D8C32] mb-3">Shop by Category</h3>
             <div className="space-y-2">
               <a href="/shop/flower" onClick={(e) => { e.preventDefault(); navigate("/shop/flower"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Flower</a>
               <a href="/shop/edibles" onClick={(e) => { e.preventDefault(); navigate("/shop/edibles"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Edibles</a>
               <a href="/shop/concentrates" onClick={(e) => { e.preventDefault(); navigate("/shop/concentrates"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Concentrates</a>
               <a href="/shop/vapor" onClick={(e) => { e.preventDefault(); navigate("/shop/vapor"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Vapor</a>
+              <a href="/shop/topicals" onClick={(e) => { e.preventDefault(); navigate("/shop/topicals"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Topicals</a>
+              <a href="/shop/tinctures" onClick={(e) => { e.preventDefault(); navigate("/shop/tinctures"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Tinctures</a>
+              <a href="/shop/accessories" onClick={(e) => { e.preventDefault(); navigate("/shop/accessories"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Accessories</a>
+              <a href="/shop/apparel" onClick={(e) => { e.preventDefault(); navigate("/shop/apparel"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Apparel</a>
               <a href="/shop/packaging" onClick={(e) => { e.preventDefault(); navigate("/shop/packaging"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Packaging</a>
+            </div>
+          </div>
+          <div>
+            <h3 className="font-semibold text-[#3D8C32] mb-3">Learn About Cannabinoids</h3>
+            <div className="space-y-2">
+              <a href="/thca" onClick={(e) => { e.preventDefault(); navigate("/thca"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">THCA</a>
+              <a href="/delta-8" onClick={(e) => { e.preventDefault(); navigate("/delta-8"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Delta-8 THC</a>
+              <a href="/delta-9" onClick={(e) => { e.preventDefault(); navigate("/delta-9"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Delta-9 THC</a>
+              <a href="/cbd" onClick={(e) => { e.preventDefault(); navigate("/cbd"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">CBD</a>
+              <a href="/cbg" onClick={(e) => { e.preventDefault(); navigate("/cbg"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">CBG</a>
+              <a href="/cbn" onClick={(e) => { e.preventDefault(); navigate("/cbn"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">CBN</a>
             </div>
           </div>
           <div>
@@ -1637,6 +1740,7 @@ function SiteFooter() {
             <div className="space-y-2">
               <a href="/about" onClick={(e) => { e.preventDefault(); navigate("/about"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">About Us</a>
               <a href="/contact" onClick={(e) => { e.preventDefault(); navigate("/contact"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Contact</a>
+              <a href="/our-locations" onClick={(e) => { e.preventDefault(); navigate("/our-locations"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Our Locations</a>
               <a href="/loyalty" onClick={(e) => { e.preventDefault(); navigate("/loyalty"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Rewards</a>
               <a href="/games" onClick={(e) => { e.preventDefault(); navigate("/games"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Games</a>
             </div>
@@ -4015,6 +4119,11 @@ function App() {
       "/games": "Play games and win prizes at The Hemp Dispensary. Roll-a-Joint and more — all free to play for rewards members.",
       "/about": "Our Story — how two Spring Hill locals built The Hemp Dispensary from a road trip idea to 15 locations, lost 13 overnight, and kept going.",
       "/thca": "Shop THCA flower, pre-rolls, concentrates, and vapes at The Hemp Dispensary in Spring Hill, FL. Federally compliant hemp, lab-tested, COA available on every product.",
+      "/delta-8": "Shop Delta-8 THC flower, gummies, vapes, wax, and tinctures at The Hemp Dispensary in Spring Hill, FL. Lab-tested, federally compliant hemp products.",
+      "/delta-9": "Shop hemp-derived Delta-9 THC edibles, beverages, and tinctures at The Hemp Dispensary in Spring Hill, FL. Lab-tested, compliant with Florida hemp regulations.",
+      "/cbd": "Shop CBD tinctures, topicals, edibles, and flower at The Hemp Dispensary in Spring Hill, FL. Full-spectrum, broad-spectrum, and isolate options. Lab-tested.",
+      "/cbg": "Shop CBG tinctures, wax, gummies, and flower at The Hemp Dispensary in Spring Hill, FL. The mother cannabinoid, lab-tested and federally compliant.",
+      "/cbn": "Shop CBN gummies, tinctures, and nighttime blends at The Hemp Dispensary in Spring Hill, FL. Formulated for relaxation and sleep. Lab-tested.",
     };
     const key = route.startsWith("/shop/") ? route : (route === "/" || route === "" ? "/" : route);
     const desc = descriptions[key] || descriptions["/"];
@@ -4195,6 +4304,12 @@ function App() {
   if (route === "/thca") return shell(loading
     ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
     : <ThcaPage products={products} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} />);
+  if (["/delta-8", "/delta-9", "/cbd", "/cbg", "/cbn"].includes(route)) {
+    const cfg = CANNABINOID_CONFIGS[route.slice(1)];
+    if (cfg) return shell(loading
+      ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
+      : <CannabinoidPage products={products} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} config={cfg} />);
+  }
   if (route === "/shipping-policy") return shell(<ShippingPolicyPage />);
 
   // Homepage
