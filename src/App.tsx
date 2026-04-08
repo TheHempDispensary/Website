@@ -967,10 +967,12 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
   const [added, setAdded] = useState(false);
 
   useEffect(() => {
-    // Try to find by slug first, then by ID for backwards compatibility
-    const local = products.find(p => p.slug === productId) || products.find(p => p.id === productId);
+    // Normalize slug: replace / " ( ) $ ' with clean chars to handle old URLs with special characters
+    const normalizedId = productId.replace(/\//g, "-").replace(/["()$']/g, "").replace(/&/g, "-and-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    // Try to find by slug first (both raw and normalized), then by ID for backwards compatibility
+    const local = products.find(p => p.slug === productId) || products.find(p => p.slug === normalizedId) || products.find(p => p.id === productId);
     if (local) { setProduct(local); setLoading(false); return; }
-    fetch(`${API_URL}/api/ecommerce/products/${productId}`)
+    fetch(`${API_URL}/api/ecommerce/products/${normalizedId}`)
       .then((r) => r.json())
       .then((data) => { setProduct(data); setLoading(false); })
       .catch(() => setLoading(false));
