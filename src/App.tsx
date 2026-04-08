@@ -272,9 +272,10 @@ function getProductBenefit(product: Product): string {
 function calcVolumeDiscountSavings(vd: VolumeDiscount, unitPrice: number, qty: number): number {
   if (qty < vd.min_quantity) return 0;
   const normalTotal = unitPrice * qty;
+  // discount_value is stored in dollars; unitPrice is in cents — convert to cents for consistency
   switch (vd.discount_type) {
-    case "fixed_total": return normalTotal - (vd.discount_value * Math.floor(qty / vd.min_quantity) + unitPrice * (qty % vd.min_quantity));
-    case "amount_off": return vd.discount_value * qty;
+    case "fixed_total": return normalTotal - (vd.discount_value * 100 * Math.floor(qty / vd.min_quantity) + unitPrice * (qty % vd.min_quantity));
+    case "amount_off": return vd.discount_value * 100 * qty;
     case "percent_off": return Math.round(normalTotal * (vd.discount_value / 100));
     default: return 0;
   }
@@ -283,9 +284,11 @@ function calcVolumeDiscountSavings(vd: VolumeDiscount, unitPrice: number, qty: n
 
 function getVolumeDiscountSavingsLabel(vd: VolumeDiscount, unitPrice: number): string {
   const normalTotal = unitPrice * vd.min_quantity;
+  // discount_value is in dollars; formatPrice expects cents — multiply by 100
+  const valueCents = vd.discount_value * 100;
   switch (vd.discount_type) {
-    case "fixed_total": return `Buy ${vd.min_quantity} for ${formatPrice(vd.discount_value)} \u2014 Save ${formatPrice(normalTotal - vd.discount_value)}!`;
-    case "amount_off": return `Buy ${vd.min_quantity}+, save ${formatPrice(vd.discount_value)} each!`;
+    case "fixed_total": return `Buy ${vd.min_quantity} for ${formatPrice(valueCents)} \u2014 Save ${formatPrice(normalTotal - valueCents)}!`;
+    case "amount_off": return `Buy ${vd.min_quantity}+, save ${formatPrice(valueCents)} each!`;
     case "percent_off": return `Buy ${vd.min_quantity}+, get ${vd.discount_value}% off \u2014 Save ${formatPrice(Math.round(normalTotal * (vd.discount_value / 100)))}!`;
     default: return `Buy ${vd.min_quantity}+ and save!`;
   }
