@@ -2546,6 +2546,18 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
       setPaymentError("Payment system is still loading. Please wait a moment and try again.");
       return;
     }
+
+    // Pre-payment validation: Block LeafLife / HQ-only items from pickup orders
+    const ft = fulfillment || "shipping";
+    if (ft === "pickup_west" || ft === "pickup_east") {
+      const blockedItems = cart.filter((item) => isLeafLife(item.product));
+      if (blockedItems.length > 0) {
+        const names = blockedItems.map((item) => item.product.online_name || item.product.name).join(", ");
+        setPaymentError(`The following items are only available for shipping and cannot be picked up in store: ${names}. Please switch to 'Shipping To Me' to order these products.`);
+        return;
+      }
+    }
+
     setSubmitting(true);
     setPaymentError("");
 
@@ -4345,6 +4357,11 @@ function App() {
   }, []);
 
   const addToCart = useCallback((product: Product, qty: number = 1) => {
+    // Block LeafLife / shipping-only products from being added to cart when pickup is selected
+    if (fulfillment && fulfillment.startsWith("pickup") && isLeafLife(product)) {
+      alert("This product is only available for shipping and cannot be picked up in store. Please switch to 'Shipping To Me' to order this product.");
+      return;
+    }
     setCart((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
       let newCart: CartItem[];
@@ -4357,7 +4374,7 @@ function App() {
       return newCart;
     });
     setCartOpen(true);
-  }, []);
+  }, [fulfillment]);
 
   const updateCartQty = useCallback((productId: string, qty: number) => {
     if (qty <= 0) {
