@@ -26,7 +26,7 @@ const STATIC_PAGES = [
   { loc: "/shop/flower", priority: "0.9", changefreq: "weekly" },
   { loc: "/shop/edibles", priority: "0.9", changefreq: "weekly" },
   { loc: "/shop/concentrates", priority: "0.9", changefreq: "weekly" },
-  { loc: "/shop/vapes", priority: "0.9", changefreq: "weekly" },
+  { loc: "/shop/vapor", priority: "0.9", changefreq: "weekly" },
   { loc: "/shop/tinctures", priority: "0.9", changefreq: "weekly" },
   { loc: "/shop/topicals", priority: "0.9", changefreq: "weekly" },
   { loc: "/shop/accessories", priority: "0.9", changefreq: "weekly" },
@@ -38,7 +38,7 @@ const STATIC_PAGES = [
 function urlEntry({ loc, priority, changefreq, lastmod }) {
   return [
     "  <url>",
-    `    <loc>${SITE}${loc}</loc>`,
+    `    <loc>${SITE}${loc.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</loc>`,
     `    <lastmod>${lastmod || today}</lastmod>`,
     `    <changefreq>${changefreq}</changefreq>`,
     `    <priority>${priority}</priority>`,
