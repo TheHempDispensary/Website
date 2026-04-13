@@ -2241,7 +2241,7 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
 
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const rawDiscount = promoApplied && promoDetail
-    ? (promoDetail.discount_pct ? Math.round(subtotal * promoDetail.discount_pct / 100) : (promoDetail.discount_amount || 0))
+    ? (promoDetail.discount_pct ? Math.round(subtotal * promoDetail.discount_pct) : (promoDetail.discount_amount || 0))
     : 0;
   const discount = Math.min(rawDiscount, subtotal);
   const discountedSubtotal = subtotal - discount - volumeDiscountTotal;
@@ -2303,7 +2303,7 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
       // Fallback to client-side validation if backend is unreachable
       if (code === "FIRST10") {
         setPromoApplied(true);
-        setPromoDetail({ code: "FIRST10", discount_pct: 10, discount_amount: null });
+        setPromoDetail({ code: "FIRST10", discount_pct: 0.10, discount_amount: null });
         setPromoError("");
       } else {
         setPromoApplied(false);
@@ -3023,11 +3023,11 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
                 )}
               </div>
               {promoError && <p className="text-red-500 text-xs mt-1">{promoError}</p>}
-              {promoApplied && promoDetail && <p className="text-[#126A44] text-xs mt-1 font-medium">{promoDetail.code} applied — {promoDetail.discount_pct ? `${promoDetail.discount_pct}% off` : formatPrice(promoDetail.discount_amount || 0) + " off"}!</p>}
+              {promoApplied && promoDetail && <p className="text-[#126A44] text-xs mt-1 font-medium">{promoDetail.code} applied — {promoDetail.discount_pct ? `${Math.round(promoDetail.discount_pct * 100)}% off` : formatPrice(promoDetail.discount_amount || 0) + " off"}!</p>}
             </div>
             <div className="border-t border-[#231F20]/20 pt-4 space-y-2">
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Subtotal</span><span className="text-[#231F20]">{formatPrice(subtotal)}</span></div>
-              {promoApplied && discount > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Discount ({promoDetail?.discount_pct ? `${promoDetail.discount_pct}%` : "promo"})</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
+              {promoApplied && discount > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Discount ({promoDetail?.discount_pct ? `${Math.round(promoDetail.discount_pct * 100)}%` : "promo"})</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
               {volumeDiscountTotal > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Volume Discount</span><span className="text-[#126A44] font-medium">-{formatPrice(volumeDiscountTotal)}</span></div>}
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">{isPickup ? "Pickup" : `Shipping${selectedRate ? ` (${selectedRate.service_level})` : ""}`}</span><span className="text-[#231F20]">{isPickup ? "FREE" : (selectedRate ? formatPrice(shippingCost) : "Select a rate")}</span></div>
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Tax ({(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 2)}%)</span><span className="text-[#231F20]">{formatPrice(tax)}</span></div>
