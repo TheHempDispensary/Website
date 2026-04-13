@@ -93,6 +93,10 @@ function fetchProducts() {
     const req = https.get(PRODUCTS_ENDPOINT, { timeout: 15000 }, (res) => {
       let data = "";
       res.on("data", (chunk) => (data += chunk));
+      res.on("error", (err) => {
+        console.warn(`[sitemap] Response stream error: ${err.message} — generating static-only sitemap`);
+        resolve([]);
+      });
       res.on("end", () => {
         try {
           const json = JSON.parse(data);
