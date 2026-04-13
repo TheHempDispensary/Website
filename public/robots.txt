@@ -9,8 +9,6 @@ Disallow: /*?sa=
 Disallow: /*?sbp=
 Disallow: /*?q=
 Disallow: /*?ref=
-Disallow: /*#!/
-Disallow: /*#~/
 
 # Block old Ecwid/Wix product ID URL patterns
 Disallow: /product/
