@@ -30,8 +30,23 @@ const STATIC_PAGES = [
   { loc: "/shop/tinctures", priority: "0.9", changefreq: "weekly" },
   { loc: "/shop/topicals", priority: "0.9", changefreq: "weekly" },
   { loc: "/shop/accessories", priority: "0.9", changefreq: "weekly" },
+  { loc: "/shop/apparel", priority: "0.8", changefreq: "weekly" },
+  { loc: "/shop/packaging", priority: "0.8", changefreq: "weekly" },
+  { loc: "/shop/pets", priority: "0.8", changefreq: "weekly" },
   { loc: "/about", priority: "0.6", changefreq: "monthly" },
   { loc: "/thca", priority: "0.8", changefreq: "weekly" },
+  { loc: "/delta-8", priority: "0.8", changefreq: "weekly" },
+  { loc: "/delta-9", priority: "0.8", changefreq: "weekly" },
+  { loc: "/cbd", priority: "0.8", changefreq: "weekly" },
+  { loc: "/cbg", priority: "0.8", changefreq: "weekly" },
+  { loc: "/cbn", priority: "0.8", changefreq: "weekly" },
+  { loc: "/our-locations", priority: "0.7", changefreq: "monthly" },
+  { loc: "/contact", priority: "0.6", changefreq: "monthly" },
+  { loc: "/shipping", priority: "0.6", changefreq: "monthly" },
+  { loc: "/loyalty", priority: "0.6", changefreq: "monthly" },
+  { loc: "/games", priority: "0.5", changefreq: "monthly" },
+  { loc: "/terms", priority: "0.5", changefreq: "monthly" },
+  { loc: "/privacy", priority: "0.5", changefreq: "monthly" },
 ];
 
 function urlEntry({ loc, priority, changefreq, lastmod }) {
