@@ -23,5 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 
+# Auto-generated sitemap (built by scripts/generate-sitemap.cjs)
+public/sitemap.xml
+
 # Local Netlify folder
 .netlify
