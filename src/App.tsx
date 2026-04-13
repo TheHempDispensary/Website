@@ -2195,6 +2195,7 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoError, setPromoError] = useState("");
+  const [promoDetail, setPromoDetail] = useState<{ code: string; discount_pct: number | null; discount_amount: number | null } | null>(null);
   const [shippingRates, setShippingRates] = useState<Array<{ id: string; provider: string; service_level: string; amount: string; amount_cents: number; estimated_days: number | null; duration_terms: string }>>([]);
   const [selectedRateId, setSelectedRateId] = useState("");
   const [ratesLoading, setRatesLoading] = useState(false);
@@ -2239,7 +2240,10 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
   }, [cart, volumeDiscounts]);
 
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const discount = promoApplied ? Math.round(subtotal * 0.10) : 0;
+  const rawDiscount = promoApplied && promoDetail
+    ? (promoDetail.discount_pct ? Math.round(subtotal * promoDetail.discount_pct / 100) : (promoDetail.discount_amount || 0))
+    : 0;
+  const discount = Math.min(rawDiscount, subtotal);
   const discountedSubtotal = subtotal - discount - volumeDiscountTotal;
   const selectedRate = shippingRates.find(r => r.id === selectedRateId);
   const shippingCost = (fulfillment && fulfillment.startsWith("pickup")) ? 0 : (selectedRate ? selectedRate.amount_cents : 0);
@@ -2288,18 +2292,22 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
       const data = await resp.json();
       if (data.valid) {
         setPromoApplied(true);
+        setPromoDetail({ code: data.code || code, discount_pct: data.discount_pct ?? null, discount_amount: data.discount_amount ?? null });
         setPromoError("");
       } else {
         setPromoApplied(false);
+        setPromoDetail(null);
         setPromoError(data.reason || "Invalid promo code");
       }
     } catch {
       // Fallback to client-side validation if backend is unreachable
       if (code === "FIRST10") {
         setPromoApplied(true);
+        setPromoDetail({ code: "FIRST10", discount_pct: 10, discount_amount: null });
         setPromoError("");
       } else {
         setPromoApplied(false);
+        setPromoDetail(null);
         setPromoError("Invalid promo code");
       }
     }
@@ -2585,7 +2593,7 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
         items: cart.map((item) => ({ product_id: item.product.id, name: item.product.name, sku: item.product.sku, price: item.product.price, quantity: item.quantity })),
         subtotal, discount, volume_discount: volumeDiscountTotal, loyalty_discount: effectiveLoyaltyDiscount, shipping_cost: shippingCost, tax, total, notes: form.notes,
         shipping_service: selectedRate?.service_level || "",
-        promo_code: promoApplied ? "FIRST10" : null,
+        promo_code: promoApplied && promoDetail ? promoDetail.code : null,
         payment_token: tokenResult.token,
         loyalty_number: form.loyaltyNumber,
         loyalty_reward_id: loyaltyRedeemId,
@@ -3009,17 +3017,17 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
                   disabled={promoApplied}
                 />
                 {promoApplied ? (
-                  <button onClick={() => { setPromoApplied(false); setPromoCode(""); }} className="px-4 py-2 text-sm font-medium text-[#231F20] border border-[#231F20]/20 rounded-lg hover:bg-[#231F20]/5 transition-colors">Remove</button>
+                  <button onClick={() => { setPromoApplied(false); setPromoCode(""); setPromoDetail(null); }} className="px-4 py-2 text-sm font-medium text-[#231F20] border border-[#231F20]/20 rounded-lg hover:bg-[#231F20]/5 transition-colors">Remove</button>
                 ) : (
                   <button onClick={applyPromo} disabled={promoLoading} className="px-4 py-2 text-sm font-medium bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg transition-colors disabled:opacity-50">{promoLoading ? "Checking..." : "Apply"}</button>
                 )}
               </div>
               {promoError && <p className="text-red-500 text-xs mt-1">{promoError}</p>}
-              {promoApplied && <p className="text-[#126A44] text-xs mt-1 font-medium">FIRST10 applied — 10% off!</p>}
+              {promoApplied && promoDetail && <p className="text-[#126A44] text-xs mt-1 font-medium">{promoDetail.code} applied — {promoDetail.discount_pct ? `${promoDetail.discount_pct}% off` : formatPrice(promoDetail.discount_amount || 0) + " off"}!</p>}
             </div>
             <div className="border-t border-[#231F20]/20 pt-4 space-y-2">
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Subtotal</span><span className="text-[#231F20]">{formatPrice(subtotal)}</span></div>
-              {promoApplied && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Discount (10%)</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
+              {promoApplied && discount > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Discount ({promoDetail?.discount_pct ? `${promoDetail.discount_pct}%` : "promo"})</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
               {volumeDiscountTotal > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Volume Discount</span><span className="text-[#126A44] font-medium">-{formatPrice(volumeDiscountTotal)}</span></div>}
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">{isPickup ? "Pickup" : `Shipping${selectedRate ? ` (${selectedRate.service_level})` : ""}`}</span><span className="text-[#231F20]">{isPickup ? "FREE" : (selectedRate ? formatPrice(shippingCost) : "Select a rate")}</span></div>
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Tax ({(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 2)}%)</span><span className="text-[#231F20]">{formatPrice(tax)}</span></div>
