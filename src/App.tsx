@@ -2240,9 +2240,10 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
   }, [cart, volumeDiscounts]);
 
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const discount = promoApplied && promoDetail
+  const rawDiscount = promoApplied && promoDetail
     ? (promoDetail.discount_pct ? Math.round(subtotal * promoDetail.discount_pct / 100) : (promoDetail.discount_amount || 0))
     : 0;
+  const discount = Math.min(rawDiscount, subtotal);
   const discountedSubtotal = subtotal - discount - volumeDiscountTotal;
   const selectedRate = shippingRates.find(r => r.id === selectedRateId);
   const shippingCost = (fulfillment && fulfillment.startsWith("pickup")) ? 0 : (selectedRate ? selectedRate.amount_cents : 0);
