@@ -31,8 +31,7 @@ const STATIC_PAGES = [
   { loc: "/shop/topicals", priority: "0.9", changefreq: "weekly" },
   { loc: "/shop/accessories", priority: "0.9", changefreq: "weekly" },
   { loc: "/about", priority: "0.6", changefreq: "monthly" },
-  { loc: "/on-sale", priority: "0.8", changefreq: "weekly" },
-  { loc: "/exotic_thca_flower", priority: "0.8", changefreq: "weekly" },
+  { loc: "/thca", priority: "0.8", changefreq: "weekly" },
 ];
 
 function urlEntry({ loc, priority, changefreq, lastmod }) {

@@ -24,7 +24,6 @@ Disallow: /tinctures
 Disallow: /topicals
 Disallow: /vapor
 Disallow: /misc
-Disallow: /cbd
 Disallow: /isolate
 Disallow: /scales
 Disallow: /energy
