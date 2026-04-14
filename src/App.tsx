@@ -4088,7 +4088,7 @@ function RollAJointGame() {
       <div className="bg-[#231F20] rounded-2xl border border-[#231F20] p-8">
         {/* Bud mascot — animated like live chat */}
         <div className="flex justify-center mb-6">
-          <BudCharacter size={100} mood={budAction === "grind" ? "think" : budAction === "roll" ? "excited" : budAction === "smoke" ? "sleep" : budAction === "celebrate" ? "excited" : "idle"} />
+          <BudCharacter size={100} mood={budAction === "grind" ? "think" : budAction === "roll" ? "excited" : budAction === "light" ? "excited" : budAction === "smoke" ? "sleep" : budAction === "celebrate" ? "excited" : "idle"} />
         </div>
 
         {/* Step 0: Pick Flower */}
