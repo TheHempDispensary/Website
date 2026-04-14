@@ -4008,22 +4008,6 @@ const STRAINS = [
   { name: "Blue Dream", color: "#231F20", desc: "Calm & creative" },
 ];
 
-function BudPuppet({ size = 80, className = "", action = "idle" }: { size?: number; className?: string; action?: string }) {
-  const actionClass = action === "grind" ? "animate-spin-slow" : action === "roll" ? "animate-wiggle" : action === "light" ? "animate-pulse" : action === "smoke" ? "animate-float" : action === "celebrate" ? "animate-bounce" : "";
-  return (
-    <div className={`relative inline-block ${className}`} style={{ width: size, height: size }}>
-      <img src="/bud-puppet.webp" alt="Bud Puppet" className={`w-full h-full object-contain drop-shadow-lg ${actionClass}`} style={{ filter: "drop-shadow(0 0 12px rgba(88,186,73,0.4))" }} />
-      {action === "grind" && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs font-bold text-[#B3D335] animate-pulse whitespace-nowrap">Grinding...</div>}
-      {action === "roll" && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs font-bold text-[#FFCB08] animate-pulse whitespace-nowrap">Rolling!</div>}
-      {action === "light" && <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-2xl animate-bounce">{"\uD83D\uDD25"}</div>}
-      {action === "smoke" && <>
-        <div className="absolute -top-6 left-1/4 text-xl animate-float opacity-70">{"\uD83D\uDCA8"}</div>
-        <div className="absolute -top-8 right-1/4 text-lg animate-pulse opacity-50">{"\uD83D\uDCA8"}</div>
-      </>}
-    </div>
-  );
-}
-
 function RollAJointGame() {
   const [step, setStep] = useState(0); // 0=pick, 1=grind, 2=roll, 3=light, 4=smoke, 5=done
   const [selectedStrain, setSelectedStrain] = useState<typeof STRAINS[0] | null>(null);
