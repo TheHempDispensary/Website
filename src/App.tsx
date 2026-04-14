@@ -340,7 +340,7 @@ function BudAgeGatePopup({ onComplete }: { onComplete: (f: FulfillmentType) => v
       <div className="bg-[#FFFFFF] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" style={{ animation: "fadeInUp 0.4s ease-out" }}>
         {/* Bud character header */}
         <div className="bg-[#231F20] px-6 pt-6 pb-4 text-center relative">
-          <img src="/bud-puppet.webp" alt="Bud" className="w-20 h-20 mx-auto mb-2 object-contain" />
+          <div className="flex justify-center mb-2"><BudCharacter size={80} mood="wave" /></div>
           <h2 className="text-[#B3D335] text-xl font-bold">{step === 1 ? "Hey! I'm Bud." : "How do you want your order?"}</h2>
           <p className="text-[#FFFFFF] text-sm mt-1">{step === 1 ? "Before we get started, I need to verify your age." : "Choose your preferred fulfillment method."}</p>
         </div>
@@ -4008,22 +4008,6 @@ const STRAINS = [
   { name: "Blue Dream", color: "#231F20", desc: "Calm & creative" },
 ];
 
-function BudPuppet({ size = 80, className = "", action = "idle" }: { size?: number; className?: string; action?: string }) {
-  const actionClass = action === "grind" ? "animate-spin-slow" : action === "roll" ? "animate-wiggle" : action === "light" ? "animate-pulse" : action === "smoke" ? "animate-float" : action === "celebrate" ? "animate-bounce" : "";
-  return (
-    <div className={`relative inline-block ${className}`} style={{ width: size, height: size }}>
-      <img src="/bud-puppet.webp" alt="Bud Puppet" className={`w-full h-full object-contain drop-shadow-lg ${actionClass}`} style={{ filter: "drop-shadow(0 0 12px rgba(88,186,73,0.4))" }} />
-      {action === "grind" && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs font-bold text-[#B3D335] animate-pulse whitespace-nowrap">Grinding...</div>}
-      {action === "roll" && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs font-bold text-[#FFCB08] animate-pulse whitespace-nowrap">Rolling!</div>}
-      {action === "light" && <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-2xl animate-bounce">{"\uD83D\uDD25"}</div>}
-      {action === "smoke" && <>
-        <div className="absolute -top-6 left-1/4 text-xl animate-float opacity-70">{"\uD83D\uDCA8"}</div>
-        <div className="absolute -top-8 right-1/4 text-lg animate-pulse opacity-50">{"\uD83D\uDCA8"}</div>
-      </>}
-    </div>
-  );
-}
-
 function RollAJointGame() {
   const [step, setStep] = useState(0); // 0=pick, 1=grind, 2=roll, 3=light, 4=smoke, 5=done
   const [selectedStrain, setSelectedStrain] = useState<typeof STRAINS[0] | null>(null);
@@ -4102,16 +4086,16 @@ function RollAJointGame() {
       </div>
 
       <div className="bg-[#231F20] rounded-2xl border border-[#231F20] p-8">
-        {/* Bud Puppet mascot */}
+        {/* Bud mascot — animated like live chat */}
         <div className="flex justify-center mb-6">
-          <BudPuppet size={100} action={budAction} />
+          <BudCharacter size={100} mood={budAction === "grind" ? "think" : budAction === "roll" ? "excited" : budAction === "light" ? "excited" : budAction === "smoke" ? "sleep" : budAction === "celebrate" ? "excited" : "idle"} />
         </div>
 
         {/* Step 0: Pick Flower */}
         {step === 0 && (
           <div>
             <h2 className="text-xl font-bold text-[#FFFFFF] text-center mb-2">Step 1: Pick Your Flower</h2>
-            <p className="text-[#231F20] text-center text-sm mb-4">Bud Puppet wants to roll one up! Choose a strain:</p>
+            <p className="text-[#FFFFFF]/70 text-center text-sm mb-4">Bud Puppet wants to roll one up! Choose a strain:</p>
             <div className="grid grid-cols-2 gap-4">
               {STRAINS.map(s => (
                 <button key={s.name} onClick={() => pickStrain(s)}
@@ -4131,7 +4115,7 @@ function RollAJointGame() {
         {step === 1 && selectedStrain && (
           <div className="text-center">
             <h2 className="text-xl font-bold text-[#FFFFFF] mb-2">Step 2: Grind the {selectedStrain.name}</h2>
-            <p className="text-[#231F20] text-sm mb-4">Bud Puppet is grinding it up!</p>
+            <p className="text-[#FFFFFF]/70 text-sm mb-4">Bud Puppet is grinding it up!</p>
             <div className="relative w-48 h-48 mx-auto mb-4">
               {/* Grinder with Bud Puppet inside */}
               <div className="absolute inset-0 rounded-full border-4 border-[#231F20]/30 overflow-hidden" style={{ background: `conic-gradient(${selectedStrain.color} ${grindProgress}%, rgba(35,31,32,0.15) ${grindProgress}%)` }}>
@@ -4161,7 +4145,7 @@ function RollAJointGame() {
         {step === 2 && selectedStrain && (
           <div className="text-center">
             <h2 className="text-xl font-bold text-[#FFFFFF] mb-2">Step 3: Roll the Joint</h2>
-            <p className="text-[#231F20] text-sm mb-4">Bud Puppet is rolling it tight!</p>
+            <p className="text-[#FFFFFF]/70 text-sm mb-4">Bud Puppet is rolling it tight!</p>
             <div className="relative w-72 h-28 mx-auto mb-6">
               {/* Rolling paper background */}
               <div className="absolute inset-0 rounded-xl bg-[#D9A32C]/20/20 border-2 border-[#D9A32C]/30 overflow-hidden">
@@ -4176,7 +4160,7 @@ function RollAJointGame() {
                 {rollProgress >= 100 && <span className="text-[#B3D335] font-bold text-lg animate-bounce">{"Perfect roll!"}</span>}
               </div>
             </div>
-            <p className="text-[#231F20] text-sm mb-4">Tap to roll! ({Math.round(rollProgress)}%)</p>
+            <p className="text-[#FFFFFF]/70 text-sm mb-4">Tap to roll! ({Math.round(rollProgress)}%)</p>
             <button onClick={handleRollClick}
               className="px-8 py-4 bg-[#D9A32C] hover:bg-[#FFCB08] text-[#FFFFFF] rounded-full font-bold text-lg transition-all active:scale-90 shadow-lg shadow-[#D9A32C]/30/50">
               Tap to Roll
@@ -4188,7 +4172,7 @@ function RollAJointGame() {
         {step === 3 && (
           <div className="text-center">
             <h2 className="text-xl font-bold text-[#FFFFFF] mb-2">Step 4: Light It Up!</h2>
-            <p className="text-[#231F20] text-sm mb-4">Bud Puppet is sparking it up!</p>
+            <p className="text-[#FFFFFF]/70 text-sm mb-4">Bud Puppet is sparking it up!</p>
             <div className="relative w-56 h-56 mx-auto mb-4">
               {/* Joint */}
               <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-8 h-36 rounded-t-sm overflow-hidden" style={{ background: `linear-gradient(180deg, ${selectedStrain?.color || "#3D8C32"}, #FFFFFF)` }}>
@@ -4228,7 +4212,7 @@ function RollAJointGame() {
               </div>
               {/* Bud Puppet smoking */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <BudPuppet size={120} action="smoke" />
+                <BudCharacter size={120} mood="sleep" />
               </div>
               {/* Smoke puffs */}
               {smokeOpacity > 0.1 && <div className="absolute top-8 left-1/2 -translate-x-1/2 text-5xl animate-pulse" style={{ opacity: smokeOpacity }}>{"\uD83D\uDCA8"}</div>}
@@ -4244,14 +4228,14 @@ function RollAJointGame() {
           <div className="text-center">
             <div className="text-6xl mb-4">{"\uD83C\uDF89"}</div>
             <h2 className="text-2xl font-bold text-[#B3D335] mb-2">Round {round} Complete!</h2>
-            <p className="text-[#231F20] mb-2">Bud Puppet rolled a perfect {selectedStrain?.name} joint!</p>
+            <p className="text-[#FFFFFF]/70 mb-2">Bud Puppet rolled a perfect {selectedStrain?.name} joint!</p>
             <p className="text-[#FFCB08] font-bold text-xl mb-2">+{100 + round * 10} game points!</p>
             <div className="bg-[#B3D335]/10 border border-[#B3D335]/30 rounded-xl p-4 mb-6 inline-block">
               <p className="text-[#126A44] font-semibold text-sm mb-1">{"\u{1F3C6}"} Bonus Rewards Points Earned!</p>
               <p className="text-[#231F20] font-bold text-2xl">{score >= 500 ? "+25" : "+10"} <span className="text-sm font-normal text-[#231F20]">rewards points</span></p>
               <p className="text-[#231F20] text-xs mt-1">{score >= 500 ? "High score bonus!" : "Complete more rounds for 25 pts!"}</p>
             </div>
-            <BudPuppet size={100} action="celebrate" className="mx-auto mb-6" />
+            <div className="flex justify-center mb-6"><BudCharacter size={100} mood="excited" /></div>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button onClick={nextRound}
                 className="px-8 py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-all shadow-lg shadow-[#B3D335]/50">
