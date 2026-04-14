@@ -2259,10 +2259,11 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
     setRatesError("");
     try {
       const productNames = cart.map(item => item.product.online_name || item.product.name);
+      const productSkus = cart.map(item => item.product.sku || "");
       const resp = await fetch(`${API_URL}/api/shipping/rates`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ street1: addr.address, street2: addr.apartment || "", city: addr.city, state: addr.state, zip_code: addr.zip, product_names: productNames }),
+        body: JSON.stringify({ street1: addr.address, street2: addr.apartment || "", city: addr.city, state: addr.state, zip_code: addr.zip, product_names: productNames, product_skus: productSkus }),
       });
       if (!resp.ok) throw new Error("Failed to fetch rates");
       const data = await resp.json();
