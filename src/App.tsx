@@ -63,6 +63,7 @@ interface Product {
   effect?: string | null;
   strength?: string | null;
   product_type?: string | null;
+  modified_time?: number;
 }
 
 type FulfillmentType = "pickup_west" | "pickup_east" | "ship";
@@ -1318,6 +1319,8 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
     }
     if (sortBy === "price-low") items.sort((a, b) => a.price - b.price);
     else if (sortBy === "price-high") items.sort((a, b) => b.price - a.price);
+    else if (sortBy === "newest") items.sort((a, b) => (b.modified_time || 0) - (a.modified_time || 0));
+    else if (sortBy === "oldest") items.sort((a, b) => (a.modified_time || 0) - (b.modified_time || 0));
     else items.sort((a, b) => a.name.localeCompare(b.name));
     return items;
   }, [products, selectedCategory, sortBy, isFeelingFilter, fulfillment]);
@@ -1334,6 +1337,8 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
             <option value="name">Sort by Name</option>
             <option value="price-low">Price: Low to High</option>
             <option value="price-high">Price: High to Low</option>
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
           </select>
         </div>
       </div>
