@@ -3001,7 +3001,7 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
                   />
                   <span className="text-sm text-[#231F20] leading-snug">
                     I am 21 years of age or older and agree to the{" "}
-                    <a href="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-[#126A44] underline hover:text-[#58BA49] transition-colors">Terms of Service</a>.
+                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#126A44] underline hover:text-[#58BA49] transition-colors">Terms of Service</a>.
                     I understand all sales are final and hemp products cannot be returned or refunded once shipped.
                   </span>
                 </label>
