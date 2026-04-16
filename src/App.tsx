@@ -4592,8 +4592,9 @@ function App() {
 
   if (route.startsWith("/product/")) return shell(<ProductDetail productId={route.replace("/product/", "")} products={products} onAddToCart={addToCart} fulfillment={fulfillment} />);
   if (route.startsWith("/shop/product/")) return shell(<ProductDetail productId={route.replace("/shop/product/", "")} products={products} onAddToCart={addToCart} fulfillment={fulfillment} />);
-  if (route.startsWith("/shop")) {
-    const catSlug = route.replace("/shop/", "").replace("/shop", "");
+  if (route.startsWith("/products/product/")) return shell(<ProductDetail productId={route.replace("/products/product/", "")} products={products} onAddToCart={addToCart} fulfillment={fulfillment} />);
+  if (route.startsWith("/shop") || route.startsWith("/products")) {
+    const catSlug = route.replace("/shop/", "").replace("/shop", "").replace("/products/", "").replace("/products", "");
     return shell(loading
       ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
       : fetchError ? <div className="flex flex-col items-center justify-center py-24"><AlertCircle className="h-12 w-12 text-[#D9A32C] mb-4" /><p className="text-[#231F20] text-lg font-medium mb-2">Unable to load products</p><p className="text-[#231F20] text-sm mb-4">Please check your connection and try again.</p><button onClick={retryFetch} className="px-6 py-3 bg-[#B3D335] hover:bg-[#126A44] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors">Try Again</button></div>
