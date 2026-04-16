@@ -2192,6 +2192,7 @@ function ChatbotBud() {
 function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpdateQty: (productId: string, qty: number) => void; onRemove: (productId: string) => void; onClear: () => void; fulfillment: FulfillmentType | null }) {
   const [step, setStep] = useState<"info" | "shipping" | "payment" | "confirmed">("info");
   const [submitting, setSubmitting] = useState(false);
+  const [tosAccepted, setTosAccepted] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
   const [paymentError, setPaymentError] = useState("");
   const [addressSuggestions, setAddressSuggestions] = useState<Array<{ display: string; address: string; city: string; state: string; zip: string }>>([]); 
@@ -2984,12 +2985,29 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
                 </div>
               )}
 
-              <div className="mt-6 flex justify-between">
+              {/* Terms of Service checkbox */}
+              <div className="mt-6 mb-4">
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={tosAccepted}
+                    onChange={(e) => setTosAccepted(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-[#231F20]/30 accent-[#B3D335] cursor-pointer"
+                  />
+                  <span className="text-sm text-[#231F20] leading-snug">
+                    I am 21 years of age or older and agree to the{" "}
+                    <a href="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-[#126A44] underline hover:text-[#58BA49] transition-colors">Terms of Service</a>.
+                    I understand all sales are final and hemp products cannot be returned or refunded once shipped.
+                  </span>
+                </label>
+              </div>
+
+              <div className="mt-2 flex justify-between">
                 <button onClick={() => setStep("shipping")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back</button>
                 <button
                   onClick={handlePlaceOrder}
-                  disabled={submitting}
-                  className="px-8 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-medium transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={submitting || !tosAccepted}
+                  className={`px-8 py-3 rounded-full font-medium transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${tosAccepted ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/20 text-[#231F20]/50 cursor-not-allowed"}`}
                 >
                   <Lock className="h-4 w-4" />
                   {submitting ? "Processing Payment..." : `Pay ${formatPrice(total)}`}
