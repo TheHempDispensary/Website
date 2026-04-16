@@ -133,7 +133,6 @@
 
 # Legacy /products paths — specific old Ecwid product URLs
 /products/delta-8-thc-gummies-90mg-fruit-variety  /products/edibles       301
-/products/concentrates                             /products/concentrates  301
 
 # SPA fallback (must be last)
 /*    /index.html   200
