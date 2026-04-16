@@ -2557,6 +2557,10 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
   const canProceedShipping = isPickup ? true : (form.address && form.city && form.state && form.zip && selectedRateId);
 
   const handlePlaceOrder = async () => {
+    if (!tosAccepted) {
+      setPaymentError("Please accept the Terms of Service to continue.");
+      return;
+    }
     if (!cloverRef.current) {
       setPaymentError("Payment system is still loading. Please wait a moment and try again.");
       return;
@@ -2605,6 +2609,7 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
         loyalty_number: form.loyaltyNumber,
         loyalty_reward_id: loyaltyRedeemId,
         fulfillment_type: fulfillment || "shipping",
+        tos_accepted: tosAccepted,
       };
 
       const resp = await fetch(`${API_URL}/api/ecommerce/orders`, {
