@@ -4432,7 +4432,9 @@ function App() {
       "/cbg": "Shop CBG tinctures, wax, gummies, and flower at The Hemp Dispensary in Spring Hill, FL. The mother cannabinoid, lab-tested and federally compliant.",
       "/cbn": "Shop CBN gummies, tinctures, and nighttime blends at The Hemp Dispensary in Spring Hill, FL. Formulated for relaxation and sleep. Lab-tested.",
     };
-    const key = route.startsWith("/shop/") ? route : (route === "/" || route === "" ? "/" : route);
+    // Normalize /products/... to /shop/... so meta descriptions resolve correctly
+    const normalized = route.startsWith("/products/") ? route.replace("/products/", "/shop/") : (route === "/products" ? "/shop" : route);
+    const key = normalized.startsWith("/shop/") ? normalized : (normalized === "/" || normalized === "" ? "/" : normalized);
     const desc = descriptions[key] || descriptions["/"];
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     if (!meta) {
