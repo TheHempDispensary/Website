@@ -4446,9 +4446,11 @@ function App() {
   }, [route]);
 
   // Dynamic canonical + og:url per route — self-referencing, www, no trailing slash on paths
+  // Normalize /shop → /products for canonical URLs since /products is the canonical structure
   useEffect(() => {
     const base = "https://www.thehempdispensary.com";
-    const path = route === "/" || route === "" ? "/" : route.replace(/\/+$/, "");
+    const rawPath = route === "/" || route === "" ? "/" : route.replace(/\/+$/, "");
+    const path = rawPath.startsWith("/shop/") ? rawPath.replace("/shop/", "/products/") : (rawPath === "/shop" ? "/products" : rawPath);
     const canonical = path === "/" ? base + "/" : base + path;
 
     let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
