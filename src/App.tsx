@@ -2711,7 +2711,15 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
                               className="w-full text-left px-4 py-3 text-sm text-[#231F20] hover:bg-[#F5F5F0] transition-colors border-b border-[#231F20]/10 last:border-b-0"
                               onMouseDown={(e) => e.preventDefault()}
                               onClick={() => {
-                                setForm((prev) => ({ ...prev, address: s.address, city: s.city, state: s.state, zip: s.zip }));
+                                setForm((prev) => ({
+                                  ...prev,
+                                  // Keep user's typed address if suggestion has no house number
+                                  address: /^\d/.test(s.address) ? s.address : prev.address,
+                                  // Only fill city/state/zip if the suggestion has non-empty values
+                                  city: s.city || prev.city,
+                                  state: s.state || prev.state,
+                                  zip: s.zip || prev.zip,
+                                }));
                                 setShowSuggestions(false);
                                 setAddressSuggestions([]);
                               }}
