@@ -560,12 +560,15 @@ function FulfillmentSwitchNotification({ removedItems, newLabel, onClose }: { re
 }
 
 /* ======================== STICKY TOP BAR ======================== */
-function StickyTopBar() {
+function StickyTopBar({ sale }: { sale?: ActiveSaleData | null }) {
+  const saleLine = sale && sale.active && sale.discount_percent
+    ? `${sale.discount_percent}% OFF SALE TODAY!`
+    : "FIRST10 = 10% Off";
   return (
     <div className="bg-[#231F20] text-[#FFFFFF] text-center py-2 px-4 text-sm font-medium">
       <span className="hidden sm:inline">{"\u{1F680}"} Order Online {"\u2013"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | Open Daily | </span>
       <span className="sm:hidden">{"\u{1F680}"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | </span>
-      <span className="text-[#FFCB08] font-bold">FIRST10 = 10% Off</span>
+      <span className="text-[#FFCB08] font-bold">{saleLine}</span>
     </div>
   );
 }
@@ -716,7 +719,10 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear, sale 
 
 
 /* ======================== HERO SECTION (Dark bg for contrast) ======================== */
-function HeroSection() {
+function HeroSection({ sale }: { sale?: ActiveSaleData | null }) {
+  const heroPromo = sale && sale.active && sale.discount_percent
+    ? `${sale.discount_percent}% OFF SALE \u2014 Shop Now!`
+    : "First-time customers: 10% OFF with code FIRST10";
   return (
     <section className="bg-[#231F20] relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 py-10 sm:py-20 text-center relative z-10">
@@ -729,7 +735,7 @@ function HeroSection() {
           <button onClick={() => navigate("/shop")} className="px-8 py-3.5 sm:py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors shadow-lg">Shop All</button>
           <button onClick={() => { const el = document.getElementById('locations-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else navigate('/contact'); }} className="px-8 py-3.5 sm:py-4 border-2 border-[#FFFFFF] hover:bg-[#FFFFFF] text-[#FFFFFF] hover:text-[#231F20] rounded-full font-bold text-lg transition-colors">Find Nearest Location</button>
         </div>
-        <p className="mt-4 text-[#FFCB08] font-medium text-sm">{"\u{1F525}"} First-time customers: 10% OFF with code FIRST10</p>
+        <p className="mt-4 text-[#FFCB08] font-medium text-sm">{"\u{1F525}"} {heroPromo}</p>
       </div>
       {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#231F20]/50 pointer-events-none" />
@@ -1040,10 +1046,11 @@ function ProductGridCard({ product, onQuickAdd, fulfillment, sale }: { product: 
         </div>
         <h3 className="text-[#231F20] text-[13px] sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#126A44] transition-colors">{titleCase(product.online_name || product.name)}</h3>
         <div className="flex items-center justify-between mb-2">
-                    {salePrice !== null ? (
+                    {salePrice !== null && sale?.discount_percent ? (
                       <span className="flex items-center gap-1.5">
                         <span className="text-[#231F20]/50 line-through text-[11px] sm:text-sm">{formatPrice(product.price)}</span>
                         <span className="text-[#126A44] font-semibold text-[14px] sm:text-lg">{formatPrice(salePrice)}</span>
+                        <span className="text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded-full bg-[#FF4444]/10 text-[#FF4444]">{sale.discount_percent}% OFF</span>
                       </span>
                     ) : (
                       <span className="text-[#231F20] font-semibold text-[14px] sm:text-lg">{formatPrice(product.price)}</span>
@@ -4720,7 +4727,7 @@ function App() {
   const shell = (content: React.ReactNode) => (
     <div className="min-h-screen bg-[#FFFFFF]">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-0 focus:top-0 focus:z-[9999] focus:bg-[#FFFFFF] focus:px-4 focus:py-2 focus:text-[#231F20] focus:underline">Skip to main content</a>
-      <StickyTopBar />
+      <StickyTopBar sale={activeSale} />
       <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} fulfillment={fulfillment} onFulfillmentClick={() => setShowFulfillmentModal(true)} />
       <main id="main-content">{content}</main>
       <SiteFooter />
@@ -4768,10 +4775,10 @@ function App() {
   return (
     <div className="min-h-screen bg-[#FFFFFF]">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-0 focus:top-0 focus:z-[9999] focus:bg-[#FFFFFF] focus:px-4 focus:py-2 focus:text-[#231F20] focus:underline">Skip to main content</a>
-      <StickyTopBar />
+      <StickyTopBar sale={activeSale} />
       <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} fulfillment={fulfillment} onFulfillmentClick={() => setShowFulfillmentModal(true)} />
       <main id="main-content">
-      <HeroSection />
+      <HeroSection sale={activeSale} />
       <TrustStrip />
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
