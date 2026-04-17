@@ -238,6 +238,55 @@ function isLeafLife(product: Product): boolean {
   return LEAFLIFE_KEYWORDS.some(kw => name.includes(kw));
 }
 
+/* ======================== ACTIVE SALE CACHE ======================== */
+interface ActiveSaleData {
+  active: boolean;
+  discount_percent?: number;
+  excluded_brands?: string[];
+  start_date?: string;
+  end_date?: string;
+}
+
+let _saleCachePromise: Promise<ActiveSaleData> | null = null;
+
+function fetchActiveSale(): Promise<ActiveSaleData> {
+  if (_saleCachePromise) return _saleCachePromise;
+  _saleCachePromise = (async () => {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
+      const resp = await fetch(`${API_URL}/api/ecommerce/active-sale`, { signal: controller.signal });
+      clearTimeout(timer);
+      if (!resp.ok) return { active: false };
+      return await resp.json() as ActiveSaleData;
+    } catch {
+      return { active: false };
+    }
+  })();
+  return _saleCachePromise;
+}
+
+function useActiveSale(): ActiveSaleData | null {
+  const [sale, setSale] = useState<ActiveSaleData | null>(null);
+  useEffect(() => {
+    fetchActiveSale().then(setSale);
+  }, []);
+  return sale;
+}
+
+function getSalePrice(product: Product, sale: ActiveSaleData | null): number | null {
+  if (!sale || !sale.active || !sale.discount_percent) return null;
+  if (product.price <= 0) return null;
+  // Check if product's brand is excluded
+  if (sale.excluded_brands && sale.excluded_brands.length > 0) {
+    const excludedLower = sale.excluded_brands.map(b => b.toLowerCase());
+    if (product.categories.some(cat => excludedLower.includes(cat.toLowerCase()))) return null;
+    // Also check by name keywords for LeafLife products
+    if (isLeafLife(product) && excludedLower.includes("leaflife")) return null;
+  }
+  return Math.round(product.price * (1 - sale.discount_percent / 100));
+}
+
 function titleCase(str: string): string {
   const KEEP_UPPER = /\b(CBC|CBD|CBG|CBN|CBT|THC)\b/gi;
   return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).replace(KEEP_UPPER, m => m.toUpperCase());
@@ -944,11 +993,12 @@ function LocationSection() {
 
 
 /* ======================== PRODUCT GRID CARD (Floating Design + Quick Add) ======================== */
-function ProductGridCard({ product, onQuickAdd, fulfillment }: { product: Product; onQuickAdd?: (product: Product) => void; fulfillment?: FulfillmentType | null }) {
+function ProductGridCard({ product, onQuickAdd, fulfillment, sale }: { product: Product; onQuickAdd?: (product: Product) => void; fulfillment?: FulfillmentType | null; sale?: ActiveSaleData | null }) {
   const effectiveStock = fulfillment ? getStockForFulfillment(product, fulfillment) : product.stock;
   if (effectiveStock <= 0) return null;
   const effect = getProductEffect(product);
   const isPickup = fulfillment && fulfillment.startsWith("pickup");
+  const salePrice = getSalePrice(product, sale ?? null);
   return (
     <div className="cursor-pointer group" onClick={() => navigate(`/shop/product/${product.slug}`)}>
       <div className="bg-[#FFFFFF] rounded-2xl p-[10px] sm:p-4 transition-all duration-300 hover:shadow-xl relative border border-[#231F20]/35">
@@ -979,7 +1029,14 @@ function ProductGridCard({ product, onQuickAdd, fulfillment }: { product: Produc
         </div>
         <h3 className="text-[#231F20] text-[13px] sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#126A44] transition-colors">{titleCase(product.online_name || product.name)}</h3>
         <div className="flex items-center justify-between mb-2">
-                    <span className="text-[#231F20] font-semibold text-[14px] sm:text-lg">{formatPrice(product.price)}</span>
+                    {salePrice !== null ? (
+                      <span className="flex items-center gap-1.5">
+                        <span className="text-[#231F20]/50 line-through text-[11px] sm:text-sm">{formatPrice(product.price)}</span>
+                        <span className="text-[#126A44] font-semibold text-[14px] sm:text-lg">{formatPrice(salePrice)}</span>
+                      </span>
+                    ) : (
+                      <span className="text-[#231F20] font-semibold text-[14px] sm:text-lg">{formatPrice(product.price)}</span>
+                    )}
                     <span className="text-[11px] sm:text-[10px] text-[#3D8C32] sm:inline">{fulfillment && isPickup ? <><span className="text-[#58BA49]">●</span> 5 Minute Pickup</> : fulfillment && !isPickup ? <><span className="text-[#3D8C32]">●</span> Ships To You</> : isLeafLife(product) ? <><span className="text-[#126A44]">●</span> Shipping Only</> : <><span className="text-[#126A44]">●</span> 5 Minute Pickup</>}</span>
         </div>
         {/* Quick Add to Cart button */}
@@ -1300,7 +1357,7 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
 }
 
 /* ======================== SHOP PAGE (Light Theme) ======================== */
-function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfillment }: { products: Product[]; categories: string[]; selectedCategory: string; onAddToCart: (product: Product) => void; fulfillment: FulfillmentType | null }) {
+function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfillment, sale }: { products: Product[]; categories: string[]; selectedCategory: string; onAddToCart: (product: Product) => void; fulfillment: FulfillmentType | null; sale?: ActiveSaleData | null }) {
   const [sortBy, setSortBy] = useState("name");
   const feelingLabels = ["relax", "sleep", "energy", "focus"];
   const isFeelingFilter = feelingLabels.includes(selectedCategory.toLowerCase());
@@ -1350,7 +1407,7 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
         ))}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-        {filtered.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} fulfillment={fulfillment} />)}
+        {filtered.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} fulfillment={fulfillment} sale={sale} />)}
       </div>
       {filtered.length === 0 && (
         <div className="text-center py-16">
@@ -1600,7 +1657,7 @@ function OurLocationsPage() {
 }
 
 /* ======================== SHIPPING POLICY PAGE ======================== */
-function ThcaPage({ products, onAddToCart, fulfillment }: { products: Product[]; onAddToCart: (product: Product) => void; fulfillment: FulfillmentType | null }) {
+function ThcaPage({ products, onAddToCart, fulfillment, sale }: { products: Product[]; onAddToCart: (product: Product) => void; fulfillment: FulfillmentType | null; sale?: ActiveSaleData | null }) {
   useEffect(() => {
     document.title = "THCA Products | The Hemp Dispensary \u2013 Spring Hill, FL";
     return () => { document.title = "The Hemp Dispensary | Spring Hill FL"; };
@@ -1630,7 +1687,7 @@ function ThcaPage({ products, onAddToCart, fulfillment }: { products: Product[];
       </div>
       <p className="text-[#231F20] text-sm mb-6">{thcaProducts.length} products</p>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-        {thcaProducts.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} fulfillment={fulfillment} />)}
+        {thcaProducts.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} fulfillment={fulfillment} sale={sale} />)}
       </div>
       {thcaProducts.length === 0 && (
         <div className="text-center py-16">
@@ -1644,11 +1701,12 @@ function ThcaPage({ products, onAddToCart, fulfillment }: { products: Product[];
 }
 
 /* ======================== CANNABINOID EDUCATION PAGES ======================== */
-function CannabinoidPage({ products, onAddToCart, fulfillment, config }: {
+function CannabinoidPage({ products, onAddToCart, fulfillment, config, sale }: {
   products: Product[];
   onAddToCart: (product: Product) => void;
   fulfillment: FulfillmentType | null;
   config: { title: string; heading: string; para1: string; para2: string; keywords: string[]; pageTitle: string };
+  sale?: ActiveSaleData | null;
 }) {
   useEffect(() => {
     document.title = config.pageTitle;
@@ -1675,7 +1733,7 @@ function CannabinoidPage({ products, onAddToCart, fulfillment, config }: {
       </div>
       <p className="text-[#231F20] text-sm mb-6">{filtered.length} products</p>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-        {filtered.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} fulfillment={fulfillment} />)}
+        {filtered.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} fulfillment={fulfillment} sale={sale} />)}
       </div>
       {filtered.length === 0 && (
         <div className="text-center py-16">
@@ -4379,6 +4437,7 @@ function App() {
   }, [fulfillment, cart]);
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const activeSale = useActiveSale();
 
   const updateCart = useCallback((newCart: CartItem[]) => {
     setCart(newCart);
@@ -4625,7 +4684,7 @@ function App() {
     return shell(loading
       ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
       : fetchError ? <div className="flex flex-col items-center justify-center py-24"><AlertCircle className="h-12 w-12 text-[#D9A32C] mb-4" /><p className="text-[#231F20] text-lg font-medium mb-2">Unable to load products</p><p className="text-[#231F20] text-sm mb-4">Please check your connection and try again.</p><button onClick={retryFetch} className="px-6 py-3 bg-[#B3D335] hover:bg-[#126A44] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors">Try Again</button></div>
-      : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} />);
+      : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} sale={activeSale} />);
   }
   if (route === "/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} fulfillment={fulfillment} />);
   if (route === "/about") return shell(<AboutPage />);
@@ -4639,12 +4698,12 @@ function App() {
   if (route === "/our-locations") return shell(<OurLocationsPage />);
   if (route === "/thca") return shell(loading
     ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
-    : <ThcaPage products={products} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} />);
+    : <ThcaPage products={products} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} sale={activeSale} />);
   if (["/delta-8", "/delta-9", "/cbd", "/cbg", "/cbn"].includes(route)) {
     const cfg = CANNABINOID_CONFIGS[route.slice(1)];
     if (cfg) return shell(loading
       ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
-      : <CannabinoidPage products={products} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} config={cfg} />);
+      : <CannabinoidPage products={products} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} config={cfg} sale={activeSale} />);
   }
   if (route === "/shipping-policy") return shell(<ShippingPolicyPage />);
 
@@ -4685,7 +4744,7 @@ function App() {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                     {displayProducts.map((product) => (
-                      <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => addToCart(p, 1)} fulfillment={fulfillment} />
+                      <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => addToCart(p, 1)} fulfillment={fulfillment} sale={activeSale} />
                     ))}
                   </div>
                 </div>
