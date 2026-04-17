@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, Instagram, Heart, DollarSign, RefreshCw, Shirt } from "lucide-react";
+import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, Instagram, DollarSign, RefreshCw, Shirt, Facebook } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -3190,19 +3190,15 @@ const VIP_TIERS = [
   { name: "Elite", min: 1000, max: Infinity, multiplier: "2x", color: "#126A44", icon: Crown, benefits: ["2x points on every purchase", "Birthday bonus: 500 pts", "Early access + VIP mystery gift"] },
 ];
 
-const REDEMPTION_TIERS = [
+const REDEMPTION_TIERS_FALLBACK = [
   { points: 100, discount: "$5 Off", minPurchase: 25, desc: "Any purchase $25+" },
-  { points: 250, discount: "$15 Off", minPurchase: 40, desc: "Any purchase $40+" },
-  { points: 500, discount: "$35 Off", minPurchase: 60, desc: "Any purchase $60+" },
-  { points: 1000, discount: "$75 Off", minPurchase: 100, desc: "Any purchase $100+" },
-  { points: 2000, discount: "Free 3.5g Flower", minPurchase: 0, desc: "Pickup only — any strain" },
 ];
 
 const WAYS_TO_EARN = [
   { label: "Sign Up Bonus", pts: 200, icon: Gift, desc: "Create your free account" },
   { label: "Every $1 Spent", pts: 1, icon: DollarSign, desc: "In-store & online" },
   { label: "Follow on Instagram", pts: 25, icon: Instagram, desc: "@thehempdispensary" },
-  { label: "Follow on TikTok", pts: 25, icon: Heart, desc: "@thehempdispensary" },
+  { label: "Follow on Facebook", pts: 25, icon: Facebook, desc: "@TheHempDispensaryFL" },
   { label: "Email Signup", pts: 30, icon: Mail, desc: "Join our mailing list" },
   { label: "Google Review", pts: 150, icon: Star, desc: "Pending staff approval" },
   { label: "Refer a Friend", pts: 500, icon: Users, desc: "After friend's first purchase" },
@@ -3226,6 +3222,27 @@ function LoyaltyPage() {
   const [referralMsg, setReferralMsg] = useState("");
   const [referralLoading, setReferralLoading] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [rewardTiers, setRewardTiers] = useState<{ points: number; discount: string; minPurchase: number; desc: string }[]>(REDEMPTION_TIERS_FALLBACK);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/rewards`);
+        if (resp.ok) {
+          const data = await resp.json();
+          const active = (data.rewards || []).filter((r: any) => r.is_active);
+          if (active.length > 0) {
+            setRewardTiers(active.map((r: any) => ({
+              points: r.points_required,
+              discount: r.name,
+              minPurchase: 0,
+              desc: r.description || "",
+            })));
+          }
+        }
+      } catch { /* use fallback */ }
+    })();
+  }, []);
 
   const handleLookup = async () => {
     if (!phone) return;
@@ -3308,8 +3325,8 @@ function LoyaltyPage() {
     if (!customer?.birthday) return false;
     const parts = customer.birthday.split("/");
     if (parts.length < 2) return false;
-    const now = new Date();
-    return parseInt(parts[0]) === (now.getMonth() + 1);
+    const nowEST = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
+    return parseInt(parts[0]) === (nowEST.getMonth() + 1);
   };
 
   const toggleSection = (s: string) => setActiveSection(activeSection === s ? null : s);
@@ -3485,7 +3502,7 @@ function LoyaltyPage() {
                               <td className={`py-2.5 text-right font-semibold ${tx.type === "earn" || tx.points > 0 ? "text-[#126A44]" : "text-[#D9A32C]"}`}>
                                 {tx.type === "earn" || tx.points > 0 ? "+" : ""}{tx.points}
                               </td>
-                              <td className="py-2.5 text-right text-[#231F20]">{tx.created_at ? new Date(tx.created_at).toLocaleDateString() : "—"}</td>
+                              <td className="py-2.5 text-right text-[#231F20]">{tx.created_at ? new Date(tx.created_at).toLocaleDateString("en-US", { timeZone: "America/New_York" }) : "—"}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -3519,7 +3536,7 @@ function LoyaltyPage() {
 
             {activeSection === "redeem" && (
               <div className="space-y-3">
-                {REDEMPTION_TIERS.map(tier => {
+                {rewardTiers.map(tier => {
                   const canAfford = customer.points_balance >= tier.points;
                   const needed = tier.points - customer.points_balance;
                   return (
@@ -3623,7 +3640,7 @@ function LoyaltyPage() {
           <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10 text-center">
             <div className="text-3xl font-bold text-[#B3D335] mb-2">3</div>
             <h3 className="text-[#231F20] font-semibold mb-2">Redeem</h3>
-            <p className="text-[#231F20] text-sm">100 pts = $5 off, 250 pts = $15 off, 500 pts = $35 off, 1000 pts = $75 off.</p>
+            <p className="text-[#231F20] text-sm">{rewardTiers.map((t, i) => `${t.points} pts = ${t.discount}${i < rewardTiers.length - 1 ? ", " : "."}`).join("")}</p>
           </div>
         </div>
 
