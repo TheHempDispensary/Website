@@ -3109,7 +3109,11 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                   <div className="flex-1 min-w-0">
                     <p className="text-[#FFFFFF] text-xs font-medium truncate">{item.product.online_name || item.product.name}</p>
                   </div>
-                  <p className="text-[#FFFFFF] text-xs font-semibold">{formatPrice(item.product.price * item.quantity)}</p>
+                  {(() => { const sp = getSalePrice(item.product, sale ?? null); return sp !== null ? (
+                    <span className="flex flex-col items-end"><span className="text-[#FFFFFF]/50 line-through text-[10px]">{formatPrice(item.product.price * item.quantity)}</span><span className="text-[#126A44] text-xs font-semibold">{formatPrice(sp * item.quantity)}</span></span>
+                  ) : (
+                    <p className="text-[#FFFFFF] text-xs font-semibold">{formatPrice(item.product.price * item.quantity)}</p>
+                  ); })()}
                 </div>
               ))}
             </div>
@@ -3137,6 +3141,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
             </div>
             <div className="border-t border-[#231F20]/20 pt-4 space-y-2">
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Subtotal</span><span className="text-[#231F20]">{formatPrice(subtotal)}</span></div>
+              {saleDiscount > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Sale Discount</span><span className="text-[#126A44] font-medium">-{formatPrice(saleDiscount)}</span></div>}
               {promoApplied && discount > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Discount ({promoDetail?.discount_pct ? `${Math.round(promoDetail.discount_pct * 100)}%` : "promo"})</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
               {volumeDiscountTotal > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Volume Discount</span><span className="text-[#126A44] font-medium">-{formatPrice(volumeDiscountTotal)}</span></div>}
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">{isPickup ? "Pickup" : `Shipping${selectedRate ? ` (${selectedRate.service_level})` : ""}`}</span><span className="text-[#231F20]">{isPickup ? "FREE" : (selectedRate ? formatPrice(shippingCost) : "Select a rate")}</span></div>
