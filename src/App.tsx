@@ -3227,7 +3227,7 @@ function LoyaltyPage() {
   useEffect(() => {
     (async () => {
       try {
-        const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/rewards`);
+        const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/rewards/public`);
         if (resp.ok) {
           const data = await resp.json();
           const active = (data.rewards || []).filter((r: any) => r.is_active);
