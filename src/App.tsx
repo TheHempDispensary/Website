@@ -238,6 +238,59 @@ function isLeafLife(product: Product): boolean {
   return LEAFLIFE_KEYWORDS.some(kw => name.includes(kw));
 }
 
+/* ======================== ACTIVE SALE CACHE ======================== */
+interface ActiveSaleData {
+  active: boolean;
+  discount_percent?: number;
+  excluded_brands?: string[];
+  start_date?: string;
+  end_date?: string;
+}
+
+let _saleCachePromise: Promise<ActiveSaleData> | null = null;
+
+function fetchActiveSale(): Promise<ActiveSaleData> {
+  if (_saleCachePromise) return _saleCachePromise;
+  _saleCachePromise = (async () => {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
+      const resp = await fetch(`${API_URL}/api/ecommerce/active-sale`, { signal: controller.signal });
+      clearTimeout(timer);
+      if (!resp.ok) {
+        _saleCachePromise = null;
+        return { active: false };
+      }
+      return await resp.json() as ActiveSaleData;
+    } catch {
+      _saleCachePromise = null;
+      return { active: false };
+    }
+  })();
+  return _saleCachePromise;
+}
+
+function useActiveSale(): ActiveSaleData | null {
+  const [sale, setSale] = useState<ActiveSaleData | null>(null);
+  useEffect(() => {
+    fetchActiveSale().then(setSale);
+  }, []);
+  return sale;
+}
+
+function getSalePrice(product: Product, sale: ActiveSaleData | null): number | null {
+  if (!sale || !sale.active || !sale.discount_percent) return null;
+  if (product.price <= 0) return null;
+  // Check if product's brand is excluded
+  if (sale.excluded_brands && sale.excluded_brands.length > 0) {
+    const excludedLower = sale.excluded_brands.map(b => b.toLowerCase());
+    if (product.categories.some(cat => excludedLower.includes(cat.toLowerCase()))) return null;
+    // Also check by name keywords for LeafLife products
+    if (isLeafLife(product) && excludedLower.includes("leaflife")) return null;
+  }
+  return Math.round(product.price * (1 - sale.discount_percent / 100));
+}
+
 function titleCase(str: string): string {
   const KEEP_UPPER = /\b(CBC|CBD|CBG|CBN|CBT|THC)\b/gi;
   return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).replace(KEEP_UPPER, m => m.toUpperCase());
@@ -594,8 +647,11 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
 }
 
 /* ======================== CART DRAWER (Light Theme) ======================== */
-function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear }: { open: boolean; onClose: () => void; cart: CartItem[]; onUpdateQty: (id: string, qty: number) => void; onRemove: (id: string) => void; onClear: () => void }) {
-  const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear, sale }: { open: boolean; onClose: () => void; cart: CartItem[]; onUpdateQty: (id: string, qty: number) => void; onRemove: (id: string) => void; onClear: () => void; sale?: ActiveSaleData | null }) {
+  const total = cart.reduce((sum, item) => {
+    const sp = getSalePrice(item.product, sale ?? null);
+    return sum + (sp !== null ? sp : item.product.price) * item.quantity;
+  }, 0);
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   if (!open) return null;
   return (
@@ -626,7 +682,11 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear }: { o
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-medium text-[#231F20] truncate">{item.product.online_name || item.product.name}</h3>
-                    <p className="text-[#126A44] font-bold text-sm">{formatPrice(item.product.price)}</p>
+                    {(() => { const sp = getSalePrice(item.product, sale ?? null); return sp !== null ? (
+                      <span className="flex items-center gap-1.5"><span className="text-[#231F20]/50 line-through text-xs">{formatPrice(item.product.price)}</span><span className="text-[#126A44] font-bold text-sm">{formatPrice(sp)}</span></span>
+                    ) : (
+                      <p className="text-[#126A44] font-bold text-sm">{formatPrice(item.product.price)}</p>
+                    ); })()}
                     <div className="flex items-center gap-2 mt-1">
                       <button onClick={() => onUpdateQty(item.product.id, item.quantity - 1)} className="p-1 text-[#231F20] hover:text-[#231F20]" aria-label="Decrease quantity"><Minus className="h-3 w-3" /></button>
                       <span className="text-sm font-medium text-[#231F20] min-w-[1.5rem] text-center">{item.quantity}</span>
@@ -944,11 +1004,12 @@ function LocationSection() {
 
 
 /* ======================== PRODUCT GRID CARD (Floating Design + Quick Add) ======================== */
-function ProductGridCard({ product, onQuickAdd, fulfillment }: { product: Product; onQuickAdd?: (product: Product) => void; fulfillment?: FulfillmentType | null }) {
+function ProductGridCard({ product, onQuickAdd, fulfillment, sale }: { product: Product; onQuickAdd?: (product: Product) => void; fulfillment?: FulfillmentType | null; sale?: ActiveSaleData | null }) {
   const effectiveStock = fulfillment ? getStockForFulfillment(product, fulfillment) : product.stock;
   if (effectiveStock <= 0) return null;
   const effect = getProductEffect(product);
   const isPickup = fulfillment && fulfillment.startsWith("pickup");
+  const salePrice = getSalePrice(product, sale ?? null);
   return (
     <div className="cursor-pointer group" onClick={() => navigate(`/shop/product/${product.slug}`)}>
       <div className="bg-[#FFFFFF] rounded-2xl p-[10px] sm:p-4 transition-all duration-300 hover:shadow-xl relative border border-[#231F20]/35">
@@ -979,7 +1040,14 @@ function ProductGridCard({ product, onQuickAdd, fulfillment }: { product: Produc
         </div>
         <h3 className="text-[#231F20] text-[13px] sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#126A44] transition-colors">{titleCase(product.online_name || product.name)}</h3>
         <div className="flex items-center justify-between mb-2">
-                    <span className="text-[#231F20] font-semibold text-[14px] sm:text-lg">{formatPrice(product.price)}</span>
+                    {salePrice !== null ? (
+                      <span className="flex items-center gap-1.5">
+                        <span className="text-[#231F20]/50 line-through text-[11px] sm:text-sm">{formatPrice(product.price)}</span>
+                        <span className="text-[#126A44] font-semibold text-[14px] sm:text-lg">{formatPrice(salePrice)}</span>
+                      </span>
+                    ) : (
+                      <span className="text-[#231F20] font-semibold text-[14px] sm:text-lg">{formatPrice(product.price)}</span>
+                    )}
                     <span className="text-[11px] sm:text-[10px] text-[#3D8C32] sm:inline">{fulfillment && isPickup ? <><span className="text-[#58BA49]">●</span> 5 Minute Pickup</> : fulfillment && !isPickup ? <><span className="text-[#3D8C32]">●</span> Ships To You</> : isLeafLife(product) ? <><span className="text-[#126A44]">●</span> Shipping Only</> : <><span className="text-[#126A44]">●</span> 5 Minute Pickup</>}</span>
         </div>
         {/* Quick Add to Cart button */}
@@ -1300,7 +1368,7 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
 }
 
 /* ======================== SHOP PAGE (Light Theme) ======================== */
-function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfillment }: { products: Product[]; categories: string[]; selectedCategory: string; onAddToCart: (product: Product) => void; fulfillment: FulfillmentType | null }) {
+function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfillment, sale }: { products: Product[]; categories: string[]; selectedCategory: string; onAddToCart: (product: Product) => void; fulfillment: FulfillmentType | null; sale?: ActiveSaleData | null }) {
   const [sortBy, setSortBy] = useState("name");
   const feelingLabels = ["relax", "sleep", "energy", "focus"];
   const isFeelingFilter = feelingLabels.includes(selectedCategory.toLowerCase());
@@ -1350,7 +1418,7 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
         ))}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-        {filtered.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} fulfillment={fulfillment} />)}
+        {filtered.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} fulfillment={fulfillment} sale={sale} />)}
       </div>
       {filtered.length === 0 && (
         <div className="text-center py-16">
@@ -1600,7 +1668,7 @@ function OurLocationsPage() {
 }
 
 /* ======================== SHIPPING POLICY PAGE ======================== */
-function ThcaPage({ products, onAddToCart, fulfillment }: { products: Product[]; onAddToCart: (product: Product) => void; fulfillment: FulfillmentType | null }) {
+function ThcaPage({ products, onAddToCart, fulfillment, sale }: { products: Product[]; onAddToCart: (product: Product) => void; fulfillment: FulfillmentType | null; sale?: ActiveSaleData | null }) {
   useEffect(() => {
     document.title = "THCA Products | The Hemp Dispensary \u2013 Spring Hill, FL";
     return () => { document.title = "The Hemp Dispensary | Spring Hill FL"; };
@@ -1630,7 +1698,7 @@ function ThcaPage({ products, onAddToCart, fulfillment }: { products: Product[];
       </div>
       <p className="text-[#231F20] text-sm mb-6">{thcaProducts.length} products</p>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-        {thcaProducts.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} fulfillment={fulfillment} />)}
+        {thcaProducts.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} fulfillment={fulfillment} sale={sale} />)}
       </div>
       {thcaProducts.length === 0 && (
         <div className="text-center py-16">
@@ -1644,11 +1712,12 @@ function ThcaPage({ products, onAddToCart, fulfillment }: { products: Product[];
 }
 
 /* ======================== CANNABINOID EDUCATION PAGES ======================== */
-function CannabinoidPage({ products, onAddToCart, fulfillment, config }: {
+function CannabinoidPage({ products, onAddToCart, fulfillment, config, sale }: {
   products: Product[];
   onAddToCart: (product: Product) => void;
   fulfillment: FulfillmentType | null;
   config: { title: string; heading: string; para1: string; para2: string; keywords: string[]; pageTitle: string };
+  sale?: ActiveSaleData | null;
 }) {
   useEffect(() => {
     document.title = config.pageTitle;
@@ -1675,7 +1744,7 @@ function CannabinoidPage({ products, onAddToCart, fulfillment, config }: {
       </div>
       <p className="text-[#231F20] text-sm mb-6">{filtered.length} products</p>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-        {filtered.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} fulfillment={fulfillment} />)}
+        {filtered.map((product) => <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => onAddToCart(p)} fulfillment={fulfillment} sale={sale} />)}
       </div>
       {filtered.length === 0 && (
         <div className="text-center py-16">
@@ -2189,7 +2258,7 @@ function ChatbotBud() {
 
 /* ======================== CHECKOUT PAGE (Preserved) ======================== */
 
-function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpdateQty: (productId: string, qty: number) => void; onRemove: (productId: string) => void; onClear: () => void; fulfillment: FulfillmentType | null }) {
+function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; onUpdateQty: (productId: string, qty: number) => void; onRemove: (productId: string) => void; onClear: () => void; fulfillment: FulfillmentType | null; sale?: ActiveSaleData | null }) {
   const [step, setStep] = useState<"info" | "shipping" | "payment" | "confirmed">("info");
   const [submitting, setSubmitting] = useState(false);
   const [tosAccepted, setTosAccepted] = useState(false);
@@ -2245,7 +2314,11 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
     return Math.round(total);
   }, [cart, volumeDiscounts]);
 
-  const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const saleDiscount = cart.reduce((sum, item) => {
+    const sp = getSalePrice(item.product, sale ?? null);
+    return sp !== null ? sum + (item.product.price - sp) * item.quantity : sum;
+  }, 0);
+  const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0) - saleDiscount;
   const rawDiscount = promoApplied && promoDetail
     ? (promoDetail.discount_pct ? Math.round(subtotal * promoDetail.discount_pct) : (promoDetail.discount_amount || 0))
     : 0;
@@ -2601,8 +2674,8 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
       const orderData = {
         customer: { first_name: form.firstName, last_name: form.lastName, email: form.email, phone: form.phone },
         shipping_address: { address: form.address, apartment: form.apartment, city: form.city, state: form.state, zip: form.zip },
-        items: cart.map((item) => ({ product_id: item.product.id, name: item.product.name, sku: item.product.sku, price: item.product.price, quantity: item.quantity })),
-        subtotal, discount, volume_discount: volumeDiscountTotal, loyalty_discount: effectiveLoyaltyDiscount, shipping_cost: shippingCost, tax, total, notes: form.notes,
+        items: cart.map((item) => { const sp = getSalePrice(item.product, sale ?? null); return { product_id: item.product.id, name: item.product.name, sku: item.product.sku, price: sp !== null ? sp : item.product.price, quantity: item.quantity }; }),
+        subtotal, discount, volume_discount: volumeDiscountTotal, sale_discount: saleDiscount, loyalty_discount: effectiveLoyaltyDiscount, shipping_cost: shippingCost, tax, total, notes: form.notes,
         shipping_service: selectedRate?.service_level || "",
         promo_code: promoApplied && promoDetail ? promoDetail.code : null,
         payment_token: tokenResult.token,
@@ -4379,6 +4452,7 @@ function App() {
   }, [fulfillment, cart]);
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const activeSale = useActiveSale();
 
   const updateCart = useCallback((newCart: CartItem[]) => {
     setCart(newCart);
@@ -4609,7 +4683,7 @@ function App() {
       <main id="main-content">{content}</main>
       <SiteFooter />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} products={products} />
-      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} sale={activeSale} />
       <ChatbotBud />
       {showAgeGate && <BudAgeGatePopup onComplete={handleAgeGateComplete} />}
       {showFulfillmentModal && <FulfillmentSelectorModal currentFulfillment={fulfillment || "ship"} onSelect={handleFulfillmentSwitch} onClose={() => setShowFulfillmentModal(false)} />}
@@ -4625,9 +4699,9 @@ function App() {
     return shell(loading
       ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
       : fetchError ? <div className="flex flex-col items-center justify-center py-24"><AlertCircle className="h-12 w-12 text-[#D9A32C] mb-4" /><p className="text-[#231F20] text-lg font-medium mb-2">Unable to load products</p><p className="text-[#231F20] text-sm mb-4">Please check your connection and try again.</p><button onClick={retryFetch} className="px-6 py-3 bg-[#B3D335] hover:bg-[#126A44] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors">Try Again</button></div>
-      : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} />);
+      : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} sale={activeSale} />);
   }
-  if (route === "/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} fulfillment={fulfillment} />);
+  if (route === "/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} fulfillment={fulfillment} sale={activeSale} />);
   if (route === "/about") return shell(<AboutPage />);
   if (route === "/terms") return shell(<TermsPage />);
   if (route === "/privacy") return shell(<PrivacyPage />);
@@ -4639,12 +4713,12 @@ function App() {
   if (route === "/our-locations") return shell(<OurLocationsPage />);
   if (route === "/thca") return shell(loading
     ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
-    : <ThcaPage products={products} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} />);
+    : <ThcaPage products={products} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} sale={activeSale} />);
   if (["/delta-8", "/delta-9", "/cbd", "/cbg", "/cbn"].includes(route)) {
     const cfg = CANNABINOID_CONFIGS[route.slice(1)];
     if (cfg) return shell(loading
       ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
-      : <CannabinoidPage products={products} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} config={cfg} />);
+      : <CannabinoidPage products={products} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} config={cfg} sale={activeSale} />);
   }
   if (route === "/shipping-policy") return shell(<ShippingPolicyPage />);
 
@@ -4685,7 +4759,7 @@ function App() {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                     {displayProducts.map((product) => (
-                      <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => addToCart(p, 1)} fulfillment={fulfillment} />
+                      <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => addToCart(p, 1)} fulfillment={fulfillment} sale={activeSale} />
                     ))}
                   </div>
                 </div>
@@ -4701,7 +4775,7 @@ function App() {
       </main>
       <SiteFooter />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} products={products} />
-      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} sale={activeSale} />
       <ChatbotBud />
       {showAgeGate && <BudAgeGatePopup onComplete={handleAgeGateComplete} />}
       {showFulfillmentModal && <FulfillmentSelectorModal currentFulfillment={fulfillment || "ship"} onSelect={handleFulfillmentSwitch} onClose={() => setShowFulfillmentModal(false)} />}
