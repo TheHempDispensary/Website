@@ -2409,7 +2409,11 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
       }
     } catch {
       // Fallback to client-side validation if backend is unreachable
-      if (code === "FIRST10") {
+      if (sale && sale.active && sale.discount_percent) {
+        setPromoApplied(false);
+        setPromoDetail(null);
+        setPromoError(`Promo codes are disabled during our ${sale.discount_percent}% OFF sale. Loyalty rewards can still be redeemed at checkout.`);
+      } else if (code === "FIRST10") {
         setPromoApplied(true);
         setPromoDetail({ code: "FIRST10", discount_pct: 0.10, discount_amount: null });
         setPromoError("");
@@ -3148,6 +3152,9 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
             {/* Promo Code */}
             <div className="border-t border-[#231F20]/20 pt-4 mb-4">
               <label className="block text-sm font-medium text-[#231F20] mb-1.5">Promo Code</label>
+              {sale && sale.active && sale.discount_percent && (
+                <p className="text-xs text-[#D9A32C] mb-2">{sale.discount_percent}% OFF sale is active — promo codes are disabled. Loyalty rewards can still be redeemed below.</p>
+              )}
               <div className="flex gap-2">
                 <input
                   type="text"
