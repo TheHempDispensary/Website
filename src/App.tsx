@@ -3198,7 +3198,7 @@ const WAYS_TO_EARN = [
   { label: "Sign Up Bonus", pts: 200, icon: Gift, desc: "Create your free account" },
   { label: "Every $1 Spent", pts: 1, icon: DollarSign, desc: "In-store & online" },
   { label: "Follow on Instagram", pts: 25, icon: Instagram, desc: "@thehempdispensary" },
-  { label: "Follow on Facebook", pts: 25, icon: Facebook, desc: "@thehempdispensary" },
+  { label: "Follow on Facebook", pts: 25, icon: Facebook, desc: "@TheHempDispensaryFL" },
   { label: "Email Signup", pts: 30, icon: Mail, desc: "Join our mailing list" },
   { label: "Google Review", pts: 150, icon: Star, desc: "Pending staff approval" },
   { label: "Refer a Friend", pts: 500, icon: Users, desc: "After friend's first purchase" },
