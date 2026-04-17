@@ -257,9 +257,13 @@ function fetchActiveSale(): Promise<ActiveSaleData> {
       const timer = setTimeout(() => controller.abort(), 5000);
       const resp = await fetch(`${API_URL}/api/ecommerce/active-sale`, { signal: controller.signal });
       clearTimeout(timer);
-      if (!resp.ok) return { active: false };
+      if (!resp.ok) {
+        _saleCachePromise = null;
+        return { active: false };
+      }
       return await resp.json() as ActiveSaleData;
     } catch {
+      _saleCachePromise = null;
       return { active: false };
     }
   })();
@@ -643,8 +647,11 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
 }
 
 /* ======================== CART DRAWER (Light Theme) ======================== */
-function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear }: { open: boolean; onClose: () => void; cart: CartItem[]; onUpdateQty: (id: string, qty: number) => void; onRemove: (id: string) => void; onClear: () => void }) {
-  const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear, sale }: { open: boolean; onClose: () => void; cart: CartItem[]; onUpdateQty: (id: string, qty: number) => void; onRemove: (id: string) => void; onClear: () => void; sale?: ActiveSaleData | null }) {
+  const total = cart.reduce((sum, item) => {
+    const sp = getSalePrice(item.product, sale ?? null);
+    return sum + (sp !== null ? sp : item.product.price) * item.quantity;
+  }, 0);
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   if (!open) return null;
   return (
@@ -675,7 +682,11 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear }: { o
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-medium text-[#231F20] truncate">{item.product.online_name || item.product.name}</h3>
-                    <p className="text-[#126A44] font-bold text-sm">{formatPrice(item.product.price)}</p>
+                    {(() => { const sp = getSalePrice(item.product, sale ?? null); return sp !== null ? (
+                      <span className="flex items-center gap-1.5"><span className="text-[#231F20]/50 line-through text-xs">{formatPrice(item.product.price)}</span><span className="text-[#126A44] font-bold text-sm">{formatPrice(sp)}</span></span>
+                    ) : (
+                      <p className="text-[#126A44] font-bold text-sm">{formatPrice(item.product.price)}</p>
+                    ); })()}
                     <div className="flex items-center gap-2 mt-1">
                       <button onClick={() => onUpdateQty(item.product.id, item.quantity - 1)} className="p-1 text-[#231F20] hover:text-[#231F20]" aria-label="Decrease quantity"><Minus className="h-3 w-3" /></button>
                       <span className="text-sm font-medium text-[#231F20] min-w-[1.5rem] text-center">{item.quantity}</span>
@@ -2247,7 +2258,7 @@ function ChatbotBud() {
 
 /* ======================== CHECKOUT PAGE (Preserved) ======================== */
 
-function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpdateQty: (productId: string, qty: number) => void; onRemove: (productId: string) => void; onClear: () => void; fulfillment: FulfillmentType | null }) {
+function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; onUpdateQty: (productId: string, qty: number) => void; onRemove: (productId: string) => void; onClear: () => void; fulfillment: FulfillmentType | null; sale?: ActiveSaleData | null }) {
   const [step, setStep] = useState<"info" | "shipping" | "payment" | "confirmed">("info");
   const [submitting, setSubmitting] = useState(false);
   const [tosAccepted, setTosAccepted] = useState(false);
@@ -2303,7 +2314,11 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
     return Math.round(total);
   }, [cart, volumeDiscounts]);
 
-  const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const saleDiscount = cart.reduce((sum, item) => {
+    const sp = getSalePrice(item.product, sale ?? null);
+    return sp !== null ? sum + (item.product.price - sp) * item.quantity : sum;
+  }, 0);
+  const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0) - saleDiscount;
   const rawDiscount = promoApplied && promoDetail
     ? (promoDetail.discount_pct ? Math.round(subtotal * promoDetail.discount_pct) : (promoDetail.discount_amount || 0))
     : 0;
@@ -2659,8 +2674,8 @@ function CheckoutPage({ cart, onClear, fulfillment }: { cart: CartItem[]; onUpda
       const orderData = {
         customer: { first_name: form.firstName, last_name: form.lastName, email: form.email, phone: form.phone },
         shipping_address: { address: form.address, apartment: form.apartment, city: form.city, state: form.state, zip: form.zip },
-        items: cart.map((item) => ({ product_id: item.product.id, name: item.product.name, sku: item.product.sku, price: item.product.price, quantity: item.quantity })),
-        subtotal, discount, volume_discount: volumeDiscountTotal, loyalty_discount: effectiveLoyaltyDiscount, shipping_cost: shippingCost, tax, total, notes: form.notes,
+        items: cart.map((item) => { const sp = getSalePrice(item.product, sale ?? null); return { product_id: item.product.id, name: item.product.name, sku: item.product.sku, price: sp !== null ? sp : item.product.price, quantity: item.quantity }; }),
+        subtotal, discount, volume_discount: volumeDiscountTotal, sale_discount: saleDiscount, loyalty_discount: effectiveLoyaltyDiscount, shipping_cost: shippingCost, tax, total, notes: form.notes,
         shipping_service: selectedRate?.service_level || "",
         promo_code: promoApplied && promoDetail ? promoDetail.code : null,
         payment_token: tokenResult.token,
@@ -4668,7 +4683,7 @@ function App() {
       <main id="main-content">{content}</main>
       <SiteFooter />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} products={products} />
-      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} sale={activeSale} />
       <ChatbotBud />
       {showAgeGate && <BudAgeGatePopup onComplete={handleAgeGateComplete} />}
       {showFulfillmentModal && <FulfillmentSelectorModal currentFulfillment={fulfillment || "ship"} onSelect={handleFulfillmentSwitch} onClose={() => setShowFulfillmentModal(false)} />}
@@ -4686,7 +4701,7 @@ function App() {
       : fetchError ? <div className="flex flex-col items-center justify-center py-24"><AlertCircle className="h-12 w-12 text-[#D9A32C] mb-4" /><p className="text-[#231F20] text-lg font-medium mb-2">Unable to load products</p><p className="text-[#231F20] text-sm mb-4">Please check your connection and try again.</p><button onClick={retryFetch} className="px-6 py-3 bg-[#B3D335] hover:bg-[#126A44] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors">Try Again</button></div>
       : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} sale={activeSale} />);
   }
-  if (route === "/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} fulfillment={fulfillment} />);
+  if (route === "/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} fulfillment={fulfillment} sale={activeSale} />);
   if (route === "/about") return shell(<AboutPage />);
   if (route === "/terms") return shell(<TermsPage />);
   if (route === "/privacy") return shell(<PrivacyPage />);
@@ -4760,7 +4775,7 @@ function App() {
       </main>
       <SiteFooter />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} products={products} />
-      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} />
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} sale={activeSale} />
       <ChatbotBud />
       {showAgeGate && <BudAgeGatePopup onComplete={handleAgeGateComplete} />}
       {showFulfillmentModal && <FulfillmentSelectorModal currentFulfillment={fulfillment || "ship"} onSelect={handleFulfillmentSwitch} onClose={() => setShowFulfillmentModal(false)} />}
