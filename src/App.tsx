@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, Instagram, DollarSign, RefreshCw, Shirt, Facebook } from "lucide-react";
+import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, Facebook } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -3197,7 +3197,6 @@ const REDEMPTION_TIERS_FALLBACK = [
 const WAYS_TO_EARN = [
   { label: "Sign Up Bonus", pts: 200, icon: Gift, desc: "Create your free account" },
   { label: "Every $1 Spent", pts: 1, icon: DollarSign, desc: "In-store & online" },
-  { label: "Follow on Instagram", pts: 25, icon: Instagram, desc: "@thehempdispensary" },
   { label: "Follow on Facebook", pts: 25, icon: Facebook, desc: "@TheHempDispensaryFL" },
   { label: "Email Signup", pts: 30, icon: Mail, desc: "Join our mailing list" },
   { label: "Google Review", pts: 150, icon: Star, desc: "Pending staff approval" },
