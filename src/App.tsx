@@ -1555,9 +1555,29 @@ function TermsPage() {
     <div className="max-w-4xl mx-auto px-4 py-16">
       <h1 className="text-4xl font-bold text-[#231F20] mb-6">Terms of Service</h1>
       <div className="prose prose-lg text-[#231F20]">
-        <p className="mb-4">By using our website and services, you agree to these terms. All products are sold in compliance with federal and state hemp regulations.</p>
-        <p className="mb-4">You must be 21 years or older to purchase age-restricted products. We reserve the right to verify age at the time of pickup.</p>
-        <p>All sales are final. Products cannot be returned once purchased due to the nature of our products.</p>
+        <p className="mb-6">By using the website thehempdispensary.com and completing a purchase, you agree to the following terms in full. If you do not agree, do not place an order.</p>
+
+        <h2 className="text-2xl font-bold text-[#231F20] mt-8 mb-3">1. Age Requirement</h2>
+        <p className="mb-6">You must be 21 years of age or older to purchase any product from The Hemp Dispensary. By completing a purchase, you confirm that you meet this age requirement. We reserve the right to verify age at any time and to refuse service to anyone who cannot verify their age.</p>
+
+        <h2 className="text-2xl font-bold text-[#231F20] mt-8 mb-3">2. Compliance with Law</h2>
+        <p className="mb-6">All products are sold in compliance with the 2018 Federal Farm Bill and applicable Florida state hemp regulations. Products contain hemp-derived cannabinoids and are not intended to diagnose, treat, cure, or prevent any disease. It is your responsibility to verify that hemp products are legal in your state or jurisdiction before ordering.</p>
+
+        <h2 className="text-2xl font-bold text-[#231F20] mt-8 mb-3">3. All Sales Are Final — No Refunds or Returns</h2>
+        <p className="mb-4">Due to the consumable and perishable nature of our products, all sales are final. We do not accept returns or issue refunds once an order has been placed and payment has been processed. This policy applies to all products including but not limited to flower, edibles, concentrates, tinctures, vapes, and topicals.</p>
+        <p className="mb-6">If your order arrives damaged or incorrect, you must contact us at support@thehempdispensary.com within 48 hours of delivery with photos of the damaged item and packaging. We will review the claim and, at our sole discretion, may offer a replacement or store credit.</p>
+
+        <h2 className="text-2xl font-bold text-[#231F20] mt-8 mb-3">4. Chargebacks and Payment Disputes</h2>
+        <p className="mb-6">By completing a purchase, you agree that filing a chargeback or payment dispute with your bank or card issuer for a valid, fulfilled order is a violation of these Terms of Service. If a chargeback is filed on a delivered order, we reserve the right to submit all available evidence — including your order details, IP address, shipping confirmation, delivery confirmation, and your agreement to these Terms of Service — to our payment processor in defense of the dispute. Accounts found to have filed fraudulent chargebacks may be permanently banned from placing future orders.</p>
+
+        <h2 className="text-2xl font-bold text-[#231F20] mt-8 mb-3">5. Shipping and Delivery</h2>
+        <p className="mb-6">Orders are shipped via USPS. Shipping times are estimates and are not guaranteed. The Hemp Dispensary is not responsible for delays caused by the carrier. Once a package is marked as delivered by the carrier, it is considered received. If you believe your package was lost or stolen after confirmed delivery, you must file a claim with USPS directly.</p>
+
+        <h2 className="text-2xl font-bold text-[#231F20] mt-8 mb-3">6. Order Confirmation as Evidence of Agreement</h2>
+        <p className="mb-6">When you complete a purchase on our website, a timestamped record is created confirming your agreement to these Terms of Service, your age verification, and your acknowledgment of our all-sales-final policy. This record may be used as evidence in any payment dispute proceeding.</p>
+
+        <h2 className="text-2xl font-bold text-[#231F20] mt-8 mb-3">7. Contact</h2>
+        <p>For any questions regarding these terms, contact us at support@thehempdispensary.com or visit us at our Spring Hill, FL location.</p>
       </div>
     </div>
   );
