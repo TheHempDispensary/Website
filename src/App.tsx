@@ -2671,8 +2671,12 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
       return;
     }
 
-    // Pre-payment validation: Block LeafLife / HQ-only items from pickup orders
+    // Pre-payment validation: Shipping orders must have a shipping rate selected
     const ft = fulfillment || "shipping";
+    if (ft === "shipping" && !selectedRateId) {
+      setPaymentError("Please go back and select a shipping rate before placing your order.");
+      return;
+    }
     if (ft === "pickup_west" || ft === "pickup_east") {
       const blockedItems = cart.filter((item) => isLeafLife(item.product));
       if (blockedItems.length > 0) {
