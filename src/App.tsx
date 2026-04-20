@@ -2673,7 +2673,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
 
     // Pre-payment validation: Shipping orders must have a shipping rate selected
     const ft = fulfillment || "shipping";
-    if (ft === "shipping" && shippingCost <= 0) {
+    if (ft === "shipping" && !selectedRateId) {
       setPaymentError("Please go back and select a shipping rate before placing your order.");
       return;
     }
