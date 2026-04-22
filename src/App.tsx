@@ -3765,6 +3765,25 @@ function AccountPage() {
   const [signupForm, setSignupForm] = useState({ first_name: "", last_name: "", phone: "", email: "" });
   const [signupLoading, setSignupLoading] = useState(false);
   const [signupResult, setSignupResult] = useState<{ status: string; message: string; points?: number } | null>(null);
+  const [rewardTiers, setRewardTiers] = useState<{ points: number; discount: string }[]>(REDEMPTION_TIERS_FALLBACK.map(t => ({ points: t.points, discount: t.discount })));
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const resp = await fetch(`${LOYALTY_API_URL}/api/loyalty/rewards/public`);
+        if (resp.ok) {
+          const data = await resp.json();
+          const active = (data.rewards || []).filter((r: any) => r.is_active);
+          if (active.length > 0) {
+            setRewardTiers(active.map((r: any) => ({
+              points: r.points_required,
+              discount: r.name,
+            })));
+          }
+        }
+      } catch { /* use fallback */ }
+    })();
+  }, []);
 
   const handleLogin = async () => {
     if (!loginForm.phone && !loginForm.email) { setLoginError("Enter your phone number or email."); return; }
@@ -3923,18 +3942,12 @@ function AccountPage() {
               <p className="text-[#231F20] text-xs mt-1">Points work across all locations + online</p>
             </div>
             <div className="space-y-3">
-              <div className="flex justify-between items-center p-3 bg-[#FFFFFF] rounded-lg">
-                <span className="text-[#231F20]">100 points</span>
-                <span className="text-[#126A44] font-semibold">$5 off</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-[#FFFFFF] rounded-lg">
-                <span className="text-[#231F20]">200 points</span>
-                <span className="text-[#126A44] font-semibold">$12 off</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-[#FFFFFF] rounded-lg">
-                <span className="text-[#231F20]">500 points</span>
-                <span className="text-[#126A44] font-semibold">$35 off</span>
-              </div>
+              {rewardTiers.map((tier, i) => (
+                <div key={i} className="flex justify-between items-center p-3 bg-[#FFFFFF] rounded-lg">
+                  <span className="text-[#231F20]">{tier.points} points</span>
+                  <span className="text-[#126A44] font-semibold">{tier.discount}</span>
+                </div>
+              ))}
             </div>
           </div>
         )}
