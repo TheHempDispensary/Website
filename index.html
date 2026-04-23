@@ -115,13 +115,13 @@
         if (hash && hash.indexOf('#!/') === 0) {
           var path = window.location.pathname.replace(/\/+$/, '').toLowerCase();
           var categoryMap = {
-            '/flower': '/shop/flower',
-            '/edibles': '/shop/edibles',
-            '/tinctures': '/shop/tinctures',
-            '/concentrates': '/shop/concentrates',
+            '/flower': '/products/flower',
+            '/edibles': '/products/edibles',
+            '/tinctures': '/products/tinctures',
+            '/concentrates': '/products/concentrates',
             '/misc': '/',
-            '/pets': '/shop/pets',
-            '/gummies': '/shop/edibles'
+            '/pets': '/',
+            '/gummies': '/'
           };
           var dest = categoryMap[path] || '/';
           window.location.replace(dest);

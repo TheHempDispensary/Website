@@ -1017,7 +1017,7 @@ function ProductGridCard({ product, onQuickAdd, fulfillment, sale }: { product: 
   const isPickup = fulfillment && fulfillment.startsWith("pickup");
   const salePrice = getSalePrice(product, sale ?? null);
   return (
-    <div className="cursor-pointer group" onClick={() => navigate(`/shop/product/${product.slug}`)}>
+    <div className="cursor-pointer group" onClick={() => navigate(`/products/product/${product.slug}`)}>
       <div className="bg-[#FFFFFF] rounded-2xl p-[10px] sm:p-4 transition-all duration-300 hover:shadow-xl relative border border-[#231F20]/35">
         {/* Floating product image */}
         <div className="flex items-center justify-center mb-2 sm:mb-3 bg-[#FFFFFF] rounded-xl overflow-hidden h-[160px] sm:h-[200px]">
@@ -1288,7 +1288,7 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
               const vGrams = extractGrams(v);
               const vSavings = vGrams > 0 && perGramSmallest > 0 && smallestVariant?.id !== v.id ? (perGramSmallest * vGrams) - v.price : 0;
               return (
-                <div key={v.id} className={`flex items-center justify-between p-3 rounded-xl border ${v.id === product.id ? 'border-[#B3D335] bg-[#FFFFFF]' : 'border-[#231F20]/10 bg-[#FFFFFF] hover:border-[#B3D335]'} cursor-pointer transition-all`} onClick={() => { if (v.id !== product.id) navigate(`/shop/product/${v.slug}`); }}>
+                <div key={v.id} className={`flex items-center justify-between p-3 rounded-xl border ${v.id === product.id ? 'border-[#B3D335] bg-[#FFFFFF]' : 'border-[#231F20]/10 bg-[#FFFFFF] hover:border-[#B3D335]'} cursor-pointer transition-all`} onClick={() => { if (v.id !== product.id) navigate(`/products/product/${v.slug}`); }}>
                   <div>
                     <span className="text-sm font-medium text-[#231F20]">{vGrams > 0 ? `${vGrams}g` : titleCase(v.online_name || v.name)}</span>
                     {vSavings > 0 && <span className="ml-2 text-xs font-bold text-[#231F20] bg-[#FFCB08] px-2 py-0.5 rounded-full">Save {formatPrice(vSavings)}</span>}
@@ -1307,7 +1307,7 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
           <h2 className="text-2xl font-bold text-[#231F20] mb-6">You Might Also Like</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {related.map((p) => (
-              <div key={p.id} className="flex items-center gap-3 bg-[#FFFFFF] rounded-xl p-3 border border-[#231F20]/10 hover:shadow-md transition-all cursor-pointer" onClick={() => navigate(`/shop/product/${p.slug}`)}>
+              <div key={p.id} className="flex items-center gap-3 bg-[#FFFFFF] rounded-xl p-3 border border-[#231F20]/10 hover:shadow-md transition-all cursor-pointer" onClick={() => navigate(`/products/product/${p.slug}`)}>
                 <div className="w-20 h-20 flex-shrink-0 bg-[#FFFFFF] rounded-lg overflow-hidden flex items-center justify-center">
                   <img src={p.image_url || placeholderUrl(p.name, 200)} alt={p.name} className="max-h-full max-w-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={handleImgError} />
                 </div>
@@ -1357,7 +1357,7 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[70vh] overflow-y-auto">
           {results.map((product) => (
-            <div key={product.id} className="cursor-pointer group" onClick={() => { navigate(`/shop/product/${product.slug}`); onClose(); setQuery(""); }}>
+            <div key={product.id} className="cursor-pointer group" onClick={() => { navigate(`/products/product/${product.slug}`); onClose(); setQuery(""); }}>
               <div className="bg-[#FFFFFF] rounded-xl p-3 transition-all hover:shadow-md">
                 <div className="flex items-center justify-center mb-2 bg-[#FFFFFF] rounded-lg overflow-hidden h-[120px]">
                   <img src={product.image_url || placeholderUrl(product.name, 200)} alt={product.name} loading="lazy" className="product-card-img" onError={handleImgError} />
@@ -4617,9 +4617,12 @@ function App() {
 
   // Dynamic canonical + og:url per route — self-referencing, www, no trailing slash on paths
   // Normalize /shop → /products for canonical URLs since /products is the canonical structure
+  // Strip query parameters (e.g. ?ref=) so canonical always points to the clean path
   useEffect(() => {
     const base = "https://www.thehempdispensary.com";
-    const rawPath = route === "/" || route === "" ? "/" : route.replace(/\/+$/, "");
+    // Use only the pathname (no query string) — strip ?ref= and any other params
+    const cleanPath = window.location.pathname;
+    const rawPath = cleanPath === "/" || cleanPath === "" ? "/" : cleanPath.replace(/\/+$/, "");
     const path = rawPath.startsWith("/shop/") ? rawPath.replace("/shop/", "/products/") : (rawPath === "/shop" ? "/products" : rawPath);
     const canonical = path === "/" ? base + "/" : base + path;
 
@@ -4765,7 +4768,6 @@ function App() {
   );
 
   if (route.startsWith("/product/")) return shell(<ProductDetail productId={route.replace("/product/", "")} products={products} onAddToCart={addToCart} fulfillment={fulfillment} />);
-  if (route.startsWith("/shop/product/")) return shell(<ProductDetail productId={route.replace("/shop/product/", "")} products={products} onAddToCart={addToCart} fulfillment={fulfillment} />);
   if (route.startsWith("/products/product/")) return shell(<ProductDetail productId={route.replace("/products/product/", "")} products={products} onAddToCart={addToCart} fulfillment={fulfillment} />);
   if (route.startsWith("/shop") || route.startsWith("/products")) {
     const catSlug = route.replace("/shop/", "").replace("/shop", "").replace("/products/", "").replace("/products", "");
