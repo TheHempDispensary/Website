@@ -22,17 +22,16 @@ const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
 const STATIC_PAGES = [
   { loc: "/", priority: "1.0", changefreq: "weekly" },
-  { loc: "/shop", priority: "0.9", changefreq: "weekly" },
-  { loc: "/shop/flower", priority: "0.9", changefreq: "weekly" },
-  { loc: "/shop/edibles", priority: "0.9", changefreq: "weekly" },
-  { loc: "/shop/concentrates", priority: "0.9", changefreq: "weekly" },
-  { loc: "/shop/vapor", priority: "0.9", changefreq: "weekly" },
-  { loc: "/shop/tinctures", priority: "0.9", changefreq: "weekly" },
-  { loc: "/shop/topicals", priority: "0.9", changefreq: "weekly" },
-  { loc: "/shop/accessories", priority: "0.9", changefreq: "weekly" },
-  { loc: "/shop/apparel", priority: "0.8", changefreq: "weekly" },
-  { loc: "/shop/packaging", priority: "0.8", changefreq: "weekly" },
-  { loc: "/shop/pets", priority: "0.8", changefreq: "weekly" },
+  { loc: "/products", priority: "0.9", changefreq: "weekly" },
+  { loc: "/products/flower", priority: "0.9", changefreq: "weekly" },
+  { loc: "/products/edibles", priority: "0.9", changefreq: "weekly" },
+  { loc: "/products/concentrates", priority: "0.9", changefreq: "weekly" },
+  { loc: "/products/vapor", priority: "0.9", changefreq: "weekly" },
+  { loc: "/products/tinctures", priority: "0.9", changefreq: "weekly" },
+  { loc: "/products/topicals", priority: "0.9", changefreq: "weekly" },
+  { loc: "/products/accessories", priority: "0.9", changefreq: "weekly" },
+  { loc: "/products/apparel", priority: "0.8", changefreq: "weekly" },
+  { loc: "/products/packaging", priority: "0.8", changefreq: "weekly" },
   { loc: "/about", priority: "0.6", changefreq: "monthly" },
   { loc: "/thca", priority: "0.8", changefreq: "weekly" },
   { loc: "/delta-8", priority: "0.8", changefreq: "weekly" },
@@ -72,7 +71,7 @@ function buildXml(productSlugs) {
   for (const slug of productSlugs) {
     entries.push(
       urlEntry({
-        loc: `/shop/product/${slug}`,
+        loc: `/products/product/${slug}`,
         priority: "0.8",
         changefreq: "weekly",
       })
