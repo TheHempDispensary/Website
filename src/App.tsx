@@ -2357,7 +2357,10 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
   const isPickup = !!(fulfillment && fulfillment.startsWith("pickup"));
   const taxRate = getTaxRate(form.state, isPickup);
   const tax = Math.round(discountedSubtotal * taxRate);
-  const effectiveLoyaltyDiscount = Math.min(loyaltyDiscount, discountedSubtotal + shippingCost + tax);
+  // Loyalty rewards: cap to subtotal only (not tax), and require at least $1 payment
+  const maxLoyaltyForSubtotal = Math.max(discountedSubtotal, 0);
+  const maxLoyaltyWithMinPayment = Math.max(discountedSubtotal - 100, 0); // leave $1.00 minimum
+  const effectiveLoyaltyDiscount = Math.min(loyaltyDiscount, maxLoyaltyWithMinPayment, maxLoyaltyForSubtotal);
   const total = discountedSubtotal + shippingCost + tax - effectiveLoyaltyDiscount;
 
   const fetchShippingRates = useCallback(async (addr: { address: string; apartment: string; city: string; state: string; zip: string }) => {
@@ -2395,10 +2398,15 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
       const resp = await fetch(`${API_URL}/api/ecommerce/validate-promo`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ promo_code: code, email }),
+        body: JSON.stringify({ promo_code: code, email, phone: form.phone.trim() }),
       });
       const data = await resp.json();
       if (data.valid) {
+        // Clear loyalty reward when applying promo code (cannot stack)
+        if (loyaltyRedeemId) {
+          setLoyaltyRedeemId(null);
+          setLoyaltyDiscount(0);
+        }
         setPromoApplied(true);
         setPromoDetail({ code: data.code || code, discount_pct: data.discount_pct ?? null, discount_amount: data.discount_amount ?? null });
         setPromoError("");
@@ -2507,6 +2515,13 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
       setLoyaltyRedeemId(null);
       setLoyaltyDiscount(0);
     } else {
+      // Clear promo code when selecting loyalty reward (cannot stack)
+      if (promoApplied) {
+        setPromoApplied(false);
+        setPromoDetail(null);
+        setPromoCode("");
+        setPromoError("");
+      }
       setLoyaltyRedeemId(rewardId);
       setLoyaltyDiscount(Math.round(rewardValue * 100));
     }
@@ -3067,16 +3082,19 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                     {loyaltyData.rewards.length > 0 && (
                       <div>
                         <p className="text-xs font-semibold text-[#231F20] mb-2">Redeem a reward:</p>
+                        {promoApplied && !loyaltyRedeemId && (
+                          <p className="text-xs text-[#D9A32C] mb-2">Loyalty rewards cannot be combined with promo codes. Remove your promo code above to redeem a reward.</p>
+                        )}
                         <div className="space-y-1.5">
                           {loyaltyData.rewards.map((rw) => (
                             <button
                               key={rw.id}
-                              onClick={() => rw.can_redeem && selectLoyaltyReward(rw.id, rw.reward_value)}
-                              disabled={!rw.can_redeem}
-                              className={`w-full flex items-center justify-between p-2.5 rounded-lg border text-left text-xs transition-colors ${loyaltyRedeemId === rw.id ? "border-[#58BA49] bg-[#58BA49]/10" : rw.can_redeem ? "border-[#231F20]/15 hover:border-[#B3D335]" : "border-[#231F20]/10 opacity-40 cursor-not-allowed"}`}
+                              onClick={() => rw.can_redeem && !promoApplied && selectLoyaltyReward(rw.id, rw.reward_value)}
+                              disabled={!rw.can_redeem || promoApplied}
+                              className={`w-full flex items-center justify-between p-2.5 rounded-lg border text-left text-xs transition-colors ${loyaltyRedeemId === rw.id ? "border-[#58BA49] bg-[#58BA49]/10" : rw.can_redeem && !promoApplied ? "border-[#231F20]/15 hover:border-[#B3D335]" : "border-[#231F20]/10 opacity-40 cursor-not-allowed"}`}
                             >
                               <span className="font-medium text-[#231F20]">{rw.name}</span>
-                              <span className={`font-bold ${rw.can_redeem ? "text-[#126A44]" : "text-[#231F20]/40"}`}>{rw.points_required} pts</span>
+                              <span className={`font-bold ${rw.can_redeem && !promoApplied ? "text-[#126A44]" : "text-[#231F20]/40"}`}>{rw.points_required} pts</span>
                             </button>
                           ))}
                         </div>
@@ -3159,6 +3177,9 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
               {sale && sale.active && sale.discount_percent && (
                 <p className="text-xs text-[#D9A32C] mb-2">{sale.discount_percent}% OFF sale is active — promo codes are disabled. Loyalty rewards can still be redeemed below.</p>
               )}
+              {loyaltyRedeemId && !promoApplied && (
+                <p className="text-xs text-[#D9A32C] mb-2">Promo codes cannot be combined with loyalty rewards. Remove your reward below to use a promo code.</p>
+              )}
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -3167,12 +3188,12 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                   onKeyDown={(e) => { if (e.key === "Enter") applyPromo(); }}
                   placeholder="Enter code"
                   className="flex-1 bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-3 py-2 text-sm text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335] focus:ring-1 focus:ring-[#B3D335] transition-colors"
-                  disabled={promoApplied}
+                  disabled={promoApplied || !!loyaltyRedeemId}
                 />
                 {promoApplied ? (
                   <button onClick={() => { setPromoApplied(false); setPromoCode(""); setPromoDetail(null); }} className="px-4 py-2 text-sm font-medium text-[#231F20] border border-[#231F20]/20 rounded-lg hover:bg-[#231F20]/5 transition-colors">Remove</button>
                 ) : (
-                  <button onClick={applyPromo} disabled={promoLoading} className="px-4 py-2 text-sm font-medium bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg transition-colors disabled:opacity-50">{promoLoading ? "Checking..." : "Apply"}</button>
+                  <button onClick={applyPromo} disabled={promoLoading || !!loyaltyRedeemId} className="px-4 py-2 text-sm font-medium bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg transition-colors disabled:opacity-50">{promoLoading ? "Checking..." : "Apply"}</button>
                 )}
               </div>
               {promoError && <p className="text-red-500 text-xs mt-1">{promoError}</p>}
