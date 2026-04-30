@@ -1340,8 +1340,7 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
         p.name.toLowerCase().includes(q) ||
         (p.online_name && p.online_name.toLowerCase().includes(q)) ||
         p.categories.some((c) => c.toLowerCase().includes(q))
-      ))
-      .slice(0, 12);
+      ));
   }, [query, products]);
 
   if (!open) return null;
@@ -1355,6 +1354,7 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
           </div>
           <button onClick={() => { onClose(); setQuery(""); }} className="p-2 text-[#231F20] hover:text-[#231F20]"><X className="h-6 w-6" /></button>
         </div>
+        {query && results.length > 0 && <p className="text-sm text-[#231F20]/60 mb-3">{results.length} product{results.length !== 1 ? "s" : ""} found</p>}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[70vh] overflow-y-auto">
           {results.map((product) => (
             <div key={product.id} className="cursor-pointer group" onClick={() => { navigate(`/products/product/${product.slug}`); onClose(); setQuery(""); }}>
