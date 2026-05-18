@@ -66,7 +66,7 @@ interface Product {
   modified_time?: number;
 }
 
-type FulfillmentType = "pickup_west" | "pickup_east" | "ship";
+type FulfillmentType = "pickup_west" | "pickup_east" | "ship" | "local_delivery";
 
 interface FulfillmentChoice {
   fulfillment: FulfillmentType;
@@ -94,11 +94,12 @@ function saveFulfillment(choice: FulfillmentChoice) {
 function getFulfillmentLabel(f: FulfillmentType): string {
   if (f === "pickup_west") return "Picking Up At West";
   if (f === "pickup_east") return "Picking Up At East";
+  if (f === "local_delivery") return "Local Delivery";
   return "Shipping To Me";
 }
 
 function getStockForFulfillment(product: Product, f: FulfillmentType): number {
-  if (f.startsWith("pickup") && isLeafLife(product)) return 0; // LeafLife ships from partner — pickup not available
+  if ((f.startsWith("pickup") || f === "local_delivery") && isLeafLife(product)) return 0; // LeafLife ships from partner — pickup/delivery not available
   if (f === "pickup_west") return product.stock_west ?? 0;
   if (f === "pickup_east") return product.stock_east ?? 0;
   return product.stock_hq ?? product.stock ?? 0;
@@ -449,6 +450,17 @@ function BudAgeGatePopup({ onComplete }: { onComplete: (f: FulfillmentType) => v
                     </div>
                   </div>
                 </button>
+                {/* Local delivery */}
+                <button onClick={() => setSelected("local_delivery")} className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selected === "local_delivery" ? "border-[#231F20] bg-[#231F20] text-[#B3D335]" : "border-[#231F20]/20 bg-[#FFFFFF] text-[#231F20] hover:border-[#231F20]/50"}`}>
+                  <div className="flex items-start gap-3">
+                    <Package className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-sm">LOCAL DELIVERY</p>
+                      <p className={`text-xs mt-1 ${selected === "local_delivery" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Delivered within 30 miles of Spring Hill</p>
+                      <p className={`text-xs font-semibold mt-1 ${selected === "local_delivery" ? "text-[#B3D335]" : "text-[#3D8C32]"}`}>Within 42 hours &bull; $15 fee ($5 over $150)</p>
+                    </div>
+                  </div>
+                </button>
                 {/* Ship to me */}
                 <button onClick={() => setSelected("ship")} className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selected === "ship" ? "border-[#231F20] bg-[#231F20] text-[#B3D335]" : "border-[#231F20]/20 bg-[#FFFFFF] text-[#231F20] hover:border-[#231F20]/50"}`}>
                   <div className="flex items-start gap-3">
@@ -505,6 +517,16 @@ function FulfillmentSelectorModal({ currentFulfillment, onSelect, onClose }: { c
                   <p className="font-bold text-sm">PICK UP AT SPRING HILL EAST</p>
                   <p className={`text-xs mt-1 ${selected === "pickup_east" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>14312 Spring Hill Dr, Spring Hill FL</p>
                   <p className={`text-xs font-semibold mt-1 ${selected === "pickup_east" ? "text-[#B3D335]" : "text-[#58BA49]"}`}>Ready in 5 minutes</p>
+                </div>
+              </div>
+            </button>
+            <button onClick={() => setSelected("local_delivery")} className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selected === "local_delivery" ? "border-[#231F20] bg-[#231F20] text-[#B3D335]" : "border-[#231F20]/20 bg-[#FFFFFF] text-[#231F20] hover:border-[#231F20]/50"}`}>
+              <div className="flex items-start gap-3">
+                <Package className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-sm">LOCAL DELIVERY</p>
+                  <p className={`text-xs mt-1 ${selected === "local_delivery" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Delivered within 30 miles of Spring Hill</p>
+                  <p className={`text-xs font-semibold mt-1 ${selected === "local_delivery" ? "text-[#B3D335]" : "text-[#3D8C32]"}`}>Within 42 hours &bull; $15 fee ($5 over $150)</p>
                 </div>
               </div>
             </button>
@@ -595,7 +617,7 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
             {/* Fulfillment pill */}
             {fulfillment && (
               <button onClick={onFulfillmentClick} className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#231F20] text-[#B3D335] rounded-full text-xs font-medium hover:bg-[#231F20]/80 transition-colors" title="Change fulfillment method">
-                {fulfillment.startsWith("pickup") ? <MapPin className="h-3.5 w-3.5" /> : <Truck className="h-3.5 w-3.5" />}
+                {fulfillment.startsWith("pickup") ? <MapPin className="h-3.5 w-3.5" /> : fulfillment === "local_delivery" ? <Package className="h-3.5 w-3.5" /> : <Truck className="h-3.5 w-3.5" />}
                 <span>{getFulfillmentLabel(fulfillment)}</span>
                 <RefreshCw className="h-3 w-3" />
               </button>
@@ -621,7 +643,7 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
         {fulfillment && (
           <div className="sm:hidden flex justify-center pb-1.5">
             <button onClick={onFulfillmentClick} className="flex items-center gap-1.5 px-3 py-1 bg-[#231F20] text-[#B3D335] rounded-full text-[11px] font-medium">
-              {fulfillment.startsWith("pickup") ? <MapPin className="h-3 w-3" /> : <Truck className="h-3 w-3" />}
+              {fulfillment.startsWith("pickup") ? <MapPin className="h-3 w-3" /> : fulfillment === "local_delivery" ? <Package className="h-3 w-3" /> : <Truck className="h-3 w-3" />}
               <span>{getFulfillmentLabel(fulfillment)}</span>
               <RefreshCw className="h-2.5 w-2.5" />
             </button>
@@ -1041,7 +1063,8 @@ function ProductGridCard({ product, onQuickAdd, fulfillment, sale }: { product: 
                     </span>
           {product.product_type && <span className="inline-block text-[11px] sm:text-xs font-medium px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full bg-[#E8F5E9] text-[#2E7D32]">{product.product_type}</span>}
           {fulfillment && isPickup && <span className="inline-block bg-[#58BA49] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ready in 5 min</span>}
-          {fulfillment && !isPickup && <span className="inline-block bg-[#3D8C32] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ships 1–2 Days</span>}
+          {fulfillment && fulfillment === "local_delivery" && <span className="inline-block bg-[#3D8C32] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">42hr Delivery</span>}
+          {fulfillment && !isPickup && fulfillment !== "local_delivery" && <span className="inline-block bg-[#3D8C32] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ships 1–2 Days</span>}
           {effectiveStock <= 5 && <span className="inline-block bg-[#ADD038] text-[#231F20] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Only {Math.floor(effectiveStock)} Left</span>}
         </div>
         <h3 className="text-[#231F20] text-[13px] sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#126A44] transition-colors">{titleCase(product.online_name || product.name)}</h3>
@@ -1055,7 +1078,7 @@ function ProductGridCard({ product, onQuickAdd, fulfillment, sale }: { product: 
                     ) : (
                       <span className="text-[#231F20] font-semibold text-[14px] sm:text-lg">{formatPrice(product.price)}</span>
                     )}
-                    <span className="text-[11px] sm:text-[10px] text-[#3D8C32] sm:inline">{fulfillment && isPickup ? <><span className="text-[#58BA49]">●</span> 5 Minute Pickup</> : fulfillment && !isPickup ? <><span className="text-[#3D8C32]">●</span> Ships To You</> : isLeafLife(product) ? <><span className="text-[#126A44]">●</span> Shipping Only</> : <><span className="text-[#126A44]">●</span> 5 Minute Pickup</>}</span>
+                    <span className="text-[11px] sm:text-[10px] text-[#3D8C32] sm:inline">{fulfillment && isPickup ? <><span className="text-[#58BA49]">●</span> 5 Minute Pickup</> : fulfillment === "local_delivery" ? <><span className="text-[#3D8C32]">●</span> 42hr Delivery</> : fulfillment && !isPickup ? <><span className="text-[#3D8C32]">●</span> Ships To You</> : isLeafLife(product) ? <><span className="text-[#126A44]">●</span> Shipping Only</> : <><span className="text-[#126A44]">●</span> 5 Minute Pickup</>}</span>
         </div>
         {/* Quick Add to Cart button */}
         {onQuickAdd && product.available && (
@@ -2310,6 +2333,9 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
   const [loyaltyShowSignup, setLoyaltyShowSignup] = useState(false);
   const [loyaltySigningUp, setLoyaltySigningUp] = useState(false);
   const [loyaltySignupSuccess, setLoyaltySignupSuccess] = useState("");
+  const [deliveryEligible, setDeliveryEligible] = useState<boolean | null>(null);
+  const [deliveryChecking, setDeliveryChecking] = useState(false);
+  const [deliveryError, setDeliveryError] = useState("");
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", phone: "",
     address: "", apartment: "", city: "", state: "FL", zip: "",
@@ -2353,8 +2379,10 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
   const discount = Math.min(rawDiscount, subtotal);
   const discountedSubtotal = subtotal - discount - volumeDiscountTotal;
   const selectedRate = shippingRates.find(r => r.id === selectedRateId);
-  const shippingCost = (fulfillment && fulfillment.startsWith("pickup")) ? 0 : (selectedRate ? selectedRate.amount_cents : 0);
   const isPickup = !!(fulfillment && fulfillment.startsWith("pickup"));
+  const isDelivery = fulfillment === "local_delivery";
+  const deliveryFee = isDelivery ? (subtotal >= 15000 ? 500 : 1500) : 0;
+  const shippingCost = isPickup ? 0 : isDelivery ? deliveryFee : (selectedRate ? selectedRate.amount_cents : 0);
   const taxRate = getTaxRate(form.state, isPickup);
   const tax = Math.round(discountedSubtotal * taxRate);
   // Loyalty rewards: cap to subtotal only (not tax), and require at least $1 payment
@@ -2385,6 +2413,23 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
     }
     setRatesLoading(false);
   }, [cart]);
+
+  const checkDeliveryEligibility = useCallback(async (addr: { address: string; city: string; state: string; zip: string }) => {
+    if (!addr.address || !addr.city || !addr.state || !addr.zip) return;
+    setDeliveryChecking(true);
+    setDeliveryError("");
+    try {
+      const params = new URLSearchParams({ address: addr.address, city: addr.city, state: addr.state, zip: addr.zip });
+      const resp = await fetch(`${API_URL}/api/ecommerce/delivery/check?${params}`);
+      const data = await resp.json();
+      setDeliveryEligible(data.eligible);
+      if (!data.eligible) setDeliveryError(data.reason || "Address is outside the delivery area.");
+    } catch {
+      setDeliveryEligible(false);
+      setDeliveryError("Unable to verify delivery address. Please try again.");
+    }
+    setDeliveryChecking(false);
+  }, []);
 
   const [promoLoading, setPromoLoading] = useState(false);
   const applyPromo = async () => {
@@ -2663,7 +2708,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
           <div className="space-y-3 text-sm text-[#231F20]">
             <div className="flex gap-3"><Mail className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>A confirmation email will be sent to <span className="font-semibold text-[#231F20]">{form.email}</span></p></div>
             <div className="flex gap-3"><Package className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>Your order will be prepared and packaged</p></div>
-            <div className="flex gap-3"><Truck className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>You'll receive shipping details once dispatched</p></div>
+            <div className="flex gap-3"><Truck className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>{isDelivery ? "Your order will be delivered within 42 hours" : isPickup ? "Your order will be ready for pickup in about 5 minutes" : "You'll receive shipping details once dispatched"}</p></div>
           </div>
         </div>
         <div className="flex gap-3 justify-center">
@@ -2674,7 +2719,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
   }
 
   const canProceedInfo = form.firstName && form.lastName && form.email && form.phone;
-  const canProceedShipping = isPickup ? true : (form.address && form.city && form.state && form.zip && selectedRateId);
+  const canProceedShipping = isPickup ? true : isDelivery ? (form.address && form.city && form.state && form.zip && deliveryEligible === true) : (form.address && form.city && form.state && form.zip && selectedRateId);
 
   const handlePlaceOrder = async () => {
     if (!tosAccepted) {
@@ -2727,7 +2772,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
         shipping_address: { address: form.address, apartment: form.apartment, city: form.city, state: form.state, zip: form.zip },
         items: cart.map((item) => { const sp = getSalePrice(item.product, sale ?? null); return { product_id: item.product.id, name: item.product.name, sku: item.product.sku, price: sp !== null ? sp : item.product.price, quantity: item.quantity }; }),
         subtotal, discount, volume_discount: volumeDiscountTotal, sale_discount: saleDiscount, loyalty_discount: effectiveLoyaltyDiscount, shipping_cost: shippingCost, tax, total, notes: form.notes,
-        shipping_service: selectedRate?.service_level || "",
+        shipping_service: isDelivery ? "Local Delivery" : (selectedRate?.service_level || ""),
         promo_code: promoApplied && promoDetail ? promoDetail.code : null,
         payment_token: tokenResult.token,
         loyalty_number: form.loyaltyNumber,
@@ -2759,7 +2804,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
 
   const steps: Array<{ key: "info" | "shipping" | "payment"; label: string; icon: typeof Phone }> = [
     { key: "info", label: "Contact", icon: Phone },
-    { key: "shipping", label: isPickup ? "Pickup" : "Shipping", icon: isPickup ? MapPin : Truck },
+    { key: "shipping", label: isPickup ? "Pickup" : isDelivery ? "Delivery" : "Shipping", icon: isPickup ? MapPin : isDelivery ? Package : Truck },
     { key: "payment", label: "Payment", icon: CreditCard },
   ];
 
@@ -2797,14 +2842,14 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
               </div>
               <div className="mt-8 flex justify-between">
                 <button onClick={() => navigate("/shop")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Shop</button>
-                <button onClick={() => setStep("shipping")} disabled={!canProceedInfo} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedInfo ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>{isPickup ? "Continue to Pickup" : "Continue to Shipping"}</button>
+                <button onClick={() => setStep("shipping")} disabled={!canProceedInfo} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedInfo ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>{isPickup ? "Continue to Pickup" : isDelivery ? "Continue to Delivery" : "Continue to Shipping"}</button>
               </div>
             </div>
           )}
 
           {step === "shipping" && (
             <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/20 p-6 sm:p-8">
-              <h2 className="text-xl font-bold text-[#231F20] mb-6">{isPickup ? "Pickup Details" : "Shipping Address"}</h2>
+              <h2 className="text-xl font-bold text-[#231F20] mb-6">{isPickup ? "Pickup Details" : isDelivery ? "Delivery Address" : "Shipping Address"}</h2>
 
               {isPickup ? (
                 <div className="space-y-4">
@@ -2872,63 +2917,112 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                     <div><label className={labelClass}>Order Notes (optional)</label><textarea value={form.notes} onChange={(e) => setField("notes", e.target.value)} placeholder="Any special instructions..." rows={3} className={inputClass} /></div>
                   </div>
 
-                  {/* Shipping Rate Selection */}
+                  {/* Delivery Eligibility Check or Shipping Rate Selection */}
                   {form.address && form.city && form.state && form.zip && (
                     <div className="mt-6 border-t border-[#231F20]/10 pt-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-[#231F20]">Shipping Method</h3>
-                        <button
-                          onClick={() => fetchShippingRates({ address: form.address, apartment: form.apartment, city: form.city, state: form.state, zip: form.zip })}
-                          disabled={ratesLoading}
-                          className="text-sm text-[#126A44] hover:text-[#58BA49] font-medium transition-colors"
-                        >
-                          {ratesLoading ? "Loading..." : shippingRates.length > 0 ? "Refresh Rates" : "Get Shipping Rates"}
-                        </button>
-                      </div>
-
-                      {ratesLoading && (
-                        <div className="flex items-center gap-3 py-6 justify-center">
-                          <div className="h-5 w-5 border-2 border-[#B3D335] border-t-transparent rounded-full animate-spin" />
-                          <span className="text-sm text-[#231F20]">Fetching USPS rates...</span>
-                        </div>
-                      )}
-
-                      {ratesError && <p className="text-red-500 text-sm mb-3">{ratesError}</p>}
-
-                      {!ratesLoading && shippingRates.length === 0 && !ratesError && (
-                        <p className="text-[#231F20]/60 text-sm">Click &quot;Get Shipping Rates&quot; to see available USPS shipping options for your address.</p>
-                      )}
-
-                      {!ratesLoading && shippingRates.length > 0 && (
-                        <div className="space-y-2">
-                          {shippingRates.map((rate) => (
+                      {isDelivery ? (
+                        <>
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold text-[#231F20]">Delivery Details</h3>
                             <button
-                              key={rate.id}
-                              onClick={() => setSelectedRateId(rate.id)}
-                              className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all text-left ${
-                                selectedRateId === rate.id
-                                  ? "border-[#B3D335] bg-[#B3D335]/5"
-                                  : "border-[#231F20]/10 hover:border-[#231F20]/30"
-                              }`}
+                              onClick={() => checkDeliveryEligibility({ address: form.address, city: form.city, state: form.state, zip: form.zip })}
+                              disabled={deliveryChecking}
+                              className="text-sm text-[#126A44] hover:text-[#58BA49] font-medium transition-colors"
                             >
-                              <div className="flex items-center gap-3">
-                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedRateId === rate.id ? "border-[#B3D335]" : "border-[#231F20]/30"}`}>
-                                  {selectedRateId === rate.id && <div className="w-2.5 h-2.5 rounded-full bg-[#B3D335]" />}
+                              {deliveryChecking ? "Checking..." : deliveryEligible !== null ? "Re-check Address" : "Check Delivery Availability"}
+                            </button>
+                          </div>
+
+                          {deliveryChecking && (
+                            <div className="flex items-center gap-3 py-6 justify-center">
+                              <div className="h-5 w-5 border-2 border-[#B3D335] border-t-transparent rounded-full animate-spin" />
+                              <span className="text-sm text-[#231F20]">Checking delivery availability...</span>
+                            </div>
+                          )}
+
+                          {deliveryError && <p className="text-red-500 text-sm mb-3">{deliveryError}</p>}
+
+                          {!deliveryChecking && deliveryEligible === null && (
+                            <p className="text-[#231F20]/60 text-sm">Click &quot;Check Delivery Availability&quot; to verify your address is within our 30-mile delivery area.</p>
+                          )}
+
+                          {!deliveryChecking && deliveryEligible === true && (
+                            <div className="p-5 rounded-xl border-2 border-[#B3D335] bg-[#B3D335]/5">
+                              <div className="flex items-center gap-3 mb-2">
+                                <CheckCircle className="h-5 w-5 text-[#126A44]" />
+                                <h3 className="font-semibold text-[#231F20]">Delivery Available!</h3>
+                              </div>
+                              <div className="space-y-2 text-sm text-[#231F20]">
+                                <div className="flex items-center gap-2">
+                                  <Clock className="h-4 w-4 text-[#126A44]" />
+                                  <span>Delivered within <strong>42 hours</strong> of order placement</span>
                                 </div>
-                                <div>
-                                  <p className="font-medium text-[#231F20] text-sm">{rate.service_level}</p>
-                                  {rate.estimated_days && (
-                                    <p className="text-xs text-[#231F20]/60">{rate.estimated_days} business day{rate.estimated_days !== 1 ? "s" : ""}</p>
-                                  )}
-                                  {rate.duration_terms && !rate.estimated_days && (
-                                    <p className="text-xs text-[#231F20]/60">{rate.duration_terms}</p>
-                                  )}
+                                <div className="flex items-center gap-2">
+                                  <DollarSign className="h-4 w-4 text-[#126A44]" />
+                                  <span>Delivery fee: <strong>{subtotal >= 15000 ? "$5.00" : "$15.00"}</strong>{subtotal >= 15000 ? " (orders over $150)" : ""}{subtotal < 15000 ? ` ($5.00 for orders over $150)` : ""}</span>
                                 </div>
                               </div>
-                              <span className="font-semibold text-[#231F20]">${rate.amount}</span>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold text-[#231F20]">Shipping Method</h3>
+                            <button
+                              onClick={() => fetchShippingRates({ address: form.address, apartment: form.apartment, city: form.city, state: form.state, zip: form.zip })}
+                              disabled={ratesLoading}
+                              className="text-sm text-[#126A44] hover:text-[#58BA49] font-medium transition-colors"
+                            >
+                              {ratesLoading ? "Loading..." : shippingRates.length > 0 ? "Refresh Rates" : "Get Shipping Rates"}
                             </button>
-                          ))}
-                        </div>
+                          </div>
+
+                          {ratesLoading && (
+                            <div className="flex items-center gap-3 py-6 justify-center">
+                              <div className="h-5 w-5 border-2 border-[#B3D335] border-t-transparent rounded-full animate-spin" />
+                              <span className="text-sm text-[#231F20]">Fetching USPS rates...</span>
+                            </div>
+                          )}
+
+                          {ratesError && <p className="text-red-500 text-sm mb-3">{ratesError}</p>}
+
+                          {!ratesLoading && shippingRates.length === 0 && !ratesError && (
+                            <p className="text-[#231F20]/60 text-sm">Click &quot;Get Shipping Rates&quot; to see available USPS shipping options for your address.</p>
+                          )}
+
+                          {!ratesLoading && shippingRates.length > 0 && (
+                            <div className="space-y-2">
+                              {shippingRates.map((rate) => (
+                                <button
+                                  key={rate.id}
+                                  onClick={() => setSelectedRateId(rate.id)}
+                                  className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all text-left ${
+                                    selectedRateId === rate.id
+                                      ? "border-[#B3D335] bg-[#B3D335]/5"
+                                      : "border-[#231F20]/10 hover:border-[#231F20]/30"
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedRateId === rate.id ? "border-[#B3D335]" : "border-[#231F20]/30"}`}>
+                                      {selectedRateId === rate.id && <div className="w-2.5 h-2.5 rounded-full bg-[#B3D335]" />}
+                                    </div>
+                                    <div>
+                                      <p className="font-medium text-[#231F20] text-sm">{rate.service_level}</p>
+                                      {rate.estimated_days && (
+                                        <p className="text-xs text-[#231F20]/60">{rate.estimated_days} business day{rate.estimated_days !== 1 ? "s" : ""}</p>
+                                      )}
+                                      {rate.duration_terms && !rate.estimated_days && (
+                                        <p className="text-xs text-[#231F20]/60">{rate.duration_terms}</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <span className="font-semibold text-[#231F20]">${rate.amount}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   )}
@@ -2959,7 +3053,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
               {/* Shipping/Pickup summary */}
               <div className="mb-4 p-4 bg-[#FFFFFF] rounded-xl">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold text-[#231F20]">{isPickup ? "Pickup Location" : "Shipping Address"}</h3>
+                  <h3 className="text-sm font-semibold text-[#231F20]">{isPickup ? "Pickup Location" : isDelivery ? "Delivery Address" : "Shipping Address"}</h3>
                   <button onClick={() => setStep("shipping")} className="text-xs text-[#B3D335] hover:text-[#126A44]">Edit</button>
                 </div>
                 {isPickup ? (
@@ -2971,6 +3065,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                   <>
                     <p className="text-[#FFFFFF] text-sm">{form.address}{form.apartment ? `, ${form.apartment}` : ""}</p>
                     <p className="text-[#231F20] text-sm">{form.city}, {form.state} {form.zip}</p>
+                    {isDelivery && <p className="text-[#126A44] text-sm font-medium mt-1">Delivered within 42 hours</p>}
                   </>
                 )}
               </div>
@@ -3204,7 +3299,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
               {saleDiscount > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Sale Discount</span><span className="text-[#126A44] font-medium">-{formatPrice(saleDiscount)}</span></div>}
               {promoApplied && discount > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Discount ({promoDetail?.discount_pct ? `${Math.round(promoDetail.discount_pct * 100)}%` : "promo"})</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
               {volumeDiscountTotal > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Volume Discount</span><span className="text-[#126A44] font-medium">-{formatPrice(volumeDiscountTotal)}</span></div>}
-              <div className="flex justify-between text-sm"><span className="text-[#231F20]">{isPickup ? "Pickup" : `Shipping${selectedRate ? ` (${selectedRate.service_level})` : ""}`}</span><span className="text-[#231F20]">{isPickup ? "FREE" : (selectedRate ? formatPrice(shippingCost) : "Select a rate")}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-[#231F20]">{isPickup ? "Pickup" : isDelivery ? "Delivery Fee" : `Shipping${selectedRate ? ` (${selectedRate.service_level})` : ""}`}</span><span className="text-[#231F20]">{isPickup ? "FREE" : isDelivery ? formatPrice(deliveryFee) : (selectedRate ? formatPrice(shippingCost) : "Select a rate")}</span></div>
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Tax ({(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 2)}%)</span><span className="text-[#231F20]">{formatPrice(tax)}</span></div>
               {effectiveLoyaltyDiscount > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Rewards Discount</span><span className="text-[#126A44] font-medium">-{formatPrice(effectiveLoyaltyDiscount)}</span></div>}
               <div className="border-t border-[#231F20]/20 pt-3 flex justify-between"><span className="text-[#231F20] font-semibold">Total</span><span className="text-xl font-bold text-[#231F20]">{formatPrice(total)}</span></div>
@@ -3921,6 +4016,7 @@ function AccountPage() {
   const getOrderFulfillmentLabel = (type: string) => {
     if (type === "pickup_west") return "Pickup — West";
     if (type === "pickup_east") return "Pickup — East";
+    if (type === "local_delivery") return "Local Delivery";
     return "Shipping";
   };
 
@@ -4085,6 +4181,12 @@ function AccountPage() {
                         {order.fulfillment_type === "pickup_west"
                           ? "Ready for pickup at Spring Hill West — 6175 Deltona Blvd, Suite 104"
                           : "Ready for pickup at Spring Hill East — 14312 Spring Hill Dr"}
+                      </div>
+                    )}
+
+                    {order.fulfillment_type === "local_delivery" && (
+                      <div className="bg-[#B3D335]/10 rounded-lg p-4 text-sm text-[#231F20]">
+                        Your order will be delivered within 42 hours of placement.
                       </div>
                     )}
                   </div>
