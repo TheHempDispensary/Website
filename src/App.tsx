@@ -1595,7 +1595,7 @@ function TermsPage() {
 
         <h2 className="text-2xl font-bold text-[#231F20] mt-8 mb-3">3. All Sales Are Final — No Refunds or Returns</h2>
         <p className="mb-4">Due to the consumable and perishable nature of our products, all sales are final. We do not accept returns or issue refunds once an order has been placed and payment has been processed. This policy applies to all products including but not limited to flower, edibles, concentrates, tinctures, vapes, and topicals.</p>
-        <p className="mb-6">If your order arrives damaged or incorrect, you must contact us at support@thehempdispensary.com within 48 hours of delivery with photos of the damaged item and packaging. We will review the claim and, at our sole discretion, may offer a replacement or store credit.</p>
+        <p className="mb-6">If your order arrives damaged or incorrect, you must contact us at Support@TheHempDispensary.com within 48 hours of delivery with photos of the damaged item and packaging. We will review the claim and, at our sole discretion, may offer a replacement or store credit.</p>
 
         <h2 className="text-2xl font-bold text-[#231F20] mt-8 mb-3">4. Chargebacks and Payment Disputes</h2>
         <p className="mb-6">By completing a purchase, you agree that filing a chargeback or payment dispute with your bank or card issuer for a valid, fulfilled order is a violation of these Terms of Service. If a chargeback is filed on a delivered order, we reserve the right to submit all available evidence — including your order details, IP address, shipping confirmation, delivery confirmation, and your agreement to these Terms of Service — to our payment processor in defense of the dispute. Accounts found to have filed fraudulent chargebacks may be permanently banned from placing future orders.</p>
@@ -1607,7 +1607,7 @@ function TermsPage() {
         <p className="mb-6">When you complete a purchase on our website, a timestamped record is created confirming your agreement to these Terms of Service, your age verification, and your acknowledgment of our all-sales-final policy. This record may be used as evidence in any payment dispute proceeding.</p>
 
         <h2 className="text-2xl font-bold text-[#231F20] mt-8 mb-3">7. Contact</h2>
-        <p>For any questions regarding these terms, contact us at support@thehempdispensary.com or visit us at our Spring Hill, FL location.</p>
+        <p>For any questions regarding these terms, contact us at Support@TheHempDispensary.com or visit us at our Spring Hill, FL location.</p>
       </div>
     </div>
   );
@@ -1646,8 +1646,8 @@ function ContactPage() {
       <div className="prose prose-lg text-[#231F20]">
         <p className="mb-4">Have questions? We'd love to hear from you!</p>
         <div className="space-y-3">
-          <p className="flex items-center gap-2"><Phone className="h-5 w-5 text-[#126A44]" /> (352) 340-2861</p>
-          <p className="flex items-center gap-2"><Mail className="h-5 w-5 text-[#126A44]" /> support@thehempdispensary.com</p>
+          <p className="flex items-center gap-2"><Phone className="h-5 w-5 text-[#126A44]" /><a href="tel:+13528426185" className="hover:text-[#126A44]"> (352) 842-6185</a></p>
+          <p className="flex items-center gap-2"><Mail className="h-5 w-5 text-[#126A44]" /><a href="mailto:Support@TheHempDispensary.com" className="hover:text-[#126A44]"> Support@TheHempDispensary.com</a></p>
           <p className="flex items-center gap-2"><MapPin className="h-5 w-5 text-[#126A44]" /> Spring Hill, FL</p>
         </div>
       </div>
@@ -1875,7 +1875,7 @@ function ShippingPolicyPage() {
         <p className="mb-4">We ship to all 50 US states in compliance with federal and state hemp regulations. All products contain less than 0.3% Delta-9 THC as required by the 2018 Farm Bill.</p>
 
         <h2 className="text-2xl font-semibold text-[#231F20] mt-6 mb-3">Questions?</h2>
-        <p className="mb-4">Contact us at <a href="mailto:support@thehempdispensary.com" className="text-[#126A44] underline">support@thehempdispensary.com</a> or call <a href="tel:+13523405860" className="text-[#126A44] underline">(352) 340-5860</a> for any shipping questions.</p>
+        <p className="mb-4">Contact us at <a href="mailto:Support@TheHempDispensary.com" className="text-[#126A44] underline">Support@TheHempDispensary.com</a> or call <a href="tel:+13523405860" className="text-[#126A44] underline">(352) 340-5860</a> for any shipping questions.</p>
       </div>
     </div>
   );
