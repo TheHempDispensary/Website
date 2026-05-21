@@ -1646,7 +1646,7 @@ function ContactPage() {
       <div className="prose prose-lg text-[#231F20]">
         <p className="mb-4">Have questions? We'd love to hear from you!</p>
         <div className="space-y-3">
-          <p className="flex items-center gap-2"><Phone className="h-5 w-5 text-[#126A44]" /><a href="tel:+13523405860" className="hover:text-[#126A44]"> (352) 340-5860</a></p>
+          <p className="flex items-center gap-2"><Phone className="h-5 w-5 text-[#126A44]" /><a href="tel:+13528426185" className="hover:text-[#126A44]"> (352) 842-6185</a></p>
           <p className="flex items-center gap-2"><Mail className="h-5 w-5 text-[#126A44]" /><a href="mailto:Support@TheHempDispensary.com" className="hover:text-[#126A44]"> Support@TheHempDispensary.com</a></p>
           <p className="flex items-center gap-2"><MapPin className="h-5 w-5 text-[#126A44]" /> Spring Hill, FL</p>
         </div>
