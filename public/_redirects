@@ -97,8 +97,8 @@
 /wax                /index.html        410
 /wax?*              /index.html        410
 /wax/*              /index.html        410
-/bud                /index.html        410
-/bud/*              /index.html        410
+/bud                /products/flower   301
+/bud/*              /products/flower   301
 /treats             /index.html        410
 /treats/*           /index.html        410
 /relaxation         /index.html        410
@@ -110,9 +110,9 @@
 /gummies            /index.html        410
 /gummies?*          /index.html        410
 /gummies/*          /index.html        410
-/chocolate          /index.html        410
-/chocolate?*        /index.html        410
-/chocolate/*        /index.html        410
+/chocolate          /products/edibles  301
+/chocolate?*        /products/edibles  301
+/chocolate/*        /products/edibles  301
 /100-ounces         /index.html        410
 /100-ounces?*       /index.html        410
 /100-ounces/*       /index.html        410
@@ -132,8 +132,9 @@
 /pets               /index.html        410
 /pets?*             /index.html        410
 /pets/*             /index.html        410
-# /cbd is a live cannabinoid page — only sub-paths are dead
+# /cbd is a live cannabinoid page — only sub-paths redirect to relevant categories
 /cbd                /index.html        200
+/cbd/cbg/vapor      /products/vapor    301
 /cbd/*              /index.html        410
 /exotic_thca_flower /index.html        410
 
