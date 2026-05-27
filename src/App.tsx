@@ -652,7 +652,7 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center justify-center gap-1 pb-2 overflow-x-auto">
           {categories.map((cat) => (
-            <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="px-3 py-1.5 text-xs font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-full transition-colors whitespace-nowrap">{cat}</button>
+            <button key={cat} onClick={() => navigate(`/products/${cat.toLowerCase()}`)} className="px-3 py-1.5 text-xs font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-full transition-colors whitespace-nowrap">{cat}</button>
           ))}
         </nav>
       </div>
@@ -661,7 +661,7 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
         <div className="md:hidden bg-[#FFFFFF] border-t border-[#231F20]/10 shadow-lg">
           <div className="max-w-7xl mx-auto px-4 py-3 grid grid-cols-2 gap-2">
             {categories.map((cat) => (
-              <button key={cat} onClick={() => { navigate(`/shop/${cat.toLowerCase()}`); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors">{cat}</button>
+              <button key={cat} onClick={() => { navigate(`/products/${cat.toLowerCase()}`); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors">{cat}</button>
             ))}
             <a href="/games" onClick={(e) => { e.preventDefault(); navigate("/games"); setMobileMenuOpen(false); }} className="sm:hidden text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors flex items-center gap-2"><Gamepad2 className="h-4 w-4" /> Games</a>
           </div>
@@ -696,7 +696,7 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear, sale 
             <div className="text-center py-12">
               <ShoppingCart className="mx-auto h-12 w-12 text-[#231F20] mb-3" />
               <p className="text-[#231F20]">Your cart is empty</p>
-              <button onClick={() => { onClose(); navigate("/shop"); }} className="mt-4 text-[#126A44] hover:underline font-medium">Start Shopping</button>
+              <button onClick={() => { onClose(); navigate("/products"); }} className="mt-4 text-[#126A44] hover:underline font-medium">Start Shopping</button>
             </div>
           ) : (
             <div className="space-y-4">
@@ -754,7 +754,7 @@ function HeroSection({ sale }: { sale?: ActiveSaleData | null }) {
         </h1>
         <p className="text-[#FFFFFF]/80 text-base sm:text-xl mb-6 max-w-2xl mx-auto">Fast pickup. Lab-tested. Trusted locally.</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button onClick={() => navigate("/shop")} className="px-8 py-3.5 sm:py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors shadow-lg">Shop All</button>
+          <button onClick={() => navigate("/products")} className="px-8 py-3.5 sm:py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors shadow-lg">Shop All</button>
           <button onClick={() => { const el = document.getElementById('locations-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else navigate('/contact'); }} className="px-8 py-3.5 sm:py-4 border-2 border-[#FFFFFF] hover:bg-[#FFFFFF] text-[#FFFFFF] hover:text-[#231F20] rounded-full font-bold text-lg transition-colors">Find Nearest Location</button>
         </div>
         <p className="mt-4 text-[#FFCB08] font-medium text-sm">{"\u{1F525}"} {heroPromo}</p>
@@ -774,7 +774,7 @@ function TrustStrip() {
     { icon: Clock, label: "Open Daily", sub: "East 7am-10pm | West 9am-10pm" },
   ];
   return (
-    <section className="bg-[#FFFFFF] border-b border-[#231F20]/10 cursor-pointer" onClick={() => navigate('/shop')}>
+    <section className="bg-[#FFFFFF] border-b border-[#231F20]/10 cursor-pointer" onClick={() => navigate('/products')}>
       <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
         <div className="grid grid-cols-4 gap-2 sm:gap-4">
           {items.map((item) => (
@@ -816,7 +816,7 @@ function ShopByCategory({ productsByCategory, fulfillment }: { categories: strin
             const IconComp = catIconComponents[cat] || Package;
             const catImage = getCategoryImage(cat);
             return (
-            <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="bg-[#FFFFFF] rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-all group border border-[#231F20]/15 hover:border-[#B3D335]">
+            <button key={cat} onClick={() => navigate(`/products/${cat.toLowerCase()}`)} className="bg-[#FFFFFF] rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-all group border border-[#231F20]/15 hover:border-[#B3D335]">
               {catImage ? (
                 <div className="w-16 h-16 mx-auto mb-3 rounded-xl overflow-hidden">
                   <img src={catImage} alt={cat} className="w-full h-full object-cover" onError={handleImgError} loading="lazy" />
@@ -853,7 +853,7 @@ function ShopByFeeling({ products }: { products: Product[] }) {
           {feelings.map((f) => {
             const count = products.filter(p => p.stock > 0 && getProductEffect(p).label === f.label).length;
             return (
-              <button key={f.label} onClick={() => navigate(`/shop/${f.label.toLowerCase()}`)} className="rounded-2xl p-3 sm:p-6 text-center hover:shadow-lg transition-all group border border-[#231F20]/10 hover:border-[#B3D335]" style={{ backgroundColor: f.bg }}>
+              <button key={f.label} onClick={() => navigate(`/products/${f.label.toLowerCase()}`)} className="rounded-2xl p-3 sm:p-6 text-center hover:shadow-lg transition-all group border border-[#231F20]/10 hover:border-[#B3D335]" style={{ backgroundColor: f.bg }}>
                 <span className="text-2xl sm:text-4xl block mb-1 sm:mb-3">{f.icon}</span>
                 <h3 className="text-sm sm:text-lg font-semibold text-[#231F20] group-hover:text-[#126A44] transition-colors">{f.label}</h3>
                 <p className="text-xs text-[#231F20] mt-0.5 hidden sm:block">{f.desc}</p>
@@ -874,7 +874,7 @@ function PromoBanner() {
       <div className="max-w-3xl mx-auto px-4 text-center">
         <p className="text-[#FFCB08] font-bold text-lg sm:text-2xl mb-2">{"\u{1F525}"} First-Time Customer?</p>
         <p className="text-[#FFFFFF] text-sm sm:text-base mb-4">Get <span className="text-[#B3D335] font-bold">10% OFF</span> your entire order with code <span className="bg-[#FFFFFF]/10 px-2 py-0.5 rounded font-mono font-bold">FIRST10</span></p>
-        <button onClick={() => navigate('/shop')} className="px-8 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold transition-colors">Shop Now &amp; Save</button>
+        <button onClick={() => navigate('/products')} className="px-8 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold transition-colors">Shop Now &amp; Save</button>
       </div>
     </section>
   );
@@ -1128,13 +1128,19 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
     </div>
   );
 
-  if (!product) return (
-    <div className="text-center py-32">
-      <Package className="mx-auto h-16 w-16 text-[#231F20] mb-4" />
-      <p className="text-[#231F20] text-lg">Product not found</p>
-      <button onClick={() => navigate("/")} className="mt-4 text-[#126A44] hover:underline">Back to products</button>
-    </div>
-  );
+  if (!product) {
+    // Signal to search engines this is a 404 — add noindex
+    const noindex = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
+    if (!noindex) { const m = document.createElement("meta"); m.name = "robots"; m.content = "noindex"; document.head.appendChild(m); }
+    else { noindex.content = "noindex"; }
+    return (
+      <div className="text-center py-32">
+        <Package className="mx-auto h-16 w-16 text-[#231F20] mb-4" />
+        <p className="text-[#231F20] text-lg">Product not found</p>
+        <button onClick={() => navigate("/products")} className="mt-4 text-[#126A44] hover:underline">Browse All Products</button>
+      </div>
+    );
+  }
 
   const effect = getProductEffect(product);
   const strength = getProductStrength(product);
@@ -1259,9 +1265,15 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
                   </span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-                  <div className="h-2.5 w-2.5 bg-[#D9A32C] rounded-full"></div>
-                  <span className="text-[#D9A32C] font-medium text-sm">Out of Stock</span>
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-2.5 w-2.5 bg-[#D9A32C] rounded-full"></div>
+                    <span className="text-[#D9A32C] font-medium text-sm">Currently Out of Stock</span>
+                  </div>
+                  <div className="bg-[#FFCB08]/10 border border-[#FFCB08]/30 rounded-lg p-3">
+                    <p className="text-sm font-medium text-[#231F20] mb-2">Get notified when this product is back in stock</p>
+                    <p className="text-xs text-[#231F20]/70">Contact us at <a href="mailto:Support@TheHempDispensary.com" className="text-[#126A44] underline">Support@TheHempDispensary.com</a> or call <a href="tel:3528426185" className="text-[#126A44] underline">(352) 842-6185</a> to be added to the waitlist.</p>
+                  </div>
                 </div>
               )}
             </div>
@@ -1442,9 +1454,9 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
       </div>
       {/* Category pills */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        <button onClick={() => navigate("/shop")} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${!selectedCategory || selectedCategory === "all" ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>All</button>
+        <button onClick={() => navigate("/products")} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${!selectedCategory || selectedCategory === "all" ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>All</button>
         {categories.map((cat) => (
-          <button key={cat} onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === cat.toLowerCase() ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>{cat}</button>
+          <button key={cat} onClick={() => navigate(`/products/${cat.toLowerCase()}`)} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === cat.toLowerCase() ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>{cat}</button>
         ))}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -1540,7 +1552,7 @@ function AboutPage() {
             Spring Hill West opened December 1, 2019. It&rsquo;s still open. Spring Hill East is still open. We still source the highest quality lab-tested hemp products we can find. We still know most of our customers by name. We&rsquo;re not a corporate chain. We&rsquo;re two guys from Spring Hill who believed in this plant before most people knew what it was &mdash; and we still do. With another federal law change on the horizon, we&rsquo;re facing new challenges again. We&rsquo;ve been here before. We&rsquo;re not going anywhere.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button onClick={() => navigate("/shop")} className="px-8 py-3.5 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] rounded-full font-bold text-lg transition-colors shadow-lg">Shop Now</button>
+            <button onClick={() => navigate("/products")} className="px-8 py-3.5 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] rounded-full font-bold text-lg transition-colors shadow-lg">Shop Now</button>
             <button onClick={() => { const el = document.getElementById('locations-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else navigate('/contact'); }} className="px-8 py-3.5 border-2 border-[#231F20] text-[#231F20] hover:bg-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors">Visit Us</button>
           </div>
         </div>
@@ -1754,7 +1766,7 @@ function ThcaPage({ products, onAddToCart, fulfillment, sale }: { products: Prod
         <div className="text-center py-16">
           <Package className="mx-auto h-12 w-12 text-[#231F20] mb-3" />
           <p className="text-[#231F20]">No THCA products currently available</p>
-          <button onClick={() => navigate("/shop")} className="mt-4 px-6 py-2 bg-[#B3D335] text-[#231F20] rounded-full font-semibold text-sm hover:bg-[#126A44] hover:text-[#FFFFFF] transition-colors">Browse All Products</button>
+          <button onClick={() => navigate("/products")} className="mt-4 px-6 py-2 bg-[#B3D335] text-[#231F20] rounded-full font-semibold text-sm hover:bg-[#126A44] hover:text-[#FFFFFF] transition-colors">Browse All Products</button>
         </div>
       )}
     </div>
@@ -1800,7 +1812,7 @@ function CannabinoidPage({ products, onAddToCart, fulfillment, config, sale }: {
         <div className="text-center py-16">
           <Package className="mx-auto h-12 w-12 text-[#231F20] mb-3" />
           <p className="text-[#231F20]">No {config.title} products currently available</p>
-          <button onClick={() => navigate("/shop")} className="mt-4 px-6 py-2 bg-[#B3D335] text-[#231F20] rounded-full font-semibold text-sm hover:bg-[#126A44] hover:text-[#FFFFFF] transition-colors">Browse All Products</button>
+          <button onClick={() => navigate("/products")} className="mt-4 px-6 py-2 bg-[#B3D335] text-[#231F20] rounded-full font-semibold text-sm hover:bg-[#126A44] hover:text-[#FFFFFF] transition-colors">Browse All Products</button>
         </div>
       )}
     </div>
@@ -1894,15 +1906,15 @@ function SiteFooter() {
           <div>
             <h3 className="font-semibold text-[#3D8C32] mb-3">Shop by Category</h3>
             <div className="space-y-2">
-              <a href="/shop/flower" onClick={(e) => { e.preventDefault(); navigate("/shop/flower"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Flower</a>
-              <a href="/shop/edibles" onClick={(e) => { e.preventDefault(); navigate("/shop/edibles"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Edibles</a>
-              <a href="/shop/concentrates" onClick={(e) => { e.preventDefault(); navigate("/shop/concentrates"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Concentrates</a>
-              <a href="/shop/vapor" onClick={(e) => { e.preventDefault(); navigate("/shop/vapor"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Vapor</a>
-              <a href="/shop/topicals" onClick={(e) => { e.preventDefault(); navigate("/shop/topicals"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Topicals</a>
-              <a href="/shop/tinctures" onClick={(e) => { e.preventDefault(); navigate("/shop/tinctures"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Tinctures</a>
-              <a href="/shop/accessories" onClick={(e) => { e.preventDefault(); navigate("/shop/accessories"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Accessories</a>
-              <a href="/shop/apparel" onClick={(e) => { e.preventDefault(); navigate("/shop/apparel"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Apparel</a>
-              <a href="/shop/packaging" onClick={(e) => { e.preventDefault(); navigate("/shop/packaging"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Packaging</a>
+              <a href="/products/flower" onClick={(e) => { e.preventDefault(); navigate("/products/flower"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Flower</a>
+              <a href="/products/edibles" onClick={(e) => { e.preventDefault(); navigate("/products/edibles"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Edibles</a>
+              <a href="/products/concentrates" onClick={(e) => { e.preventDefault(); navigate("/products/concentrates"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Concentrates</a>
+              <a href="/products/vapor" onClick={(e) => { e.preventDefault(); navigate("/products/vapor"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Vapor</a>
+              <a href="/products/topicals" onClick={(e) => { e.preventDefault(); navigate("/products/topicals"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Topicals</a>
+              <a href="/products/tinctures" onClick={(e) => { e.preventDefault(); navigate("/products/tinctures"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Tinctures</a>
+              <a href="/products/accessories" onClick={(e) => { e.preventDefault(); navigate("/products/accessories"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Accessories</a>
+              <a href="/products/apparel" onClick={(e) => { e.preventDefault(); navigate("/products/apparel"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Apparel</a>
+              <a href="/products/packaging" onClick={(e) => { e.preventDefault(); navigate("/products/packaging"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Packaging</a>
             </div>
           </div>
           <div>
@@ -2689,7 +2701,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
         <ShoppingCart className="mx-auto h-16 w-16 text-[#231F20] mb-4" />
         <h1 className="text-2xl font-bold text-[#FFFFFF] mb-2">Your cart is empty</h1>
         <p className="text-[#231F20] mb-6">Add some products before checking out.</p>
-        <button onClick={() => navigate("/shop")} className="bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] px-8 py-3 rounded-full font-medium transition-colors">Shop Now</button>
+        <button onClick={() => navigate("/products")} className="bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] px-8 py-3 rounded-full font-medium transition-colors">Shop Now</button>
       </div>
     );
   }
@@ -2841,7 +2853,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                 <div><label className={labelClass}>Phone *</label><input type="tel" value={form.phone} onChange={(e) => setField("phone", e.target.value)} placeholder="(352) 555-0123" className={inputClass} /></div>
               </div>
               <div className="mt-8 flex justify-between">
-                <button onClick={() => navigate("/shop")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Shop</button>
+                <button onClick={() => navigate("/products")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Shop</button>
                 <button onClick={() => setStep("shipping")} disabled={!canProceedInfo} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedInfo ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>{isPickup ? "Continue to Pickup" : isDelivery ? "Continue to Delivery" : "Continue to Shipping"}</button>
               </div>
             </div>
@@ -4707,14 +4719,14 @@ function App() {
   useEffect(() => {
     const descriptions: Record<string, string> = {
       "/": "The Hemp Dispensary — Spring Hill FL's trusted hemp store. Shop premium flower, edibles, concentrates, vapes, topicals, and tinctures online. Ready in 5 minutes or shipped to your door.",
-      "/shop/flower": "Shop premium hemp flower at The Hemp Dispensary — Everyday, Premium, Essential, Smalls, and Snowcaps tiers. Lab-tested, locally trusted, ready in 5 minutes.",
-      "/shop/edibles": "Hemp edibles including Delta-9 gummies, CBD chocolates, and CBN sleep chews. Lab-tested, legally compliant, available for pickup or shipping.",
-      "/shop/concentrates": "Premium hemp concentrates including live rosin, diamonds, shatter, and badder. Solventless and hydrocarbon options, lab-tested for purity.",
-      "/shop/vapor": "CBD and THC vape cartridges, disposables, and 510-thread batteries. Lab-tested hemp vapor products ready for pickup in Spring Hill FL.",
-      "/shop/topicals": "Hemp topicals including CBD muscle creams, balms, roll-ons, and transdermal patches. Targeted relief, lab-tested, available in-store and online.",
-      "/shop/tinctures": "CBD, CBG, CBN and full spectrum hemp tinctures. Sublingual oils for sleep, pain, focus, and daily wellness. Lab-tested, fast pickup or shipping.",
-      "/shop/accessories": "Hemp accessories including glass pipes, rolling papers, grinders, storage, and butane. Everything you need in one stop.",
-      "/shop/packaging": "Wholesale packaging supplies — containers, bags, jars, and more from top manufacturers like Chubby Gorilla. Available at The Hemp Dispensary.",
+      "/products/flower": "Shop premium hemp flower at The Hemp Dispensary — Everyday, Premium, Essential, Smalls, and Snowcaps tiers. Lab-tested, locally trusted, ready in 5 minutes.",
+      "/products/edibles": "Hemp edibles including Delta-9 gummies, CBD chocolates, and CBN sleep chews. Lab-tested, legally compliant, available for pickup or shipping.",
+      "/products/concentrates": "Premium hemp concentrates including live rosin, diamonds, shatter, and badder. Solventless and hydrocarbon options, lab-tested for purity.",
+      "/products/vapor": "CBD and THC vape cartridges, disposables, and 510-thread batteries. Lab-tested hemp vapor products ready for pickup in Spring Hill FL.",
+      "/products/topicals": "Hemp topicals including CBD muscle creams, balms, roll-ons, and transdermal patches. Targeted relief, lab-tested, available in-store and online.",
+      "/products/tinctures": "CBD, CBG, CBN and full spectrum hemp tinctures. Sublingual oils for sleep, pain, focus, and daily wellness. Lab-tested, fast pickup or shipping.",
+      "/products/accessories": "Hemp accessories including glass pipes, rolling papers, grinders, storage, and butane. Everything you need in one stop.",
+      "/products/packaging": "Wholesale packaging supplies — containers, bags, jars, and more from top manufacturers like Chubby Gorilla. Available at The Hemp Dispensary.",
       "/loyalty": "Hemp Rewards — earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary.",
       "/games": "Play games and win prizes at The Hemp Dispensary. Roll-a-Joint and more — all free to play for rewards members.",
       "/about": "Our Story — how two Spring Hill locals built The Hemp Dispensary from a road trip idea to 15 locations, lost 13 overnight, and kept going.",
@@ -4725,9 +4737,7 @@ function App() {
       "/cbg": "Shop CBG tinctures, wax, gummies, and flower at The Hemp Dispensary in Spring Hill, FL. The mother cannabinoid, lab-tested and federally compliant.",
       "/cbn": "Shop CBN gummies, tinctures, and nighttime blends at The Hemp Dispensary in Spring Hill, FL. Formulated for relaxation and sleep. Lab-tested.",
     };
-    // Normalize /products/... to /shop/... so meta descriptions resolve correctly
-    const normalized = route.startsWith("/products/") ? route.replace("/products/", "/shop/") : (route === "/products" ? "/shop" : route);
-    const key = normalized.startsWith("/shop/") ? normalized : (normalized === "/" || normalized === "" ? "/" : normalized);
+    const key = route === "" ? "/" : route;
     const desc = descriptions[key] || descriptions["/"];
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     if (!meta) {
@@ -4953,7 +4963,7 @@ function App() {
                 <div className="max-w-7xl mx-auto px-4">
                   <div className="flex items-center justify-between mb-8">
                     <h2 className="text-[18px] sm:text-3xl font-semibold sm:font-bold text-[#231F20]">{cat}</h2>
-                    <button onClick={() => navigate(`/shop/${cat.toLowerCase()}`)} className="border border-[#231F20] text-[#231F20] hover:bg-[#FFFFFF] px-6 py-2 rounded-full font-medium transition-all duration-300 text-sm">View All</button>
+                    <button onClick={() => navigate(`/products/${cat.toLowerCase()}`)} className="border border-[#231F20] text-[#231F20] hover:bg-[#FFFFFF] px-6 py-2 rounded-full font-medium transition-all duration-300 text-sm">View All</button>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                     {displayProducts.map((product) => (

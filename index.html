@@ -2,8 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="canonical" href="https://www.thehempdispensary.com/" />
+    <link rel="canonical" href="https://www.thehempdispensary.com/" id="canonical-link" />
     <meta property="og:url" content="https://www.thehempdispensary.com/" />
+    <script>
+      (function(){
+        var p = window.location.pathname;
+        var path = p === '/' || p === '' ? '/' : p.replace(/\/+$/, '');
+        if (path.indexOf('/shop/') === 0) path = path.replace('/shop/', '/products/');
+        else if (path === '/shop') path = '/products';
+        var canonical = path === '/' ? 'https://www.thehempdispensary.com/' : 'https://www.thehempdispensary.com' + path;
+        document.getElementById('canonical-link').href = canonical;
+        var og = document.querySelector('meta[property="og:url"]');
+        if (og) og.content = canonical;
+      })();
+    </script>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
     <link rel="apple-touch-icon" href="/favicon-192.png" />
