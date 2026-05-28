@@ -391,8 +391,8 @@ function BudAgeGatePopup({ onComplete }: { onComplete: (f: FulfillmentType) => v
   const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ backgroundColor: "rgba(35,31,32,0.85)" }}>
-      <div className="bg-[#FFFFFF] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" style={{ animation: "fadeInUp 0.4s ease-out" }}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4" style={{ backgroundColor: "rgba(35,31,32,0.85)" }}>
+      <div className="bg-[#FFFFFF] rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto" style={{ animation: "fadeInUp 0.4s ease-out" }}>
         {/* Bud character header */}
         <div className="bg-[#231F20] px-6 pt-6 pb-4 text-center relative">
           <div className="flex justify-center mb-2"><BudCharacter size={80} mood="wave" /></div>
@@ -490,8 +490,8 @@ function FulfillmentSelectorModal({ currentFulfillment, onSelect, onClose }: { c
   const [selected, setSelected] = useState<FulfillmentType>(currentFulfillment);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ backgroundColor: "rgba(35,31,32,0.85)" }}>
-      <div className="bg-[#FFFFFF] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" style={{ animation: "fadeInUp 0.4s ease-out" }}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4" style={{ backgroundColor: "rgba(35,31,32,0.85)" }}>
+      <div className="bg-[#FFFFFF] rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto" style={{ animation: "fadeInUp 0.4s ease-out" }}>
         <div className="bg-[#231F20] px-6 pt-6 pb-4 text-center relative">
           <img src="/bud-puppet.webp" alt="Bud" className="w-16 h-16 mx-auto mb-2 object-contain" />
           <h2 className="text-[#B3D335] text-xl font-bold">Switch fulfillment method</h2>
