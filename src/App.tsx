@@ -654,6 +654,7 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
           {categories.map((cat) => (
             <button key={cat} onClick={() => navigate(`/products/${cat.toLowerCase()}`)} className="px-3 py-1.5 text-xs font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-full transition-colors whitespace-nowrap">{cat}</button>
           ))}
+          <button onClick={() => navigate("/wholesale")} className="px-3 py-1.5 text-xs font-bold text-[#126A44] hover:text-[#FFFFFF] hover:bg-[#126A44] rounded-full transition-colors whitespace-nowrap border border-[#126A44]">WHOLESALE</button>
         </nav>
       </div>
       {/* Mobile menu */}
@@ -664,6 +665,7 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
               <button key={cat} onClick={() => { navigate(`/products/${cat.toLowerCase()}`); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors">{cat}</button>
             ))}
             <a href="/games" onClick={(e) => { e.preventDefault(); navigate("/games"); setMobileMenuOpen(false); }} className="sm:hidden text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors flex items-center gap-2"><Gamepad2 className="h-4 w-4" /> Games</a>
+            <a href="/wholesale" onClick={(e) => { e.preventDefault(); navigate("/wholesale"); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-bold text-[#126A44] hover:bg-[#126A44] hover:text-[#FFFFFF] rounded-lg transition-colors flex items-center gap-2"><DollarSign className="h-4 w-4" /> Wholesale</a>
           </div>
         </div>
       )}
@@ -1893,6 +1895,331 @@ function ShippingPolicyPage() {
   );
 }
 
+/* ======================== WHOLESALE PAGE ======================== */
+interface WholesaleCartEntry {
+  product: Product;
+  vd: VolumeDiscount;
+  quantity: number;
+}
+
+function WholesalePage({ products, fulfillment }: { products: Product[]; fulfillment: FulfillmentType | null }) {
+  const [volumeDiscounts, setVolumeDiscounts] = useState<VolumeDiscount[]>([]);
+  const [loadingDeals, setLoadingDeals] = useState(true);
+  const [orderItems, setOrderItems] = useState<WholesaleCartEntry[]>([]);
+  const [customerName, setCustomerName] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [orderMessage, setOrderMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
+  useEffect(() => {
+    document.title = "Wholesale | The Hemp Dispensary – Bulk Pricing & Volume Discounts";
+    return () => { document.title = "The Hemp Dispensary | Spring Hill FL"; };
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/ecommerce/volume-discounts/active`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => { setVolumeDiscounts(Array.isArray(data) ? data : []); setLoadingDeals(false); })
+      .catch(() => { setVolumeDiscounts([]); setLoadingDeals(false); });
+  }, []);
+
+  const wholesaleProducts = useMemo(() => {
+    if (volumeDiscounts.length === 0) return [];
+    return volumeDiscounts
+      .filter(vd => vd.is_active)
+      .map(vd => {
+        const product = products.find(p => p.sku === vd.product_sku);
+        if (!product) return null;
+        const effectiveStock = fulfillment ? getStockForFulfillment(product, fulfillment) : product.stock;
+        if (effectiveStock <= 0) return null;
+        return { vd, product, effectiveStock };
+      })
+      .filter((x): x is { vd: VolumeDiscount; product: Product; effectiveStock: number } => x !== null);
+  }, [volumeDiscounts, products, fulfillment]);
+
+  const addToOrder = (product: Product, vd: VolumeDiscount) => {
+    setOrderItems(prev => {
+      const existing = prev.find(e => e.product.id === product.id);
+      if (existing) return prev;
+      return [...prev, { product, vd, quantity: vd.min_quantity }];
+    });
+    document.getElementById("wholesale-order-form")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const updateOrderQty = (productId: string, qty: number) => {
+    setOrderItems(prev => prev.map(e => e.product.id === productId ? { ...e, quantity: Math.max(e.vd.min_quantity, qty) } : e));
+  };
+
+  const removeFromOrder = (productId: string) => {
+    setOrderItems(prev => prev.filter(e => e.product.id !== productId));
+  };
+
+  const orderTotal = useMemo(() => {
+    return orderItems.reduce((sum, entry) => {
+      const wpCents = entry.vd.discount_type === "fixed_total"
+        ? (entry.vd.discount_value * 100) / entry.vd.min_quantity
+        : entry.vd.discount_type === "percent_off"
+          ? entry.product.price * (1 - entry.vd.discount_value / 100)
+          : entry.product.price - entry.vd.discount_value * 100;
+      return sum + Math.round(wpCents) * entry.quantity;
+    }, 0);
+  }, [orderItems]);
+
+  const handleSubmitOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (orderItems.length === 0) { setSubmitError("Please add at least one product to your order."); return; }
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const items = orderItems.map(entry => {
+        const wpCents = entry.vd.discount_type === "fixed_total"
+          ? Math.round((entry.vd.discount_value * 100) / entry.vd.min_quantity)
+          : entry.vd.discount_type === "percent_off"
+            ? Math.round(entry.product.price * (1 - entry.vd.discount_value / 100))
+            : Math.round(entry.product.price - entry.vd.discount_value * 100);
+        return {
+          product_name: entry.product.online_name || entry.product.name,
+          sku: entry.product.sku,
+          quantity: entry.quantity,
+          unit_price: entry.product.price,
+          wholesale_price: wpCents,
+        };
+      });
+      const resp = await fetch(`${API_URL}/api/ecommerce/wholesale-inquiries`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customer_name: customerName,
+          business_name: businessName,
+          email: customerEmail,
+          phone: customerPhone,
+          items,
+          message: orderMessage,
+        }),
+      });
+      if (!resp.ok) throw new Error("Failed to submit");
+      setSubmitted(true);
+    } catch {
+      setSubmitError("Something went wrong. Please try again or email us directly.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div>
+      {/* Hero */}
+      <section className="bg-[#231F20] relative overflow-hidden">
+        <div className="max-w-4xl mx-auto px-4 py-14 sm:py-20 text-center relative z-10">
+          <span className="inline-block bg-[#B3D335] text-[#231F20] text-xs font-bold px-4 py-1.5 rounded-full mb-4 uppercase tracking-wider">Bulk Savings</span>
+          <h1 className="text-3xl sm:text-5xl font-bold text-[#FFFFFF] mb-4 leading-tight">
+            Wholesale Pricing<br />
+            <span className="text-[#B3D335]">Buy More. Save More.</span>
+          </h1>
+          <p className="text-[#FFFFFF]/80 text-base sm:text-xl max-w-2xl mx-auto mb-6">Volume discounts on our most popular products. Perfect for retailers, event organizers, and bulk buyers. Select your products, submit your order, and we'll send you an invoice.</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="#wholesale-deals" onClick={(e) => { e.preventDefault(); document.getElementById("wholesale-deals")?.scrollIntoView({ behavior: "smooth" }); }} className="px-8 py-3.5 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors shadow-lg">View Deals</a>
+            <a href="#wholesale-order-form" onClick={(e) => { e.preventDefault(); document.getElementById("wholesale-order-form")?.scrollIntoView({ behavior: "smooth" }); }} className="px-8 py-3.5 border-2 border-[#FFFFFF] hover:bg-[#FFFFFF] text-[#FFFFFF] hover:text-[#231F20] rounded-full font-bold text-lg transition-colors">Request Invoice</a>
+          </div>
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#231F20]/50 pointer-events-none" />
+      </section>
+
+      {/* How It Works */}
+      <section className="bg-[#FFFFFF] py-12 border-b border-[#231F20]/10">
+        <div className="max-w-5xl mx-auto px-4">
+          <h2 className="text-2xl font-bold text-[#231F20] text-center mb-8">How Wholesale Works</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-[#B3D335]/20 flex items-center justify-center"><Package className="h-6 w-6 text-[#126A44]" /></div>
+              <h3 className="font-semibold text-[#231F20] mb-1">1. Pick Your Products</h3>
+              <p className="text-sm text-[#231F20]/70">Browse our wholesale deals below and add items to your order.</p>
+            </div>
+            <div className="text-center">
+              <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-[#B3D335]/20 flex items-center justify-center"><Send className="h-6 w-6 text-[#126A44]" /></div>
+              <h3 className="font-semibold text-[#231F20] mb-1">2. Submit Your Order</h3>
+              <p className="text-sm text-[#231F20]/70">Fill in your contact info, review your selections, and submit. We'll receive your request instantly.</p>
+            </div>
+            <div className="text-center">
+              <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-[#B3D335]/20 flex items-center justify-center"><CreditCard className="h-6 w-6 text-[#126A44]" /></div>
+              <h3 className="font-semibold text-[#231F20] mb-1">3. Pay via Invoice</h3>
+              <p className="text-sm text-[#231F20]/70">We'll send you an invoice. Pay securely — no credit card disputes, no hassle.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Wholesale Deals */}
+      <section id="wholesale-deals" className="bg-[#FFFFFF] py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-2">Wholesale Deals</h2>
+          <p className="text-[#231F20]/60 text-sm mb-8">{wholesaleProducts.length} products with bulk pricing available</p>
+
+          {loadingDeals ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#B3D335] mb-4"></div>
+              <p className="text-[#231F20]/60 text-sm">Loading wholesale deals...</p>
+            </div>
+          ) : wholesaleProducts.length === 0 ? (
+            <div className="text-center py-16 bg-[#FFFFFF] rounded-2xl border border-[#231F20]/10">
+              <Package className="mx-auto h-12 w-12 text-[#231F20]/30 mb-3" />
+              <p className="text-[#231F20] font-medium mb-2">No wholesale deals available right now</p>
+              <p className="text-[#231F20]/60 text-sm mb-4">Check back soon or contact us for custom bulk pricing.</p>
+              <a href="mailto:Support@TheHempDispensary.com" className="text-[#126A44] font-medium hover:underline">Email Us for Custom Pricing</a>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {wholesaleProducts.map(({ vd, product }) => {
+                const unitPriceCents = product.price;
+                const normalTotal = unitPriceCents * vd.min_quantity;
+                const dealLabel = getVolumeDiscountSavingsLabel(vd, unitPriceCents);
+                const savings = vd.discount_type === "fixed_total"
+                  ? normalTotal - vd.discount_value * 100
+                  : vd.discount_type === "percent_off"
+                    ? Math.round(normalTotal * (vd.discount_value / 100))
+                    : vd.discount_value * 100 * vd.min_quantity;
+                const perUnitWholesale = vd.discount_type === "fixed_total"
+                  ? (vd.discount_value * 100) / vd.min_quantity
+                  : vd.discount_type === "percent_off"
+                    ? unitPriceCents * (1 - vd.discount_value / 100)
+                    : unitPriceCents - vd.discount_value * 100;
+                const inOrder = orderItems.some(e => e.product.id === product.id);
+
+                return (
+                  <div key={vd.id} className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/15 overflow-hidden hover:shadow-xl transition-all group">
+                    <div className="cursor-pointer" onClick={() => navigate(`/products/product/${product.slug}`)}>
+                      <div className="flex items-center justify-center bg-[#FFFFFF] h-[200px] overflow-hidden">
+                        <img src={product.image_url || placeholderUrl(product.name)} alt={product.name} loading="lazy" width="300" height="300" className="max-h-full w-auto object-contain transition-transform duration-300 group-hover:scale-105" onError={handleImgError} />
+                      </div>
+                    </div>
+                    <div className="p-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="inline-block bg-[#FF4444]/10 text-[#FF4444] text-xs font-bold px-3 py-1 rounded-full">Save {formatPrice(savings)}</span>
+                        <span className="inline-block bg-[#B3D335]/20 text-[#126A44] text-xs font-bold px-3 py-1 rounded-full">Min. {vd.min_quantity} units</span>
+                      </div>
+                      <h3 className="text-[#231F20] font-semibold text-base mb-1 cursor-pointer hover:text-[#126A44] transition-colors" onClick={() => navigate(`/products/product/${product.slug}`)}>
+                        {titleCase(product.online_name || product.name)}
+                      </h3>
+                      <div className="bg-[#FFFFFF] rounded-xl border border-[#231F20]/10 p-3 mb-4">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-[#231F20]/50">Retail price</span>
+                          <span className="text-sm text-[#231F20]/50 line-through">{formatPrice(unitPriceCents)}/ea</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-[#126A44]">Wholesale price</span>
+                          <span className="text-lg font-bold text-[#126A44]">{formatPrice(Math.round(perUnitWholesale))}/ea</span>
+                        </div>
+                        <div className="border-t border-[#231F20]/10 mt-2 pt-2">
+                          <p className="text-sm font-bold text-[#231F20]">{dealLabel}</p>
+                        </div>
+                      </div>
+                      {inOrder ? (
+                        <div className="w-full py-3 bg-[#126A44] text-[#FFFFFF] rounded-full font-semibold text-sm text-center flex items-center justify-center gap-2">
+                          <CheckCircle className="h-4 w-4" /> Added to Order
+                        </div>
+                      ) : (
+                        <button onClick={() => addToOrder(product, vd)} className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors text-sm">
+                          Add to Wholesale Order
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Wholesale Order Form */}
+      <section id="wholesale-order-form" className="bg-[#231F20] py-14">
+        <div className="max-w-3xl mx-auto px-4">
+          {submitted ? (
+            <div className="bg-[#126A44]/20 border border-[#126A44]/40 rounded-2xl p-8 text-center">
+              <CheckCircle className="h-14 w-14 text-[#B3D335] mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-[#FFFFFF] mb-2">Order Request Submitted!</h2>
+              <p className="text-[#FFFFFF]/70 mb-6">We've received your wholesale order request and will send you an invoice within 1 business day.</p>
+              <button onClick={() => { setSubmitted(false); setOrderItems([]); setCustomerName(""); setBusinessName(""); setCustomerEmail(""); setCustomerPhone(""); setOrderMessage(""); }} className="px-6 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors">Place Another Order</button>
+            </div>
+          ) : (
+            <>
+              <div className="text-center mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold text-[#FFFFFF] mb-3">Submit Your Wholesale Order</h2>
+                <p className="text-[#FFFFFF]/70">Select products above, then fill out your info below. We'll send you an invoice — no credit card required.</p>
+              </div>
+
+              {/* Order Summary */}
+              {orderItems.length > 0 && (
+                <div className="bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-2xl p-5 mb-6">
+                  <h3 className="text-[#B3D335] font-semibold mb-4">Your Order ({orderItems.length} item{orderItems.length !== 1 ? "s" : ""})</h3>
+                  <div className="space-y-3">
+                    {orderItems.map(entry => {
+                      const wpCents = entry.vd.discount_type === "fixed_total"
+                        ? Math.round((entry.vd.discount_value * 100) / entry.vd.min_quantity)
+                        : entry.vd.discount_type === "percent_off"
+                          ? Math.round(entry.product.price * (1 - entry.vd.discount_value / 100))
+                          : Math.round(entry.product.price - entry.vd.discount_value * 100);
+                      const lineTotal = wpCents * entry.quantity;
+                      return (
+                        <div key={entry.product.id} className="flex items-center gap-3 bg-[#FFFFFF]/5 rounded-xl p-3">
+                          <img src={entry.product.image_url || placeholderUrl(entry.product.name)} alt="" className="w-12 h-12 rounded-lg object-contain bg-[#FFFFFF] flex-shrink-0" onError={handleImgError} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[#FFFFFF] text-sm font-medium truncate">{titleCase(entry.product.online_name || entry.product.name)}</p>
+                            <p className="text-[#FFFFFF]/50 text-xs">{formatPrice(wpCents)}/ea wholesale</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => updateOrderQty(entry.product.id, entry.quantity - 1)} className="w-7 h-7 rounded-full bg-[#FFFFFF]/10 text-[#FFFFFF] flex items-center justify-center hover:bg-[#FFFFFF]/20 text-sm"><Minus className="h-3 w-3" /></button>
+                            <input type="number" min={entry.vd.min_quantity} value={entry.quantity} onChange={(e) => updateOrderQty(entry.product.id, parseInt(e.target.value) || entry.vd.min_quantity)} className="w-14 text-center bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-lg text-[#FFFFFF] text-sm py-1" />
+                            <button onClick={() => updateOrderQty(entry.product.id, entry.quantity + 1)} className="w-7 h-7 rounded-full bg-[#FFFFFF]/10 text-[#FFFFFF] flex items-center justify-center hover:bg-[#FFFFFF]/20 text-sm"><Plus className="h-3 w-3" /></button>
+                          </div>
+                          <p className="text-[#B3D335] font-semibold text-sm w-20 text-right">{formatPrice(lineTotal)}</p>
+                          <button onClick={() => removeFromOrder(entry.product.id)} className="text-[#FFFFFF]/40 hover:text-[#FF4444] transition-colors"><Trash2 className="h-4 w-4" /></button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="border-t border-[#FFFFFF]/20 mt-4 pt-4 flex items-center justify-between">
+                    <span className="text-[#FFFFFF]/70 font-medium">Estimated Total</span>
+                    <span className="text-[#B3D335] text-xl font-bold">{formatPrice(orderTotal)}</span>
+                  </div>
+                </div>
+              )}
+
+              {orderItems.length === 0 && (
+                <div className="bg-[#FFFFFF]/5 border border-[#FFFFFF]/10 rounded-2xl p-8 mb-6 text-center">
+                  <Package className="h-10 w-10 text-[#FFFFFF]/30 mx-auto mb-3" />
+                  <p className="text-[#FFFFFF]/50 text-sm">No products added yet. Browse the deals above and click "Add to Wholesale Order" to get started.</p>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmitOrder} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <input type="text" placeholder="Your Name *" value={customerName} onChange={(e) => setCustomerName(e.target.value)} required className="w-full px-4 py-3 bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-xl text-[#FFFFFF] placeholder-[#FFFFFF]/40 focus:outline-none focus:border-[#B3D335]" />
+                  <input type="text" placeholder="Business Name (optional)" value={businessName} onChange={(e) => setBusinessName(e.target.value)} className="w-full px-4 py-3 bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-xl text-[#FFFFFF] placeholder-[#FFFFFF]/40 focus:outline-none focus:border-[#B3D335]" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <input type="email" placeholder="Email Address *" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} required className="w-full px-4 py-3 bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-xl text-[#FFFFFF] placeholder-[#FFFFFF]/40 focus:outline-none focus:border-[#B3D335]" />
+                  <input type="tel" placeholder="Phone Number (optional)" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full px-4 py-3 bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-xl text-[#FFFFFF] placeholder-[#FFFFFF]/40 focus:outline-none focus:border-[#B3D335]" />
+                </div>
+                <textarea placeholder="Additional notes (optional)" value={orderMessage} onChange={(e) => setOrderMessage(e.target.value)} rows={3} className="w-full px-4 py-3 bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-xl text-[#FFFFFF] placeholder-[#FFFFFF]/40 focus:outline-none focus:border-[#B3D335] resize-none" />
+                {submitError && <p className="text-[#FF4444] text-sm text-center">{submitError}</p>}
+                <button type="submit" disabled={submitting || orderItems.length === 0} className="w-full py-3.5 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  {submitting ? "Submitting..." : orderItems.length === 0 ? "Add Products to Continue" : `Request Invoice — ${formatPrice(orderTotal)}`}
+                </button>
+                <p className="text-center text-[#FFFFFF]/40 text-xs">Or email us directly at <a href="mailto:Support@TheHempDispensary.com" className="text-[#B3D335] hover:underline">Support@TheHempDispensary.com</a> · Call <a href="tel:+13523405860" className="text-[#B3D335] hover:underline">(352) 340-5860</a></p>
+              </form>
+            </>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
 /* ======================== FOOTER (Dark Background) ======================== */
 function SiteFooter() {
   return (
@@ -1936,6 +2263,7 @@ function SiteFooter() {
               <a href="/our-locations" onClick={(e) => { e.preventDefault(); navigate("/our-locations"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Our Locations</a>
               <a href="/loyalty" onClick={(e) => { e.preventDefault(); navigate("/loyalty"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Rewards</a>
               <a href="/games" onClick={(e) => { e.preventDefault(); navigate("/games"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Games</a>
+              <a href="/wholesale" onClick={(e) => { e.preventDefault(); navigate("/wholesale"); }} className="block text-[#B3D335] hover:text-[#FFFFFF] text-sm font-semibold transition-colors">Wholesale</a>
             </div>
           </div>
           <div>
@@ -4736,6 +5064,7 @@ function App() {
       "/cbd": "Shop CBD tinctures, topicals, edibles, and flower at The Hemp Dispensary in Spring Hill, FL. Full-spectrum, broad-spectrum, and isolate options. Lab-tested.",
       "/cbg": "Shop CBG tinctures, wax, gummies, and flower at The Hemp Dispensary in Spring Hill, FL. The mother cannabinoid, lab-tested and federally compliant.",
       "/cbn": "Shop CBN gummies, tinctures, and nighttime blends at The Hemp Dispensary in Spring Hill, FL. Formulated for relaxation and sleep. Lab-tested.",
+      "/wholesale": "Wholesale bulk pricing at The Hemp Dispensary — volume discounts on vape cartridges, edibles, flower, and more. Submit your order and pay via invoice.",
     };
     const key = route === "" ? "/" : route;
     const desc = descriptions[key] || descriptions["/"];
@@ -4929,6 +5258,9 @@ function App() {
       : <CannabinoidPage products={products} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} config={cfg} sale={activeSale} />);
   }
   if (route === "/shipping-policy") return shell(<ShippingPolicyPage />);
+  if (route === "/wholesale") return shell(loading
+    ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
+    : <WholesalePage products={products} fulfillment={fulfillment} />);
 
   // Homepage
   return (
