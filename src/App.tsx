@@ -1935,6 +1935,9 @@ function WholesalePage({ products }: { products: Product[] }) {
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [orderMessage, setOrderMessage] = useState("");
+  const [customerState, setCustomerState] = useState("FL");
+  const [hasResaleCert, setHasResaleCert] = useState(false);
+  const [resaleCertNumber, setResaleCertNumber] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -1997,9 +2000,13 @@ function WholesalePage({ products }: { products: Product[] }) {
     setOrderEntries(prev => prev.filter(e => e.bundle.id !== bundleId));
   };
 
-  const orderTotal = useMemo(() => {
+  const orderSubtotal = useMemo(() => {
     return orderEntries.reduce((sum, entry) => sum + entry.bundle.price_cents, 0);
   }, [orderEntries]);
+
+  const taxRate = hasResaleCert ? 0 : getTaxRate(customerState);
+  const taxAmount = Math.round(orderSubtotal * taxRate);
+  const orderTotal = orderSubtotal + taxAmount;
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -2025,7 +2032,7 @@ function WholesalePage({ products }: { products: Product[] }) {
           email: customerEmail,
           phone: customerPhone,
           items,
-          message: orderMessage,
+          message: [orderMessage, hasResaleCert ? `Resale Certificate: ${resaleCertNumber || "(provided)"}` : "", `State: ${customerState}`, `Tax: ${hasResaleCert ? "EXEMPT (resale cert)" : formatPrice(taxAmount)}`, `Subtotal: ${formatPrice(orderSubtotal)}`, `Total w/ tax: ${formatPrice(orderTotal)}`].filter(Boolean).join("\n"),
         }),
       });
       if (!resp.ok) throw new Error("Failed to submit");
@@ -2199,7 +2206,7 @@ function WholesalePage({ products }: { products: Product[] }) {
               <CheckCircle className="h-14 w-14 text-[#B3D335] mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-[#FFFFFF] mb-2">Order Request Submitted!</h2>
               <p className="text-[#FFFFFF]/70 mb-6">We've received your bulk order request and will send you an invoice within 1 business day.</p>
-              <button onClick={() => { setSubmitted(false); setOrderEntries([]); setCustomerName(""); setBusinessName(""); setCustomerEmail(""); setCustomerPhone(""); setOrderMessage(""); }} className="px-6 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors">Place Another Order</button>
+              <button onClick={() => { setSubmitted(false); setOrderEntries([]); setCustomerName(""); setBusinessName(""); setCustomerEmail(""); setCustomerPhone(""); setOrderMessage(""); setHasResaleCert(false); setResaleCertNumber(""); }} className="px-6 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors">Place Another Order</button>
             </div>
           ) : (
             <>
@@ -2235,9 +2242,19 @@ function WholesalePage({ products }: { products: Product[] }) {
                       </div>
                     ))}
                   </div>
-                  <div className="border-t border-[#FFFFFF]/20 mt-4 pt-4 flex items-center justify-between">
-                    <span className="text-[#FFFFFF]/70 font-medium">Estimated Total</span>
-                    <span className="text-[#B3D335] text-xl font-bold">{formatPrice(orderTotal)}</span>
+                  <div className="border-t border-[#FFFFFF]/20 mt-4 pt-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#FFFFFF]/50 text-sm">Subtotal</span>
+                      <span className="text-[#FFFFFF] font-medium">{formatPrice(orderSubtotal)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#FFFFFF]/50 text-sm">Tax ({hasResaleCert ? "Exempt" : `${(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 2)}%`})</span>
+                      <span className={`font-medium ${hasResaleCert ? "text-[#B3D335]" : "text-[#FFFFFF]"}`}>{hasResaleCert ? "$0.00" : formatPrice(taxAmount)}</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-[#FFFFFF]/10">
+                      <span className="text-[#FFFFFF] font-medium">Estimated Total</span>
+                      <span className="text-[#B3D335] text-xl font-bold">{formatPrice(orderTotal)}</span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -2258,10 +2275,25 @@ function WholesalePage({ products }: { products: Product[] }) {
                   <input type="email" placeholder="Email Address *" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} required className="w-full px-4 py-3 bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-xl text-[#FFFFFF] placeholder-[#FFFFFF]/40 focus:outline-none focus:border-[#B3D335]" />
                   <input type="tel" placeholder="Phone Number (optional)" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full px-4 py-3 bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-xl text-[#FFFFFF] placeholder-[#FFFFFF]/40 focus:outline-none focus:border-[#B3D335]" />
                 </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <select value={customerState} onChange={(e) => setCustomerState(e.target.value)} className="w-full px-4 py-3 bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-xl text-[#FFFFFF] focus:outline-none focus:border-[#B3D335]">
+                    {Object.keys(STATE_TAX_RATES).sort().map(st => <option key={st} value={st} className="text-[#231F20]">{st}</option>)}
+                  </select>
+                </div>
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input type="checkbox" checked={hasResaleCert} onChange={(e) => setHasResaleCert(e.target.checked)} className="mt-1 w-4 h-4 rounded border-[#FFFFFF]/30 accent-[#B3D335]" />
+                  <div>
+                    <span className="text-[#FFFFFF] text-sm font-medium group-hover:text-[#B3D335] transition-colors">I have a valid resale certificate (tax exempt)</span>
+                    <p className="text-[#FFFFFF]/40 text-xs mt-0.5">Sales tax will be waived. We may request a copy of your certificate.</p>
+                  </div>
+                </label>
+                {hasResaleCert && (
+                  <input type="text" placeholder="Resale Certificate Number (optional)" value={resaleCertNumber} onChange={(e) => setResaleCertNumber(e.target.value)} className="w-full px-4 py-3 bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-xl text-[#FFFFFF] placeholder-[#FFFFFF]/40 focus:outline-none focus:border-[#B3D335]" />
+                )}
                 <textarea placeholder="Additional notes (optional)" value={orderMessage} onChange={(e) => setOrderMessage(e.target.value)} rows={3} className="w-full px-4 py-3 bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-xl text-[#FFFFFF] placeholder-[#FFFFFF]/40 focus:outline-none focus:border-[#B3D335] resize-none" />
                 {submitError && <p className="text-[#FF4444] text-sm text-center">{submitError}</p>}
                 <button type="submit" disabled={submitting || orderEntries.length === 0} className="w-full py-3.5 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                  {submitting ? "Submitting..." : orderEntries.length === 0 ? "Choose a Deal to Continue" : `Request Invoice — ${formatPrice(orderTotal)}`}
+                  {submitting ? "Submitting..." : orderEntries.length === 0 ? "Choose a Deal to Continue" : `Request Invoice — ${formatPrice(orderTotal)}${hasResaleCert ? " (Tax Exempt)" : ""}`}
                 </button>
                 <p className="text-center text-[#FFFFFF]/40 text-xs">Or email us directly at <a href="mailto:Support@TheHempDispensary.com" className="text-[#B3D335] hover:underline">Support@TheHempDispensary.com</a> · Call <a href="tel:+13523405860" className="text-[#B3D335] hover:underline">(352) 340-5860</a></p>
               </form>
