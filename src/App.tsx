@@ -654,7 +654,7 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
           {categories.map((cat) => (
             <button key={cat} onClick={() => navigate(`/products/${cat.toLowerCase()}`)} className="px-3 py-1.5 text-xs font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-full transition-colors whitespace-nowrap">{cat}</button>
           ))}
-          <button onClick={() => navigate("/wholesale")} className="px-3 py-1.5 text-xs font-bold text-[#126A44] hover:text-[#FFFFFF] hover:bg-[#126A44] rounded-full transition-colors whitespace-nowrap border border-[#126A44]">WHOLESALE</button>
+          <button onClick={() => navigate("/wholesale")} className="px-3 py-1.5 text-xs font-bold text-[#126A44] hover:text-[#FFFFFF] hover:bg-[#126A44] rounded-full transition-colors whitespace-nowrap border border-[#126A44]">BULK BARGAINS</button>
         </nav>
       </div>
       {/* Mobile menu */}
@@ -665,7 +665,7 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
               <button key={cat} onClick={() => { navigate(`/products/${cat.toLowerCase()}`); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors">{cat}</button>
             ))}
             <a href="/games" onClick={(e) => { e.preventDefault(); navigate("/games"); setMobileMenuOpen(false); }} className="sm:hidden text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors flex items-center gap-2"><Gamepad2 className="h-4 w-4" /> Games</a>
-            <a href="/wholesale" onClick={(e) => { e.preventDefault(); navigate("/wholesale"); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-bold text-[#126A44] hover:bg-[#126A44] hover:text-[#FFFFFF] rounded-lg transition-colors flex items-center gap-2"><DollarSign className="h-4 w-4" /> Wholesale</a>
+            <a href="/wholesale" onClick={(e) => { e.preventDefault(); navigate("/wholesale"); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-bold text-[#126A44] hover:bg-[#126A44] hover:text-[#FFFFFF] rounded-lg transition-colors flex items-center gap-2"><DollarSign className="h-4 w-4" /> Bulk Bargains</a>
           </div>
         </div>
       )}
@@ -1414,6 +1414,7 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
 /* ======================== SHOP PAGE (Light Theme) ======================== */
 function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfillment, sale }: { products: Product[]; categories: string[]; selectedCategory: string; onAddToCart: (product: Product) => void; fulfillment: FulfillmentType | null; sale?: ActiveSaleData | null }) {
   const [sortBy, setSortBy] = useState("name");
+  const [thcFilter, setThcFilter] = useState<"all" | "thc" | "non-thc">("all");
   const feelingLabels = ["relax", "sleep", "energy", "focus"];
   const isFeelingFilter = feelingLabels.includes(selectedCategory.toLowerCase());
 
@@ -1429,13 +1430,15 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
         items = items.filter((p) => p.categories.some((c) => c.toLowerCase() === catLower));
       }
     }
+    if (thcFilter === "thc") items = items.filter(p => p.name.toUpperCase().includes("THC"));
+    else if (thcFilter === "non-thc") items = items.filter(p => !p.name.toUpperCase().includes("THC"));
     if (sortBy === "price-low") items.sort((a, b) => a.price - b.price);
     else if (sortBy === "price-high") items.sort((a, b) => b.price - a.price);
     else if (sortBy === "newest") items.sort((a, b) => (b.modified_time || 0) - (a.modified_time || 0));
     else if (sortBy === "oldest") items.sort((a, b) => (a.modified_time || 0) - (b.modified_time || 0));
     else items.sort((a, b) => a.name.localeCompare(b.name));
     return items;
-  }, [products, selectedCategory, sortBy, isFeelingFilter, fulfillment]);
+  }, [products, selectedCategory, sortBy, thcFilter, isFeelingFilter, fulfillment]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -1453,6 +1456,14 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
             <option value="oldest">Oldest First</option>
           </select>
         </div>
+      </div>
+      {/* THC / Non-THC filter */}
+      <div className="flex gap-2 mb-4">
+        {(["all", "thc", "non-thc"] as const).map(f => (
+          <button key={f} onClick={() => setThcFilter(f)} className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${thcFilter === f ? "bg-[#126A44] text-[#FFFFFF]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#126A44]"}`}>
+            {f === "all" ? "All" : f === "thc" ? "THC" : "Non-THC"}
+          </button>
+        ))}
       </div>
       {/* Category pills */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
@@ -1896,16 +1907,29 @@ function ShippingPolicyPage() {
 }
 
 /* ======================== WHOLESALE PAGE ======================== */
-interface WholesaleCartEntry {
-  product: Product;
-  vd: VolumeDiscount;
-  quantity: number;
+interface WholesaleBundle {
+  id: number;
+  name: string;
+  description: string;
+  min_quantity: number;
+  price_cents: number;
+  product_skus: string[];
+  category_filter: string;
+  is_active: boolean;
+  image_url: string;
 }
 
-function WholesalePage({ products, fulfillment }: { products: Product[]; fulfillment: FulfillmentType | null }) {
-  const [volumeDiscounts, setVolumeDiscounts] = useState<VolumeDiscount[]>([]);
+interface BundleOrderEntry {
+  bundle: WholesaleBundle;
+  selections: { product: Product; quantity: number }[];
+}
+
+function WholesalePage({ products }: { products: Product[] }) {
+  const [bundles, setBundles] = useState<WholesaleBundle[]>([]);
   const [loadingDeals, setLoadingDeals] = useState(true);
-  const [orderItems, setOrderItems] = useState<WholesaleCartEntry[]>([]);
+  const [expandedBundle, setExpandedBundle] = useState<number | null>(null);
+  const [bundleSelections, setBundleSelections] = useState<Record<number, Record<string, number>>>({});
+  const [orderEntries, setOrderEntries] = useState<BundleOrderEntry[]>([]);
   const [customerName, setCustomerName] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
@@ -1916,79 +1940,82 @@ function WholesalePage({ products, fulfillment }: { products: Product[]; fulfill
   const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
-    document.title = "Wholesale | The Hemp Dispensary – Bulk Pricing & Volume Discounts";
+    document.title = "Bulk Bargains | The Hemp Dispensary – Wholesale Pricing & Volume Deals";
     return () => { document.title = "The Hemp Dispensary | Spring Hill FL"; };
   }, []);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/ecommerce/volume-discounts/active`)
+    fetch(`${API_URL}/api/ecommerce/wholesale-bundles/active`)
       .then(r => r.ok ? r.json() : [])
-      .then(data => { setVolumeDiscounts(Array.isArray(data) ? data : []); setLoadingDeals(false); })
-      .catch(() => { setVolumeDiscounts([]); setLoadingDeals(false); });
+      .then(data => { setBundles(Array.isArray(data) ? data : []); setLoadingDeals(false); })
+      .catch(() => { setBundles([]); setLoadingDeals(false); });
   }, []);
 
-  const wholesaleProducts = useMemo(() => {
-    if (volumeDiscounts.length === 0) return [];
-    return volumeDiscounts
-      .filter(vd => vd.is_active)
-      .map(vd => {
-        const product = products.find(p => p.sku === vd.product_sku);
-        if (!product) return null;
-        const effectiveStock = fulfillment ? getStockForFulfillment(product, fulfillment) : product.stock;
-        if (effectiveStock <= 0) return null;
-        return { vd, product, effectiveStock };
-      })
-      .filter((x): x is { vd: VolumeDiscount; product: Product; effectiveStock: number } => x !== null);
-  }, [volumeDiscounts, products, fulfillment]);
+  const getBundleProducts = (bundle: WholesaleBundle) => {
+    return bundle.product_skus
+      .map(sku => products.find(p => p.sku === sku))
+      .filter((p): p is Product => p !== null && p !== undefined);
+  };
 
-  const addToOrder = (product: Product, vd: VolumeDiscount) => {
-    setOrderItems(prev => {
-      const existing = prev.find(e => e.product.id === product.id);
-      if (existing) return prev;
-      return [...prev, { product, vd, quantity: vd.min_quantity }];
+  const getBundleSelectedQty = (bundleId: number) => {
+    const sel = bundleSelections[bundleId] || {};
+    return Object.values(sel).reduce((sum, q) => sum + q, 0);
+  };
+
+  const updateSelection = (bundleId: number, sku: string, qty: number) => {
+    setBundleSelections(prev => ({
+      ...prev,
+      [bundleId]: { ...(prev[bundleId] || {}), [sku]: Math.max(0, qty) },
+    }));
+  };
+
+  const addBundleToOrder = (bundle: WholesaleBundle) => {
+    const sel = bundleSelections[bundle.id] || {};
+    const selections = Object.entries(sel)
+      .filter(([, qty]) => qty > 0)
+      .map(([sku, quantity]) => {
+        const product = products.find(p => p.sku === sku);
+        return product ? { product, quantity } : null;
+      })
+      .filter((s): s is { product: Product; quantity: number } => s !== null);
+    if (selections.length === 0) return;
+    setOrderEntries(prev => {
+      const existing = prev.findIndex(e => e.bundle.id === bundle.id);
+      if (existing >= 0) {
+        const updated = [...prev];
+        updated[existing] = { bundle, selections };
+        return updated;
+      }
+      return [...prev, { bundle, selections }];
     });
+    setExpandedBundle(null);
+    setBundleSelections(prev => ({ ...prev, [bundle.id]: {} }));
     document.getElementById("wholesale-order-form")?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const updateOrderQty = (productId: string, qty: number) => {
-    setOrderItems(prev => prev.map(e => e.product.id === productId ? { ...e, quantity: Math.max(e.vd.min_quantity, qty) } : e));
-  };
-
-  const removeFromOrder = (productId: string) => {
-    setOrderItems(prev => prev.filter(e => e.product.id !== productId));
+  const removeOrderEntry = (bundleId: number) => {
+    setOrderEntries(prev => prev.filter(e => e.bundle.id !== bundleId));
   };
 
   const orderTotal = useMemo(() => {
-    return orderItems.reduce((sum, entry) => {
-      const wpCents = entry.vd.discount_type === "fixed_total"
-        ? (entry.vd.discount_value * 100) / entry.vd.min_quantity
-        : entry.vd.discount_type === "percent_off"
-          ? entry.product.price * (1 - entry.vd.discount_value / 100)
-          : entry.product.price - entry.vd.discount_value * 100;
-      return sum + Math.round(wpCents) * entry.quantity;
-    }, 0);
-  }, [orderItems]);
+    return orderEntries.reduce((sum, entry) => sum + entry.bundle.price_cents, 0);
+  }, [orderEntries]);
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (orderItems.length === 0) { setSubmitError("Please add at least one product to your order."); return; }
+    if (orderEntries.length === 0) { setSubmitError("Please add at least one bundle to your order."); return; }
     setSubmitting(true);
     setSubmitError("");
     try {
-      const items = orderItems.map(entry => {
-        const wpCents = entry.vd.discount_type === "fixed_total"
-          ? Math.round((entry.vd.discount_value * 100) / entry.vd.min_quantity)
-          : entry.vd.discount_type === "percent_off"
-            ? Math.round(entry.product.price * (1 - entry.vd.discount_value / 100))
-            : Math.round(entry.product.price - entry.vd.discount_value * 100);
-        return {
-          product_name: entry.product.online_name || entry.product.name,
-          sku: entry.product.sku,
-          quantity: entry.quantity,
-          unit_price: entry.product.price,
-          wholesale_price: wpCents,
-        };
-      });
+      const items = orderEntries.flatMap(entry =>
+        entry.selections.map(sel => ({
+          product_name: `[${entry.bundle.name}] ${sel.product.online_name || sel.product.name}`,
+          sku: sel.product.sku,
+          quantity: sel.quantity,
+          unit_price: sel.product.price,
+          wholesale_price: Math.round(entry.bundle.price_cents / entry.bundle.min_quantity),
+        }))
+      );
       const resp = await fetch(`${API_URL}/api/ecommerce/wholesale-inquiries`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2017,10 +2044,10 @@ function WholesalePage({ products, fulfillment }: { products: Product[]; fulfill
         <div className="max-w-4xl mx-auto px-4 py-14 sm:py-20 text-center relative z-10">
           <span className="inline-block bg-[#B3D335] text-[#231F20] text-xs font-bold px-4 py-1.5 rounded-full mb-4 uppercase tracking-wider">Bulk Savings</span>
           <h1 className="text-3xl sm:text-5xl font-bold text-[#FFFFFF] mb-4 leading-tight">
-            Wholesale Pricing<br />
+            Bulk Bargains<br />
             <span className="text-[#B3D335]">Buy More. Save More.</span>
           </h1>
-          <p className="text-[#FFFFFF]/80 text-base sm:text-xl max-w-2xl mx-auto mb-6">Volume discounts on our most popular products. Perfect for retailers, event organizers, and bulk buyers. Select your products, submit your order, and we'll send you an invoice.</p>
+          <p className="text-[#FFFFFF]/80 text-base sm:text-xl max-w-2xl mx-auto mb-6">Volume deals on our most popular products. Pick your flavors, submit your order, and we'll send you an invoice. Perfect for retailers, event organizers, and bulk buyers.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a href="#wholesale-deals" onClick={(e) => { e.preventDefault(); document.getElementById("wholesale-deals")?.scrollIntoView({ behavior: "smooth" }); }} className="px-8 py-3.5 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors shadow-lg">View Deals</a>
             <a href="#wholesale-order-form" onClick={(e) => { e.preventDefault(); document.getElementById("wholesale-order-form")?.scrollIntoView({ behavior: "smooth" }); }} className="px-8 py-3.5 border-2 border-[#FFFFFF] hover:bg-[#FFFFFF] text-[#FFFFFF] hover:text-[#231F20] rounded-full font-bold text-lg transition-colors">Request Invoice</a>
@@ -2032,17 +2059,17 @@ function WholesalePage({ products, fulfillment }: { products: Product[]; fulfill
       {/* How It Works */}
       <section className="bg-[#FFFFFF] py-12 border-b border-[#231F20]/10">
         <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-[#231F20] text-center mb-8">How Wholesale Works</h2>
+          <h2 className="text-2xl font-bold text-[#231F20] text-center mb-8">How It Works</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-[#B3D335]/20 flex items-center justify-center"><Package className="h-6 w-6 text-[#126A44]" /></div>
-              <h3 className="font-semibold text-[#231F20] mb-1">1. Pick Your Products</h3>
-              <p className="text-sm text-[#231F20]/70">Browse our wholesale deals below and add items to your order.</p>
+              <h3 className="font-semibold text-[#231F20] mb-1">1. Choose a Deal</h3>
+              <p className="text-sm text-[#231F20]/70">Browse our bulk deals below. Each deal lets you mix and match flavors or variants.</p>
             </div>
             <div className="text-center">
               <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-[#B3D335]/20 flex items-center justify-center"><Send className="h-6 w-6 text-[#126A44]" /></div>
-              <h3 className="font-semibold text-[#231F20] mb-1">2. Submit Your Order</h3>
-              <p className="text-sm text-[#231F20]/70">Fill in your contact info, review your selections, and submit. We'll receive your request instantly.</p>
+              <h3 className="font-semibold text-[#231F20] mb-1">2. Pick Your Flavors</h3>
+              <p className="text-sm text-[#231F20]/70">Select how many of each flavor you want to reach the minimum quantity. Then submit your order.</p>
             </div>
             <div className="text-center">
               <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-[#B3D335]/20 flex items-center justify-center"><CreditCard className="h-6 w-6 text-[#126A44]" /></div>
@@ -2053,80 +2080,109 @@ function WholesalePage({ products, fulfillment }: { products: Product[]; fulfill
         </div>
       </section>
 
-      {/* Wholesale Deals */}
+      {/* Bulk Deals */}
       <section id="wholesale-deals" className="bg-[#FFFFFF] py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-2">Wholesale Deals</h2>
-          <p className="text-[#231F20]/60 text-sm mb-8">{wholesaleProducts.length} products with bulk pricing available</p>
+        <div className="max-w-5xl mx-auto px-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-2">Bulk Deals</h2>
+          <p className="text-[#231F20]/60 text-sm mb-8">{bundles.length} deal{bundles.length !== 1 ? "s" : ""} available</p>
 
           {loadingDeals ? (
             <div className="flex flex-col items-center justify-center py-16">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#B3D335] mb-4"></div>
-              <p className="text-[#231F20]/60 text-sm">Loading wholesale deals...</p>
+              <p className="text-[#231F20]/60 text-sm">Loading deals...</p>
             </div>
-          ) : wholesaleProducts.length === 0 ? (
+          ) : bundles.length === 0 ? (
             <div className="text-center py-16 bg-[#FFFFFF] rounded-2xl border border-[#231F20]/10">
               <Package className="mx-auto h-12 w-12 text-[#231F20]/30 mb-3" />
-              <p className="text-[#231F20] font-medium mb-2">No wholesale deals available right now</p>
+              <p className="text-[#231F20] font-medium mb-2">No bulk deals available right now</p>
               <p className="text-[#231F20]/60 text-sm mb-4">Check back soon or contact us for custom bulk pricing.</p>
               <a href="mailto:Support@TheHempDispensary.com" className="text-[#126A44] font-medium hover:underline">Email Us for Custom Pricing</a>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {wholesaleProducts.map(({ vd, product }) => {
-                const unitPriceCents = product.price;
-                const normalTotal = unitPriceCents * vd.min_quantity;
-                const dealLabel = getVolumeDiscountSavingsLabel(vd, unitPriceCents);
-                const savings = vd.discount_type === "fixed_total"
-                  ? normalTotal - vd.discount_value * 100
-                  : vd.discount_type === "percent_off"
-                    ? Math.round(normalTotal * (vd.discount_value / 100))
-                    : vd.discount_value * 100 * vd.min_quantity;
-                const perUnitWholesale = vd.discount_type === "fixed_total"
-                  ? (vd.discount_value * 100) / vd.min_quantity
-                  : vd.discount_type === "percent_off"
-                    ? unitPriceCents * (1 - vd.discount_value / 100)
-                    : unitPriceCents - vd.discount_value * 100;
-                const inOrder = orderItems.some(e => e.product.id === product.id);
+            <div className="space-y-6">
+              {bundles.map(bundle => {
+                const bundleProducts = getBundleProducts(bundle);
+                const isExpanded = expandedBundle === bundle.id;
+                const selectedQty = getBundleSelectedQty(bundle.id);
+                const inOrder = orderEntries.some(e => e.bundle.id === bundle.id);
+                const firstProduct = bundleProducts[0];
+                const perUnit = bundle.min_quantity > 0 ? bundle.price_cents / bundle.min_quantity : 0;
 
                 return (
-                  <div key={vd.id} className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/15 overflow-hidden hover:shadow-xl transition-all group">
-                    <div className="cursor-pointer" onClick={() => navigate(`/products/product/${product.slug}`)}>
-                      <div className="flex items-center justify-center bg-[#FFFFFF] h-[200px] overflow-hidden">
-                        <img src={product.image_url || placeholderUrl(product.name)} alt={product.name} loading="lazy" width="300" height="300" className="max-h-full w-auto object-contain transition-transform duration-300 group-hover:scale-105" onError={handleImgError} />
-                      </div>
-                    </div>
-                    <div className="p-5">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="inline-block bg-[#FF4444]/10 text-[#FF4444] text-xs font-bold px-3 py-1 rounded-full">Save {formatPrice(savings)}</span>
-                        <span className="inline-block bg-[#B3D335]/20 text-[#126A44] text-xs font-bold px-3 py-1 rounded-full">Min. {vd.min_quantity} units</span>
-                      </div>
-                      <h3 className="text-[#231F20] font-semibold text-base mb-1 cursor-pointer hover:text-[#126A44] transition-colors" onClick={() => navigate(`/products/product/${product.slug}`)}>
-                        {titleCase(product.online_name || product.name)}
-                      </h3>
-                      <div className="bg-[#FFFFFF] rounded-xl border border-[#231F20]/10 p-3 mb-4">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs text-[#231F20]/50">Retail price</span>
-                          <span className="text-sm text-[#231F20]/50 line-through">{formatPrice(unitPriceCents)}/ea</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-[#126A44]">Wholesale price</span>
-                          <span className="text-lg font-bold text-[#126A44]">{formatPrice(Math.round(perUnitWholesale))}/ea</span>
-                        </div>
-                        <div className="border-t border-[#231F20]/10 mt-2 pt-2">
-                          <p className="text-sm font-bold text-[#231F20]">{dealLabel}</p>
+                  <div key={bundle.id} className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/15 overflow-hidden hover:shadow-xl transition-all">
+                    <div className="p-6">
+                      <div className="flex items-start gap-4">
+                        {firstProduct && (
+                          <div className="w-20 h-20 flex-shrink-0 flex items-center justify-center bg-[#FFFFFF] rounded-xl border border-[#231F20]/10 overflow-hidden">
+                            <img src={firstProduct.image_url || placeholderUrl(firstProduct.name)} alt="" className="max-h-full w-auto object-contain" onError={handleImgError} />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xl font-bold text-[#231F20] mb-1">{bundle.name}</h3>
+                          {bundle.description && <p className="text-sm text-[#231F20]/60 mb-2">{bundle.description}</p>}
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="inline-block bg-[#B3D335]/20 text-[#126A44] text-sm font-bold px-3 py-1 rounded-full">{bundle.min_quantity} units for {formatPrice(bundle.price_cents)}</span>
+                            <span className="text-xs text-[#231F20]/50">{formatPrice(Math.round(perUnit))}/ea</span>
+                            <span className="text-xs text-[#231F20]/40">·</span>
+                            <span className="text-xs text-[#231F20]/50">{bundleProducts.length} flavor{bundleProducts.length !== 1 ? "s" : ""} available</span>
+                          </div>
                         </div>
                       </div>
-                      {inOrder ? (
-                        <div className="w-full py-3 bg-[#126A44] text-[#FFFFFF] rounded-full font-semibold text-sm text-center flex items-center justify-center gap-2">
-                          <CheckCircle className="h-4 w-4" /> Added to Order
-                        </div>
-                      ) : (
-                        <button onClick={() => addToOrder(product, vd)} className="w-full py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors text-sm">
-                          Add to Wholesale Order
+
+                      {!isExpanded && !inOrder && (
+                        <button onClick={() => setExpandedBundle(bundle.id)} className="w-full mt-4 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors text-sm">
+                          Choose Flavors & Add to Order
                         </button>
                       )}
+                      {inOrder && (
+                        <div className="w-full mt-4 py-3 bg-[#126A44] text-[#FFFFFF] rounded-full font-semibold text-sm text-center flex items-center justify-center gap-2">
+                          <CheckCircle className="h-4 w-4" /> Added to Order
+                        </div>
+                      )}
                     </div>
+
+                    {isExpanded && (
+                      <div className="border-t border-[#231F20]/10 bg-[#FFFFFF] p-5">
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="font-semibold text-[#231F20] text-sm">Select Flavors</h4>
+                          <span className={`text-sm font-bold ${selectedQty >= bundle.min_quantity ? "text-[#126A44]" : "text-[#231F20]/60"}`}>
+                            {selectedQty} / {bundle.min_quantity} selected
+                          </span>
+                        </div>
+                        {selectedQty < bundle.min_quantity && (
+                          <div className="w-full bg-[#231F20]/10 rounded-full h-2 mb-4">
+                            <div className="bg-[#B3D335] h-2 rounded-full transition-all" style={{ width: `${Math.min(100, (selectedQty / bundle.min_quantity) * 100)}%` }} />
+                          </div>
+                        )}
+                        <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                          {bundleProducts.map(product => {
+                            const qty = (bundleSelections[bundle.id] || {})[product.sku] || 0;
+                            return (
+                              <div key={product.id} className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-[#231F20]/5">
+                                <img src={product.image_url || placeholderUrl(product.name)} alt="" className="w-10 h-10 object-contain rounded-lg" onError={handleImgError} />
+                                <span className="flex-1 text-sm text-[#231F20] truncate">{titleCase(product.online_name || product.name)}</span>
+                                <div className="flex items-center gap-1.5">
+                                  <button onClick={() => updateSelection(bundle.id, product.sku, qty - 1)}
+                                    className="w-7 h-7 rounded-full bg-[#231F20]/10 text-[#231F20] flex items-center justify-center hover:bg-[#231F20]/20 text-sm font-bold">−</button>
+                                  <input type="number" min="0" value={qty} onChange={(e) => updateSelection(bundle.id, product.sku, parseInt(e.target.value) || 0)}
+                                    className="w-14 text-center text-sm border border-[#231F20]/15 rounded-lg py-1" />
+                                  <button onClick={() => updateSelection(bundle.id, product.sku, qty + 1)}
+                                    className="w-7 h-7 rounded-full bg-[#B3D335]/30 text-[#126A44] flex items-center justify-center hover:bg-[#B3D335]/50 text-sm font-bold">+</button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div className="flex gap-2 mt-4">
+                          <button onClick={() => addBundleToOrder(bundle)} disabled={selectedQty < bundle.min_quantity}
+                            className="flex-1 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+                            {selectedQty < bundle.min_quantity ? `Select ${bundle.min_quantity - selectedQty} more` : `Add to Order — ${formatPrice(bundle.price_cents)}`}
+                          </button>
+                          <button onClick={() => { setExpandedBundle(null); setBundleSelections(prev => ({ ...prev, [bundle.id]: {} })); }}
+                            className="px-4 py-3 border border-[#231F20]/15 rounded-full text-[#231F20]/60 hover:bg-[#231F20]/5 text-sm">Cancel</button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -2135,52 +2191,49 @@ function WholesalePage({ products, fulfillment }: { products: Product[]; fulfill
         </div>
       </section>
 
-      {/* Wholesale Order Form */}
+      {/* Order Form */}
       <section id="wholesale-order-form" className="bg-[#231F20] py-14">
         <div className="max-w-3xl mx-auto px-4">
           {submitted ? (
             <div className="bg-[#126A44]/20 border border-[#126A44]/40 rounded-2xl p-8 text-center">
               <CheckCircle className="h-14 w-14 text-[#B3D335] mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-[#FFFFFF] mb-2">Order Request Submitted!</h2>
-              <p className="text-[#FFFFFF]/70 mb-6">We've received your wholesale order request and will send you an invoice within 1 business day.</p>
-              <button onClick={() => { setSubmitted(false); setOrderItems([]); setCustomerName(""); setBusinessName(""); setCustomerEmail(""); setCustomerPhone(""); setOrderMessage(""); }} className="px-6 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors">Place Another Order</button>
+              <p className="text-[#FFFFFF]/70 mb-6">We've received your bulk order request and will send you an invoice within 1 business day.</p>
+              <button onClick={() => { setSubmitted(false); setOrderEntries([]); setCustomerName(""); setBusinessName(""); setCustomerEmail(""); setCustomerPhone(""); setOrderMessage(""); }} className="px-6 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors">Place Another Order</button>
             </div>
           ) : (
             <>
               <div className="text-center mb-8">
-                <h2 className="text-2xl sm:text-3xl font-bold text-[#FFFFFF] mb-3">Submit Your Wholesale Order</h2>
-                <p className="text-[#FFFFFF]/70">Select products above, then fill out your info below. We'll send you an invoice — no credit card required.</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-[#FFFFFF] mb-3">Submit Your Order</h2>
+                <p className="text-[#FFFFFF]/70">Choose your deals above, fill in your info, and we'll send you an invoice.</p>
               </div>
 
               {/* Order Summary */}
-              {orderItems.length > 0 && (
+              {orderEntries.length > 0 && (
                 <div className="bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-2xl p-5 mb-6">
-                  <h3 className="text-[#B3D335] font-semibold mb-4">Your Order ({orderItems.length} item{orderItems.length !== 1 ? "s" : ""})</h3>
+                  <h3 className="text-[#B3D335] font-semibold mb-4">Your Order ({orderEntries.length} deal{orderEntries.length !== 1 ? "s" : ""})</h3>
                   <div className="space-y-3">
-                    {orderItems.map(entry => {
-                      const wpCents = entry.vd.discount_type === "fixed_total"
-                        ? Math.round((entry.vd.discount_value * 100) / entry.vd.min_quantity)
-                        : entry.vd.discount_type === "percent_off"
-                          ? Math.round(entry.product.price * (1 - entry.vd.discount_value / 100))
-                          : Math.round(entry.product.price - entry.vd.discount_value * 100);
-                      const lineTotal = wpCents * entry.quantity;
-                      return (
-                        <div key={entry.product.id} className="flex items-center gap-3 bg-[#FFFFFF]/5 rounded-xl p-3">
-                          <img src={entry.product.image_url || placeholderUrl(entry.product.name)} alt="" className="w-12 h-12 rounded-lg object-contain bg-[#FFFFFF] flex-shrink-0" onError={handleImgError} />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[#FFFFFF] text-sm font-medium truncate">{titleCase(entry.product.online_name || entry.product.name)}</p>
-                            <p className="text-[#FFFFFF]/50 text-xs">{formatPrice(wpCents)}/ea wholesale</p>
+                    {orderEntries.map(entry => (
+                      <div key={entry.bundle.id} className="bg-[#FFFFFF]/5 rounded-xl p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <p className="text-[#FFFFFF] font-medium">{entry.bundle.name}</p>
+                            <p className="text-[#FFFFFF]/50 text-xs">{entry.selections.reduce((s, sel) => s + sel.quantity, 0)} units total</p>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <button onClick={() => updateOrderQty(entry.product.id, entry.quantity - 1)} className="w-7 h-7 rounded-full bg-[#FFFFFF]/10 text-[#FFFFFF] flex items-center justify-center hover:bg-[#FFFFFF]/20 text-sm"><Minus className="h-3 w-3" /></button>
-                            <input type="number" min={entry.vd.min_quantity} value={entry.quantity} onChange={(e) => updateOrderQty(entry.product.id, parseInt(e.target.value) || entry.vd.min_quantity)} className="w-14 text-center bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-lg text-[#FFFFFF] text-sm py-1" />
-                            <button onClick={() => updateOrderQty(entry.product.id, entry.quantity + 1)} className="w-7 h-7 rounded-full bg-[#FFFFFF]/10 text-[#FFFFFF] flex items-center justify-center hover:bg-[#FFFFFF]/20 text-sm"><Plus className="h-3 w-3" /></button>
+                          <div className="flex items-center gap-3">
+                            <span className="text-[#B3D335] font-bold">{formatPrice(entry.bundle.price_cents)}</span>
+                            <button onClick={() => removeOrderEntry(entry.bundle.id)} className="text-[#FFFFFF]/40 hover:text-[#FF4444] transition-colors"><Trash2 className="h-4 w-4" /></button>
                           </div>
-                          <p className="text-[#B3D335] font-semibold text-sm w-20 text-right">{formatPrice(lineTotal)}</p>
-                          <button onClick={() => removeFromOrder(entry.product.id)} className="text-[#FFFFFF]/40 hover:text-[#FF4444] transition-colors"><Trash2 className="h-4 w-4" /></button>
                         </div>
-                      );
-                    })}
+                        <div className="flex flex-wrap gap-1">
+                          {entry.selections.map(sel => (
+                            <span key={sel.product.id} className="text-xs bg-[#FFFFFF]/10 text-[#FFFFFF]/70 px-2 py-0.5 rounded">
+                              {titleCase(sel.product.online_name || sel.product.name)} × {sel.quantity}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                   <div className="border-t border-[#FFFFFF]/20 mt-4 pt-4 flex items-center justify-between">
                     <span className="text-[#FFFFFF]/70 font-medium">Estimated Total</span>
@@ -2189,10 +2242,10 @@ function WholesalePage({ products, fulfillment }: { products: Product[]; fulfill
                 </div>
               )}
 
-              {orderItems.length === 0 && (
+              {orderEntries.length === 0 && (
                 <div className="bg-[#FFFFFF]/5 border border-[#FFFFFF]/10 rounded-2xl p-8 mb-6 text-center">
                   <Package className="h-10 w-10 text-[#FFFFFF]/30 mx-auto mb-3" />
-                  <p className="text-[#FFFFFF]/50 text-sm">No products added yet. Browse the deals above and click "Add to Wholesale Order" to get started.</p>
+                  <p className="text-[#FFFFFF]/50 text-sm">No deals added yet. Browse the deals above and choose your flavors to get started.</p>
                 </div>
               )}
 
@@ -2207,8 +2260,8 @@ function WholesalePage({ products, fulfillment }: { products: Product[]; fulfill
                 </div>
                 <textarea placeholder="Additional notes (optional)" value={orderMessage} onChange={(e) => setOrderMessage(e.target.value)} rows={3} className="w-full px-4 py-3 bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-xl text-[#FFFFFF] placeholder-[#FFFFFF]/40 focus:outline-none focus:border-[#B3D335] resize-none" />
                 {submitError && <p className="text-[#FF4444] text-sm text-center">{submitError}</p>}
-                <button type="submit" disabled={submitting || orderItems.length === 0} className="w-full py-3.5 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                  {submitting ? "Submitting..." : orderItems.length === 0 ? "Add Products to Continue" : `Request Invoice — ${formatPrice(orderTotal)}`}
+                <button type="submit" disabled={submitting || orderEntries.length === 0} className="w-full py-3.5 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  {submitting ? "Submitting..." : orderEntries.length === 0 ? "Choose a Deal to Continue" : `Request Invoice — ${formatPrice(orderTotal)}`}
                 </button>
                 <p className="text-center text-[#FFFFFF]/40 text-xs">Or email us directly at <a href="mailto:Support@TheHempDispensary.com" className="text-[#B3D335] hover:underline">Support@TheHempDispensary.com</a> · Call <a href="tel:+13523405860" className="text-[#B3D335] hover:underline">(352) 340-5860</a></p>
               </form>
@@ -2263,7 +2316,7 @@ function SiteFooter() {
               <a href="/our-locations" onClick={(e) => { e.preventDefault(); navigate("/our-locations"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Our Locations</a>
               <a href="/loyalty" onClick={(e) => { e.preventDefault(); navigate("/loyalty"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Rewards</a>
               <a href="/games" onClick={(e) => { e.preventDefault(); navigate("/games"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Games</a>
-              <a href="/wholesale" onClick={(e) => { e.preventDefault(); navigate("/wholesale"); }} className="block text-[#B3D335] hover:text-[#FFFFFF] text-sm font-semibold transition-colors">Wholesale</a>
+              <a href="/wholesale" onClick={(e) => { e.preventDefault(); navigate("/wholesale"); }} className="block text-[#B3D335] hover:text-[#FFFFFF] text-sm font-semibold transition-colors">Bulk Bargains</a>
             </div>
           </div>
           <div>
@@ -5064,7 +5117,7 @@ function App() {
       "/cbd": "Shop CBD tinctures, topicals, edibles, and flower at The Hemp Dispensary in Spring Hill, FL. Full-spectrum, broad-spectrum, and isolate options. Lab-tested.",
       "/cbg": "Shop CBG tinctures, wax, gummies, and flower at The Hemp Dispensary in Spring Hill, FL. The mother cannabinoid, lab-tested and federally compliant.",
       "/cbn": "Shop CBN gummies, tinctures, and nighttime blends at The Hemp Dispensary in Spring Hill, FL. Formulated for relaxation and sleep. Lab-tested.",
-      "/wholesale": "Wholesale bulk pricing at The Hemp Dispensary — volume discounts on vape cartridges, edibles, flower, and more. Submit your order and pay via invoice.",
+      "/wholesale": "Bulk Bargains at The Hemp Dispensary — wholesale pricing on vape cartridges, edibles, flower, and more. Mix and match flavors, submit your order, and pay via invoice.",
     };
     const key = route === "" ? "/" : route;
     const desc = descriptions[key] || descriptions["/"];
@@ -5260,7 +5313,7 @@ function App() {
   if (route === "/shipping-policy") return shell(<ShippingPolicyPage />);
   if (route === "/wholesale") return shell(loading
     ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
-    : <WholesalePage products={products} fulfillment={fulfillment} />);
+    : <WholesalePage products={products} />);
 
   // Homepage
   return (
