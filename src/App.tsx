@@ -774,7 +774,7 @@ function TrustStrip() {
     { icon: MapPin, label: "2 Locations", sub: "Spring Hill, FL" },
     { icon: Zap, label: "Ready In 5 Minutes", sub: "Fast Pickup" },
     { icon: Truck, label: "48 Hr Local Delivery", sub: "Spring Hill Area" },
-    { icon: Package, label: "Nationwide Shipping", sub: "All 50 States" },
+    { icon: Package, label: "Nationwide Shipping", sub: "Quick Processing Time" },
     { icon: Clock, label: "Open Daily", sub: "East 7am-10pm | West 9am-10pm" },
   ];
   return (
