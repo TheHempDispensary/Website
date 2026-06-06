@@ -457,7 +457,7 @@ function BudAgeGatePopup({ onComplete }: { onComplete: (f: FulfillmentType) => v
                     <div>
                       <p className="font-bold text-sm">LOCAL DELIVERY</p>
                       <p className={`text-xs mt-1 ${selected === "local_delivery" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Delivered within 30 miles of Spring Hill</p>
-                      <p className={`text-xs font-semibold mt-1 ${selected === "local_delivery" ? "text-[#B3D335]" : "text-[#3D8C32]"}`}>Within 42 hours &bull; $15 fee ($5 over $150)</p>
+                      <p className={`text-xs font-semibold mt-1 ${selected === "local_delivery" ? "text-[#B3D335]" : "text-[#3D8C32]"}`}>Within 48 hours &bull; $15 fee ($5 over $150)</p>
                     </div>
                   </div>
                 </button>
@@ -526,7 +526,7 @@ function FulfillmentSelectorModal({ currentFulfillment, onSelect, onClose }: { c
                 <div>
                   <p className="font-bold text-sm">LOCAL DELIVERY</p>
                   <p className={`text-xs mt-1 ${selected === "local_delivery" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Delivered within 30 miles of Spring Hill</p>
-                  <p className={`text-xs font-semibold mt-1 ${selected === "local_delivery" ? "text-[#B3D335]" : "text-[#3D8C32]"}`}>Within 42 hours &bull; $15 fee ($5 over $150)</p>
+                  <p className={`text-xs font-semibold mt-1 ${selected === "local_delivery" ? "text-[#B3D335]" : "text-[#3D8C32]"}`}>Within 48 hours &bull; $15 fee ($5 over $150)</p>
                 </div>
               </div>
             </button>
@@ -3135,7 +3135,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
           <div className="space-y-3 text-sm text-[#231F20]">
             <div className="flex gap-3"><Mail className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>A confirmation email will be sent to <span className="font-semibold text-[#231F20]">{form.email}</span></p></div>
             <div className="flex gap-3"><Package className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>Your order will be prepared and packaged</p></div>
-            <div className="flex gap-3"><Truck className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>{isDelivery ? "Your order will be delivered within 42 hours" : isPickup ? "Your order will be ready for pickup in about 5 minutes" : "You'll receive shipping details once dispatched"}</p></div>
+            <div className="flex gap-3"><Truck className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>{isDelivery ? "Your order will be delivered within 48 hours" : isPickup ? "Your order will be ready for pickup in about 5 minutes" : "You'll receive shipping details once dispatched"}</p></div>
           </div>
         </div>
         <div className="flex gap-3 justify-center">
@@ -3382,7 +3382,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                               <div className="space-y-2 text-sm text-[#231F20]">
                                 <div className="flex items-center gap-2">
                                   <Clock className="h-4 w-4 text-[#126A44]" />
-                                  <span>Delivered within <strong>42 hours</strong> of order placement</span>
+                                  <span>Delivered within <strong>48 hours</strong> of order placement</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <DollarSign className="h-4 w-4 text-[#126A44]" />
@@ -3492,7 +3492,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                   <>
                     <p className="text-[#FFFFFF] text-sm">{form.address}{form.apartment ? `, ${form.apartment}` : ""}</p>
                     <p className="text-[#231F20] text-sm">{form.city}, {form.state} {form.zip}</p>
-                    {isDelivery && <p className="text-[#126A44] text-sm font-medium mt-1">Delivered within 42 hours</p>}
+                    {isDelivery && <p className="text-[#126A44] text-sm font-medium mt-1">Delivered within 48 hours</p>}
                   </>
                 )}
               </div>
@@ -4613,7 +4613,7 @@ function AccountPage() {
 
                     {order.fulfillment_type === "local_delivery" && (
                       <div className="bg-[#B3D335]/10 rounded-lg p-4 text-sm text-[#231F20]">
-                        Your order will be delivered within 42 hours of placement.
+                        Your order will be delivered within 48 hours of placement.
                       </div>
                     )}
                   </div>
