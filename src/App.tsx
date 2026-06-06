@@ -5172,7 +5172,9 @@ function App() {
     // Use only the pathname (no query string) — strip ?ref= and any other params
     const cleanPath = window.location.pathname;
     const rawPath = cleanPath === "/" || cleanPath === "" ? "/" : cleanPath.replace(/\/+$/, "");
-    const path = rawPath.startsWith("/shop/") ? rawPath.replace("/shop/", "/products/") : (rawPath === "/shop" ? "/products" : rawPath);
+    let path = rawPath.startsWith("/shop/") ? rawPath.replace("/shop/", "/products/") : (rawPath === "/shop" ? "/products" : rawPath);
+    // Normalize legacy /product/X → /products/product/X
+    if (path.startsWith("/product/") && !path.startsWith("/products/")) path = "/products" + path;
     const canonical = path === "/" ? base + "/" : base + path;
 
     let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
@@ -5190,6 +5192,23 @@ function App() {
       document.head.appendChild(ogUrl);
     }
     ogUrl.content = canonical;
+  }, [route]);
+
+  // Dynamic robots meta — noindex utility/thin pages, index content pages
+  useEffect(() => {
+    const noindexRoutes = ["/checkout", "/account", "/shipping-policy", "/games"];
+    const shouldNoindex = noindexRoutes.includes(route);
+    let meta = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
+    if (shouldNoindex) {
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.name = "robots";
+        document.head.appendChild(meta);
+      }
+      meta.content = "noindex, nofollow";
+    } else if (meta) {
+      meta.remove();
+    }
   }, [route]);
 
   useEffect(() => {
@@ -5316,7 +5335,16 @@ function App() {
     </div>
   );
 
-  if (route.startsWith("/product/")) return shell(<ProductDetail productId={route.replace("/product/", "")} products={products} onAddToCart={addToCart} fulfillment={fulfillment} />);
+  // Legacy /product/{id} → redirect to canonical /products/product/{slug}
+  if (route.startsWith("/product/")) {
+    const pid = route.replace("/product/", "");
+    const match = products.find(p => p.id === pid || p.slug === pid);
+    if (match?.slug && match.slug !== pid) {
+      navigate(`/products/product/${match.slug}`);
+      return null;
+    }
+    return shell(<ProductDetail productId={pid} products={products} onAddToCart={addToCart} fulfillment={fulfillment} />);
+  }
   if (route.startsWith("/products/product/")) return shell(<ProductDetail productId={route.replace("/products/product/", "")} products={products} onAddToCart={addToCart} fulfillment={fulfillment} />);
   if (route.startsWith("/shop") || route.startsWith("/products")) {
     const catSlug = route.replace("/shop/", "").replace("/shop", "").replace("/products/", "").replace("/products", "");

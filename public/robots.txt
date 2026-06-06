@@ -31,5 +31,8 @@ Disallow: /es/
 
 # Block utility/non-indexable paths
 Disallow: /products/pages/
+Disallow: /checkout
+Disallow: /account
+Disallow: /shipping-policy
 
 Sitemap: https://www.thehempdispensary.com/sitemap.xml
