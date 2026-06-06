@@ -32,6 +32,7 @@ const STATIC_PAGES = [
   { loc: "/products/accessories", priority: "0.9", changefreq: "weekly" },
   { loc: "/products/apparel", priority: "0.8", changefreq: "weekly" },
   { loc: "/products/packaging", priority: "0.8", changefreq: "weekly" },
+  { loc: "/wholesale", priority: "0.8", changefreq: "weekly" },
   { loc: "/about", priority: "0.6", changefreq: "monthly" },
   { loc: "/thca", priority: "0.8", changefreq: "weekly" },
   { loc: "/delta-8", priority: "0.8", changefreq: "weekly" },
@@ -43,9 +44,9 @@ const STATIC_PAGES = [
   { loc: "/contact", priority: "0.6", changefreq: "monthly" },
   { loc: "/shipping", priority: "0.6", changefreq: "monthly" },
   { loc: "/loyalty", priority: "0.6", changefreq: "monthly" },
-  { loc: "/games", priority: "0.5", changefreq: "monthly" },
-  { loc: "/terms", priority: "0.5", changefreq: "monthly" },
-  { loc: "/privacy", priority: "0.5", changefreq: "monthly" },
+  { loc: "/terms", priority: "0.3", changefreq: "yearly" },
+  { loc: "/privacy", priority: "0.3", changefreq: "yearly" },
+  // Excluded from sitemap: /checkout, /account, /games, /shipping-policy (utility/thin pages)
 ];
 
 function urlEntry({ loc, priority, changefreq, lastmod }) {

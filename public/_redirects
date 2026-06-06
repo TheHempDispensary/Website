@@ -6,9 +6,12 @@
 /products?cp=true    /products              301
 /products?cs=true    /products              301
 
+# Ecwid/Wix ?store-page= parameter URLs → clean canonical
+/?store-page=*       /products              301
+
 # Specific page redirects
 /locations          /our-locations     301
-/shipping-policy    /                  301
+/shipping-policy    /shipping          301
 /affiliate-program  /                  301
 /help-save-hemp     /                  301
 /newpage95b2d746    /                  301
@@ -47,9 +50,24 @@
 /tinctures?*        /products/tinctures    301
 /tinctures/*        /products/tinctures    301
 
+# Legacy Ecwid category redirects — topicals (still valid)
+/topicals           /products/topicals     301
+/topicals?*         /products/topicals     301
+/topicals/*         /products/topicals     301
+
+# Legacy Ecwid category redirects — vapor (still valid)
+/vapor              /products/vapor        301
+/vapor?*            /products/vapor        301
+/vapor/*            /products/vapor        301
+
 # Legacy Ecwid category redirects — accessories (still valid)
 /stickers           /products/accessories  301
 /stickers/*         /products/accessories  301
+
+# Legacy Ecwid category redirects — apparel
+/apparel            /products/apparel      301
+/apparel?*          /products/apparel      301
+/apparel/*          /products/apparel      301
 
 # Legacy Ecwid category redirects — general shop (still valid)
 /on-sale            /products          301
@@ -72,6 +90,9 @@
 /es                 /                  301
 /es/                /                  301
 /es/*               /                  301
+
+# Legacy Ecwid pagination — /products/pages/X
+/products/pages/*   /products          301
 
 # Legacy /products paths — specific old Ecwid product URLs
 /products/delta-8-thc-gummies-90mg-fruit-variety  /products/edibles  301

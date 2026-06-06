@@ -8,8 +8,10 @@
       (function(){
         var p = window.location.pathname;
         var path = p === '/' || p === '' ? '/' : p.replace(/\/+$/, '');
+        // Normalize legacy URL patterns to canonical
         if (path.indexOf('/shop/') === 0) path = path.replace('/shop/', '/products/');
         else if (path === '/shop') path = '/products';
+        if (path.indexOf('/product/') === 0 && path.indexOf('/products/product/') !== 0) path = '/products' + path;
         var canonical = path === '/' ? 'https://www.thehempdispensary.com/' : 'https://www.thehempdispensary.com' + path;
         document.getElementById('canonical-link').href = canonical;
         var og = document.querySelector('meta[property="og:url"]');
