@@ -1121,10 +1121,27 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
     const local = products.find(p => p.slug === productId) || products.find(p => p.slug === normalizedId) || products.find(p => p.id === productId);
     if (local) { setProduct(local); setLoading(false); return; }
     fetch(`${API_URL}/api/ecommerce/products/${normalizedId}`)
-      .then((r) => r.json())
-      .then((data) => { setProduct(data); setLoading(false); })
+      .then((r) => { if (!r.ok) throw new Error("not found"); return r.json(); })
+      .then((data) => { if (data && data.id) { setProduct(data); } setLoading(false); })
       .catch(() => setLoading(false));
   }, [productId, products]);
+
+  // Manage noindex for product-not-found via useEffect so it cleans up properly
+  const isNotFound = !loading && !product;
+  useEffect(() => {
+    if (!isNotFound) return;
+    let meta = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "robots";
+      document.head.appendChild(meta);
+    }
+    meta.content = "noindex";
+    return () => {
+      const m = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
+      if (m) m.remove();
+    };
+  }, [isNotFound]);
 
   if (loading) return (
     <div className="flex justify-center items-center py-32">
@@ -1133,10 +1150,6 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
   );
 
   if (!product) {
-    // Signal to search engines this is a 404 — add noindex
-    const noindex = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
-    if (!noindex) { const m = document.createElement("meta"); m.name = "robots"; m.content = "noindex"; document.head.appendChild(m); }
-    else { noindex.content = "noindex"; }
     return (
       <div className="text-center py-32">
         <Package className="mx-auto h-16 w-16 text-[#231F20] mb-4" />
