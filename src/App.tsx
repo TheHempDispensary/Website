@@ -456,8 +456,8 @@ function BudAgeGatePopup({ onComplete }: { onComplete: (f: FulfillmentType) => v
                     <Package className="h-5 w-5 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-bold text-sm">LOCAL DELIVERY</p>
-                      <p className={`text-xs mt-1 ${selected === "local_delivery" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Delivered within 30 miles of Spring Hill</p>
-                      <p className={`text-xs font-semibold mt-1 ${selected === "local_delivery" ? "text-[#B3D335]" : "text-[#3D8C32]"}`}>Within 42 hours &bull; $15 fee ($5 over $150)</p>
+                      <p className={`text-xs mt-1 ${selected === "local_delivery" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>30 mile radius of 34608</p>
+                      <p className={`text-xs font-semibold mt-1 ${selected === "local_delivery" ? "text-[#B3D335]" : "text-[#3D8C32]"}`}>Next day &bull; $15 fee ($5 over $150)</p>
                     </div>
                   </div>
                 </button>
@@ -525,8 +525,8 @@ function FulfillmentSelectorModal({ currentFulfillment, onSelect, onClose }: { c
                 <Package className="h-5 w-5 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-bold text-sm">LOCAL DELIVERY</p>
-                  <p className={`text-xs mt-1 ${selected === "local_delivery" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>Delivered within 30 miles of Spring Hill</p>
-                  <p className={`text-xs font-semibold mt-1 ${selected === "local_delivery" ? "text-[#B3D335]" : "text-[#3D8C32]"}`}>Within 42 hours &bull; $15 fee ($5 over $150)</p>
+                  <p className={`text-xs mt-1 ${selected === "local_delivery" ? "text-[#FFFFFF]" : "text-[#231F20]/60"}`}>30 mile radius of 34608</p>
+                  <p className={`text-xs font-semibold mt-1 ${selected === "local_delivery" ? "text-[#B3D335]" : "text-[#3D8C32]"}`}>Next day &bull; $15 fee ($5 over $150)</p>
                 </div>
               </div>
             </button>
@@ -754,7 +754,7 @@ function HeroSection({ sale }: { sale?: ActiveSaleData | null }) {
           Skip the Line.<br />
           <span className="text-[#B3D335]">Get Your Hemp in Minutes.</span>
         </h1>
-        <p className="text-[#FFFFFF]/80 text-base sm:text-xl mb-6 max-w-2xl mx-auto">Fast pickup. Lab-tested. Trusted locally.</p>
+        <p className="text-[#FFFFFF]/80 text-base sm:text-xl mb-6 max-w-2xl mx-auto">Fast pickup. Lab-tested. Trusted nationally.</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button onClick={() => navigate("/products")} className="px-8 py-3.5 sm:py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors shadow-lg">Shop All</button>
           <button onClick={() => { const el = document.getElementById('locations-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else navigate('/contact'); }} className="px-8 py-3.5 sm:py-4 border-2 border-[#FFFFFF] hover:bg-[#FFFFFF] text-[#FFFFFF] hover:text-[#231F20] rounded-full font-bold text-lg transition-colors">Find Nearest Location</button>
@@ -773,12 +773,14 @@ function TrustStrip() {
     { icon: Shield, label: "Lab Tested", sub: "Clean & Safe" },
     { icon: MapPin, label: "2 Locations", sub: "Spring Hill, FL" },
     { icon: Zap, label: "Ready In 5 Minutes", sub: "Fast Pickup" },
+    { icon: Truck, label: "Next Day Delivery", sub: "30 Mile Radius of 34608" },
+    { icon: Package, label: "Nationwide Shipping", sub: "Quick Processing Time" },
     { icon: Clock, label: "Open Daily", sub: "East 7am-10pm | West 9am-10pm" },
   ];
   return (
     <section className="bg-[#FFFFFF] border-b border-[#231F20]/10 cursor-pointer" onClick={() => navigate('/products')}>
       <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
-        <div className="grid grid-cols-4 gap-2 sm:gap-4">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-4">
           {items.map((item) => (
             <div key={item.label} className="flex flex-col items-center text-center">
               <item.icon className="h-5 w-5 text-[#3D8C32] mb-1" />
@@ -3133,7 +3135,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
           <div className="space-y-3 text-sm text-[#231F20]">
             <div className="flex gap-3"><Mail className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>A confirmation email will be sent to <span className="font-semibold text-[#231F20]">{form.email}</span></p></div>
             <div className="flex gap-3"><Package className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>Your order will be prepared and packaged</p></div>
-            <div className="flex gap-3"><Truck className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>{isDelivery ? "Your order will be delivered within 42 hours" : isPickup ? "Your order will be ready for pickup in about 5 minutes" : "You'll receive shipping details once dispatched"}</p></div>
+            <div className="flex gap-3"><Truck className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" /><p>{isDelivery ? "Your order will be delivered next business day" : isPickup ? "Your order will be ready for pickup in about 5 minutes" : "You'll receive shipping details once dispatched"}</p></div>
           </div>
         </div>
         <div className="flex gap-3 justify-center">
@@ -3368,7 +3370,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                           {deliveryError && <p className="text-red-500 text-sm mb-3">{deliveryError}</p>}
 
                           {!deliveryChecking && deliveryEligible === null && (
-                            <p className="text-[#231F20]/60 text-sm">Click &quot;Check Delivery Availability&quot; to verify your address is within our 30-mile delivery area.</p>
+                            <p className="text-[#231F20]/60 text-sm">Click &quot;Check Delivery Availability&quot; to verify your address is within our 30-mile radius of 34608.</p>
                           )}
 
                           {!deliveryChecking && deliveryEligible === true && (
@@ -3380,7 +3382,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                               <div className="space-y-2 text-sm text-[#231F20]">
                                 <div className="flex items-center gap-2">
                                   <Clock className="h-4 w-4 text-[#126A44]" />
-                                  <span>Delivered within <strong>42 hours</strong> of order placement</span>
+                                  <span>Delivered <strong>next business day</strong> after order placement</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <DollarSign className="h-4 w-4 text-[#126A44]" />
@@ -3490,7 +3492,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                   <>
                     <p className="text-[#FFFFFF] text-sm">{form.address}{form.apartment ? `, ${form.apartment}` : ""}</p>
                     <p className="text-[#231F20] text-sm">{form.city}, {form.state} {form.zip}</p>
-                    {isDelivery && <p className="text-[#126A44] text-sm font-medium mt-1">Delivered within 42 hours</p>}
+                    {isDelivery && <p className="text-[#126A44] text-sm font-medium mt-1">Next day delivery</p>}
                   </>
                 )}
               </div>
@@ -4611,7 +4613,7 @@ function AccountPage() {
 
                     {order.fulfillment_type === "local_delivery" && (
                       <div className="bg-[#B3D335]/10 rounded-lg p-4 text-sm text-[#231F20]">
-                        Your order will be delivered within 42 hours of placement.
+                        Your order will be delivered next business day.
                       </div>
                     )}
                   </div>
