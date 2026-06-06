@@ -5339,7 +5339,7 @@ function App() {
   if (route.startsWith("/product/")) {
     const pid = route.replace("/product/", "");
     const match = products.find(p => p.id === pid || p.slug === pid);
-    if (match?.slug && match.slug !== pid) {
+    if (match?.slug) {
       navigate(`/products/product/${match.slug}`);
       return null;
     }
