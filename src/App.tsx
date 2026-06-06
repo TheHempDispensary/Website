@@ -754,7 +754,7 @@ function HeroSection({ sale }: { sale?: ActiveSaleData | null }) {
           Skip the Line.<br />
           <span className="text-[#B3D335]">Get Your Hemp in Minutes.</span>
         </h1>
-        <p className="text-[#FFFFFF]/80 text-base sm:text-xl mb-6 max-w-2xl mx-auto">Fast pickup. Lab-tested. Trusted locally.</p>
+        <p className="text-[#FFFFFF]/80 text-base sm:text-xl mb-6 max-w-2xl mx-auto">Fast pickup. Lab-tested. Trusted nationally.</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button onClick={() => navigate("/products")} className="px-8 py-3.5 sm:py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors shadow-lg">Shop All</button>
           <button onClick={() => { const el = document.getElementById('locations-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else navigate('/contact'); }} className="px-8 py-3.5 sm:py-4 border-2 border-[#FFFFFF] hover:bg-[#FFFFFF] text-[#FFFFFF] hover:text-[#231F20] rounded-full font-bold text-lg transition-colors">Find Nearest Location</button>
@@ -773,12 +773,14 @@ function TrustStrip() {
     { icon: Shield, label: "Lab Tested", sub: "Clean & Safe" },
     { icon: MapPin, label: "2 Locations", sub: "Spring Hill, FL" },
     { icon: Zap, label: "Ready In 5 Minutes", sub: "Fast Pickup" },
+    { icon: Truck, label: "48 Hr Local Delivery", sub: "Spring Hill Area" },
+    { icon: Package, label: "Nationwide Shipping", sub: "All 50 States" },
     { icon: Clock, label: "Open Daily", sub: "East 7am-10pm | West 9am-10pm" },
   ];
   return (
     <section className="bg-[#FFFFFF] border-b border-[#231F20]/10 cursor-pointer" onClick={() => navigate('/products')}>
       <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
-        <div className="grid grid-cols-4 gap-2 sm:gap-4">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-4">
           {items.map((item) => (
             <div key={item.label} className="flex flex-col items-center text-center">
               <item.icon className="h-5 w-5 text-[#3D8C32] mb-1" />
