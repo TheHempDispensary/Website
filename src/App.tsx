@@ -292,9 +292,20 @@ function getSalePrice(product: Product, sale: ActiveSaleData | null): number | n
   return Math.round(product.price * (1 - sale.discount_percent / 100));
 }
 
+const NON_CONSUMABLE_CATEGORIES = ["apparel", "accessories", "packaging"];
+function isConsumableProduct(product: Product): boolean {
+  return !product.categories.some(c => NON_CONSUMABLE_CATEGORIES.includes(c.toLowerCase()));
+}
+
+function cleanProductName(str: string): string {
+  let cleaned = str.replace(/\s{2,}/g, " ").trim();
+  cleaned = cleaned.replace(/\s*Batch\s+\d{6,}-\d+/gi, "");
+  return cleaned;
+}
+
 function titleCase(str: string): string {
   const KEEP_UPPER = /\b(CBC|CBD|CBG|CBN|CBT|THC)\b/gi;
-  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).replace(KEEP_UPPER, m => m.toUpperCase());
+  return cleanProductName(str).toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).replace(KEEP_UPPER, m => m.toUpperCase());
 }
 
 const PRODUCT_FALLBACK = "/images/product-placeholder.webp";
@@ -751,7 +762,7 @@ function HeroSection({ sale }: { sale?: ActiveSaleData | null }) {
     <section className="bg-[#231F20] relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 py-10 sm:py-20 text-center relative z-10">
         <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-[#FFFFFF] mb-3 leading-tight">
-          Skip the Line.<br />
+          Skip the Line.{" "}<br />
           <span className="text-[#B3D335]">Get Your Hemp in Minutes.</span>
         </h1>
         <p className="text-[#FFFFFF]/80 text-base sm:text-xl mb-6 max-w-2xl mx-auto">Fast pickup. Lab-tested. Trusted nationally.</p>
@@ -1061,10 +1072,10 @@ function ProductGridCard({ product, onQuickAdd, fulfillment, sale }: { product: 
         </div>
         {/* Badges row */}
         <div className="flex items-center gap-1 flex-wrap mb-1.5">
-          <span className="inline-block text-[11px] sm:text-xs font-bold px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full bg-[#D9A32C]/15 text-[#D9A32C] border border-[#D9A32C]/30">21+</span>
-                    <span className="inline-block text-[11px] sm:text-xs font-medium px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>
+          {isConsumableProduct(product) && <span className="inline-block text-[11px] sm:text-xs font-bold px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full bg-[#D9A32C]/15 text-[#D9A32C] border border-[#D9A32C]/30">21+</span>}
+          {isConsumableProduct(product) && <span className="inline-block text-[11px] sm:text-xs font-medium px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>
                       {effect.icon} {effect.label}
-                    </span>
+                    </span>}
           {product.product_type && <span className="inline-block text-[11px] sm:text-xs font-medium px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full bg-[#E8F5E9] text-[#2E7D32]">{product.product_type}</span>}
           {fulfillment && isPickup && <span className="inline-block bg-[#58BA49] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ready in 5 min</span>}
           {fulfillment && fulfillment === "local_delivery" && <span className="inline-block bg-[#3D8C32] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">42hr Delivery</span>}
@@ -1189,6 +1200,12 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
 
   return (
     <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+      <Breadcrumbs items={[
+        { label: "Home", href: "/" },
+        { label: "Products", href: "/products" },
+        ...(product.categories.length > 0 ? [{ label: product.categories[0], href: `/products/${product.categories[0].toLowerCase()}` }] : []),
+        { label: titleCase(product.online_name || product.name) },
+      ]} />
       <button onClick={() => window.history.back()} className="flex items-center gap-2 text-[#126A44] hover:text-[#126A44] mb-4 sm:mb-6 font-medium text-sm sm:text-base">
         <ArrowLeft className="h-4 w-4" /> Back to Products
       </button>
@@ -1232,9 +1249,9 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
 
             {/* Effect, Type & Strength badges */}
             <div className="flex gap-2 mb-4 flex-wrap">
-              <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>{effect.icon} {effect.label}</span>
+              {isConsumableProduct(product) && <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>{effect.icon} {effect.label}</span>}
               {product.product_type && <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#E8F5E9] text-[#2E7D32]">{product.product_type}</span>}
-              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#FFCB08]" style={{ color: "#231F20" }}>Strength: {strength.label}</span>
+              {isConsumableProduct(product) && <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#FFCB08]" style={{ color: "#231F20" }}>Strength: {strength.label}</span>}
             </div>
 
             <div className="flex items-center gap-3 mb-4">
@@ -1260,10 +1277,12 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
             {/* Benefit description */}
             <p className="text-[#231F20] text-sm mb-4">{benefit}</p>
 
+            {isConsumableProduct(product) && (
             <div className="flex items-center gap-2 mb-4 bg-[#FFCB08]/10 border border-[#FFCB08]/30 rounded-lg px-4 py-2">
               <span className="text-[#D9A32C] font-bold">21+</span>
               <span className="text-[#231F20] text-sm">Age verification required</span>
             </div>
+            )}
 
             {product.description && (
               <div className="mb-4">
@@ -1427,6 +1446,25 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
 }
 
 /* ======================== SHOP PAGE (Light Theme) ======================== */
+function Breadcrumbs({ items }: { items: { label: string; href?: string }[] }) {
+  return (
+    <nav aria-label="Breadcrumb" className="mb-4 text-sm text-[#231F20]/60">
+      <ol className="flex items-center gap-1 flex-wrap">
+        {items.map((item, i) => (
+          <li key={i} className="flex items-center gap-1">
+            {i > 0 && <ChevronRight className="h-3 w-3" />}
+            {item.href ? (
+              <a href={item.href} onClick={(e) => { e.preventDefault(); navigate(item.href!); }} className="hover:text-[#126A44] transition-colors">{item.label}</a>
+            ) : (
+              <span className="text-[#231F20] font-medium">{item.label}</span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
+
 function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfillment, sale }: { products: Product[]; categories: string[]; selectedCategory: string; onAddToCart: (product: Product) => void; fulfillment: FulfillmentType | null; sale?: ActiveSaleData | null }) {
   const [sortBy, setSortBy] = useState("name");
   const [thcFilter, setThcFilter] = useState<"all" | "thc" | "non-thc">("all");
@@ -1457,6 +1495,11 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      <Breadcrumbs items={[
+        { label: "Home", href: "/" },
+        { label: "Products", href: selectedCategory && selectedCategory !== "all" ? "/products" : undefined },
+        ...(selectedCategory && selectedCategory !== "all" ? [{ label: selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) }] : []),
+      ]} />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-[18px] sm:text-3xl font-semibold sm:font-bold text-[#231F20]">{selectedCategory && selectedCategory !== "all" ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : "All Products"}</h1>
@@ -1759,10 +1802,7 @@ function OurLocationsPage() {
 
 /* ======================== SHIPPING POLICY PAGE ======================== */
 function ThcaPage({ products, onAddToCart, fulfillment, sale }: { products: Product[]; onAddToCart: (product: Product) => void; fulfillment: FulfillmentType | null; sale?: ActiveSaleData | null }) {
-  useEffect(() => {
-    document.title = "THCA Products | The Hemp Dispensary \u2013 Spring Hill, FL";
-    return () => { document.title = "The Hemp Dispensary | Spring Hill FL"; };
-  }, []);
+  // Title now handled centrally in App component
 
   const thcaProducts = useMemo(() => {
     const items = fulfillment
@@ -1809,10 +1849,7 @@ function CannabinoidPage({ products, onAddToCart, fulfillment, config, sale }: {
   config: { title: string; heading: string; para1: string; para2: string; keywords: string[]; pageTitle: string };
   sale?: ActiveSaleData | null;
 }) {
-  useEffect(() => {
-    document.title = config.pageTitle;
-    return () => { document.title = "The Hemp Dispensary | Spring Hill FL"; };
-  }, [config.pageTitle]);
+  // Title now handled centrally in App component
 
   const filtered = useMemo(() => {
     const items = fulfillment
@@ -1957,10 +1994,7 @@ function WholesalePage({ products }: { products: Product[] }) {
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  useEffect(() => {
-    document.title = "Bulk Bargains | The Hemp Dispensary – Wholesale Pricing & Volume Deals";
-    return () => { document.title = "The Hemp Dispensary | Spring Hill FL"; };
-  }, []);
+  // Title now handled centrally in App component
 
   useEffect(() => {
     fetch(`${API_URL}/api/ecommerce/wholesale-bundles/active`)
@@ -5040,6 +5074,36 @@ function GamesPage() {
 
 
 /* ======================== MAIN APP ======================== */
+const PAGE_META: Record<string, { title: string; description: string }> = {
+  "/": { title: "The Hemp Dispensary | Premium Hemp Products \u2013 Spring Hill, FL", description: "The Hemp Dispensary \u2014 Spring Hill FL's trusted hemp store. Shop premium flower, edibles, concentrates, vapes, topicals, and tinctures online. Ready in 5 minutes or shipped to your door." },
+  "/products": { title: "All Products | The Hemp Dispensary", description: "Browse all hemp products at The Hemp Dispensary \u2014 flower, edibles, concentrates, vapes, topicals, tinctures, and more. Lab-tested, ready in 5 minutes." },
+  "/products/flower": { title: "Hemp Flower \u2013 Shop 89+ Strains | The Hemp Dispensary", description: "Shop premium hemp flower at The Hemp Dispensary \u2014 Everyday, Premium, Essential, Smalls, and Snowcaps tiers. Lab-tested, locally trusted, ready in 5 minutes." },
+  "/products/edibles": { title: "Hemp Edibles \u2013 Gummies, Chocolates & More | The Hemp Dispensary", description: "Hemp edibles including Delta-9 gummies, CBD chocolates, and CBN sleep chews. Lab-tested, legally compliant, available for pickup or shipping." },
+  "/products/concentrates": { title: "Hemp Concentrates \u2013 Live Rosin, Diamonds & Wax | The Hemp Dispensary", description: "Premium hemp concentrates including live rosin, diamonds, shatter, and badder. Solventless and hydrocarbon options, lab-tested for purity." },
+  "/products/vapor": { title: "Vape Cartridges & Disposables | The Hemp Dispensary", description: "CBD and THC vape cartridges, disposables, and 510-thread batteries. Lab-tested hemp vapor products ready for pickup in Spring Hill FL." },
+  "/products/topicals": { title: "Hemp Topicals \u2013 Creams, Balms & Patches | The Hemp Dispensary", description: "Hemp topicals including CBD muscle creams, balms, roll-ons, and transdermal patches. Targeted relief, lab-tested, available in-store and online." },
+  "/products/tinctures": { title: "Hemp Tinctures \u2013 CBD, CBG & CBN Oils | The Hemp Dispensary", description: "CBD, CBG, CBN and full spectrum hemp tinctures. Sublingual oils for sleep, pain, focus, and daily wellness. Lab-tested, fast pickup or shipping." },
+  "/products/apparel": { title: "Hemp Dispensary Apparel | The Hemp Dispensary", description: "Official Hemp Dispensary apparel \u2014 hoodies, tees, and gear. Rep your favorite hemp store." },
+  "/products/accessories": { title: "Smoking Accessories \u2013 Pipes, Grinders & More | The Hemp Dispensary", description: "Hemp accessories including glass pipes, rolling papers, grinders, storage, and butane. Everything you need in one stop." },
+  "/products/packaging": { title: "Packaging Supplies | The Hemp Dispensary", description: "Wholesale packaging supplies \u2014 containers, bags, jars, and more from top manufacturers like Chubby Gorilla. Available at The Hemp Dispensary." },
+  "/products/pets": { title: "CBD Pet Products | The Hemp Dispensary", description: "CBD pet tinctures and treats for dogs and cats. Lab-tested, vet-friendly hemp products at The Hemp Dispensary." },
+  "/loyalty": { title: "Hemp Rewards \u2013 Loyalty Program | The Hemp Dispensary", description: "Hemp Rewards \u2014 earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary." },
+  "/games": { title: "Games | The Hemp Dispensary", description: "Play games and win prizes at The Hemp Dispensary. Roll-a-Joint and more \u2014 all free to play for rewards members." },
+  "/about": { title: "About Us \u2013 Our Story | The Hemp Dispensary", description: "Our Story \u2014 how two Spring Hill locals built The Hemp Dispensary from a road trip idea to 15 locations, lost 13 overnight, and kept going." },
+  "/contact": { title: "Contact Us | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Get in touch with The Hemp Dispensary. Visit us at our Spring Hill locations, call, email, or reach out online." },
+  "/our-locations": { title: "Store Locations | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Find The Hemp Dispensary near you. Two Spring Hill, FL locations with daily hours and 5-minute pickup." },
+  "/thca": { title: "THCA Products | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Shop THCA flower, pre-rolls, concentrates, and vapes at The Hemp Dispensary in Spring Hill, FL. Federally compliant hemp, lab-tested, COA available on every product." },
+  "/delta-8": { title: "Delta-8 THC Products | The Hemp Dispensary", description: "Shop Delta-8 THC flower, gummies, vapes, wax, and tinctures at The Hemp Dispensary in Spring Hill, FL. Lab-tested, federally compliant hemp products." },
+  "/delta-9": { title: "Delta-9 THC Products | The Hemp Dispensary", description: "Shop hemp-derived Delta-9 THC edibles, beverages, and tinctures at The Hemp Dispensary in Spring Hill, FL. Lab-tested, compliant with Florida hemp regulations." },
+  "/cbd": { title: "CBD Products | The Hemp Dispensary", description: "Shop CBD tinctures, topicals, edibles, and flower at The Hemp Dispensary in Spring Hill, FL. Full-spectrum, broad-spectrum, and isolate options. Lab-tested." },
+  "/cbg": { title: "CBG Products | The Hemp Dispensary", description: "Shop CBG tinctures, wax, gummies, and flower at The Hemp Dispensary in Spring Hill, FL. The mother cannabinoid, lab-tested and federally compliant." },
+  "/cbn": { title: "CBN Products | The Hemp Dispensary", description: "Shop CBN gummies, tinctures, and nighttime blends at The Hemp Dispensary in Spring Hill, FL. Formulated for relaxation and sleep. Lab-tested." },
+  "/wholesale": { title: "Bulk Bargains \u2013 Wholesale Pricing | The Hemp Dispensary", description: "Bulk Bargains at The Hemp Dispensary \u2014 wholesale pricing on vape cartridges, edibles, flower, and more. Mix and match flavors, submit your order, and pay via invoice." },
+  "/terms": { title: "Terms of Service | The Hemp Dispensary", description: "Terms of Service for The Hemp Dispensary. Read our policies on orders, shipping, returns, and more." },
+  "/privacy": { title: "Privacy Policy | The Hemp Dispensary", description: "Privacy Policy for The Hemp Dispensary. Learn how we handle your personal information." },
+  "/shipping": { title: "Shipping & Pickup Info | The Hemp Dispensary", description: "Shipping and pickup information for The Hemp Dispensary. 5-minute in-store pickup, next-day local delivery, and nationwide shipping." },
+};
+
 function App() {
   const route = useRoute();
   const [products, setProducts] = useState<Product[]>([]);
@@ -5143,38 +5207,18 @@ function App() {
     updateCart([]);
   }, [updateCart]);
 
-  // Dynamic meta descriptions per route
+  // Dynamic title + meta description per route
   useEffect(() => {
-    const descriptions: Record<string, string> = {
-      "/": "The Hemp Dispensary — Spring Hill FL's trusted hemp store. Shop premium flower, edibles, concentrates, vapes, topicals, and tinctures online. Ready in 5 minutes or shipped to your door.",
-      "/products/flower": "Shop premium hemp flower at The Hemp Dispensary — Everyday, Premium, Essential, Smalls, and Snowcaps tiers. Lab-tested, locally trusted, ready in 5 minutes.",
-      "/products/edibles": "Hemp edibles including Delta-9 gummies, CBD chocolates, and CBN sleep chews. Lab-tested, legally compliant, available for pickup or shipping.",
-      "/products/concentrates": "Premium hemp concentrates including live rosin, diamonds, shatter, and badder. Solventless and hydrocarbon options, lab-tested for purity.",
-      "/products/vapor": "CBD and THC vape cartridges, disposables, and 510-thread batteries. Lab-tested hemp vapor products ready for pickup in Spring Hill FL.",
-      "/products/topicals": "Hemp topicals including CBD muscle creams, balms, roll-ons, and transdermal patches. Targeted relief, lab-tested, available in-store and online.",
-      "/products/tinctures": "CBD, CBG, CBN and full spectrum hemp tinctures. Sublingual oils for sleep, pain, focus, and daily wellness. Lab-tested, fast pickup or shipping.",
-      "/products/accessories": "Hemp accessories including glass pipes, rolling papers, grinders, storage, and butane. Everything you need in one stop.",
-      "/products/packaging": "Wholesale packaging supplies — containers, bags, jars, and more from top manufacturers like Chubby Gorilla. Available at The Hemp Dispensary.",
-      "/loyalty": "Hemp Rewards — earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary.",
-      "/games": "Play games and win prizes at The Hemp Dispensary. Roll-a-Joint and more — all free to play for rewards members.",
-      "/about": "Our Story — how two Spring Hill locals built The Hemp Dispensary from a road trip idea to 15 locations, lost 13 overnight, and kept going.",
-      "/thca": "Shop THCA flower, pre-rolls, concentrates, and vapes at The Hemp Dispensary in Spring Hill, FL. Federally compliant hemp, lab-tested, COA available on every product.",
-      "/delta-8": "Shop Delta-8 THC flower, gummies, vapes, wax, and tinctures at The Hemp Dispensary in Spring Hill, FL. Lab-tested, federally compliant hemp products.",
-      "/delta-9": "Shop hemp-derived Delta-9 THC edibles, beverages, and tinctures at The Hemp Dispensary in Spring Hill, FL. Lab-tested, compliant with Florida hemp regulations.",
-      "/cbd": "Shop CBD tinctures, topicals, edibles, and flower at The Hemp Dispensary in Spring Hill, FL. Full-spectrum, broad-spectrum, and isolate options. Lab-tested.",
-      "/cbg": "Shop CBG tinctures, wax, gummies, and flower at The Hemp Dispensary in Spring Hill, FL. The mother cannabinoid, lab-tested and federally compliant.",
-      "/cbn": "Shop CBN gummies, tinctures, and nighttime blends at The Hemp Dispensary in Spring Hill, FL. Formulated for relaxation and sleep. Lab-tested.",
-      "/wholesale": "Bulk Bargains at The Hemp Dispensary — wholesale pricing on vape cartridges, edibles, flower, and more. Mix and match flavors, submit your order, and pay via invoice.",
-    };
     const key = route === "" ? "/" : route;
-    const desc = descriptions[key] || descriptions["/"];
-    let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
-    if (!meta) {
-      meta = document.createElement("meta");
-      meta.name = "description";
-      document.head.appendChild(meta);
+    const meta = PAGE_META[key] || PAGE_META["/"];
+    document.title = meta.title;
+    let descEl = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    if (!descEl) {
+      descEl = document.createElement("meta");
+      descEl.name = "description";
+      document.head.appendChild(descEl);
     }
-    meta.content = desc;
+    descEl.content = meta.description;
   }, [route]);
 
   // Dynamic canonical + og:url per route — self-referencing, www, no trailing slash on paths
@@ -5205,6 +5249,26 @@ function App() {
       document.head.appendChild(ogUrl);
     }
     ogUrl.content = canonical;
+
+    // Update og:title and og:description per route
+    const key = route === "" ? "/" : route;
+    const meta = PAGE_META[key] || PAGE_META["/"];
+
+    let ogTitle = document.querySelector('meta[property="og:title"]') as HTMLMetaElement | null;
+    if (!ogTitle) {
+      ogTitle = document.createElement("meta");
+      ogTitle.setAttribute("property", "og:title");
+      document.head.appendChild(ogTitle);
+    }
+    ogTitle.content = meta.title;
+
+    let ogDesc = document.querySelector('meta[property="og:description"]') as HTMLMetaElement | null;
+    if (!ogDesc) {
+      ogDesc = document.createElement("meta");
+      ogDesc.setAttribute("property", "og:description");
+      document.head.appendChild(ogDesc);
+    }
+    ogDesc.content = meta.description;
   }, [route]);
 
   // Dynamic robots meta — noindex utility/thin pages, index content pages
@@ -5325,7 +5389,7 @@ function App() {
   const stockForFulfillment = useCallback((p: Product) => fulfillment ? getStockForFulfillment(p, fulfillment) : p.stock, [fulfillment]);
 
   const homeCategories = useMemo(() => {
-    const preferred = ["Flower", "Concentrates", "Edibles", "Topicals", "Tinctures", "Vapor", "Apparel", "Accessories", "Pets"];
+    const preferred = ["Flower", "Concentrates", "Edibles", "Topicals", "Tinctures", "Vapor"];
     return preferred.filter((c) => {
       const prods = productsByCategory[c] || [];
       return prods.some(p => stockForFulfillment(p) > 0);
