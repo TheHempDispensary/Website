@@ -244,6 +244,8 @@ interface ActiveSaleData {
   active: boolean;
   discount_percent?: number;
   excluded_brands?: string[];
+  applies_to?: string;
+  product_ids?: string[];
   start_date?: string;
   end_date?: string;
 }
@@ -282,6 +284,10 @@ function useActiveSale(): ActiveSaleData | null {
 function getSalePrice(product: Product, sale: ActiveSaleData | null): number | null {
   if (!sale || !sale.active || !sale.discount_percent) return null;
   if (product.price <= 0) return null;
+  // If sale is for specific products only, check if this product is in the list
+  if (sale.applies_to === "specific" && sale.product_ids && sale.product_ids.length > 0) {
+    if (!sale.product_ids.includes(product.id)) return null;
+  }
   // Check if product's brand is excluded
   if (sale.excluded_brands && sale.excluded_brands.length > 0) {
     const excludedLower = sale.excluded_brands.map(b => b.toLowerCase());
@@ -595,7 +601,7 @@ function FulfillmentSwitchNotification({ removedItems, newLabel, onClose }: { re
 /* ======================== STICKY TOP BAR ======================== */
 function StickyTopBar({ sale }: { sale?: ActiveSaleData | null }) {
   const saleLine = sale && sale.active && sale.discount_percent
-    ? `${sale.discount_percent}% OFF SALE TODAY!`
+    ? (sale.applies_to === "specific" ? `Up to ${sale.discount_percent}% OFF Select Items!` : `${sale.discount_percent}% OFF SALE TODAY!`)
     : "FIRST10 = 10% Off";
   return (
     <div className="bg-[#231F20] text-[#FFFFFF] text-center py-2 px-4 text-sm font-medium">
@@ -756,7 +762,7 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear, sale 
 /* ======================== HERO SECTION (Dark bg for contrast) ======================== */
 function HeroSection({ sale }: { sale?: ActiveSaleData | null }) {
   const heroPromo = sale && sale.active && sale.discount_percent
-    ? `${sale.discount_percent}% OFF SALE \u2014 Shop Now!`
+    ? (sale.applies_to === "specific" ? `Up to ${sale.discount_percent}% OFF Select Items \u2014 Shop Now!` : `${sale.discount_percent}% OFF SALE \u2014 Shop Now!`)
     : "First-time customers: 10% OFF with code FIRST10";
   return (
     <section className="bg-[#231F20] relative overflow-hidden">
