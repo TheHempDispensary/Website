@@ -12,6 +12,9 @@ declare global {
 const CLOVER_PAKMS_KEY = "ffacf4a65f1681720f6882f75d2824b9";
 const CLOVER_MERCHANT_ID = "0AJ4FF0G1YFM1";
 
+const VALID_CATEGORY_SLUGS = new Set(["flower", "edibles", "concentrates", "vapor", "topicals", "tinctures", "apparel", "accessories", "packaging"]);
+const VALID_FEELING_SLUGS = new Set(["relax", "sleep", "energy", "focus"]);
+
 interface CartItem {
   product: Product;
   quantity: number;
@@ -5079,6 +5082,35 @@ function GamesPage() {
 }
 
 
+function NotFoundPage() {
+  useEffect(() => {
+    document.title = "Page Not Found | The Hemp Dispensary";
+    let meta = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "robots";
+      document.head.appendChild(meta);
+    }
+    meta.content = "noindex";
+    return () => {
+      const m = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
+      if (m) m.remove();
+    };
+  }, []);
+
+  return (
+    <div className="text-center py-32 max-w-xl mx-auto px-4">
+      <Package className="mx-auto h-16 w-16 text-[#231F20] mb-4" />
+      <h1 className="text-2xl font-bold text-[#231F20] mb-2">Page Not Found</h1>
+      <p className="text-[#231F20] mb-6">The page you're looking for doesn't exist or has been moved.</p>
+      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <button onClick={() => navigate("/products")} className="px-6 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors">Browse All Products</button>
+        <button onClick={() => navigate("/")} className="px-6 py-3 border border-[#231F20]/15 text-[#231F20] hover:bg-[#FFFFFF] rounded-full font-medium transition-colors">Go Home</button>
+      </div>
+    </div>
+  );
+}
+
 /* ======================== MAIN APP ======================== */
 const PAGE_META: Record<string, { title: string; description: string }> = {
   "/": { title: "The Hemp Dispensary | Premium Hemp Products \u2013 Spring Hill, FL", description: "The Hemp Dispensary \u2014 Spring Hill FL's trusted hemp store. Shop premium flower, edibles, concentrates, vapes, topicals, and tinctures online. Ready in 5 minutes or shipped to your door." },
@@ -5281,11 +5313,12 @@ function App() {
   useEffect(() => {
     const noindexRoutes = ["/checkout", "/account", "/shipping-policy", "/games"];
     const shouldNoindex = noindexRoutes.includes(route);
-    let meta = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
+    let meta = document.querySelector('meta[name="robots"][data-global]') as HTMLMetaElement | null;
     if (shouldNoindex) {
       if (!meta) {
         meta = document.createElement("meta");
         meta.name = "robots";
+        meta.setAttribute("data-global", "true");
         document.head.appendChild(meta);
       }
       meta.content = "noindex, nofollow";
@@ -5431,6 +5464,9 @@ function App() {
   if (route.startsWith("/products/product/")) return shell(<ProductDetail productId={route.replace("/products/product/", "")} products={products} onAddToCart={addToCart} fulfillment={fulfillment} />);
   if (route.startsWith("/shop") || route.startsWith("/products")) {
     const catSlug = route.replace("/shop/", "").replace("/shop", "").replace("/products/", "").replace("/products", "");
+    if (catSlug && !VALID_CATEGORY_SLUGS.has(catSlug.toLowerCase()) && !VALID_FEELING_SLUGS.has(catSlug.toLowerCase())) {
+      return shell(<NotFoundPage />);
+    }
     return shell(loading
       ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
       : fetchError ? <div className="flex flex-col items-center justify-center py-24"><AlertCircle className="h-12 w-12 text-[#D9A32C] mb-4" /><p className="text-[#231F20] text-lg font-medium mb-2">Unable to load products</p><p className="text-[#231F20] text-sm mb-4">Please check your connection and try again.</p><button onClick={retryFetch} className="px-6 py-3 bg-[#B3D335] hover:bg-[#126A44] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-semibold transition-colors">Try Again</button></div>
@@ -5459,6 +5495,9 @@ function App() {
   if (route === "/wholesale") return shell(loading
     ? <div className="flex flex-col items-center justify-center py-24"><img src="/logo.webp" alt="The Hemp Dispensary" width="240" height="96" className="h-20 w-auto animate-pulse mb-4" /><p className="text-[#231F20] text-lg italic">Remedy Your Way</p></div>
     : <WholesalePage products={products} />);
+
+  // Unknown route → 404
+  if (route !== "/" && route !== "") return shell(<NotFoundPage />);
 
   // Homepage
   return (

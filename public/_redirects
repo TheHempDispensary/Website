@@ -1,3 +1,21 @@
+# Trailing-slash normalization (must be first to prevent redirect chains)
+/products/           /products              301
+/products/flower/    /products/flower       301
+/products/edibles/   /products/edibles      301
+/products/concentrates/  /products/concentrates  301
+/products/vapor/     /products/vapor        301
+/products/topicals/  /products/topicals     301
+/products/tinctures/ /products/tinctures    301
+/products/apparel/   /products/apparel      301
+/products/accessories/  /products/accessories  301
+/products/packaging/ /products/packaging    301
+/products/product/*/  /products/product/:splat  301
+/about/              /about                 301
+/contact/            /contact               301
+/wholesale/          /wholesale             301
+/loyalty/            /loyalty               301
+/shipping/           /shipping              301
+
 # /shop → /products (canonical consolidation for SEO)
 /shop                /products              301
 /shop/*              /products/:splat       301
@@ -80,8 +98,8 @@
 /isolate?*          /products          301
 /isolate/*          /products          301
 
-# Old product URLs (wildcard catches all /product/ paths)
-/product/*          /products          301
+# Old product URLs → preserve individual product identity
+/product/*          /products/product/:splat  301
 
 # Old store paths (Ecwid store URLs)
 /store/*            /products          301
