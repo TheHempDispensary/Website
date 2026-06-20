@@ -3583,7 +3583,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                     <label className={labelClass}>Card Number</label>
                     <div id="clover-card-number" className="bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg overflow-hidden" style={{ minHeight: "48px" }}></div>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                     <div>
                       <label className={labelClass}>Expiration</label>
                       <div id="clover-card-date" className="bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg overflow-hidden" style={{ minHeight: "48px" }}></div>
@@ -3592,8 +3592,8 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                       <label className={labelClass}>CVV</label>
                       <div id="clover-card-cvv" className="bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg overflow-hidden" style={{ minHeight: "48px" }}></div>
                     </div>
-                    <div>
-                      <label className={labelClass}>ZIP Code</label>
+                    <div className="col-span-2 sm:col-span-1">
+                      <label className={labelClass}>Billing ZIP Code</label>
                       <div id="clover-card-zip" className="bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg overflow-hidden" style={{ minHeight: "48px" }}></div>
                     </div>
                   </div>
