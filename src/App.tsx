@@ -2493,7 +2493,8 @@ function ChatbotBud() {
   const backdropRef = useRef<HTMLDivElement>(null);
 
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-  const BUD_IDLE_SIZE = isMobile ? 110 : 150;
+  const isCheckout = typeof window !== "undefined" && window.location.pathname.startsWith("/checkout");
+  const BUD_IDLE_SIZE = isMobile && isCheckout ? 48 : isMobile ? 110 : 150;
   const BUD_ACTIVE_SIZE = isMobile ? 160 : 220;
   const BUBBLE_MAX_W = isMobile ? "85vw" : "280px";
 
@@ -2632,9 +2633,9 @@ function ChatbotBud() {
   /* ---------- IDLE STATE (Bud floating in corner) ---------- */
   if (!open) {
     return (
-      <div className="fixed bottom-4 right-4 z-50" style={{ width: BUD_IDLE_SIZE, height: BUD_IDLE_SIZE }}>
+      <div className={`fixed z-50 ${isCheckout && isMobile ? "bottom-1 right-1" : "bottom-4 right-4"}`} style={{ width: BUD_IDLE_SIZE, height: BUD_IDLE_SIZE }}>
         {/* Idle hint speech bubble */}
-        {showHint && (
+        {showHint && !(isCheckout && isMobile) && (
           <div
             className="bud-hint-enter absolute bg-[#FFFFFF] text-[#231F20] text-xs font-semibold px-3 py-2 rounded-xl shadow-lg border border-[#B3D335]/20"
             style={{ bottom: BUD_IDLE_SIZE - 8, right: 10, whiteSpace: "nowrap", zIndex: 51 }}
