@@ -3292,7 +3292,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto px-3 sm:px-4 py-8 overflow-x-hidden">
       {/* Progress Steps */}
       <div className="flex items-center justify-center mb-10">
         {steps.map((s, i) => (
@@ -3323,9 +3323,9 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                 <div><label className={labelClass}>Email *</label><input type="email" value={form.email} onChange={(e) => setField("email", e.target.value)} placeholder="john@example.com" className={inputClass} /></div>
                 <div><label className={labelClass}>Phone *</label><input type="tel" value={form.phone} onChange={(e) => setField("phone", e.target.value)} placeholder="(352) 555-0123" className={inputClass} /></div>
               </div>
-              <div className="mt-8 flex justify-between">
-                <button onClick={() => navigate("/products")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Shop</button>
-                <button onClick={() => setStep("shipping")} disabled={!canProceedInfo} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedInfo ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>{isPickup ? "Continue to Pickup" : isDelivery ? "Continue to Delivery" : "Continue to Shipping"}</button>
+              <div className="mt-8 flex justify-between items-center">
+                <button onClick={() => navigate("/products")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2 text-sm sm:text-base flex-shrink-0"><ArrowLeft className="h-4 w-4" /> <span className="hidden sm:inline">Back to Shop</span><span className="sm:hidden">Back</span></button>
+                <button onClick={() => setStep("shipping")} disabled={!canProceedInfo} className={`px-5 sm:px-8 py-3 rounded-full font-medium text-sm sm:text-base transition-all ${canProceedInfo ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}><span className="sm:hidden">Continue</span><span className="hidden sm:inline">{isPickup ? "Continue to Pickup" : isDelivery ? "Continue to Delivery" : "Continue to Shipping"}</span></button>
               </div>
             </div>
           )}
@@ -3512,9 +3512,9 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                 </>
               )}
 
-              <div className="mt-8 flex justify-between">
-                <button onClick={() => setStep("info")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back</button>
-                <button onClick={() => setStep("payment")} disabled={!canProceedShipping} className={`px-8 py-3 rounded-full font-medium transition-all ${canProceedShipping ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>Continue to Payment</button>
+              <div className="mt-8 flex justify-between items-center">
+                <button onClick={() => setStep("info")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2 text-sm sm:text-base flex-shrink-0"><ArrowLeft className="h-4 w-4" /> Back</button>
+                <button onClick={() => setStep("payment")} disabled={!canProceedShipping} className={`px-5 sm:px-8 py-3 rounded-full font-medium text-sm sm:text-base transition-all ${canProceedShipping ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}>Continue to Payment</button>
               </div>
             </div>
           )}
@@ -3712,12 +3712,12 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                 </label>
               </div>
 
-              <div className="mt-2 flex justify-between">
-                <button onClick={() => setStep("shipping")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back</button>
+              <div className="mt-2 flex justify-between items-center">
+                <button onClick={() => setStep("shipping")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2 text-sm sm:text-base flex-shrink-0"><ArrowLeft className="h-4 w-4" /> Back</button>
                 <button
                   onClick={handlePlaceOrder}
                   disabled={submitting || !tosAccepted}
-                  className={`px-8 py-3 rounded-full font-medium transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${tosAccepted ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/20 text-[#231F20]/50 cursor-not-allowed"}`}
+                  className={`px-5 sm:px-8 py-3 rounded-full font-medium text-sm sm:text-base transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${tosAccepted ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/20 text-[#231F20]/50 cursor-not-allowed"}`}
                 >
                   <Lock className="h-4 w-4" />
                   {submitting ? "Processing Payment..." : `Pay ${formatPrice(total)}`}
@@ -5436,7 +5436,7 @@ function App() {
   }, [productsByCategory, stockForFulfillment]);
 
   const shell = (content: React.ReactNode) => (
-    <div className="min-h-screen bg-[#FFFFFF]">
+    <div className="min-h-screen bg-[#FFFFFF] overflow-x-hidden">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-0 focus:top-0 focus:z-[9999] focus:bg-[#FFFFFF] focus:px-4 focus:py-2 focus:text-[#231F20] focus:underline">Skip to main content</a>
       <StickyTopBar sale={activeSale} />
       <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} fulfillment={fulfillment} onFulfillmentClick={() => setShowFulfillmentModal(true)} />
