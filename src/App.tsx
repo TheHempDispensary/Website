@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, Facebook } from "lucide-react";
+import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, Facebook, FlaskConical } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -67,6 +67,7 @@ interface Product {
   strength?: string | null;
   product_type?: string | null;
   modified_time?: number;
+  lab_results?: { sample_accession: string; description: string; batch_no: string; sample_status: string; coa_approved_date: string }[];
 }
 
 type FulfillmentType = "pickup_west" | "pickup_east" | "ship" | "local_delivery";
@@ -1377,6 +1378,34 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Lab Results / COA */}
+      {product.lab_results && product.lab_results.length > 0 && (
+        <div className="mt-8">
+          <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/10 p-5 sm:p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <FlaskConical className="h-5 w-5 text-[#126A44]" />
+              <h2 className="text-xl font-bold text-[#231F20]">Lab Results</h2>
+              <span className="ml-auto text-xs font-medium bg-[#ADD038]/20 text-[#126A44] px-2.5 py-1 rounded-full border border-[#ADD038]/40">COA Verified</span>
+            </div>
+            <div className="space-y-3">
+              {product.lab_results.map((lr) => (
+                <div key={lr.sample_accession} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 bg-[#F9FBF2] rounded-xl border border-[#ADD038]/20">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <CheckCircle className="h-4 w-4 text-[#58BA49] flex-shrink-0" />
+                    <span className="text-sm font-medium text-[#231F20] truncate">{lr.description}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-[#231F20]/70">
+                    {lr.batch_no && <span>Batch: {lr.batch_no}</span>}
+                    <span className={`font-medium px-2 py-0.5 rounded-full ${lr.sample_status === "Testing Completed" ? "bg-[#ADD038]/30 text-[#126A44]" : "bg-[#FFCB08]/30 text-[#D9A32C]"}`}>{lr.sample_status}</span>
+                    {lr.coa_approved_date && <span>{new Date(lr.coa_approved_date).toLocaleDateString()}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
