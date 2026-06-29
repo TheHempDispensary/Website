@@ -1166,16 +1166,19 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
   const effect = getProductEffect(product);
   const strength = getProductStrength(product);
   const benefit = getProductBenefit(product);
+  const stockFor = (p: Product) => fulfillment ? getStockForFulfillment(p, fulfillment) : p.stock;
+  const effectiveStock = stockFor(product);
+  const isEffectivelyAvailable = effectiveStock > 0;
 
   // Find related products for "You Might Also Like"
   const related = products
-    .filter(p => p.id !== product.id && p.stock > 0 && p.categories.some(c => product.categories.includes(c)))
+    .filter(p => p.id !== product.id && stockFor(p) > 0 && p.categories.some(c => product.categories.includes(c)))
     .slice(0, 3);
 
   // Find size variants for savings badge (e.g., "Apples & Bananas Live Rosin 1 Gram" / "4 Grams")
   const baseName = (product.online_name || product.name).replace(/\d+\s*(gram|grams|g)\b/gi, "").trim().toLowerCase();
   const sizeVariants = products.filter(p =>
-    p.id !== product.id && p.stock > 0 &&
+    p.id !== product.id && stockFor(p) > 0 &&
     (p.online_name || p.name).replace(/\d+\s*(gram|grams|g)\b/gi, "").trim().toLowerCase() === baseName
   );
   const extractGrams = (p: Product): number => {
@@ -1286,11 +1289,11 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
 
             {/* Availability */}
             <div className="mb-4">
-              {product.stock > 0 ? (
+              {effectiveStock > 0 ? (
                 <div className="flex items-center gap-2">
-                  <div className={`h-2.5 w-2.5 rounded-full ${product.stock <= 5 ? 'bg-[#FFCB08]' : 'bg-[#58BA49]'}`}></div>
-                  <span className={`text-sm font-medium ${product.stock <= 5 ? 'text-[#D9A32C]' : 'text-[#126A44]'}`}>
-                    {product.stock <= 5 ? `Only ${Math.floor(product.stock)} remaining` : `In Stock (${Math.floor(product.stock)} available)`}
+                  <div className={`h-2.5 w-2.5 rounded-full ${effectiveStock <= 5 ? 'bg-[#FFCB08]' : 'bg-[#58BA49]'}`}></div>
+                  <span className={`text-sm font-medium ${effectiveStock <= 5 ? 'text-[#D9A32C]' : 'text-[#126A44]'}`}>
+                    {effectiveStock <= 5 ? `Only ${Math.floor(effectiveStock)} remaining` : `In Stock (${Math.floor(effectiveStock)} available)`}
                   </span>
                 </div>
               ) : (
@@ -1321,22 +1324,22 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
 
             {/* Add to cart */}
             <div className="mt-auto pt-4 space-y-3">
-              {product.available && (
+              {isEffectivelyAvailable && (
                 <div className="flex items-center gap-3">
                   <span className="text-[#231F20] text-sm">Qty:</span>
                   <div className="flex items-center border border-[#231F20]/15 rounded-lg">
                     <button onClick={() => setQty(Math.max(1, qty - 1))} className="p-2 text-[#231F20] hover:text-[#231F20] transition-colors" aria-label="Decrease quantity"><Minus className="h-4 w-4" /></button>
                     <span className="px-4 py-2 text-[#231F20] font-medium min-w-[3rem] text-center">{qty}</span>
-                    <button onClick={() => setQty(Math.min(product.stock, qty + 1))} className="p-2 text-[#231F20] hover:text-[#231F20] transition-colors" aria-label="Increase quantity"><Plus className="h-4 w-4" /></button>
+                    <button onClick={() => setQty(Math.min(effectiveStock, qty + 1))} className="p-2 text-[#231F20] hover:text-[#231F20] transition-colors" aria-label="Increase quantity"><Plus className="h-4 w-4" /></button>
                   </div>
                 </div>
               )}
               <button
-                disabled={!product.available}
-                onClick={() => { if (product.available) { onAddToCart(product, qty); setAdded(true); setTimeout(() => setAdded(false), 2000); } }}
-                className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 ${product.available ? (added ? "bg-[#ADD038] text-[#231F20]" : "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] shadow-lg") : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}
+                disabled={!isEffectivelyAvailable}
+                onClick={() => { if (isEffectivelyAvailable) { onAddToCart(product, qty); setAdded(true); setTimeout(() => setAdded(false), 2000); } }}
+                className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 ${isEffectivelyAvailable ? (added ? "bg-[#ADD038] text-[#231F20]" : "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] shadow-lg") : "bg-[#231F20]/10 text-[#231F20] cursor-not-allowed"}`}
               >
-                {!product.available ? "Out of Stock" : added ? "Added to Cart!" : "Add to Cart"}
+                {!isEffectivelyAvailable ? "Out of Stock" : added ? "Added to Cart!" : "Add to Cart"}
               </button>
             </div>
           </div>
