@@ -1147,23 +1147,6 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
       .catch(() => setLoading(false));
   }, [productId, products]);
 
-  // Manage noindex for product-not-found via useEffect so it cleans up properly
-  const isNotFound = !loading && !product;
-  useEffect(() => {
-    if (!isNotFound) return;
-    let meta = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
-    if (!meta) {
-      meta = document.createElement("meta");
-      meta.name = "robots";
-      document.head.appendChild(meta);
-    }
-    meta.content = "noindex";
-    return () => {
-      const m = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
-      if (m) m.remove();
-    };
-  }, [isNotFound]);
-
   if (loading) return (
     <div className="flex justify-center items-center py-32">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B3D335]"></div>
@@ -5115,17 +5098,6 @@ function GamesPage() {
 function NotFoundPage() {
   useEffect(() => {
     document.title = "Page Not Found | The Hemp Dispensary";
-    let meta = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
-    if (!meta) {
-      meta = document.createElement("meta");
-      meta.name = "robots";
-      document.head.appendChild(meta);
-    }
-    meta.content = "noindex";
-    return () => {
-      const m = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
-      if (m) m.remove();
-    };
   }, []);
 
   return (
@@ -5143,11 +5115,11 @@ function NotFoundPage() {
 
 /* ======================== MAIN APP ======================== */
 const PAGE_META: Record<string, { title: string; description: string }> = {
-  "/": { title: "The Hemp Dispensary | Premium Hemp Products \u2013 Spring Hill, FL", description: "The Hemp Dispensary \u2014 Spring Hill FL's trusted hemp store. Shop premium flower, edibles, concentrates, vapes, topicals, and tinctures online. Ready in 5 minutes or shipped to your door." },
-  "/products": { title: "All Products | The Hemp Dispensary", description: "Browse all hemp products at The Hemp Dispensary \u2014 flower, edibles, concentrates, vapes, topicals, tinctures, and more. Lab-tested, ready in 5 minutes." },
-  "/products/flower": { title: "Hemp Flower \u2013 Shop 89+ Strains | The Hemp Dispensary", description: "Shop premium hemp flower at The Hemp Dispensary \u2014 Everyday, Premium, Essential, Smalls, and Snowcaps tiers. Lab-tested, locally trusted, ready in 5 minutes." },
-  "/products/edibles": { title: "Hemp Edibles \u2013 Gummies, Chocolates & More | The Hemp Dispensary", description: "Hemp edibles including Delta-9 gummies, CBD chocolates, and CBN sleep chews. Lab-tested, legally compliant, available for pickup or shipping." },
-  "/products/concentrates": { title: "Hemp Concentrates \u2013 Live Rosin, Diamonds & Wax | The Hemp Dispensary", description: "Premium hemp concentrates including live rosin, diamonds, shatter, and badder. Solventless and hydrocarbon options, lab-tested for purity." },
+  "/": { title: "Florida Hemp & THCA Dispensary - The Hemp Dispensary", description: "Lab-tested THCA flower, edibles & concentrates. 2 Spring Hill FL stores + nationwide shipping. Ready in 5 min." },
+  "/products": { title: "Shop Hemp & THCA Products - The Hemp Dispensary FL", description: "Browse 500+ lab-tested THCA, \u03948, \u03949, kratom & mushroom products. Florida-compliant. Ship to all 50 states." },
+  "/products/flower": { title: "THCA Flower - Lab-Tested Indoor & Greenhouse - Hemp Dispensary", description: "Premium THCA flower strains from $20. Full panel COAs. Ships nationwide. Pick up in Spring Hill FL today." },
+  "/products/edibles": { title: "THC Edibles & Gummies - Florida-Compliant - Hemp Dispensary", description: "\u03949 THC gummies, chocolates & drinks. Lab-tested, FL hemp law compliant. Same-day pickup or nationwide shipping." },
+  "/products/concentrates": { title: "Hemp Concentrates: Dabs, Rosin, Diamonds - Hemp Dispensary", description: "THCA diamonds, live rosin, badder & sauce. Lab-tested concentrates from $30. FL hemp dispensary." },
   "/products/vapor": { title: "Vape Cartridges & Disposables | The Hemp Dispensary", description: "CBD and THC vape cartridges, disposables, and 510-thread batteries. Lab-tested hemp vapor products ready for pickup in Spring Hill FL." },
   "/products/topicals": { title: "Hemp Topicals \u2013 Creams, Balms & Patches | The Hemp Dispensary", description: "Hemp topicals including CBD muscle creams, balms, roll-ons, and transdermal patches. Targeted relief, lab-tested, available in-store and online." },
   "/products/tinctures": { title: "Hemp Tinctures \u2013 CBD, CBG & CBN Oils | The Hemp Dispensary", description: "CBD, CBG, CBN and full spectrum hemp tinctures. Sublingual oils for sleep, pain, focus, and daily wellness. Lab-tested, fast pickup or shipping." },
@@ -5157,7 +5129,7 @@ const PAGE_META: Record<string, { title: string; description: string }> = {
   "/products/pets": { title: "CBD Pet Products | The Hemp Dispensary", description: "CBD pet tinctures and treats for dogs and cats. Lab-tested, vet-friendly hemp products at The Hemp Dispensary." },
   "/loyalty": { title: "Hemp Rewards \u2013 Loyalty Program | The Hemp Dispensary", description: "Hemp Rewards \u2014 earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary." },
   "/games": { title: "Games | The Hemp Dispensary", description: "Play games and win prizes at The Hemp Dispensary. Roll-a-Joint and more \u2014 all free to play for rewards members." },
-  "/about": { title: "About Us \u2013 Our Story | The Hemp Dispensary", description: "Our Story \u2014 how two Spring Hill locals built The Hemp Dispensary from a road trip idea to 15 locations, lost 13 overnight, and kept going." },
+  "/about": { title: "About Us - Florida Hemp Survivors Since 2019", description: "Founded by Anthoney & Jimmy. Survived the 2024 FDACS reversal. Two Spring Hill stores still standing." },
   "/contact": { title: "Contact Us | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Get in touch with The Hemp Dispensary. Visit us at our Spring Hill locations, call, email, or reach out online." },
   "/our-locations": { title: "Store Locations | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Find The Hemp Dispensary near you. Two Spring Hill, FL locations with daily hours and 5-minute pickup." },
   "/thca": { title: "THCA Products | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Shop THCA flower, pre-rolls, concentrates, and vapes at The Hemp Dispensary in Spring Hill, FL. Federally compliant hemp, lab-tested, COA available on every product." },
@@ -5170,6 +5142,7 @@ const PAGE_META: Record<string, { title: string; description: string }> = {
   "/terms": { title: "Terms of Service | The Hemp Dispensary", description: "Terms of Service for The Hemp Dispensary. Read our policies on orders, shipping, returns, and more." },
   "/privacy": { title: "Privacy Policy | The Hemp Dispensary", description: "Privacy Policy for The Hemp Dispensary. Learn how we handle your personal information." },
   "/shipping": { title: "Shipping & Pickup Info | The Hemp Dispensary", description: "Shipping and pickup information for The Hemp Dispensary. 5-minute in-store pickup, next-day local delivery, and nationwide shipping." },
+  "/lab-results": { title: "Lab Results & COAs - Every Product Tested - Hemp Dispensary", description: "Full panel certificates of analysis for every THCA, \u03948, and \u03949 product we sell. Updated weekly." },
 };
 
 function App() {
@@ -5339,23 +5312,7 @@ function App() {
     ogDesc.content = meta.description;
   }, [route]);
 
-  // Dynamic robots meta — noindex utility/thin pages, index content pages
-  useEffect(() => {
-    const noindexRoutes = ["/checkout", "/account", "/shipping-policy", "/games"];
-    const shouldNoindex = noindexRoutes.includes(route);
-    let meta = document.querySelector('meta[name="robots"][data-global]') as HTMLMetaElement | null;
-    if (shouldNoindex) {
-      if (!meta) {
-        meta = document.createElement("meta");
-        meta.name = "robots";
-        meta.setAttribute("data-global", "true");
-        document.head.appendChild(meta);
-      }
-      meta.content = "noindex, nofollow";
-    } else if (meta) {
-      meta.remove();
-    }
-  }, [route]);
+
 
   useEffect(() => {
     // Load from localStorage cache for instant display — 60s TTL to avoid stale images
