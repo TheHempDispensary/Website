@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, Facebook, FlaskConical } from "lucide-react";
+import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, Facebook, FlaskConical, FileText, ExternalLink } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -67,7 +67,15 @@ interface Product {
   strength?: string | null;
   product_type?: string | null;
   modified_time?: number;
-  lab_results?: { sample_accession: string; description: string; batch_no: string; sample_status: string; coa_approved_date: string }[];
+  lab_results?: {
+    sample_accession: string;
+    description: string;
+    batch_no: string;
+    sample_status: string;
+    coa_approved_date: string;
+    coa_pdf_url?: string;
+    panels?: { panel_name: string; panel_remark: string; analytes: { analyte: string; result: string; result_unit: string; concentration: number; conc_unit: string; remark: string }[] }[];
+  }[];
 }
 
 type FulfillmentType = "pickup_west" | "pickup_east" | "ship" | "local_delivery";
@@ -1377,18 +1385,61 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
               <h2 className="text-xl font-bold text-[#231F20]">Lab Results</h2>
               <span className="ml-auto text-xs font-medium bg-[#ADD038]/20 text-[#126A44] px-2.5 py-1 rounded-full border border-[#ADD038]/40">COA Verified</span>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {product.lab_results.map((lr) => (
-                <div key={lr.sample_accession} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 bg-[#F9FBF2] rounded-xl border border-[#ADD038]/20">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <CheckCircle className="h-4 w-4 text-[#58BA49] flex-shrink-0" />
-                    <span className="text-sm font-medium text-[#231F20] truncate">{lr.description}</span>
+                <div key={lr.sample_accession} className="border border-[#ADD038]/20 rounded-xl overflow-hidden">
+                  {/* Header row */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 bg-[#F9FBF2]">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <CheckCircle className="h-4 w-4 text-[#58BA49] flex-shrink-0" />
+                      <span className="text-sm font-medium text-[#231F20] truncate">{lr.description}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-[#231F20]/70">
+                      {lr.batch_no && <span>Batch: {lr.batch_no}</span>}
+                      <span className={`font-medium px-2 py-0.5 rounded-full ${lr.sample_status === "Testing Completed" ? "bg-[#ADD038]/30 text-[#126A44]" : "bg-[#FFCB08]/30 text-[#D9A32C]"}`}>{lr.sample_status}</span>
+                      {lr.coa_approved_date && <span>{new Date(lr.coa_approved_date).toLocaleDateString()}</span>}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-[#231F20]/70">
-                    {lr.batch_no && <span>Batch: {lr.batch_no}</span>}
-                    <span className={`font-medium px-2 py-0.5 rounded-full ${lr.sample_status === "Testing Completed" ? "bg-[#ADD038]/30 text-[#126A44]" : "bg-[#FFCB08]/30 text-[#D9A32C]"}`}>{lr.sample_status}</span>
-                    {lr.coa_approved_date && <span>{new Date(lr.coa_approved_date).toLocaleDateString()}</span>}
-                  </div>
+
+                  {/* Analyte panels */}
+                  {lr.panels && lr.panels.length > 0 && (
+                    <div className="p-3 space-y-3">
+                      {lr.panels.map((panel) => (
+                        <div key={panel.panel_name} className="border border-[#231F20]/5 rounded-lg overflow-hidden">
+                          <div className="flex items-center justify-between px-3 py-2 bg-[#F5F5F5]">
+                            <span className="text-xs font-semibold text-[#231F20] uppercase tracking-wide">{panel.panel_name}</span>
+                            {panel.panel_remark && (
+                              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${panel.panel_remark.toLowerCase() === "passed" ? "bg-[#ADD038]/30 text-[#126A44]" : "bg-[#FFCB08]/30 text-[#D9A32C]"}`}>{panel.panel_remark}</span>
+                            )}
+                          </div>
+                          <div className="divide-y divide-[#231F20]/5">
+                            {panel.analytes.filter(a => a.result && a.result !== "<LOQ" && a.result !== "0" && a.result !== "0.00" && a.result !== "0.0000").map((a) => (
+                              <div key={a.analyte} className="flex items-center justify-between px-3 py-1.5">
+                                <span className="text-xs text-[#231F20]/80">{a.analyte.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</span>
+                                <span className="text-xs font-semibold text-[#231F20]">
+                                  {a.concentration != null && a.concentration !== undefined ? `${a.concentration}${a.conc_unit ? ` ${a.conc_unit}` : ""}` : `${a.result}${a.result_unit ? ` ${a.result_unit}` : ""}`}
+                                </span>
+                              </div>
+                            ))}
+                            {panel.analytes.filter(a => a.result && a.result !== "<LOQ" && a.result !== "0" && a.result !== "0.00" && a.result !== "0.0000").length === 0 && (
+                              <div className="px-3 py-1.5 text-xs text-[#231F20]/50 italic">All analytes below limit of quantification</div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* COA PDF download link */}
+                  {lr.coa_pdf_url && (
+                    <div className="px-3 pb-3">
+                      <a href={lr.coa_pdf_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-[#126A44] hover:text-[#58BA49] transition-colors">
+                        <FileText className="h-4 w-4" />
+                        <span>View Full COA Report</span>
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
