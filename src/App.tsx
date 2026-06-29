@@ -1168,7 +1168,7 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
   const benefit = getProductBenefit(product);
   const stockFor = (p: Product) => fulfillment ? getStockForFulfillment(p, fulfillment) : p.stock;
   const effectiveStock = stockFor(product);
-  const isEffectivelyAvailable = effectiveStock > 0;
+  const isEffectivelyAvailable = product.available && effectiveStock > 0;
 
   // Find related products for "You Might Also Like"
   const related = products
