@@ -1431,7 +1431,7 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
                               <div key={a.analyte} className="flex items-center justify-between px-3 py-1.5">
                                 <span className="text-xs text-[#231F20]/80">{a.analyte.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</span>
                                 <span className="text-xs font-semibold text-[#231F20]">
-                                  {a.concentration ? `${a.concentration}${a.conc_unit ? ` ${a.conc_unit}` : "%"}` : `${a.result}${a.result_unit ? ` ${a.result_unit}` : ""}`}
+                                  {a.concentration != null && a.concentration !== undefined ? `${a.concentration}${a.conc_unit ? ` ${a.conc_unit}` : ""}` : `${a.result}${a.result_unit ? ` ${a.result_unit}` : ""}`}
                                 </span>
                               </div>
                             ))}
