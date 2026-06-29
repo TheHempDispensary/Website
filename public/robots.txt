@@ -1,6 +1,6 @@
 User-agent: *
 
-# Block URL parameters that create duplicate/filter pages
+# Block filter/sort query strings
 Disallow: /*?store-page=
 Disallow: /*?cs=
 Disallow: /*?cst=
@@ -10,15 +10,13 @@ Disallow: /*?sbp=
 Disallow: /*?q=
 Disallow: /*?ref=
 
-# Block utility/non-indexable paths
-Disallow: /products/pages/
+# Block utility paths
 Disallow: /checkout
 Disallow: /account
-Disallow: /shipping-policy
+Disallow: /cart
 Disallow: /games
 
-# Explicitly allow product and category paths
-Allow: /products/
-Allow: /products/product/
+# Allow everything else
+Allow: /
 
 Sitemap: https://www.thehempdispensary.com/sitemap.xml

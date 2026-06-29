@@ -4,9 +4,9 @@
  * Fetches all product slugs from the THD inventory API and writes
  * public/sitemap.xml with static pages + one entry per product.
  *
- * Graceful fallback: if the API is unreachable the sitemap is still
- * generated with static pages only, and the script exits 0 so the
- * build continues.
+ * Exclusions match robots.txt: no query-string URLs, no /checkout,
+ * /account, /cart, /games. Deduplicates all URLs. Uses product
+ * modified_time for lastmod when available.
  */
 
 const https = require("https");
@@ -18,7 +18,28 @@ const PRODUCTS_ENDPOINT = `${API_BASE}/api/ecommerce/products?limit=1000`;
 const SITE = "https://www.thehempdispensary.com";
 const OUT = path.join(__dirname, "..", "public", "sitemap.xml");
 
-const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+const today = new Date().toISOString().slice(0, 10);
+
+// Paths excluded from sitemap (mirrors robots.txt Disallow + utility pages)
+const EXCLUDED_PATHS = new Set([
+  "/checkout",
+  "/account",
+  "/cart",
+  "/games",
+  "/shipping-policy",
+]);
+
+// Query string patterns that must never appear in sitemap URLs
+const EXCLUDED_QUERY_PATTERNS = [
+  "store-page=",
+  "cs=",
+  "cst=",
+  "cp=",
+  "sa=",
+  "sbp=",
+  "q=",
+  "ref=",
+];
 
 const STATIC_PAGES = [
   { loc: "/", priority: "1.0", changefreq: "weekly" },
@@ -44,15 +65,42 @@ const STATIC_PAGES = [
   { loc: "/contact", priority: "0.6", changefreq: "monthly" },
   { loc: "/shipping", priority: "0.6", changefreq: "monthly" },
   { loc: "/loyalty", priority: "0.6", changefreq: "monthly" },
+  { loc: "/lab-results", priority: "0.6", changefreq: "weekly" },
   { loc: "/terms", priority: "0.3", changefreq: "yearly" },
   { loc: "/privacy", priority: "0.3", changefreq: "yearly" },
-  // Excluded from sitemap: /checkout, /account, /games, /shipping-policy (utility/thin pages)
 ];
+
+function isExcluded(loc) {
+  // Exclude paths in the blocklist
+  const cleanPath = loc.split("?")[0].replace(/\/+$/, "") || "/";
+  if (EXCLUDED_PATHS.has(cleanPath)) return true;
+  // Exclude any URL with blocked query parameters
+  if (EXCLUDED_QUERY_PATTERNS.some((pat) => loc.includes(pat))) return true;
+  // Exclude /products/pages/ (legacy pagination)
+  if (cleanPath.includes("/products/pages/")) return true;
+  return false;
+}
+
+function canonicalizeLoc(loc) {
+  // Strip query strings, trailing slashes, lowercase
+  let clean = loc.split("?")[0];
+  clean = clean.replace(/\/+$/, "") || "/";
+  return clean;
+}
+
+function escapeXml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
 
 function urlEntry({ loc, priority, changefreq, lastmod }) {
   return [
     "  <url>",
-    `    <loc>${SITE}${loc.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</loc>`,
+    `    <loc>${escapeXml(SITE + loc)}</loc>`,
     `    <lastmod>${lastmod || today}</lastmod>`,
     `    <changefreq>${changefreq}</changefreq>`,
     `    <priority>${priority}</priority>`,
@@ -60,23 +108,35 @@ function urlEntry({ loc, priority, changefreq, lastmod }) {
   ].join("\n");
 }
 
-function buildXml(productSlugs) {
+function buildXml(products) {
+  const seen = new Set();
   const entries = [];
+
+  function addEntry(entry) {
+    const key = canonicalizeLoc(entry.loc);
+    if (seen.has(key)) return;
+    if (isExcluded(entry.loc)) return;
+    seen.add(key);
+    entries.push(urlEntry({ ...entry, loc: key }));
+  }
 
   // Static pages
   for (const page of STATIC_PAGES) {
-    entries.push(urlEntry(page));
+    addEntry(page);
   }
 
-  // Product pages
-  for (const slug of productSlugs) {
-    entries.push(
-      urlEntry({
-        loc: `/products/product/${slug}`,
-        priority: "0.8",
-        changefreq: "weekly",
-      })
-    );
+  // Product pages — use modified_time for lastmod
+  for (const product of products) {
+    if (!product.slug) continue;
+    const lastmod = product.modified_time
+      ? new Date(product.modified_time).toISOString().slice(0, 10)
+      : today;
+    addEntry({
+      loc: `/products/product/${product.slug}`,
+      priority: "0.8",
+      changefreq: "weekly",
+      lastmod,
+    });
   }
 
   return [
@@ -94,31 +154,41 @@ function fetchProducts() {
       let data = "";
       res.on("data", (chunk) => (data += chunk));
       res.on("error", (err) => {
-        console.warn(`[sitemap] Response stream error: ${err.message} — generating static-only sitemap`);
+        console.warn(
+          `[sitemap] Response stream error: ${err.message} — generating static-only sitemap`
+        );
         resolve([]);
       });
       res.on("end", () => {
         try {
           const json = JSON.parse(data);
-          const slugs = (json.products || [])
-            .map((p) => p.slug)
-            .filter(Boolean);
-          console.log(`[sitemap] Fetched ${slugs.length} product slugs from API`);
-          resolve(slugs);
+          const products = (json.products || []).filter(
+            (p) => p.slug && p.available !== false
+          );
+          console.log(
+            `[sitemap] Fetched ${products.length} product slugs from API`
+          );
+          resolve(products);
         } catch (err) {
-          console.warn(`[sitemap] Failed to parse API response: ${err.message}`);
+          console.warn(
+            `[sitemap] Failed to parse API response: ${err.message}`
+          );
           resolve([]);
         }
       });
     });
 
     req.on("error", (err) => {
-      console.warn(`[sitemap] API unreachable: ${err.message} — generating static-only sitemap`);
+      console.warn(
+        `[sitemap] API unreachable: ${err.message} — generating static-only sitemap`
+      );
       resolve([]);
     });
 
     req.on("timeout", () => {
-      console.warn("[sitemap] API request timed out — generating static-only sitemap");
+      console.warn(
+        "[sitemap] API request timed out — generating static-only sitemap"
+      );
       req.destroy();
       resolve([]);
     });
@@ -126,11 +196,11 @@ function fetchProducts() {
 }
 
 async function main() {
-  const slugs = await fetchProducts();
-  const xml = buildXml(slugs);
+  const products = await fetchProducts();
+  const xml = buildXml(products);
   fs.writeFileSync(OUT, xml, "utf8");
-  const urlCount = STATIC_PAGES.length + slugs.length;
-  console.log(`[sitemap] Wrote ${OUT} (${urlCount} URLs)`);
+  const urlCount = (xml.match(/<url>/g) || []).length;
+  console.log(`[sitemap] Wrote ${OUT} (${urlCount} URLs, deduplicated)`);
 }
 
 main();
