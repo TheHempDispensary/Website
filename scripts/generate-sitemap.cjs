@@ -127,7 +127,7 @@ function buildXml(products) {
 
   // Product pages — use modified_time for lastmod
   for (const product of products) {
-    if (!product.slug) continue;
+    if (!product.slug || /[#?]/.test(product.slug)) continue;
     const lastmod = product.modified_time
       ? new Date(product.modified_time).toISOString().slice(0, 10)
       : today;

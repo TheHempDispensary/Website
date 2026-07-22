@@ -398,7 +398,8 @@ async function main() {
   console.log("[prerender] Fetching products from API...");
   const products = await fetchProducts();
   const available = products
-    .filter((p) => p.slug && p.stock > 0 && p.available !== false)
+    // Netlify rejects deployed filenames containing # or ? — skip such slugs
+    .filter((p) => p.slug && !/[#?]/.test(p.slug) && p.stock > 0 && p.available !== false)
     .sort((a, b) => (b.price || 0) - (a.price || 0))
     .slice(0, 50);
 
