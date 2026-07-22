@@ -21,7 +21,7 @@ const SITE = "https://www.thehempdispensary.com";
 
 const ROUTE_META = {
   "/": {
-    title: "Florida Hemp & THCA Dispensary - The Hemp Dispensary",
+    title: "Florida Cannabis Hemp Dispensary - The Hemp Dispensary",
     description: "Lab-tested THCA flower, edibles & concentrates. 2 Spring Hill FL stores + nationwide shipping. Ready in 5 min.",
     h1: "Florida Hemp & THCA Dispensary",
     body: "The Hemp Dispensary is Spring Hill Florida's trusted hemp store. We carry over 500 lab-tested products including THCA flower, Delta-8, Delta-9 edibles, CBD tinctures, concentrates, vapes, topicals, and accessories. Founded in 2019 by Anthoney and Jimmy, we survived the 2024 FDACS reversal and continue operating two Spring Hill locations. Every product comes with a Certificate of Analysis (COA) from independent labs. Shop online for nationwide shipping or pick up in-store in as little as 5 minutes. Open daily at both Spring Hill West (6175 Deltona Blvd) and Spring Hill East (14312 Spring Hill Dr). We offer a loyalty rewards program, wholesale pricing, and local delivery. Whether you're looking for premium indoor flower, live rosin concentrates, or sleep-focused CBN gummies, The Hemp Dispensary has what you need. All products are federally compliant under the 2018 Farm Bill and Florida hemp regulations.",
