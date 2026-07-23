@@ -5169,7 +5169,7 @@ function NotFoundPage() {
 
 /* ======================== MAIN APP ======================== */
 const PAGE_META: Record<string, { title: string; description: string }> = {
-  "/": { title: "Florida Hemp & THCA Dispensary - The Hemp Dispensary", description: "Lab-tested THCA flower, edibles & concentrates. 2 Spring Hill FL stores + nationwide shipping. Ready in 5 min." },
+  "/": { title: "Florida Cannabis Hemp Dispensary - The Hemp Dispensary", description: "Lab-tested THCA flower, edibles & concentrates. 2 Spring Hill FL stores + nationwide shipping. Ready in 5 min." },
   "/products": { title: "Shop Hemp & THCA Products - The Hemp Dispensary FL", description: "Browse 500+ lab-tested THCA, \u03948, \u03949, kratom & mushroom products. Florida-compliant. Ship to all 50 states." },
   "/products/flower": { title: "THCA Flower - Lab-Tested Indoor & Greenhouse - Hemp Dispensary", description: "Premium THCA flower strains from $20. Full panel COAs. Ships nationwide. Pick up in Spring Hill FL today." },
   "/products/edibles": { title: "THC Edibles & Gummies - Florida-Compliant - Hemp Dispensary", description: "\u03949 THC gummies, chocolates & drinks. Lab-tested, FL hemp law compliant. Same-day pickup or nationwide shipping." },
