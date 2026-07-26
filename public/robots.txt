@@ -1,6 +1,6 @@
 User-agent: *
 
-# Block filter/sort query strings
+# Block filter/sort query strings only (duplicate parameter URLs)
 Disallow: /*?store-page=
 Disallow: /*?cs=
 Disallow: /*?cst=
@@ -9,6 +9,7 @@ Disallow: /*?sa=
 Disallow: /*?sbp=
 Disallow: /*?q=
 Disallow: /*?ref=
+Disallow: /*?category=
 
 # Block utility paths
 Disallow: /checkout
@@ -16,7 +17,9 @@ Disallow: /account
 Disallow: /cart
 Disallow: /games
 
-# Allow everything else
+# /product/ and /shop/ are intentionally NOT blocked — Google must be
+# able to crawl them to see the 301s/410s. Blocked URLs stay frozen in
+# Search Console forever.
 Allow: /
 
 Sitemap: https://www.thehempdispensary.com/sitemap.xml
