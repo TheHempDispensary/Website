@@ -2664,29 +2664,91 @@ function ChatbotBud() {
     setInput("");
     setLoading(true);
 
-    try {
+    const payload = {
+      session_id: getSessionId(),
+      message: trimmed,
+      page_url: window.location.href,
+      device_type: getDeviceType(),
+    };
+
+    const stripJsonFragment = (t: string) => {
+      const idx = t.indexOf('{"message"');
+      return idx > 0 ? t.substring(0, idx).trim() : t;
+    };
+
+    // Non-streaming fallback (used if streaming fails or isn't available).
+    const sendNonStreaming = async () => {
       const resp = await fetch(`${API_URL}/api/chat/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          session_id: getSessionId(),
-          message: trimmed,
-          page_url: window.location.href,
-          device_type: getDeviceType(),
-        }),
+        body: JSON.stringify(payload),
       });
       if (!resp.ok) throw new Error("Chat API error");
       const data = await resp.json();
-      // Safety net: strip any trailing JSON fragment the backend may have left
-      let botText = data.message || "";
-      const jsonIdx = botText.indexOf('{"message"');
-      if (jsonIdx > 0) botText = botText.substring(0, jsonIdx).trim();
+      const botText = stripJsonFragment(data.message || "");
       setMessages(prev => [...prev, { from: "bot", text: botText }]);
+    };
+
+    // Add an empty bot bubble we'll fill in as tokens arrive.
+    let botText = "";
+    let started = false;
+    try {
+      const resp = await fetch(`${API_URL}/api/chat/message/stream`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!resp.ok || !resp.body) throw new Error("Stream unavailable");
+
+      const appendDelta = (delta: string) => {
+        botText += delta;
+        const display = stripJsonFragment(botText);
+        setMessages(prev => {
+          if (!started) {
+            started = true;
+            return [...prev, { from: "bot", text: display }];
+          }
+          const copy = prev.slice();
+          copy[copy.length - 1] = { from: "bot", text: display };
+          return copy;
+        });
+      };
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const events = buffer.split("\n\n");
+        buffer = events.pop() || "";
+        for (const evt of events) {
+          const line = evt.split("\n").find(l => l.startsWith("data:"));
+          if (!line) continue;
+          try {
+            const obj = JSON.parse(line.slice(5).trim());
+            if (obj.delta) appendDelta(obj.delta);
+          } catch { /* ignore malformed chunk */ }
+        }
+      }
+      if (!started) {
+        // Server produced no tokens — fall back to the JSON endpoint.
+        await sendNonStreaming();
+      }
     } catch {
-      setMessages(prev => [...prev, {
-        from: "bot",
-        text: "Sorry, I'm having a little trouble right now. You can reach our West Store at 352-340-5860 or our East Store at 352-515-5370, or stop by either Spring Hill location!",
-      }]);
+      // Only fall back if we haven't already rendered a streamed reply,
+      // to avoid appending a duplicate bot message.
+      if (!started) {
+        try {
+          await sendNonStreaming();
+        } catch {
+          setMessages(prev => [...prev, {
+            from: "bot",
+            text: "Sorry, I'm having a little trouble right now. You can reach our West Store at 352-340-5860 or our East Store at 352-515-5370, or stop by either Spring Hill location!",
+          }]);
+        }
+      }
     } finally {
       setLoading(false);
     }
