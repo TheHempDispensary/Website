@@ -53,6 +53,8 @@ const STATIC_PAGES = [
   { loc: "/products/accessories", priority: "0.9", changefreq: "weekly" },
   { loc: "/products/apparel", priority: "0.8", changefreq: "weekly" },
   { loc: "/products/packaging", priority: "0.8", changefreq: "weekly" },
+  { loc: "/products/pets", priority: "0.8", changefreq: "weekly" },
+  { loc: "/products/moonrocks", priority: "0.8", changefreq: "weekly" },
   { loc: "/wholesale", priority: "0.8", changefreq: "weekly" },
   { loc: "/about", priority: "0.6", changefreq: "monthly" },
   { loc: "/thca", priority: "0.8", changefreq: "weekly" },

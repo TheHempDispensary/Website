@@ -1,5 +1,48 @@
-# Force apex → www (only if not already in Netlify DNS)
+# ============================================================
+# The Hemp Dispensary — SEO index cleanup redirects
+# Netlify processes top-down, FIRST MATCH WINS. Keep specific rules
+# above wildcards. The `!` (force) flag makes a redirect win even if a
+# stale static file exists at the legacy path.
+#
+# NOTE: There is intentionally NO `/* /index.html 200` catch-all.
+# Removing it lets Netlify serve /404.html with a real HTTP 404 for
+# unknown paths (kills the soft-404s). Every real route is emitted as a
+# static file at build time (see scripts/prerender.cjs), so deep links
+# and crawlers still get HTTP 200 for pages that actually exist.
+# ============================================================
+
+# Force apex → www
 https://thehempdispensary.com/*  https://www.thehempdispensary.com/:splat  301!
 
-# SPA catch-all — MUST be the LAST rule
-/*  /index.html  200
+# --- Legacy Square Online catalog IDs (/product/{ID}) → 410 Gone -------
+# ~277 unmappable old Square item IDs. 410 tells Google "deliberately
+# removed" and drops them fastest.
+/product/*  /404.html  410
+
+# --- Legacy product paths → current canonical /products/product/{slug} -
+# On this site the canonical product URL is /products/product/{slug},
+# so legacy /shop/product/{slug} maps to that exact depth (NOT /products/{slug}).
+/shop/product/*  /products/product/:splat  301!
+
+# --- Legacy category paths → current categories ------------------------
+/shop      /products         301!
+/shop/*    /products/:splat  301!
+
+# Bare legacy category URLs seen in the coverage reports
+/concentrates  /products/concentrates  301!
+/tinctures     /products/tinctures     301!
+/edibles       /products/edibles       301!
+/bud           /products/flower        301!
+/chocolate     /products/edibles       301!
+/beverages     /products/edibles       301!
+
+# Empty legacy Spanish pages (soft 404s)
+/es/*  /  301
+
+# ------------------------------------------------------------
+# Per-product depth-fix redirects
+#   /products/{slug}  →  /products/product/{slug}  301!
+# for every slug in the live catalog are APPENDED below this line at
+# build time by scripts/prerender.cjs. Unknown /products/{slug} paths
+# have no rule and fall through to the real 404 (/404.html).
+# ------------------------------------------------------------

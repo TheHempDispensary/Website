@@ -332,7 +332,7 @@ function injectIntoHtml(baseHtml, { title, description, canonical, h1, body, jso
 
 // ─── API Fetch ──────────────────────────────────────────────────────────
 
-function fetchProducts() {
+function fetchCatalog() {
   return new Promise((resolve) => {
     const req = https.get(
       `${API_BASE}/api/ecommerce/products?limit=1000`,
@@ -340,20 +340,40 @@ function fetchProducts() {
       (res) => {
         let data = "";
         res.on("data", (chunk) => (data += chunk));
-        res.on("error", () => resolve([]));
+        res.on("error", () => resolve({ products: [], categories: [] }));
         res.on("end", () => {
           try {
             const json = JSON.parse(data);
-            resolve(json.products || []);
+            resolve({
+              products: json.products || [],
+              categories: json.categories || [],
+            });
           } catch {
-            resolve([]);
+            resolve({ products: [], categories: [] });
           }
         });
       }
     );
-    req.on("error", () => resolve([]));
-    req.on("timeout", () => { req.destroy(); resolve([]); });
+    req.on("error", () => resolve({ products: [], categories: [] }));
+    req.on("timeout", () => { req.destroy(); resolve({ products: [], categories: [] }); });
   });
+}
+
+// Utility / legal routes the SPA renders but that have no SEO meta.
+// They must exist as static files (HTTP 200) now that the /* 200
+// catch-all is gone — otherwise a direct hit would 404.
+const SHELL_ROUTES = [
+  "/checkout", "/account", "/games", "/terms", "/privacy", "/shipping-policy",
+];
+
+function genericCategoryMeta(slug) {
+  const label = slug.charAt(0).toUpperCase() + slug.slice(1);
+  return {
+    title: `${label} - The Hemp Dispensary FL`,
+    description: `Shop lab-tested ${label.toLowerCase()} at The Hemp Dispensary. Two Spring Hill FL locations, 5-minute pickup, and nationwide shipping.`,
+    h1: label,
+    body: `Browse ${label.toLowerCase()} at The Hemp Dispensary. Every product is independently lab-tested with a Certificate of Analysis available. Shop online for nationwide shipping or pick up in as little as 5 minutes at our two Spring Hill, Florida locations.`,
+  };
 }
 
 // ─── Main ───────────────────────────────────────────────────────────────
@@ -394,14 +414,38 @@ async function main() {
     prerendered++;
   }
 
-  // Pre-render top product pages
-  console.log("[prerender] Fetching products from API...");
-  const products = await fetchProducts();
+  console.log("[prerender] Fetching catalog from API...");
+  const { products, categories } = await fetchCatalog();
+
+  // Pre-render a landing page for every live category (so /products/{category}
+  // returns HTTP 200 now that the SPA catch-all is gone). Categories already
+  // covered by ROUTE_META are skipped.
+  const prerenderedCategoryRoutes = new Set(Object.keys(ROUTE_META));
+  for (const cat of categories) {
+    const slug = String(cat).toLowerCase();
+    const routePath = `/products/${slug}`;
+    if (prerenderedCategoryRoutes.has(routePath)) continue;
+    const meta = genericCategoryMeta(slug);
+    const canonical = SITE + routePath;
+    const html = injectIntoHtml(baseHtml, {
+      title: meta.title,
+      description: meta.description,
+      canonical,
+      h1: meta.h1,
+      body: meta.body,
+      jsonLdBlocks: [ORG_JSONLD, ...buildCategoryJsonLd(routePath, meta.h1)],
+    });
+    const outDir = path.join(DIST, routePath);
+    fs.mkdirSync(outDir, { recursive: true });
+    fs.writeFileSync(path.join(outDir, "index.html"), html, "utf8");
+    prerendered++;
+  }
+
+  // Pre-render ALL live product pages (Netlify rejects deployed filenames
+  // containing # or ?, so those slugs are skipped).
   const available = products
-    // Netlify rejects deployed filenames containing # or ? — skip such slugs
     .filter((p) => p.slug && !/[#?]/.test(p.slug) && p.stock > 0 && p.available !== false)
-    .sort((a, b) => (b.price || 0) - (a.price || 0))
-    .slice(0, 50);
+    .sort((a, b) => (b.price || 0) - (a.price || 0));
 
   console.log(`[prerender] Pre-rendering ${available.length} product pages...`);
   for (const product of available) {
@@ -444,6 +488,61 @@ async function main() {
     fs.mkdirSync(outDir, { recursive: true });
     fs.writeFileSync(path.join(outDir, "index.html"), html, "utf8");
     prerendered++;
+  }
+
+  // Emit plain SPA shells for utility/legal routes that have no SEO meta,
+  // so a direct hit returns HTTP 200 (the /* 200 catch-all is gone).
+  for (const routePath of SHELL_ROUTES) {
+    const outDir = path.join(DIST, routePath);
+    if (fs.existsSync(path.join(outDir, "index.html"))) continue;
+    fs.mkdirSync(outDir, { recursive: true });
+    fs.writeFileSync(path.join(outDir, "index.html"), baseHtml, "utf8");
+    prerendered++;
+  }
+
+  // Generate /404.html — Netlify serves it with a real HTTP 404 for any path
+  // that matches no file/redirect. It carries the full SPA bundle, so humans
+  // still get a working page (client-side NotFoundPage) while bots see 404.
+  let notFoundHtml = injectIntoHtml(baseHtml, {
+    title: "Page Not Found - The Hemp Dispensary",
+    description: "The page you're looking for doesn't exist. Browse our lab-tested hemp products.",
+    canonical: SITE + "/404",
+    h1: "Page Not Found",
+    body: "The page you're looking for doesn't exist or has moved. Browse our full catalog of lab-tested hemp products, or head back to the homepage.",
+    jsonLdBlocks: [],
+  });
+  if (!/<meta name="robots"/.test(notFoundHtml)) {
+    notFoundHtml = notFoundHtml.replace(
+      "</head>",
+      '    <meta name="robots" content="noindex" />\n  </head>'
+    );
+  }
+  fs.writeFileSync(path.join(DIST, "404.html"), notFoundHtml, "utf8");
+
+  // Append per-product depth-fix redirects to dist/_redirects:
+  //   /products/{slug}  →  /products/product/{slug}  301!
+  // for every live catalog slug (rescues bare mis-depth URLs from soft-404).
+  // Skip any slug that collides with a category route (category page wins).
+  const categorySlugs = new Set(
+    (categories || []).map((c) => String(c).toLowerCase())
+  );
+  const redirectsPath = path.join(DIST, "_redirects");
+  const seenSlugs = new Set();
+  const genLines = [];
+  for (const product of available) {
+    const slug = product.slug;
+    if (seenSlugs.has(slug) || categorySlugs.has(slug)) continue;
+    seenSlugs.add(slug);
+    genLines.push(`/products/${slug}  /products/product/${slug}  301!`);
+  }
+  if (fs.existsSync(redirectsPath) && genLines.length > 0) {
+    const header =
+      "\n# --- Auto-generated per-product depth-fix redirects ---------\n" +
+      `# ${genLines.length} rules generated ${new Date().toISOString()}\n`;
+    fs.appendFileSync(redirectsPath, header + genLines.join("\n") + "\n", "utf8");
+    console.log(`[prerender] Appended ${genLines.length} per-product redirects to _redirects`);
+  } else {
+    console.warn("[prerender] Skipped per-product redirects (no _redirects file or no products)");
   }
 
   console.log(`[prerender] Done — ${prerendered} pages pre-rendered`);
