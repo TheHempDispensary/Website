@@ -252,14 +252,22 @@ function isLeafLife(product: Product): boolean {
 }
 
 /* ======================== ACTIVE SALE CACHE ======================== */
-interface ActiveSaleData {
-  active: boolean;
+interface SaleEntry {
+  name?: string;
   discount_percent?: number;
   excluded_brands?: string[];
   applies_to?: string;
   product_ids?: string[];
   start_date?: string;
   end_date?: string;
+}
+
+interface ActiveSaleData extends SaleEntry {
+  active: boolean;
+  /** Every direct discount running right now (several can overlap). */
+  sales?: SaleEntry[];
+  /** Only a sitewide sale blocks promo codes; sales on select items don't. */
+  promos_disabled?: boolean;
 }
 
 let _saleCachePromise: Promise<ActiveSaleData> | null = null;
@@ -293,21 +301,53 @@ function useActiveSale(): ActiveSaleData | null {
   return sale;
 }
 
-function getSalePrice(product: Product, sale: ActiveSaleData | null): number | null {
-  if (!sale || !sale.active || !sale.discount_percent) return null;
-  if (product.price <= 0) return null;
+function saleAppliesTo(product: Product, entry: SaleEntry): boolean {
+  if (!entry.discount_percent) return false;
   // If sale is for specific products only, check if this product is in the list
-  if (sale.applies_to === "specific" && sale.product_ids && sale.product_ids.length > 0) {
-    if (!sale.product_ids.includes(product.id)) return null;
+  if (entry.applies_to === "specific" && entry.product_ids && entry.product_ids.length > 0) {
+    if (!entry.product_ids.includes(product.id)) return false;
   }
   // Check if product's brand is excluded
-  if (sale.excluded_brands && sale.excluded_brands.length > 0) {
-    const excludedLower = sale.excluded_brands.map(b => b.toLowerCase());
-    if (product.categories.some(cat => excludedLower.includes(cat.toLowerCase()))) return null;
+  if (entry.excluded_brands && entry.excluded_brands.length > 0) {
+    const excludedLower = entry.excluded_brands.map(b => b.toLowerCase());
+    if (product.categories.some(cat => excludedLower.includes(cat.toLowerCase()))) return false;
     // Also check by name keywords for LeafLife products
-    if (isLeafLife(product) && excludedLower.includes("leaflife")) return null;
+    if (isLeafLife(product) && excludedLower.includes("leaflife")) return false;
   }
-  return Math.round(product.price * (1 - sale.discount_percent / 100));
+  return true;
+}
+
+/** Deepest discount percent applying to this product, or null. */
+function getSalePercent(product: Product, sale: ActiveSaleData | null): number | null {
+  if (!sale || !sale.active || product.price <= 0) return null;
+  const entries: SaleEntry[] = sale.sales && sale.sales.length > 0 ? sale.sales : [sale];
+  let best: number | null = null;
+  for (const entry of entries) {
+    if (!saleAppliesTo(product, entry)) continue;
+    const pct = entry.discount_percent as number;
+    if (best === null || pct > best) best = pct;
+  }
+  return best;
+}
+
+function getSalePrice(product: Product, sale: ActiveSaleData | null): number | null {
+  const pct = getSalePercent(product, sale);
+  if (pct === null) return null;
+  return Math.round(product.price * (1 - pct / 100));
+}
+
+/** Highest advertised discount across all live sales. */
+function maxSalePercent(sale: ActiveSaleData | null | undefined): number {
+  if (!sale || !sale.active) return 0;
+  const entries: SaleEntry[] = sale.sales && sale.sales.length > 0 ? sale.sales : [sale];
+  return entries.reduce((max, e) => Math.max(max, e.discount_percent || 0), 0);
+}
+
+/** True when every live sale is limited to select items. */
+function isSelectItemsSale(sale: ActiveSaleData | null | undefined): boolean {
+  if (!sale || !sale.active) return false;
+  const entries: SaleEntry[] = sale.sales && sale.sales.length > 0 ? sale.sales : [sale];
+  return entries.every(e => e.applies_to === "specific" && !!e.product_ids && e.product_ids.length > 0);
 }
 
 const NON_CONSUMABLE_CATEGORIES = ["apparel", "accessories", "packaging"];
@@ -612,8 +652,9 @@ function FulfillmentSwitchNotification({ removedItems, newLabel, onClose }: { re
 
 /* ======================== STICKY TOP BAR ======================== */
 function StickyTopBar({ sale }: { sale?: ActiveSaleData | null }) {
-  const saleLine = sale && sale.active && sale.discount_percent
-    ? (sale.applies_to === "specific" ? `Up to ${sale.discount_percent}% OFF Select Items!` : `${sale.discount_percent}% OFF SALE TODAY!`)
+  const salePct = maxSalePercent(sale);
+  const saleLine = salePct
+    ? (isSelectItemsSale(sale) ? `Up to ${salePct}% OFF Select Items!` : `${salePct}% OFF SALE TODAY!`)
     : "FIRST10 = 10% Off";
   return (
     <div className="bg-[#231F20] text-[#FFFFFF] text-center py-2 px-4 text-sm font-medium">
@@ -718,9 +759,13 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear, sale 
           <h2 className="text-lg font-bold text-[#231F20]">Your Cart ({itemCount})</h2>
           <button onClick={onClose} className="p-2 text-[#231F20] hover:text-[#231F20] transition-colors"><X className="h-5 w-5" /></button>
         </div>
-        {/* FIRST20 promo banner */}
+        {/* Promo banner — advertises the sale instead of a code during a sitewide sale */}
         <div className="bg-[#FFCB08]/10 border-b border-[#FFCB08]/20 px-4 py-2 text-center">
-          <p className="text-sm font-medium text-[#231F20]">{"\u{1F525}"} Use code <span className="font-bold text-[#126A44]">FIRST10</span> for 10% off your first order!</p>
+          {sale && sale.active && sale.promos_disabled ? (
+            <p className="text-sm font-medium text-[#231F20]">{"\u{1F525}"} <span className="font-bold text-[#126A44]">{maxSalePercent(sale)}% OFF</span> applied automatically — no code needed!</p>
+          ) : (
+            <p className="text-sm font-medium text-[#231F20]">{"\u{1F525}"} Use code <span className="font-bold text-[#126A44]">FIRST10</span> for 10% off your first order!</p>
+          )}
         </div>
         <div className="flex-1 overflow-y-auto p-4">
           {cart.length === 0 ? (
@@ -737,7 +782,7 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear, sale 
                     <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={handleImgError} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-medium text-[#231F20] truncate">{item.product.online_name || item.product.name}</h3>
+                    <h3 className="text-sm font-medium text-[#231F20] break-words line-clamp-2">{titleCase(item.product.online_name || item.product.name)}</h3>
                     {(() => { const sp = getSalePrice(item.product, sale ?? null); return sp !== null ? (
                       <span className="flex items-center gap-1.5"><span className="text-[#231F20]/50 line-through text-xs">{formatPrice(item.product.price)}</span><span className="text-[#126A44] font-bold text-sm">{formatPrice(sp)}</span></span>
                     ) : (
@@ -773,8 +818,9 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear, sale 
 
 /* ======================== HERO SECTION (Dark bg for contrast) ======================== */
 function HeroSection({ sale }: { sale?: ActiveSaleData | null }) {
-  const heroPromo = sale && sale.active && sale.discount_percent
-    ? (sale.applies_to === "specific" ? `Up to ${sale.discount_percent}% OFF Select Items \u2014 Shop Now!` : `${sale.discount_percent}% OFF SALE \u2014 Shop Now!`)
+  const salePct = maxSalePercent(sale);
+  const heroPromo = salePct
+    ? (isSelectItemsSale(sale) ? `Up to ${salePct}% OFF Select Items \u2014 Shop Now!` : `${salePct}% OFF SALE \u2014 Shop Now!`)
     : "First-time customers: 10% OFF with code FIRST10";
   return (
     <section className="bg-[#231F20] relative overflow-hidden">
@@ -1070,6 +1116,7 @@ function ProductGridCard({ product, onQuickAdd, fulfillment, sale }: { product: 
   if (effectiveStock <= 0) return null;
   const effect = getProductEffect(product);
   const isPickup = fulfillment && fulfillment.startsWith("pickup");
+  const salePercent = getSalePercent(product, sale ?? null);
   const salePrice = getSalePrice(product, sale ?? null);
   return (
     <div className="cursor-pointer group" onClick={() => navigate(`/products/product/${product.slug}`)}>
@@ -1102,11 +1149,11 @@ function ProductGridCard({ product, onQuickAdd, fulfillment, sale }: { product: 
         </div>
         <h3 className="text-[#231F20] text-[13px] sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#126A44] transition-colors">{titleCase(product.online_name || product.name)}</h3>
         <div className="flex items-center justify-between mb-2">
-                    {salePrice !== null && sale?.discount_percent ? (
+                    {salePrice !== null && salePercent !== null ? (
                       <span className="flex items-center gap-1.5">
                         <span className="text-[#231F20]/50 line-through text-[11px] sm:text-sm">{formatPrice(product.price)}</span>
                         <span className="text-[#126A44] font-semibold text-[14px] sm:text-lg">{formatPrice(salePrice)}</span>
-                        <span className="text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded-full bg-[#FF4444]/10 text-[#FF4444]">{sale.discount_percent}% OFF</span>
+                        <span className="text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded-full bg-[#FF4444]/10 text-[#FF4444]">{salePercent}% OFF</span>
                       </span>
                     ) : (
                       <span className="text-[#231F20] font-semibold text-[14px] sm:text-lg">{formatPrice(product.price)}</span>
@@ -1128,7 +1175,7 @@ function ProductGridCard({ product, onQuickAdd, fulfillment, sale }: { product: 
 }
 
 /* ======================== PRODUCT DETAIL (Light Theme) ======================== */
-function ProductDetail({ productId, products, onAddToCart, fulfillment }: { productId: string; products: Product[]; onAddToCart: (product: Product, qty: number) => void; fulfillment?: FulfillmentType | null }) {
+function ProductDetail({ productId, products, onAddToCart, fulfillment, sale }: { productId: string; products: Product[]; onAddToCart: (product: Product, qty: number) => void; fulfillment?: FulfillmentType | null; sale?: ActiveSaleData | null }) {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
@@ -1259,7 +1306,19 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment }: { prod
             </div>
 
             <div className="flex items-center gap-3 mb-4">
-              <p className="text-3xl font-bold text-[#126A44]">{formatPrice(product.price)}</p>
+              {(() => {
+                const salePercent = getSalePercent(product, sale ?? null);
+                const salePrice = getSalePrice(product, sale ?? null);
+                return salePrice !== null && salePercent !== null ? (
+                  <>
+                    <p className="text-xl font-medium text-[#231F20]/50 line-through">{formatPrice(product.price)}</p>
+                    <p className="text-3xl font-bold text-[#126A44]">{formatPrice(salePrice)}</p>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#FF4444]/10 text-[#FF4444]">{salePercent}% OFF</span>
+                  </>
+                ) : (
+                  <p className="text-3xl font-bold text-[#126A44]">{formatPrice(product.price)}</p>
+                );
+              })()}
               {savingsVsBuying > 0 && (
                 <span className="inline-block bg-[#ADD038] text-[#231F20] text-xs font-bold px-2.5 py-1 rounded-full">
                   Save {formatPrice(savingsVsBuying)} vs buying {currentGrams}{"\u00D7"}1g
@@ -2983,6 +3042,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
     const sp = getSalePrice(item.product, sale ?? null);
     return sp !== null ? sum + (item.product.price - sp) * item.quantity : sum;
   }, 0);
+  const promosDisabled = !!(sale && sale.active && sale.promos_disabled);
   const preSubtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const subtotal = preSubtotal - saleDiscount;
   const rawDiscount = promoApplied && promoDetail
@@ -3074,10 +3134,10 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
       }
     } catch {
       // Fallback to client-side validation if backend is unreachable
-      if (sale && sale.active && sale.discount_percent) {
+      if (promosDisabled) {
         setPromoApplied(false);
         setPromoDetail(null);
-        setPromoError(`Promo codes are disabled during our ${sale.discount_percent}% OFF sale. Loyalty rewards can still be redeemed at checkout.`);
+        setPromoError(`Promo codes are disabled during our ${maxSalePercent(sale)}% OFF sale. Loyalty rewards can still be redeemed at checkout.`);
       } else if (code === "FIRST10") {
         setPromoApplied(true);
         setPromoDetail({ code: "FIRST10", discount_pct: 0.10, discount_amount: null });
@@ -3692,10 +3752,10 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                         <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={handleImgError} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[#FFFFFF] text-sm font-medium truncate">{item.product.online_name || item.product.name}</p>
+                        <p className="text-[#231F20] text-sm font-medium break-words line-clamp-2">{titleCase(item.product.online_name || item.product.name)}</p>
                         <p className="text-[#231F20] text-xs">Qty: {item.quantity}</p>
                       </div>
-                      <p className="text-[#FFFFFF] text-sm font-semibold">{formatPrice(item.product.price * item.quantity)}</p>
+                      <p className="text-[#231F20] text-sm font-semibold">{formatPrice(item.product.price * item.quantity)}</p>
                     </div>
                   ))}
                 </div>
@@ -3868,12 +3928,12 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                     <span className="absolute -top-1 -right-1 bg-[#B3D335] text-[#231F20] text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">{item.quantity}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[#FFFFFF] text-xs font-medium truncate">{item.product.online_name || item.product.name}</p>
+                    <p className="text-[#231F20] text-xs font-medium break-words line-clamp-2">{titleCase(item.product.online_name || item.product.name)}</p>
                   </div>
                   {(() => { const sp = getSalePrice(item.product, sale ?? null); return sp !== null ? (
-                    <span className="flex flex-col items-end"><span className="text-[#FFFFFF]/50 line-through text-[10px]">{formatPrice(item.product.price * item.quantity)}</span><span className="text-[#126A44] text-xs font-semibold">{formatPrice(sp * item.quantity)}</span></span>
+                    <span className="flex flex-col items-end flex-shrink-0"><span className="text-[#231F20]/50 line-through text-[10px]">{formatPrice(item.product.price * item.quantity)}</span><span className="text-[#126A44] text-xs font-semibold">{formatPrice(sp * item.quantity)}</span></span>
                   ) : (
-                    <p className="text-[#FFFFFF] text-xs font-semibold">{formatPrice(item.product.price * item.quantity)}</p>
+                    <p className="text-[#231F20] text-xs font-semibold flex-shrink-0">{formatPrice(item.product.price * item.quantity)}</p>
                   ); })()}
                 </div>
               ))}
@@ -3881,8 +3941,8 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
             {/* Promo Code */}
             <div className="border-t border-[#231F20]/20 pt-4 mb-4">
               <label className="block text-sm font-medium text-[#231F20] mb-1.5">Promo Code</label>
-              {sale && sale.active && sale.discount_percent && (
-                <p className="text-xs text-[#D9A32C] mb-2">{sale.discount_percent}% OFF sale is active — promo codes are disabled. Loyalty rewards can still be redeemed below.</p>
+              {promosDisabled && (
+                <p className="text-xs text-[#D9A32C] mb-2">{maxSalePercent(sale)}% OFF sale is active — promo codes are disabled. Loyalty rewards can still be redeemed below.</p>
               )}
               {loyaltyRedeemId && !promoApplied && (
                 <p className="text-xs text-[#D9A32C] mb-2">Promo codes cannot be combined with loyalty rewards. Remove your reward below to use a promo code.</p>
@@ -5562,9 +5622,9 @@ function App() {
       navigate(`/products/product/${match.slug}`);
       return null;
     }
-    return shell(<ProductDetail productId={pid} products={products} onAddToCart={addToCart} fulfillment={fulfillment} />);
+    return shell(<ProductDetail productId={pid} products={products} onAddToCart={addToCart} fulfillment={fulfillment} sale={activeSale} />);
   }
-  if (route.startsWith("/products/product/")) return shell(<ProductDetail productId={route.replace("/products/product/", "")} products={products} onAddToCart={addToCart} fulfillment={fulfillment} />);
+  if (route.startsWith("/products/product/")) return shell(<ProductDetail productId={route.replace("/products/product/", "")} products={products} onAddToCart={addToCart} fulfillment={fulfillment} sale={activeSale} />);
   if (route.startsWith("/shop") || route.startsWith("/products")) {
     const catSlug = route.replace("/shop/", "").replace("/shop", "").replace("/products/", "").replace("/products", "");
     if (catSlug && !VALID_CATEGORY_SLUGS.has(catSlug.toLowerCase()) && !VALID_FEELING_SLUGS.has(catSlug.toLowerCase())) {
