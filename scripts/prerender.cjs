@@ -363,7 +363,7 @@ function fetchCatalog() {
 // They must exist as static files (HTTP 200) now that the /* 200
 // catch-all is gone — otherwise a direct hit would 404.
 const SHELL_ROUTES = [
-  "/checkout", "/account", "/games", "/terms", "/privacy", "/shipping-policy",
+  "/checkout", "/account", "/terms", "/privacy", "/shipping-policy",
 ];
 
 function genericCategoryMeta(slug) {

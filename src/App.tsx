@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, Gamepad2, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, Facebook, FlaskConical, FileText, ExternalLink } from "lucide-react";
+import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, Facebook, FlaskConical, FileText, ExternalLink } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -699,10 +699,6 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
             <a href="/account" onClick={(e) => { e.preventDefault(); navigate("/account"); }} className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#126A44] transition-colors" title="Account" aria-label="My account">
               <User className="h-5 w-5" />
             </a>
-            <a href="/games" onClick={(e) => { e.preventDefault(); navigate("/games"); }} className="hidden sm:flex p-2 text-[#231F20] hover:text-[#126A44] transition-colors items-center gap-1" title="Games">
-              <Gamepad2 className="h-5 w-5" />
-              <span className="hidden md:inline text-xs font-medium">Games</span>
-            </a>
             <button onClick={onCartOpen} className="relative p-1.5 sm:p-2 text-[#231F20] hover:text-[#126A44] transition-colors" aria-label="View cart">
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && <span className="absolute -top-0.5 -right-0.5 bg-[#B3D335] text-[#231F20] text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">{cartCount}</span>}
@@ -734,7 +730,6 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
             {categories.map((cat) => (
               <button key={cat} onClick={() => { navigate(`/products/${cat.toLowerCase()}`); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors">{cat}</button>
             ))}
-            <a href="/games" onClick={(e) => { e.preventDefault(); navigate("/games"); setMobileMenuOpen(false); }} className="sm:hidden text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors flex items-center gap-2"><Gamepad2 className="h-4 w-4" /> Games</a>
             <a href="/wholesale" onClick={(e) => { e.preventDefault(); navigate("/wholesale"); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-bold text-[#126A44] hover:bg-[#126A44] hover:text-[#FFFFFF] rounded-lg transition-colors flex items-center gap-2"><DollarSign className="h-4 w-4" /> Bulk Bargains</a>
           </div>
         </div>
@@ -2530,8 +2525,7 @@ function SiteFooter() {
               <a href="/contact" onClick={(e) => { e.preventDefault(); navigate("/contact"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Contact</a>
               <a href="/our-locations" onClick={(e) => { e.preventDefault(); navigate("/our-locations"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Our Locations</a>
               <a href="/loyalty" onClick={(e) => { e.preventDefault(); navigate("/loyalty"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Rewards</a>
-              <a href="/games" onClick={(e) => { e.preventDefault(); navigate("/games"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Games</a>
-              <a href="/wholesale" onClick={(e) => { e.preventDefault(); navigate("/wholesale"); }} className="block text-[#B3D335] hover:text-[#FFFFFF] text-sm font-semibold transition-colors">Bulk Bargains</a>
+                <a href="/wholesale" onClick={(e) => { e.preventDefault(); navigate("/wholesale"); }} className="block text-[#B3D335] hover:text-[#FFFFFF] text-sm font-semibold transition-colors">Bulk Bargains</a>
             </div>
           </div>
           <div>
@@ -3057,11 +3051,21 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
   const shippingCost = isPickup ? 0 : isDelivery ? deliveryFee : (selectedRate ? selectedRate.amount_cents : 0);
   const taxRate = getTaxRate(form.state, isPickup);
   const tax = Math.round(discountedSubtotal * taxRate);
-  // Loyalty rewards: cap to subtotal only (not tax), and require at least $1 payment
-  const maxLoyaltyForSubtotal = Math.max(discountedSubtotal, 0);
-  const maxLoyaltyWithMinPayment = Math.max(discountedSubtotal - 100, 0); // leave $1.00 minimum
-  const effectiveLoyaltyDiscount = Math.min(loyaltyDiscount, maxLoyaltyWithMinPayment, maxLoyaltyForSubtotal);
+  // Loyalty rewards may cover the entire product subtotal, but not tax or shipping,
+  // and the card charge can never be $0. Rewards worth more than this cap are not
+  // redeemable at all, so points are never spent for less than the reward's value.
+  const preLoyaltyTotal = discountedSubtotal + shippingCost + tax;
+  const maxLoyaltyDiscount = Math.max(Math.min(discountedSubtotal, preLoyaltyTotal - 1), 0);
+  const effectiveLoyaltyDiscount = Math.min(loyaltyDiscount, maxLoyaltyDiscount);
   const total = discountedSubtotal + shippingCost + tax - effectiveLoyaltyDiscount;
+
+  // Release a selected reward if the cart no longer covers its full value
+  useEffect(() => {
+    if (loyaltyRedeemId && loyaltyDiscount > maxLoyaltyDiscount) {
+      setLoyaltyRedeemId(null);
+      setLoyaltyDiscount(0);
+    }
+  }, [loyaltyRedeemId, loyaltyDiscount, maxLoyaltyDiscount]);
 
   const fetchShippingRates = useCallback(async (addr: { address: string; apartment: string; city: string; state: string; zip: string }) => {
     if (!addr.address || !addr.city || !addr.state || !addr.zip) return;
@@ -3226,6 +3230,8 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
     }
     setLoyaltySigningUp(false);
   };
+
+  const rewardFitsOrder = (rewardValue: number) => Math.round(rewardValue * 100) <= maxLoyaltyDiscount;
 
   const selectLoyaltyReward = (rewardId: number, rewardValue: number) => {
     if (loyaltyRedeemId === rewardId) {
@@ -3853,17 +3859,26 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                           <p className="text-xs text-[#D9A32C] mb-2">Loyalty rewards cannot be combined with promo codes. Remove your promo code above to redeem a reward.</p>
                         )}
                         <div className="space-y-1.5">
-                          {loyaltyData.rewards.map((rw) => (
-                            <button
-                              key={rw.id}
-                              onClick={() => rw.can_redeem && !promoApplied && selectLoyaltyReward(rw.id, rw.reward_value)}
-                              disabled={!rw.can_redeem || promoApplied}
-                              className={`w-full flex items-center justify-between p-2.5 rounded-lg border text-left text-xs transition-colors ${loyaltyRedeemId === rw.id ? "border-[#58BA49] bg-[#58BA49]/10" : rw.can_redeem && !promoApplied ? "border-[#231F20]/15 hover:border-[#B3D335]" : "border-[#231F20]/10 opacity-40 cursor-not-allowed"}`}
-                            >
-                              <span className="font-medium text-[#231F20]">{rw.name}</span>
-                              <span className={`font-bold ${rw.can_redeem && !promoApplied ? "text-[#126A44]" : "text-[#231F20]/40"}`}>{rw.points_required} pts</span>
-                            </button>
-                          ))}
+                          {loyaltyData.rewards.map((rw) => {
+                            const fits = rewardFitsOrder(rw.reward_value);
+                            const selectable = rw.can_redeem && !promoApplied && fits;
+                            const shortBy = Math.round(rw.reward_value * 100) - maxLoyaltyDiscount;
+                            return (
+                              <button
+                                key={rw.id}
+                                onClick={() => selectable && selectLoyaltyReward(rw.id, rw.reward_value)}
+                                disabled={!selectable}
+                                className={`w-full flex items-center justify-between p-2.5 rounded-lg border text-left text-xs transition-colors ${loyaltyRedeemId === rw.id ? "border-[#58BA49] bg-[#58BA49]/10" : selectable ? "border-[#231F20]/15 hover:border-[#B3D335]" : "border-[#231F20]/10 opacity-40 cursor-not-allowed"}`}
+                              >
+                                <span className="font-medium text-[#231F20]">{rw.name}</span>
+                                {rw.can_redeem && !fits ? (
+                                  <span className="font-medium text-[#D9A32C]">Add {formatPrice(shortBy)} more to use</span>
+                                ) : (
+                                  <span className={`font-bold ${selectable ? "text-[#126A44]" : "text-[#231F20]/40"}`}>{rw.points_required} pts</span>
+                                )}
+                              </button>
+                            );
+                          })}
                         </div>
                         {loyaltyRedeemId && <p className="text-[#126A44] text-xs mt-2 font-medium">Reward applied — {formatPrice(effectiveLoyaltyDiscount)} off!</p>}
                       </div>
@@ -4008,7 +4023,6 @@ const WAYS_TO_EARN = [
   { label: "Google Review", pts: 150, icon: Star, desc: "Pending staff approval" },
   { label: "Refer a Friend", pts: 500, icon: Users, desc: "After friend's first purchase" },
   { label: "Birthday Bonus", pts: 100, icon: Cake, desc: "Awarded in your birthday month" },
-  { label: "Daily Bud Puppet", pts: 10, icon: Gamepad2, desc: "Play once per day" },
 ];
 
 function LoyaltyPage() {
@@ -4975,301 +4989,6 @@ function AccountPage() {
 }
 
 
-/* ======================== GAMES (Preserved) ======================== */
-
-/* ======================== ROLL A JOINT GAME ======================== */
-const STRAINS = [
-  { name: "OG Kush", color: "#3D8C32", desc: "Classic earthy pine" },
-  { name: "Purple Haze", color: "#231F20", desc: "Sweet berry vibes" },
-  { name: "Sour Diesel", color: "#ADD038", desc: "Energizing citrus" },
-  { name: "Blue Dream", color: "#231F20", desc: "Calm & creative" },
-];
-
-function RollAJointGame() {
-  const [step, setStep] = useState(0); // 0=pick, 1=grind, 2=roll, 3=light, 4=smoke, 5=done
-  const [selectedStrain, setSelectedStrain] = useState<typeof STRAINS[0] | null>(null);
-  const [grindProgress, setGrindProgress] = useState(0);
-  const [rollProgress, setRollProgress] = useState(0);
-  const [lightProgress, setLightProgress] = useState(0);
-  const [smokeOpacity, setSmokeOpacity] = useState(0);
-  const [score, setScore] = useState(0);
-  const [round, setRound] = useState(1);
-  const grindInterval = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const budAction = step === 0 ? "idle" : step === 1 ? "grind" : step === 2 ? "roll" : step === 3 ? "light" : step === 4 ? "smoke" : "celebrate";
-
-  const pickStrain = (strain: typeof STRAINS[0]) => {
-    setSelectedStrain(strain);
-    setStep(1);
-  };
-
-  const startGrind = () => {
-    if (grindInterval.current) return;
-    grindInterval.current = setInterval(() => {
-      setGrindProgress(p => {
-        if (p >= 100) { clearInterval(grindInterval.current!); grindInterval.current = null; setStep(2); return 100; }
-        return p + 3;
-      });
-    }, 50);
-  };
-
-  const stopGrind = () => {
-    if (grindInterval.current) { clearInterval(grindInterval.current); grindInterval.current = null; }
-  };
-
-  const handleRollClick = () => {
-    setRollProgress(p => {
-      const next = Math.min(100, p + 8);
-      if (next >= 100) setTimeout(() => setStep(3), 300);
-      return next;
-    });
-  };
-
-  const handleLightClick = () => {
-    setLightProgress(p => {
-      const next = Math.min(100, p + 12);
-      if (next >= 100) {
-        setTimeout(() => {
-          setStep(4);
-          let op = 0;
-          const smokeAnim = setInterval(() => {
-            op += 0.02;
-            setSmokeOpacity(op);
-            if (op >= 1) {
-              clearInterval(smokeAnim);
-              setTimeout(() => { setStep(5); setScore(s => s + 100 + round * 10); }, 1500);
-            }
-          }, 50);
-        }, 300);
-      }
-      return next;
-    });
-  };
-
-  const nextRound = () => {
-    setStep(0); setSelectedStrain(null); setGrindProgress(0); setRollProgress(0); setLightProgress(0); setSmokeOpacity(0);
-    setRound(r => r + 1);
-  };
-
-  return (
-    <div className="max-w-2xl mx-auto px-4 py-12">
-      <div className="text-center mb-6">
-        <h1 className="text-4xl font-bold text-[#231F20] mb-2">Roll a Joint!</h1>
-        <p className="text-[#231F20]">Help Bud Puppet grind, roll, light, and enjoy</p>
-        <div className="flex items-center justify-center gap-6 mt-3">
-          <span className="text-[#B3D335] font-bold">Round {round}</span>
-          <span className="text-[#FFCB08] font-bold">Score: {score}</span>
-        </div>
-      </div>
-
-      <div className="bg-[#231F20] rounded-2xl border border-[#231F20] p-8">
-        {/* Bud mascot — animated like live chat */}
-        <div className="flex justify-center mb-6">
-          <BudCharacter size={100} mood={budAction === "grind" ? "think" : budAction === "roll" ? "excited" : budAction === "light" ? "excited" : budAction === "smoke" ? "sleep" : budAction === "celebrate" ? "excited" : "idle"} />
-        </div>
-
-        {/* Step 0: Pick Flower */}
-        {step === 0 && (
-          <div>
-            <h2 className="text-xl font-bold text-[#FFFFFF] text-center mb-2">Step 1: Pick Your Flower</h2>
-            <p className="text-[#FFFFFF]/70 text-center text-sm mb-4">Bud Puppet wants to roll one up! Choose a strain:</p>
-            <div className="grid grid-cols-2 gap-4">
-              {STRAINS.map(s => (
-                <button key={s.name} onClick={() => pickStrain(s)}
-                  className="p-4 rounded-xl border-2 border-[#231F20]/20 hover:border-[#B3D335] bg-[#FFFFFF] hover:bg-[#FFFFFF] transition-all group">
-                  <div className="w-16 h-16 mx-auto rounded-full mb-3 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-110" style={{ background: s.color }}>
-                    <img src="/bud-puppet.webp" alt={s.name} className="w-12 h-12 object-contain" />
-                  </div>
-                  <p className="text-[#231F20] font-semibold">{s.name}</p>
-                  <p className="text-[#231F20] text-xs mt-1">{s.desc}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Step 1: Grind - Bud Puppet grinds the flower */}
-        {step === 1 && selectedStrain && (
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-[#FFFFFF] mb-2">Step 2: Grind the {selectedStrain.name}</h2>
-            <p className="text-[#FFFFFF]/70 text-sm mb-4">Bud Puppet is grinding it up!</p>
-            <div className="relative w-48 h-48 mx-auto mb-4">
-              {/* Grinder with Bud Puppet inside */}
-              <div className="absolute inset-0 rounded-full border-4 border-[#231F20]/30 overflow-hidden" style={{ background: `conic-gradient(${selectedStrain.color} ${grindProgress}%, rgba(35,31,32,0.15) ${grindProgress}%)` }}>
-                <div className="absolute inset-4 rounded-full bg-[#231F20]/80 border-2 border-[#231F20]/30 flex items-center justify-center">
-                  <div style={{ transform: `rotate(${grindProgress * 3.6}deg)`, transition: "transform 0.1s" }}>
-                    <img src="/bud-puppet.webp" alt="Grinding" className="w-16 h-16 object-contain" />
-                  </div>
-                </div>
-              </div>
-              {/* Grinding particles */}
-              {grindProgress > 20 && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-sm text-[#B3D335] animate-pulse">{"Crunch crunch..."}</div>}
-            </div>
-            <div className="w-56 mx-auto bg-[#231F20]/10 rounded-full h-4 mb-4 overflow-hidden">
-              <div className="h-4 rounded-full transition-all flex items-center justify-center text-xs font-bold text-[#FFFFFF]" style={{ width: `${grindProgress}%`, background: `linear-gradient(90deg, ${selectedStrain.color}, #B3D335)` }}>
-                {grindProgress > 15 && `${Math.round(grindProgress)}%`}
-              </div>
-            </div>
-            <button onMouseDown={startGrind} onMouseUp={stopGrind} onMouseLeave={stopGrind}
-              onTouchStart={startGrind} onTouchEnd={stopGrind}
-              className="px-8 py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-all active:scale-95 shadow-lg shadow-[#B3D335]/50">
-              Hold to Grind
-            </button>
-          </div>
-        )}
-
-        {/* Step 2: Roll - Bud Puppet rolls it */}
-        {step === 2 && selectedStrain && (
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-[#FFFFFF] mb-2">Step 3: Roll the Joint</h2>
-            <p className="text-[#FFFFFF]/70 text-sm mb-4">Bud Puppet is rolling it tight!</p>
-            <div className="relative w-72 h-28 mx-auto mb-6">
-              {/* Rolling paper background */}
-              <div className="absolute inset-0 rounded-xl bg-[#D9A32C]/20/20 border-2 border-[#D9A32C]/30 overflow-hidden">
-                {/* Filled portion */}
-                <div className="h-full rounded-xl transition-all duration-200 flex items-center" style={{ width: `${rollProgress}%`, background: `linear-gradient(90deg, ${selectedStrain.color}44, ${selectedStrain.color})` }}>
-                  {rollProgress > 10 && <img src="/bud-puppet.webp" alt="Rolling" className="h-16 w-16 object-contain ml-auto mr-2 animate-wiggle" />}
-                </div>
-              </div>
-              {/* Rolling paper texture lines */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                {rollProgress < 100 && <span className="text-[#FFCB08]/60/40 text-sm">{"~ rolling paper ~"}</span>}
-                {rollProgress >= 100 && <span className="text-[#B3D335] font-bold text-lg animate-bounce">{"Perfect roll!"}</span>}
-              </div>
-            </div>
-            <p className="text-[#FFFFFF]/70 text-sm mb-4">Tap to roll! ({Math.round(rollProgress)}%)</p>
-            <button onClick={handleRollClick}
-              className="px-8 py-4 bg-[#D9A32C] hover:bg-[#FFCB08] text-[#FFFFFF] rounded-full font-bold text-lg transition-all active:scale-90 shadow-lg shadow-[#D9A32C]/30/50">
-              Tap to Roll
-            </button>
-          </div>
-        )}
-
-        {/* Step 3: Light - Bud Puppet lights it */}
-        {step === 3 && (
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-[#FFFFFF] mb-2">Step 4: Light It Up!</h2>
-            <p className="text-[#FFFFFF]/70 text-sm mb-4">Bud Puppet is sparking it up!</p>
-            <div className="relative w-56 h-56 mx-auto mb-4">
-              {/* Joint */}
-              <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-8 h-36 rounded-t-sm overflow-hidden" style={{ background: `linear-gradient(180deg, ${selectedStrain?.color || "#3D8C32"}, #FFFFFF)` }}>
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2">
-                  {lightProgress > 0 && <span className="text-4xl animate-pulse">{"\uD83D\uDD25"}</span>}
-                </div>
-                {/* Glow effect */}
-                {lightProgress > 0 && <div className="absolute top-0 left-0 right-0 h-4" style={{ background: `linear-gradient(180deg, orange, transparent)`, opacity: lightProgress / 100 }} />}
-              </div>
-              {/* Bud Puppet holding the joint */}
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
-                <img src="/bud-puppet.webp" alt="Lighting" className="w-20 h-20 object-contain" style={{ filter: `brightness(${1 + lightProgress / 200})` }} />
-              </div>
-              {/* Lighter */}
-              {lightProgress < 100 && <div className="absolute top-8 right-4 text-4xl animate-bounce">{"\uD83E\uDE94"}</div>}
-            </div>
-            <div className="w-56 mx-auto bg-[#231F20]/10 rounded-full h-4 mb-4 overflow-hidden">
-              <div className="bg-gradient-to-r from-[#D9A32C] to-[#D9A32C] h-4 rounded-full transition-all flex items-center justify-center text-xs font-bold text-[#FFFFFF]" style={{ width: `${lightProgress}%` }}>
-                {lightProgress > 15 && `${Math.round(lightProgress)}%`}
-              </div>
-            </div>
-            <button onClick={handleLightClick}
-              className="px-8 py-4 bg-[#D9A32C] hover:bg-[#D9A32C] text-[#FFFFFF] rounded-full font-bold text-lg transition-all active:scale-95 shadow-lg shadow-[#D9A32C]/30/50">
-              {"\uD83D\uDD25"} Click to Light
-            </button>
-          </div>
-        )}
-
-        {/* Step 4: Smoke animation - Bud Puppet enjoys */}
-        {step === 4 && (
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-[#FFFFFF] mb-4">Bud Puppet is Enjoying It!</h2>
-            <div className="relative w-72 h-72 mx-auto">
-              {/* Glow effect */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-40 h-40 rounded-full animate-pulse" style={{ background: `radial-gradient(circle, ${selectedStrain?.color || "#3D8C32"}66, transparent)`, opacity: smokeOpacity }} />
-              </div>
-              {/* Bud Puppet smoking */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <BudCharacter size={120} mood="sleep" />
-              </div>
-              {/* Smoke puffs */}
-              {smokeOpacity > 0.1 && <div className="absolute top-8 left-1/2 -translate-x-1/2 text-5xl animate-pulse" style={{ opacity: smokeOpacity }}>{"\uD83D\uDCA8"}</div>}
-              {smokeOpacity > 0.3 && <div className="absolute top-2 left-1/4 text-4xl animate-bounce" style={{ opacity: smokeOpacity * 0.8 }}>{"\uD83D\uDCA8"}</div>}
-              {smokeOpacity > 0.5 && <div className="absolute top-0 right-1/4 text-3xl animate-pulse" style={{ opacity: smokeOpacity * 0.6 }}>{"\u2601\uFE0F"}</div>}
-              {smokeOpacity > 0.7 && <div className="absolute top-4 right-1/3 text-2xl animate-bounce" style={{ opacity: smokeOpacity * 0.5 }}>{"\uD83D\uDCA8"}</div>}
-            </div>
-          </div>
-        )}
-
-        {/* Step 5: Round Complete */}
-        {step === 5 && (
-          <div className="text-center">
-            <div className="text-6xl mb-4">{"\uD83C\uDF89"}</div>
-            <h2 className="text-2xl font-bold text-[#B3D335] mb-2">Round {round} Complete!</h2>
-            <p className="text-[#FFFFFF]/70 mb-2">Bud Puppet rolled a perfect {selectedStrain?.name} joint!</p>
-            <p className="text-[#FFCB08] font-bold text-xl mb-2">+{100 + round * 10} game points!</p>
-            <div className="bg-[#B3D335]/10 border border-[#B3D335]/30 rounded-xl p-4 mb-6 inline-block">
-              <p className="text-[#126A44] font-semibold text-sm mb-1">{"\u{1F3C6}"} Bonus Rewards Points Earned!</p>
-              <p className="text-[#231F20] font-bold text-2xl">{score >= 500 ? "+25" : "+10"} <span className="text-sm font-normal text-[#231F20]">rewards points</span></p>
-              <p className="text-[#231F20] text-xs mt-1">{score >= 500 ? "High score bonus!" : "Complete more rounds for 25 pts!"}</p>
-            </div>
-            <div className="flex justify-center mb-6"><BudCharacter size={100} mood="excited" /></div>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button onClick={nextRound}
-                className="px-8 py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-all shadow-lg shadow-[#B3D335]/50">
-                Next Round
-              </button>
-              <button onClick={() => navigate("/loyalty")}
-                className="px-6 py-3 border-2 border-[#B3D335] text-[#B3D335] hover:bg-[#B3D335] hover:text-[#231F20] rounded-full font-semibold transition-all">
-                Check Rewards Balance
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Step indicators */}
-      <div className="flex items-center justify-center gap-2 mt-6">
-        {["Pick", "Grind", "Roll", "Light", "Smoke"].map((label, i) => (
-          <div key={i} className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${i <= step ? "bg-[#B3D335]/20 text-[#231F20] border border-[#B3D335]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15"}`}>
-            {i < step ? "\u2713" : i + 1}. {label}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ======================== GAMES HUB PAGE ======================== */
-function GamesPage() {
-  const [activeGame, setActiveGame] = useState<"none" | "roll">("none");
-
-  if (activeGame === "roll") return (
-    <div>
-      <div className="max-w-2xl mx-auto px-4 pt-8"><button onClick={() => setActiveGame("none")} className="text-[#231F20] hover:text-[#231F20] transition-colors flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Back to Games</button></div>
-      <RollAJointGame />
-    </div>
-  );
-
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold text-[#231F20] mb-3">Hemp Games</h1>
-        <p className="text-[#231F20] text-lg">Play games, win prizes, and have fun!</p>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Roll a Joint */}
-        <button onClick={() => setActiveGame("roll")}
-          className="bg-[#FFFFFF] border-2 border-[#FFCB08]/50 hover:border-[#FFCB08] rounded-2xl p-8 text-left transition-all hover:scale-105 group">
-          <img src="https://thd-inventory-api.fly.dev/api/inventory/images/2025754319266?v=2" alt="Pre-rolled joint" className="h-20 w-20 object-contain mb-4 rounded-lg" />
-          <h2 className="text-2xl font-bold text-[#231F20] mb-2">Roll a Joint</h2>
-          <p className="text-[#231F20]">Pick your flower, grind it, roll it, light it! Watch your cannabis nut character enjoy the ride.</p>
-          <span className="inline-block mt-4 text-[#FFCB08] font-semibold group-hover:translate-x-1 transition-transform">Play Now {"\u2192"}</span>
-              </button>
-            </div>
-    </div>
-  );
-}
-
 
 function NotFoundPage() {
   useEffect(() => {
@@ -5304,7 +5023,6 @@ const PAGE_META: Record<string, { title: string; description: string }> = {
   "/products/packaging": { title: "Packaging Supplies | The Hemp Dispensary", description: "Wholesale packaging supplies \u2014 containers, bags, jars, and more from top manufacturers like Chubby Gorilla. Available at The Hemp Dispensary." },
   "/products/pets": { title: "CBD Pet Products | The Hemp Dispensary", description: "CBD pet tinctures and treats for dogs and cats. Lab-tested, vet-friendly hemp products at The Hemp Dispensary." },
   "/loyalty": { title: "Hemp Rewards \u2013 Loyalty Program | The Hemp Dispensary", description: "Hemp Rewards \u2014 earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary." },
-  "/games": { title: "Games | The Hemp Dispensary", description: "Play games and win prizes at The Hemp Dispensary. Roll-a-Joint and more \u2014 all free to play for rewards members." },
   "/about": { title: "About Us - Florida Hemp Survivors Since 2019", description: "Founded by Anthoney & Jimmy. Survived the 2024 FDACS reversal. Two Spring Hill stores still standing." },
   "/contact": { title: "Contact Us | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Get in touch with The Hemp Dispensary. Visit us at our Spring Hill locations, call, email, or reach out online." },
   "/our-locations": { title: "Store Locations | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Find The Hemp Dispensary near you. Two Spring Hill, FL locations with daily hours and 5-minute pickup." },
@@ -5642,7 +5360,6 @@ function App() {
   if (route === "/shipping") return shell(<ShippingPage />);
   if (route === "/loyalty") return shell(<LoyaltyPage />);
   if (route === "/account") return shell(<AccountPage />);
-  if (route === "/games") return shell(<GamesPage />);
   if (route === "/contact") return shell(<><ContactPage /><LocationSection /></>);
   if (route === "/our-locations") return shell(<OurLocationsPage />);
   if (route === "/thca") return shell(loading
