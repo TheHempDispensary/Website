@@ -3051,10 +3051,11 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
   const shippingCost = isPickup ? 0 : isDelivery ? deliveryFee : (selectedRate ? selectedRate.amount_cents : 0);
   const taxRate = getTaxRate(form.state, isPickup);
   const tax = Math.round(discountedSubtotal * taxRate);
-  // Loyalty rewards: cap to subtotal only (not tax), and require at least $1 payment.
-  // Rewards worth more than this cap are not redeemable at all, so points are never
-  // spent for less than the reward's full value.
-  const maxLoyaltyDiscount = Math.max(Math.min(discountedSubtotal, discountedSubtotal - 100), 0); // leave $1.00 minimum
+  // Loyalty rewards may cover the entire product subtotal, but not tax or shipping,
+  // and the card charge can never be $0. Rewards worth more than this cap are not
+  // redeemable at all, so points are never spent for less than the reward's value.
+  const preLoyaltyTotal = discountedSubtotal + shippingCost + tax;
+  const maxLoyaltyDiscount = Math.max(Math.min(discountedSubtotal, preLoyaltyTotal - 1), 0);
   const effectiveLoyaltyDiscount = Math.min(loyaltyDiscount, maxLoyaltyDiscount);
   const total = discountedSubtotal + shippingCost + tax - effectiveLoyaltyDiscount;
 
@@ -3861,7 +3862,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                           {loyaltyData.rewards.map((rw) => {
                             const fits = rewardFitsOrder(rw.reward_value);
                             const selectable = rw.can_redeem && !promoApplied && fits;
-                            const shortBy = Math.round(rw.reward_value * 100) + 100 - discountedSubtotal;
+                            const shortBy = Math.round(rw.reward_value * 100) - maxLoyaltyDiscount;
                             return (
                               <button
                                 key={rw.id}
