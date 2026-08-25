@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, Facebook, FlaskConical, FileText, ExternalLink } from "lucide-react";
+import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, Facebook, FlaskConical, FileText, ExternalLink, Gem, Dog } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -12,7 +12,7 @@ declare global {
 const CLOVER_PAKMS_KEY = "ffacf4a65f1681720f6882f75d2824b9";
 const CLOVER_MERCHANT_ID = "0AJ4FF0G1YFM1";
 
-const VALID_CATEGORY_SLUGS = new Set(["flower", "edibles", "concentrates", "vapor", "topicals", "tinctures", "apparel", "accessories", "packaging"]);
+const VALID_CATEGORY_SLUGS = new Set(["flower", "edibles", "concentrates", "vapor", "topicals", "tinctures", "apparel", "accessories", "packaging", "moonrocks", "pets"]);
 const VALID_FEELING_SLUGS = new Set(["relax", "sleep", "energy", "focus"]);
 
 interface CartItem {
@@ -668,7 +668,7 @@ function StickyTopBar({ sale }: { sale?: ActiveSaleData | null }) {
 /* ======================== HEADER (Light Theme) ======================== */
 function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentClick }: { cartCount: number; onSearch: () => void; onCartOpen: () => void; fulfillment: FulfillmentType | null; onFulfillmentClick: () => void }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const categories = ["FLOWER", "EDIBLES", "CONCENTRATES", "VAPOR", "TOPICALS", "TINCTURES", "APPAREL", "ACCESSORIES", "PACKAGING"];
+  const categories = ["FLOWER", "EDIBLES", "CONCENTRATES", "VAPOR", "TOPICALS", "TINCTURES", "APPAREL", "ACCESSORIES", "PACKAGING", "MOONROCKS", "PETS"];
 
   return (
     <header className="bg-[#FFFFFF] sticky top-0 z-50 border-b border-[#231F20]/15 shadow-sm">
@@ -867,13 +867,13 @@ function TrustStrip() {
 /* ======================== SHOP BY CATEGORY ======================== */
 function ShopByCategory({ productsByCategory, fulfillment }: { categories: string[]; productsByCategory: Record<string, Product[]>; fulfillment?: FulfillmentType | null }) {
   const stockFor = (p: Product) => fulfillment ? getStockForFulfillment(p, fulfillment) : p.stock;
-  const displayCats = ["Flower", "Edibles", "Concentrates", "Vapor", "Topicals", "Tinctures", "Apparel", "Accessories", "Packaging"].filter(c => {
+  const displayCats = ["Flower", "Edibles", "Concentrates", "Vapor", "Topicals", "Tinctures", "Apparel", "Accessories", "Packaging", "MoonRocks", "Pets"].filter(c => {
     const prods = productsByCategory[c] || [];
     return prods.some(p => stockFor(p) > 0);
   });
   if (displayCats.length === 0) return null;
 
-  const catIconComponents: Record<string, React.ComponentType<{ className?: string }>> = { Flower: Leaf, Edibles: Candy, Concentrates: Droplets, Vapor: Wind, Topicals: Pipette, Tinctures: Pill, Apparel: Shirt, Accessories: Wrench, Packaging: Box };
+  const catIconComponents: Record<string, React.ComponentType<{ className?: string }>> = { Flower: Leaf, Edibles: Candy, Concentrates: Droplets, Vapor: Wind, Topicals: Pipette, Tinctures: Pill, Apparel: Shirt, Accessories: Wrench, Packaging: Box, MoonRocks: Gem, Pets: Dog };
 
   const getCategoryImage = (cat: string): string | null => {
     const prods = productsByCategory[cat] || [];
