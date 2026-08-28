@@ -14,6 +14,7 @@ const CLOVER_MERCHANT_ID = "0AJ4FF0G1YFM1";
 
 const VALID_CATEGORY_SLUGS = new Set(["flower", "edibles", "concentrates", "vapor", "topicals", "tinctures", "apparel", "accessories", "packaging", "moonrocks", "pets"]);
 const VALID_FEELING_SLUGS = new Set(["relax", "sleep", "energy", "focus"]);
+const VALID_PRODUCT_FILTER_SLUGS = new Set(["sale", "new"]);
 
 interface CartItem {
   product: Product;
@@ -817,6 +818,7 @@ function HeroSection({ sale }: { sale?: ActiveSaleData | null }) {
   const heroPromo = salePct
     ? (isSelectItemsSale(sale) ? `Up to ${salePct}% OFF Select Items \u2014 Shop Now!` : `${salePct}% OFF SALE \u2014 Shop Now!`)
     : "First-time customers: 10% OFF with code FIRST10";
+  const promoDestination = salePct ? "/products/sale" : "/products";
   return (
     <section className="bg-[#231F20] relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 py-10 sm:py-20 text-center relative z-10">
@@ -829,7 +831,7 @@ function HeroSection({ sale }: { sale?: ActiveSaleData | null }) {
           <button onClick={() => navigate("/products")} className="px-8 py-3.5 sm:py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors shadow-lg">Shop All</button>
           <button onClick={() => { const el = document.getElementById('locations-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else navigate('/contact'); }} className="px-8 py-3.5 sm:py-4 border-2 border-[#FFFFFF] hover:bg-[#FFFFFF] text-[#FFFFFF] hover:text-[#231F20] rounded-full font-bold text-lg transition-colors">Find Nearest Location</button>
         </div>
-        <p className="mt-4 text-[#FFCB08] font-medium text-sm">{"\u{1F525}"} {heroPromo}</p>
+        <button onClick={() => navigate(promoDestination)} className="mt-4 text-[#FFCB08] hover:text-[#B3D335] font-medium text-sm transition-colors">{"\u{1F525}"} {heroPromo}</button>
       </div>
       {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#231F20]/50 pointer-events-none" />
@@ -1595,17 +1597,27 @@ function Breadcrumbs({ items }: { items: { label: string; href?: string }[] }) {
 }
 
 function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfillment, sale }: { products: Product[]; categories: string[]; selectedCategory: string; onAddToCart: (product: Product) => void; fulfillment: FulfillmentType | null; sale?: ActiveSaleData | null }) {
-  const [sortBy, setSortBy] = useState("name");
+  const selectedSlug = selectedCategory.toLowerCase();
+  const [sortBy, setSortBy] = useState(selectedSlug === "new" ? "newest" : "name");
   const [thcFilter, setThcFilter] = useState<"all" | "thc" | "non-thc">("all");
   const feelingLabels = ["relax", "sleep", "energy", "focus"];
-  const isFeelingFilter = feelingLabels.includes(selectedCategory.toLowerCase());
+  const isFeelingFilter = feelingLabels.includes(selectedSlug);
+  const isSaleFilter = selectedSlug === "sale";
+  const isNewFilter = selectedSlug === "new";
+  const pageTitle = isSaleFilter ? "Sale Items" : isNewFilter ? "New Items" : selectedCategory && selectedCategory !== "all" ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : "All Products";
+
+  useEffect(() => {
+    if (isNewFilter) setSortBy("newest");
+  }, [isNewFilter]);
 
   const filtered = useMemo(() => {
     let items = fulfillment
       ? products.filter(p => getStockForFulfillment(p, fulfillment) > 0)
       : products.filter(p => p.stock > 0);
-    if (selectedCategory && selectedCategory !== "all") {
-      const catLower = selectedCategory.toLowerCase();
+    if (isSaleFilter) {
+      items = items.filter((p) => getSalePercent(p, sale ?? null) !== null);
+    } else if (!isNewFilter && selectedCategory && selectedCategory !== "all") {
+      const catLower = selectedSlug;
       if (isFeelingFilter) {
         items = items.filter((p) => getProductEffect(p).label.toLowerCase() === catLower);
       } else {
@@ -1620,18 +1632,18 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
     else if (sortBy === "oldest") items.sort((a, b) => (a.modified_time || 0) - (b.modified_time || 0));
     else items.sort((a, b) => a.name.localeCompare(b.name));
     return items;
-  }, [products, selectedCategory, sortBy, thcFilter, isFeelingFilter, fulfillment]);
+  }, [products, selectedCategory, selectedSlug, sortBy, thcFilter, isFeelingFilter, isSaleFilter, isNewFilter, fulfillment, sale]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <Breadcrumbs items={[
         { label: "Home", href: "/" },
         { label: "Products", href: selectedCategory && selectedCategory !== "all" ? "/products" : undefined },
-        ...(selectedCategory && selectedCategory !== "all" ? [{ label: selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) }] : []),
+        ...(selectedCategory && selectedCategory !== "all" ? [{ label: pageTitle }] : []),
       ]} />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-[18px] sm:text-3xl font-semibold sm:font-bold text-[#231F20]">{selectedCategory && selectedCategory !== "all" ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : "All Products"}</h1>
+          <h1 className="text-[18px] sm:text-3xl font-semibold sm:font-bold text-[#231F20]">{pageTitle}</h1>
           <p className="text-[#231F20] text-sm mt-1">{filtered.length} products</p>
         </div>
         <div className="flex gap-2 items-center">
@@ -1655,6 +1667,8 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
       {/* Category pills */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
         <button onClick={() => navigate("/products")} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${!selectedCategory || selectedCategory === "all" ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>All</button>
+        <button onClick={() => navigate("/products/new")} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${isNewFilter ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>New Items</button>
+        {sale?.active && <button onClick={() => navigate("/products/sale")} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${isSaleFilter ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>Sale</button>}
         {categories.map((cat) => (
           <button key={cat} onClick={() => navigate(`/products/${cat.toLowerCase()}`)} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === cat.toLowerCase() ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>{cat}</button>
         ))}
@@ -5012,6 +5026,8 @@ function NotFoundPage() {
 const PAGE_META: Record<string, { title: string; description: string }> = {
   "/": { title: "Florida Cannabis Hemp Dispensary - The Hemp Dispensary", description: "Lab-tested THCA flower, edibles & concentrates. 2 Spring Hill FL stores + nationwide shipping. Ready in 5 min." },
   "/products": { title: "Shop Hemp & THCA Products - The Hemp Dispensary FL", description: "Browse 500+ lab-tested THCA, \u03948, \u03949, kratom & mushroom products. Florida-compliant. Ship to all 50 states." },
+  "/products/new": { title: "New Hemp & THCA Products | The Hemp Dispensary", description: "Shop the newest hemp, THCA, CBD, edible, concentrate, and wellness products available from The Hemp Dispensary." },
+  "/products/sale": { title: "Hemp & THCA Products on Sale | The Hemp Dispensary", description: "Shop current discounts on select hemp, THCA, CBD, edible, concentrate, and wellness products from The Hemp Dispensary." },
   "/products/flower": { title: "THCA Flower - Lab-Tested Indoor & Greenhouse - Hemp Dispensary", description: "Premium THCA flower strains from $20. Full panel COAs. Ships nationwide. Pick up in Spring Hill FL today." },
   "/products/edibles": { title: "THC Edibles & Gummies - Florida-Compliant - Hemp Dispensary", description: "\u03949 THC gummies, chocolates & drinks. Lab-tested, FL hemp law compliant. Same-day pickup or nationwide shipping." },
   "/products/concentrates": { title: "Hemp Concentrates: Dabs, Rosin, Diamonds - Hemp Dispensary", description: "THCA diamonds, live rosin, badder & sauce. Lab-tested concentrates from $30. FL hemp dispensary." },
@@ -5316,6 +5332,14 @@ function App() {
     });
   }, [productsByCategory, stockForFulfillment]);
 
+  const newItems = useMemo(() => {
+    const newestInStock = products
+      .filter((p) => stockForFulfillment(p) > 0)
+      .sort((a, b) => (b.modified_time || 0) - (a.modified_time || 0));
+    const withImages = newestInStock.filter((p) => p.image_url && !p.image_url.includes("product-placeholder"));
+    return (withImages.length >= 4 ? withImages : newestInStock).slice(0, 4);
+  }, [products, stockForFulfillment]);
+
   const shell = (content: React.ReactNode) => (
     <div className="min-h-screen bg-[#FFFFFF] overflow-x-hidden">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-0 focus:top-0 focus:z-[9999] focus:bg-[#FFFFFF] focus:px-4 focus:py-2 focus:text-[#231F20] focus:underline">Skip to main content</a>
@@ -5345,7 +5369,7 @@ function App() {
   if (route.startsWith("/products/product/")) return shell(<ProductDetail productId={route.replace("/products/product/", "")} products={products} onAddToCart={addToCart} fulfillment={fulfillment} sale={activeSale} />);
   if (route.startsWith("/shop") || route.startsWith("/products")) {
     const catSlug = route.replace("/shop/", "").replace("/shop", "").replace("/products/", "").replace("/products", "");
-    if (catSlug && !VALID_CATEGORY_SLUGS.has(catSlug.toLowerCase()) && !VALID_FEELING_SLUGS.has(catSlug.toLowerCase())) {
+    if (catSlug && !VALID_CATEGORY_SLUGS.has(catSlug.toLowerCase()) && !VALID_FEELING_SLUGS.has(catSlug.toLowerCase()) && !VALID_PRODUCT_FILTER_SLUGS.has(catSlug.toLowerCase())) {
       return shell(<NotFoundPage />);
     }
     return shell(loading
@@ -5401,6 +5425,21 @@ function App() {
         <>
           <ShopByCategory categories={categories} productsByCategory={productsByCategory} fulfillment={fulfillment} />
           <ShopByFeeling products={products} />
+          {newItems.length > 0 && (
+            <section className="py-10 bg-[#FFFFFF]">
+              <div className="max-w-7xl mx-auto px-4">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-[18px] sm:text-3xl font-semibold sm:font-bold text-[#231F20]">New Items</h2>
+                  <button onClick={() => navigate("/products/new")} className="border border-[#231F20] text-[#231F20] hover:bg-[#FFFFFF] px-6 py-2 rounded-full font-medium transition-all duration-300 text-sm">View All</button>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                  {newItems.map((product) => (
+                    <ProductGridCard key={product.id} product={product} onQuickAdd={(p) => addToCart(p, 1)} fulfillment={fulfillment} sale={activeSale} />
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
           {/* Product carousels by category */}
           {homeCategories.map((cat) => {
             const inStock = (productsByCategory[cat] || []).filter(p => stockForFulfillment(p) > 0);
