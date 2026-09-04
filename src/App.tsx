@@ -993,7 +993,7 @@ function SaleSpotlight({ products, sale, fulfillment }: { products: Product[]; s
   const dollars = (cents: number) => "$" + Math.round(cents / 100).toLocaleString("en-US");
   const stats = [
     { value: String(deals.length), label: "Items on Sale" },
-    { value: String(halfOffOrMore), label: "At 50% Off or More" },
+    { value: String(halfOffOrMore), label: "50% Off or More" },
     { value: endLabel ?? "Now", label: endLabel ? "Sale Ends" : "Sale Is Live" },
   ];
   return (
@@ -1040,9 +1040,9 @@ function SaleSpotlight({ products, sale, fulfillment }: { products: Product[]; s
         {/* Stat tiles */}
         <div className="grid grid-cols-3 gap-3 sm:gap-4 mt-4 sm:mt-6">
           {stats.map(s => (
-            <div key={s.label} className="rounded-2xl border-2 border-dashed border-[#FFCB08] bg-[#FFFBEA] px-5 py-4">
-              <p className="text-2xl sm:text-3xl font-bold text-[#126A44]">{s.value}</p>
-              <p className="text-[10px] sm:text-xs tracking-[0.15em] uppercase text-[#231F20]/60 mt-1">{s.label}</p>
+            <div key={s.label} className="rounded-2xl border-2 border-dashed border-[#FFCB08] bg-[#FFFBEA] px-3 py-3 sm:px-5 sm:py-4 text-center sm:text-left">
+              <p className="text-xl sm:text-3xl font-bold text-[#126A44] whitespace-nowrap">{s.value}</p>
+              <p className="text-[9px] sm:text-xs tracking-[0.1em] sm:tracking-[0.15em] uppercase text-[#231F20]/60 mt-1 leading-tight">{s.label}</p>
             </div>
           ))}
         </div>
