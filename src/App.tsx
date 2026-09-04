@@ -975,7 +975,7 @@ function saleMonthName(sale: ActiveSaleData | null | undefined): string {
   return (saleEndDate(sale) ?? new Date()).toLocaleDateString("en-US", { month: "long" });
 }
 
-function SaleSpotlight({ products, sale, fulfillment, onQuickAdd }: { products: Product[]; sale?: ActiveSaleData | null; fulfillment?: FulfillmentType | null; onQuickAdd: (p: Product) => void }) {
+function SaleSpotlight({ products, sale, fulfillment }: { products: Product[]; sale?: ActiveSaleData | null; fulfillment?: FulfillmentType | null }) {
   const salePct = maxSalePercent(sale);
   if (!salePct) return null;
   const stockFor = (p: Product) => fulfillment ? getStockForFulfillment(p, fulfillment) : p.stock;
@@ -984,32 +984,96 @@ function SaleSpotlight({ products, sale, fulfillment, onQuickAdd }: { products: 
   const end = saleEndDate(sale);
   const monthName = saleMonthName(sale);
   const endLabel = end ? end.toLocaleDateString("en-US", { month: "short", day: "numeric" }) : null;
-  const featured = deals.filter(d => d.product.image_url && !d.product.image_url.includes("product-placeholder")).slice(0, 4);
-  const showcase = featured.length >= 4 ? featured : deals.slice(0, 4);
+  const priced = deals.map(d => {
+    const salePrice = getSalePrice(d.product, sale ?? null) ?? d.product.price;
+    return { ...d, salePrice, saving: d.product.price - salePrice };
+  });
+  const halfOffOrMore = priced.filter(d => d.pct >= 50).length;
+  const picks = [...priced].sort((a, b) => b.saving - a.saving || b.pct - a.pct).slice(0, 6);
+  const dollars = (cents: number) => "$" + Math.round(cents / 100).toLocaleString("en-US");
+  const stats = [
+    { value: String(deals.length), label: "Items on Sale" },
+    { value: String(halfOffOrMore), label: "50% Off or More" },
+    { value: endLabel ?? "Now", label: endLabel ? "Sale Ends" : "Sale Is Live" },
+  ];
   return (
-    <section className="bg-[#231F20] py-10 sm:py-14 relative overflow-hidden" aria-labelledby="sale-spotlight-heading">
+    <section className="bg-[#FFFFFF] py-8 sm:py-12" aria-labelledby="sale-spotlight-heading">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10 mb-8">
-          <img src="/bud-puppet.webp" alt="Bud, The Hemp Dispensary mascot" width="160" height="160" loading="lazy" className="w-28 h-28 sm:w-40 sm:h-40 object-contain drop-shadow-lg flex-shrink-0" />
-          <div className="text-center md:text-left flex-1">
-            <p className="text-[#B3D335] font-semibold tracking-[0.2em] text-xs sm:text-sm uppercase mb-1">{monthName} Sale Event</p>
-            <h2 id="sale-spotlight-heading" className="text-3xl sm:text-5xl font-bold text-[#FFFFFF] leading-tight">
-              Up to <span className="text-[#FFCB08]">{salePct}% OFF</span>
-            </h2>
-            <p className="text-[#FFFFFF]/80 text-sm sm:text-lg mt-2">
-              {deals.length} items marked down in store and online.{endLabel ? ` Ends ${endLabel}` : ""} — while supplies last.
-            </p>
-            <p className="text-[#FFFFFF]/60 text-xs sm:text-sm mt-1 italic">“I marked these down myself.” — Bud</p>
+        {/* Hero card */}
+        <div onClick={() => navigate("/products/sale")} className="relative overflow-hidden rounded-3xl border-4 border-[#FFCB08] bg-gradient-to-br from-[#126A44] via-[#0F5A3A] to-[#0B4A30] text-[#FFFFFF] cursor-pointer shadow-xl">
+          <div className="absolute -right-10 -top-10 w-64 h-64 rounded-full bg-[#3D8C32]/40 pointer-events-none" />
+          <div className="absolute right-1/4 bottom-0 w-40 h-40 rounded-full bg-[#3D8C32]/30 pointer-events-none" />
+          <div className="relative grid md:grid-cols-[1fr_auto] gap-6 p-6 sm:p-10">
+            <div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4">
+                <img src="/logo.webp" alt="The Hemp Dispensary" width="120" height="48" className="h-10 w-auto object-contain bg-[#FFFFFF] rounded-lg px-2 py-1" loading="lazy" />
+                <div className="text-xs sm:text-sm">
+                  <p className="text-[#FFCB08] font-semibold tracking-[0.2em] uppercase">Spring Hill East &amp; West</p>
+                  <p className="text-[#FFFFFF]/80">Plus online, all month long</p>
+                </div>
+              </div>
+              <h2 id="sale-spotlight-heading" className="leading-none">
+                <span className="block text-5xl sm:text-7xl font-black uppercase tracking-tight drop-shadow-md">{monthName}</span>
+                <span className="block text-3xl sm:text-5xl font-black uppercase text-[#FFCB08] mt-1">Sale Event</span>
+              </h2>
+              <p className="mt-4 max-w-xl text-sm sm:text-base text-[#FFFFFF]/90">
+                Deep cuts on flower, edibles, tinctures, glass and merch {"\u2014"} <span className="text-[#FFCB08] font-semibold">while supplies last.</span> Most of these are one-time clearance runs, so when they{"\u2019"}re gone, they{"\u2019"}re gone.
+              </p>
+              <button onClick={(e) => { e.stopPropagation(); navigate("/products/sale"); }} className="mt-6 px-8 py-3 bg-[#FFCB08] hover:bg-[#B3D335] text-[#231F20] rounded-full font-bold transition-colors shadow-lg">Shop the Sale</button>
+            </div>
+            <div className="flex flex-col items-center justify-center gap-4 md:gap-2">
+              <div className="bg-[#FFFFFF] text-[#231F20] rounded-2xl px-4 py-3 shadow-md text-sm max-w-[220px] md:self-end">
+                <p className="font-bold">{"\u201C"}I marked these down myself.{"\u201D"}</p>
+                <p className="text-[#3D8C32] text-xs mt-1">{"\u2014"} Bud, your budtender</p>
+              </div>
+              <div className="flex items-center gap-3 sm:gap-5">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-[#C0392B] border-4 border-[#FFFFFF] flex flex-col items-center justify-center shadow-lg flex-shrink-0">
+                  <span className="text-2xl sm:text-3xl font-black leading-none">{salePct}%</span>
+                  <span className="text-[10px] font-bold tracking-widest uppercase mt-1">up to off</span>
+                </div>
+                <img src="/bud-puppet.webp" alt="Bud, The Hemp Dispensary mascot" width="160" height="160" loading="lazy" className="w-32 h-32 sm:w-52 sm:h-52 object-contain drop-shadow-xl" />
+              </div>
+            </div>
           </div>
-          <button onClick={() => navigate("/products/sale")} className="px-8 py-3.5 bg-[#FFCB08] hover:bg-[#B3D335] text-[#231F20] rounded-full font-bold text-lg transition-colors shadow-lg whitespace-nowrap">Shop the Sale</button>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-          {showcase.map(({ product }) => (
-            <ProductGridCard key={product.id} product={product} onQuickAdd={onQuickAdd} fulfillment={fulfillment} sale={sale} />
+
+        {/* Stat tiles */}
+        <div className="grid grid-cols-3 gap-3 sm:gap-4 mt-4 sm:mt-6">
+          {stats.map(s => (
+            <div key={s.label} className="rounded-2xl border-2 border-dashed border-[#FFCB08] bg-[#FFFBEA] px-3 py-3 sm:px-5 sm:py-4 text-center sm:text-left">
+              <p className="text-xl sm:text-3xl font-bold text-[#126A44] whitespace-nowrap">{s.value}</p>
+              <p className="text-[9px] sm:text-xs tracking-[0.1em] sm:tracking-[0.15em] uppercase text-[#231F20]/60 mt-1 leading-tight">{s.label}</p>
+            </div>
           ))}
         </div>
-        <div className="text-center mt-6">
-          <button onClick={() => navigate("/products/sale")} className="text-[#B3D335] hover:text-[#FFCB08] font-medium text-sm transition-colors">See all {deals.length} sale items →</button>
+
+        {/* Bud's picks */}
+        <div className="mt-10">
+          <div className="flex items-center gap-3">
+            <span className="w-8 h-8 rounded-full bg-[#126A44] flex items-center justify-center flex-shrink-0"><Star className="h-4 w-4 text-[#FFCB08] fill-[#FFCB08]" /></span>
+            <h3 className="text-lg sm:text-2xl font-bold text-[#126A44] uppercase tracking-wide">Bud{"\u2019"}s Picks of the Month</h3>
+            <span className="hidden sm:block flex-1 border-t-4 border-dashed border-[#FFCB08]/70" />
+          </div>
+          <p className="text-sm text-[#231F20]/60 mt-1 ml-11">The biggest dollar-for-dollar savings in the building.</p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
+            {picks.map((d, i) => (
+              <button key={d.product.id} onClick={() => navigate(`/products/product/${d.product.slug}`)} className={`relative text-left rounded-2xl border-2 p-5 pt-6 bg-[#FFFFFF] hover:shadow-lg transition-all ${i === 0 ? "border-[#C0392B] bg-[#FFF5F0]" : "border-[#126A44]"}`}>
+                <span className={`absolute -top-3 left-5 w-6 h-6 rounded-full border-2 bg-[#FFFFFF] ${i === 0 ? "border-[#C0392B]" : "border-[#126A44]"}`} />
+                {i === 0 && <span className="absolute -top-3 right-4 bg-[#C0392B] text-[#FFFFFF] text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full">Bud{"\u2019"}s Top Pick</span>}
+                <p className="font-semibold text-[#231F20] text-sm sm:text-base line-clamp-2 min-h-[2.5rem]">{titleCase(d.product.online_name || d.product.name)}</p>
+                <div className="flex items-end justify-between mt-3 gap-2">
+                  <p className="leading-none">
+                    <span className="text-3xl font-black text-[#126A44]">{dollars(d.salePrice)}</span>
+                    <span className="text-[#231F20]/40 line-through ml-2">{dollars(d.product.price)}</span>
+                  </p>
+                  <span className="bg-[#C0392B] text-[#FFFFFF] text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">{d.pct}% OFF</span>
+                </div>
+              </button>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <button onClick={() => navigate("/products/sale")} className="px-8 py-3 border-2 border-[#126A44] text-[#126A44] hover:bg-[#126A44] hover:text-[#FFFFFF] rounded-full font-bold transition-colors">See all {deals.length} sale items {"\u2192"}</button>
+          </div>
         </div>
       </div>
     </section>
@@ -5508,7 +5572,7 @@ function App() {
         </div>
       ) : (
         <>
-          <SaleSpotlight products={products} sale={activeSale} fulfillment={fulfillment} onQuickAdd={(p) => addToCart(p, 1)} />
+          <SaleSpotlight products={products} sale={activeSale} fulfillment={fulfillment} />
           <ShopByCategory categories={categories} productsByCategory={productsByCategory} fulfillment={fulfillment} />
           <ShopByFeeling products={products} />
           {newItems.length > 0 && (
