@@ -655,7 +655,7 @@ function FulfillmentSwitchNotification({ removedItems, newLabel, onClose }: { re
 function StickyTopBar({ sale }: { sale?: ActiveSaleData | null }) {
   const salePct = maxSalePercent(sale);
   const saleLine = salePct
-    ? (isSelectItemsSale(sale) ? `Up to ${salePct}% OFF Select Items!` : `${salePct}% OFF SALE TODAY!`)
+    ? (isSelectItemsSale(sale) ? `${saleMonthName(sale)} Sale: Up to ${salePct}% OFF Select Items!` : `${salePct}% OFF SALE TODAY!`)
     : "FIRST10 = 10% Off";
   return (
     <div className="bg-[#231F20] text-[#FFFFFF] text-center py-2 px-4 text-sm font-medium">
@@ -816,7 +816,7 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear, sale 
 function HeroSection({ sale }: { sale?: ActiveSaleData | null }) {
   const salePct = maxSalePercent(sale);
   const heroPromo = salePct
-    ? (isSelectItemsSale(sale) ? `Up to ${salePct}% OFF Select Items \u2014 Shop Now!` : `${salePct}% OFF SALE \u2014 Shop Now!`)
+    ? (isSelectItemsSale(sale) ? `${saleMonthName(sale)} Sale: Up to ${salePct}% OFF Select Items \u2014 Shop Now!` : `${salePct}% OFF SALE \u2014 Shop Now!`)
     : "First-time customers: 10% OFF with code FIRST10";
   const promoDestination = salePct ? "/products/sale" : "/products";
   return (
@@ -943,8 +943,93 @@ function ShopByFeeling({ products }: { products: Product[] }) {
   );
 }
 
+/* ======================== SALE SPOTLIGHT ======================== */
+/** Products with a live discount, deepest discount first (in stock, priced). */
+function getSaleProducts(products: Product[], sale: ActiveSaleData | null | undefined, stockFor: (p: Product) => number): { product: Product; pct: number }[] {
+  if (!sale || !sale.active) return [];
+  const out: { product: Product; pct: number }[] = [];
+  for (const product of products) {
+    if (stockFor(product) <= 0) continue;
+    const pct = getSalePercent(product, sale);
+    if (pct) out.push({ product, pct });
+  }
+  return out.sort((a, b) => b.pct - a.pct || (b.product.price - a.product.price));
+}
+
+/** Latest end date across live sales (YYYY-MM-DD…), or null when open-ended. */
+function saleEndDate(sale: ActiveSaleData | null | undefined): Date | null {
+  if (!sale || !sale.active) return null;
+  const entries: SaleEntry[] = sale.sales && sale.sales.length > 0 ? sale.sales : [sale];
+  let latest: Date | null = null;
+  for (const e of entries) {
+    if (!e.end_date) continue;
+    const d = new Date(e.end_date);
+    if (isNaN(d.getTime())) continue;
+    if (!latest || d > latest) latest = d;
+  }
+  return latest;
+}
+
+/** Month the sale is named after: its end month, or the current month when open-ended. */
+function saleMonthName(sale: ActiveSaleData | null | undefined): string {
+  return (saleEndDate(sale) ?? new Date()).toLocaleDateString("en-US", { month: "long" });
+}
+
+function SaleSpotlight({ products, sale, fulfillment, onQuickAdd }: { products: Product[]; sale?: ActiveSaleData | null; fulfillment?: FulfillmentType | null; onQuickAdd: (p: Product) => void }) {
+  const salePct = maxSalePercent(sale);
+  if (!salePct) return null;
+  const stockFor = (p: Product) => fulfillment ? getStockForFulfillment(p, fulfillment) : p.stock;
+  const deals = getSaleProducts(products, sale, stockFor);
+  if (deals.length === 0) return null;
+  const end = saleEndDate(sale);
+  const monthName = saleMonthName(sale);
+  const endLabel = end ? end.toLocaleDateString("en-US", { month: "short", day: "numeric" }) : null;
+  const featured = deals.filter(d => d.product.image_url && !d.product.image_url.includes("product-placeholder")).slice(0, 4);
+  const showcase = featured.length >= 4 ? featured : deals.slice(0, 4);
+  return (
+    <section className="bg-[#231F20] py-10 sm:py-14 relative overflow-hidden" aria-labelledby="sale-spotlight-heading">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10 mb-8">
+          <img src="/bud-puppet.webp" alt="Bud, The Hemp Dispensary mascot" width="160" height="160" loading="lazy" className="w-28 h-28 sm:w-40 sm:h-40 object-contain drop-shadow-lg flex-shrink-0" />
+          <div className="text-center md:text-left flex-1">
+            <p className="text-[#B3D335] font-semibold tracking-[0.2em] text-xs sm:text-sm uppercase mb-1">{monthName} Sale Event</p>
+            <h2 id="sale-spotlight-heading" className="text-3xl sm:text-5xl font-bold text-[#FFFFFF] leading-tight">
+              Up to <span className="text-[#FFCB08]">{salePct}% OFF</span>
+            </h2>
+            <p className="text-[#FFFFFF]/80 text-sm sm:text-lg mt-2">
+              {deals.length} items marked down in store and online.{endLabel ? ` Ends ${endLabel}` : ""} — while supplies last.
+            </p>
+            <p className="text-[#FFFFFF]/60 text-xs sm:text-sm mt-1 italic">“I marked these down myself.” — Bud</p>
+          </div>
+          <button onClick={() => navigate("/products/sale")} className="px-8 py-3.5 bg-[#FFCB08] hover:bg-[#B3D335] text-[#231F20] rounded-full font-bold text-lg transition-colors shadow-lg whitespace-nowrap">Shop the Sale</button>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          {showcase.map(({ product }) => (
+            <ProductGridCard key={product.id} product={product} onQuickAdd={onQuickAdd} fulfillment={fulfillment} sale={sale} />
+          ))}
+        </div>
+        <div className="text-center mt-6">
+          <button onClick={() => navigate("/products/sale")} className="text-[#B3D335] hover:text-[#FFCB08] font-medium text-sm transition-colors">See all {deals.length} sale items →</button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ======================== PROMO CTA BANNER ======================== */
-function PromoBanner() {
+function PromoBanner({ sale }: { sale?: ActiveSaleData | null }) {
+  const salePct = maxSalePercent(sale);
+  if (salePct) {
+    return (
+      <section className="bg-[#231F20] py-8 sm:py-10">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <p className="text-[#FFCB08] font-bold text-lg sm:text-2xl mb-2">{"\u{1F525}"} Don’t Miss the Sale</p>
+          <p className="text-[#FFFFFF] text-sm sm:text-base mb-4">Up to <span className="text-[#B3D335] font-bold">{salePct}% OFF</span> select items, in store and online{!sale?.promos_disabled && <> — first-time customers still get 10% off with code <span className="bg-[#FFFFFF]/10 px-2 py-0.5 rounded font-mono font-bold">FIRST10</span></>}</p>
+          <button onClick={() => navigate('/products/sale')} className="px-8 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold transition-colors">Shop the Sale</button>
+        </div>
+      </section>
+    );
+  }
   return (
     <section className="bg-[#231F20] py-8 sm:py-10">
       <div className="max-w-3xl mx-auto px-4 text-center">
@@ -5423,6 +5508,7 @@ function App() {
         </div>
       ) : (
         <>
+          <SaleSpotlight products={products} sale={activeSale} fulfillment={fulfillment} onQuickAdd={(p) => addToCart(p, 1)} />
           <ShopByCategory categories={categories} productsByCategory={productsByCategory} fulfillment={fulfillment} />
           <ShopByFeeling products={products} />
           {newItems.length > 0 && (
@@ -5462,7 +5548,7 @@ function App() {
               </section>
             );
           })}
-          <PromoBanner />
+          <PromoBanner sale={activeSale} />
         </>
       )}
       <WhyChooseUs />
