@@ -989,12 +989,10 @@ function SaleSpotlight({ products, sale, fulfillment }: { products: Product[]; s
     return { ...d, salePrice, saving: d.product.price - salePrice };
   });
   const halfOffOrMore = priced.filter(d => d.pct >= 50).length;
-  const totalSavings = priced.reduce((sum, d) => sum + d.saving * stockFor(d.product), 0);
   const picks = [...priced].sort((a, b) => b.saving - a.saving || b.pct - a.pct).slice(0, 6);
   const dollars = (cents: number) => "$" + Math.round(cents / 100).toLocaleString("en-US");
   const stats = [
     { value: String(deals.length), label: "Items on Sale" },
-    { value: dollars(totalSavings), label: "Customer Savings" },
     { value: String(halfOffOrMore), label: "At 50% Off or More" },
     { value: endLabel ?? "Now", label: endLabel ? "Sale Ends" : "Sale Is Live" },
   ];
@@ -1040,7 +1038,7 @@ function SaleSpotlight({ products, sale, fulfillment }: { products: Product[]; s
         </div>
 
         {/* Stat tiles */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-4 sm:mt-6">
+        <div className="grid grid-cols-3 gap-3 sm:gap-4 mt-4 sm:mt-6">
           {stats.map(s => (
             <div key={s.label} className="rounded-2xl border-2 border-dashed border-[#FFCB08] bg-[#FFFBEA] px-5 py-4">
               <p className="text-2xl sm:text-3xl font-bold text-[#126A44]">{s.value}</p>
