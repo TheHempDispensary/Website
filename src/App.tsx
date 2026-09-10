@@ -1847,7 +1847,7 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
 /* ======================== STATIC PAGES (Light Theme) ======================== */
 
 const ABOUT_TIMELINE = [
-  { year: "April 2018", text: "HEMP wholesale company founded by Anthoney & Jimmy" },
+  { year: "April 2018", text: "HEMP wholesale company founded by two Spring Hill locals" },
   { year: "February 2019", text: "The Hemp Dispensary concept born during a trip to Colorado" },
   { year: "December 1, 2019", text: "Spring Hill West opens (6175 Deltona Blvd)" },
   { year: "Early 2020", text: "Crystal River opens (location #2)" },
@@ -1881,7 +1881,7 @@ function AboutPage() {
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">It started with a road trip</h2>
           <p className="text-[#231F20] text-base sm:text-lg leading-relaxed">
-            In April 2018, Anthoney and Jimmy &mdash; two Spring Hill residents &mdash; started Healing Emotionally Mentally Physically (HEMP), a wholesale hemp company. Early 2019, sourcing problems pushed them to Colorado. Standing inside a marijuana dispensary in Colorado, they looked at each other and knew exactly what Spring Hill was missing. They came home with one idea: open a Hemp Dispensary.
+            In April 2018, two Spring Hill residents started Healing Emotionally Mentally Physically (HEMP), a wholesale hemp company. Early 2019, sourcing problems pushed them to Colorado. Standing inside a marijuana dispensary in Colorado, they looked at each other and knew exactly what Spring Hill was missing. They came home with one idea: open a Hemp Dispensary.
           </p>
         </div>
       </section>
@@ -1891,7 +1891,7 @@ function AboutPage() {
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">Nobody would give us a chance</h2>
           <p className="text-[#231F20] text-base sm:text-lg leading-relaxed">
-            Anthoney was in real estate. Jimmy was in landscaping. They spent months searching for a building before they even opened &mdash; landlord after landlord turned them away because they didn&rsquo;t understand what hemp was and assumed it was illegal. Finally, one landlord sat down with them, listened, and took a chance. On December 1, 2019, The Hemp Dispensary opened its doors at 6175 Deltona Blvd, Spring Hill, FL &mdash; the store we still call Spring Hill West. Once the doors were open, the real hustle began. When Anthoney had to show a house, Jimmy covered the store. When Jimmy had to run a landscaping estimate, Anthoney held things down. They built it shift by shift.
+            One founder was in real estate, the other in landscaping. They spent months searching for a building before they even opened &mdash; landlord after landlord turned them away because they didn&rsquo;t understand what hemp was and assumed it was illegal. Finally, one landlord sat down with them, listened, and took a chance. On December 1, 2019, The Hemp Dispensary opened its doors at 6175 Deltona Blvd, Spring Hill, FL &mdash; the store we still call Spring Hill West. Once the doors were open, the real hustle began. When one had to show a house, the other covered the store. When one had to run a landscaping estimate, the other held things down. They built it shift by shift.
           </p>
         </div>
       </section>
@@ -1957,7 +1957,7 @@ function AboutPage() {
           <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#FFCB08] italic leading-relaxed">
             &ldquo;We didn&rsquo;t build this to quit.&rdquo;
           </p>
-          <p className="text-[#FFFFFF]/70 mt-4 text-lg">&mdash; Anthoney & Jimmy</p>
+          <p className="text-[#FFFFFF]/70 mt-4 text-lg">&mdash; The Founders</p>
         </div>
       </section>
     </div>
@@ -5199,7 +5199,7 @@ const PAGE_META: Record<string, { title: string; description: string }> = {
   "/products/packaging": { title: "Packaging Supplies | The Hemp Dispensary", description: "Wholesale packaging supplies \u2014 containers, bags, jars, and more from top manufacturers like Chubby Gorilla. Available at The Hemp Dispensary." },
   "/products/pets": { title: "CBD Pet Products | The Hemp Dispensary", description: "CBD pet tinctures and treats for dogs and cats. Lab-tested, vet-friendly hemp products at The Hemp Dispensary." },
   "/loyalty": { title: "Hemp Rewards \u2013 Loyalty Program | The Hemp Dispensary", description: "Hemp Rewards \u2014 earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary." },
-  "/about": { title: "About Us - Florida Hemp Survivors Since 2019", description: "Founded by Anthoney & Jimmy. Survived the 2024 FDACS reversal. Two Spring Hill stores still standing." },
+  "/about": { title: "About Us - Florida Hemp Survivors Since 2019", description: "Founded by two Spring Hill locals. Survived the 2024 FDACS reversal. Two Spring Hill stores still standing." },
   "/contact": { title: "Contact Us | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Get in touch with The Hemp Dispensary. Visit us at our Spring Hill locations, call, email, or reach out online." },
   "/our-locations": { title: "Store Locations | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Find The Hemp Dispensary near you. Two Spring Hill, FL locations with daily hours and 5-minute pickup." },
   "/thca": { title: "THCA Products | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Shop THCA flower, pre-rolls, concentrates, and vapes at The Hemp Dispensary in Spring Hill, FL. Federally compliant hemp, lab-tested, COA available on every product." },
