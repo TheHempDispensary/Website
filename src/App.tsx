@@ -252,6 +252,11 @@ function isLeafLife(product: Product): boolean {
   return LEAFLIFE_KEYWORDS.some(kw => name.includes(kw));
 }
 
+// LeafLife products are THCA but their names carry no cannabinoid label.
+function isThcProduct(product: Product): boolean {
+  return product.name.toUpperCase().includes("THC") || isLeafLife(product);
+}
+
 /* ======================== ACTIVE SALE CACHE ======================== */
 interface SaleEntry {
   name?: string;
@@ -1753,7 +1758,8 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
   const isFeelingFilter = feelingLabels.includes(selectedSlug);
   const isSaleFilter = selectedSlug === "sale";
   const isNewFilter = selectedSlug === "new";
-  const pageTitle = isSaleFilter ? "Sale Items" : isNewFilter ? "New Items" : selectedCategory && selectedCategory !== "all" ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : "All Products";
+  const isOnlineExclusiveFilter = selectedSlug === "online-exclusive";
+  const pageTitle = isSaleFilter ? "Sale Items" : isNewFilter ? "New Items" : isOnlineExclusiveFilter ? "Online Exclusives" : selectedCategory && selectedCategory !== "all" ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : "All Products";
 
   useEffect(() => {
     if (isNewFilter) setSortBy("newest");
@@ -1765,6 +1771,8 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
       : products.filter(p => p.stock > 0);
     if (isSaleFilter) {
       items = items.filter((p) => getSalePercent(p, sale ?? null) !== null);
+    } else if (isOnlineExclusiveFilter) {
+      items = items.filter((p) => isLeafLife(p));
     } else if (!isNewFilter && selectedCategory && selectedCategory !== "all") {
       const catLower = selectedSlug;
       if (isFeelingFilter) {
@@ -1773,15 +1781,15 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
         items = items.filter((p) => p.categories.some((c) => c.toLowerCase() === catLower));
       }
     }
-    if (thcFilter === "thc") items = items.filter(p => p.name.toUpperCase().includes("THC"));
-    else if (thcFilter === "non-thc") items = items.filter(p => !p.name.toUpperCase().includes("THC"));
+    if (thcFilter === "thc") items = items.filter(isThcProduct);
+    else if (thcFilter === "non-thc") items = items.filter(p => !isThcProduct(p));
     if (sortBy === "price-low") items.sort((a, b) => a.price - b.price);
     else if (sortBy === "price-high") items.sort((a, b) => b.price - a.price);
     else if (sortBy === "newest") items.sort((a, b) => (b.modified_time || 0) - (a.modified_time || 0));
     else if (sortBy === "oldest") items.sort((a, b) => (a.modified_time || 0) - (b.modified_time || 0));
     else items.sort((a, b) => a.name.localeCompare(b.name));
     return items;
-  }, [products, selectedCategory, selectedSlug, sortBy, thcFilter, isFeelingFilter, isSaleFilter, isNewFilter, fulfillment, sale]);
+  }, [products, selectedCategory, selectedSlug, sortBy, thcFilter, isFeelingFilter, isSaleFilter, isNewFilter, isOnlineExclusiveFilter, fulfillment, sale]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -1817,6 +1825,7 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
         <button onClick={() => navigate("/products")} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${!selectedCategory || selectedCategory === "all" ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>All</button>
         <button onClick={() => navigate("/products/new")} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${isNewFilter ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>New Items</button>
+        <button onClick={() => navigate("/products/online-exclusive")} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${isOnlineExclusiveFilter ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>Online Exclusives</button>
         {sale?.active && <button onClick={() => navigate("/products/sale")} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${isSaleFilter ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>Sale</button>}
         {categories.map((cat) => (
           <button key={cat} onClick={() => navigate(`/products/${cat.toLowerCase()}`)} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === cat.toLowerCase() ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>{cat}</button>
@@ -2668,6 +2677,7 @@ function SiteFooter() {
               <a href="/products/accessories" onClick={(e) => { e.preventDefault(); navigate("/products/accessories"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Accessories</a>
               <a href="/products/apparel" onClick={(e) => { e.preventDefault(); navigate("/products/apparel"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Apparel</a>
               <a href="/products/packaging" onClick={(e) => { e.preventDefault(); navigate("/products/packaging"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Packaging</a>
+              <a href="/products/online-exclusive" onClick={(e) => { e.preventDefault(); navigate("/products/online-exclusive"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Online Exclusives</a>
             </div>
           </div>
           <div>
@@ -5176,6 +5186,7 @@ const PAGE_META: Record<string, { title: string; description: string }> = {
   "/": { title: "Florida Cannabis Hemp Dispensary - The Hemp Dispensary", description: "Lab-tested THCA flower, edibles & concentrates. 2 Spring Hill FL stores + nationwide shipping. Ready in 5 min." },
   "/products": { title: "Shop Hemp & THCA Products - The Hemp Dispensary FL", description: "Browse 500+ lab-tested THCA, \u03948, \u03949, kratom & mushroom products. Florida-compliant. Ship to all 50 states." },
   "/products/new": { title: "New Hemp & THCA Products | The Hemp Dispensary", description: "Shop the newest hemp, THCA, CBD, edible, concentrate, and wellness products available from The Hemp Dispensary." },
+  "/products/online-exclusive": { title: "Online Exclusive THCA Products | The Hemp Dispensary", description: "Shop online-exclusive THCA flower, concentrates, and vapes shipped directly from our licensed partner. Not available for in-store pickup." },
   "/products/sale": { title: "Hemp & THCA Products on Sale | The Hemp Dispensary", description: "Shop current discounts on select hemp, THCA, CBD, edible, concentrate, and wellness products from The Hemp Dispensary." },
   "/products/flower": { title: "THCA Flower - Lab-Tested Indoor & Greenhouse - Hemp Dispensary", description: "Premium THCA flower strains from $20. Full panel COAs. Ships nationwide. Pick up in Spring Hill FL today." },
   "/products/edibles": { title: "THC Edibles & Gummies - Florida-Compliant - Hemp Dispensary", description: "\u03949 THC gummies, chocolates & drinks. Lab-tested, FL hemp law compliant. Same-day pickup or nationwide shipping." },
