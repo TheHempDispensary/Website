@@ -12,7 +12,15 @@ declare global {
 const CLOVER_PAKMS_KEY = "ffacf4a65f1681720f6882f75d2824b9";
 const CLOVER_MERCHANT_ID = "0AJ4FF0G1YFM1";
 
-const VALID_CATEGORY_SLUGS = new Set(["flower", "edibles", "concentrates", "vapor", "topicals", "tinctures", "apparel", "accessories", "packaging", "moonrocks", "pets"]);
+const VALID_CATEGORY_SLUGS = new Set(["flower", "edibles", "concentrates", "vapor", "topicals", "tinctures", "apparel", "accessories", "packaging", "moonrocks", "pets", "gift-cards"]);
+
+function categorySlug(cat: string): string {
+  return cat.toLowerCase().replace(/\s+/g, "-");
+}
+
+function isGiftCard(product: Product): boolean {
+  return !!product.is_gift_card || product.sku.startsWith("GIFTCARD-");
+}
 const VALID_FEELING_SLUGS = new Set(["relax", "sleep", "energy", "focus"]);
 const VALID_PRODUCT_FILTER_SLUGS = new Set(["sale", "new"]);
 
@@ -64,6 +72,7 @@ interface Product {
   image_url: string | null;
   is_age_restricted: boolean;
   shipping_only?: boolean;
+  is_gift_card?: boolean;
   effect?: string | null;
   strength?: string | null;
   product_type?: string | null;
@@ -325,7 +334,7 @@ function saleAppliesTo(product: Product, entry: SaleEntry): boolean {
 
 /** Deepest discount percent applying to this product, or null. */
 function getSalePercent(product: Product, sale: ActiveSaleData | null): number | null {
-  if (!sale || !sale.active || product.price <= 0) return null;
+  if (!sale || !sale.active || product.price <= 0 || isGiftCard(product)) return null;
   const entries: SaleEntry[] = sale.sales && sale.sales.length > 0 ? sale.sales : [sale];
   let best: number | null = null;
   for (const entry of entries) {
@@ -674,7 +683,7 @@ function StickyTopBar({ sale }: { sale?: ActiveSaleData | null }) {
 /* ======================== HEADER (Light Theme) ======================== */
 function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentClick }: { cartCount: number; onSearch: () => void; onCartOpen: () => void; fulfillment: FulfillmentType | null; onFulfillmentClick: () => void }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const categories = ["FLOWER", "EDIBLES", "CONCENTRATES", "VAPOR", "TOPICALS", "TINCTURES", "APPAREL", "ACCESSORIES", "PACKAGING", "MOONROCKS", "PETS"];
+  const categories = ["FLOWER", "EDIBLES", "CONCENTRATES", "VAPOR", "TOPICALS", "TINCTURES", "APPAREL", "ACCESSORIES", "PACKAGING", "MOONROCKS", "PETS", "GIFT CARDS"];
 
   return (
     <header className="bg-[#FFFFFF] sticky top-0 z-50 border-b border-[#231F20]/15 shadow-sm">
@@ -724,7 +733,7 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center justify-center gap-1 pb-2 overflow-x-auto">
           {categories.map((cat) => (
-            <button key={cat} onClick={() => navigate(`/products/${cat.toLowerCase()}`)} className="px-3 py-1.5 text-xs font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-full transition-colors whitespace-nowrap">{cat}</button>
+            <button key={cat} onClick={() => navigate(`/products/${categorySlug(cat)}`)} className="px-3 py-1.5 text-xs font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-full transition-colors whitespace-nowrap">{cat}</button>
           ))}
           <button onClick={() => navigate("/wholesale")} className="px-3 py-1.5 text-xs font-bold text-[#126A44] hover:text-[#FFFFFF] hover:bg-[#126A44] rounded-full transition-colors whitespace-nowrap border border-[#126A44]">BULK BARGAINS</button>
         </nav>
@@ -734,7 +743,7 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
         <div className="md:hidden bg-[#FFFFFF] border-t border-[#231F20]/10 shadow-lg">
           <div className="max-w-7xl mx-auto px-4 py-3 grid grid-cols-2 gap-2">
             {categories.map((cat) => (
-              <button key={cat} onClick={() => { navigate(`/products/${cat.toLowerCase()}`); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors">{cat}</button>
+              <button key={cat} onClick={() => { navigate(`/products/${categorySlug(cat)}`); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors">{cat}</button>
             ))}
             <a href="/wholesale" onClick={(e) => { e.preventDefault(); navigate("/wholesale"); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-bold text-[#126A44] hover:bg-[#126A44] hover:text-[#FFFFFF] rounded-lg transition-colors flex items-center gap-2"><DollarSign className="h-4 w-4" /> Bulk Bargains</a>
           </div>
@@ -874,13 +883,13 @@ function TrustStrip() {
 /* ======================== SHOP BY CATEGORY ======================== */
 function ShopByCategory({ productsByCategory, fulfillment }: { categories: string[]; productsByCategory: Record<string, Product[]>; fulfillment?: FulfillmentType | null }) {
   const stockFor = (p: Product) => fulfillment ? getStockForFulfillment(p, fulfillment) : p.stock;
-  const displayCats = ["Flower", "Edibles", "Concentrates", "Vapor", "Topicals", "Tinctures", "Apparel", "Accessories", "Packaging", "MoonRocks", "Pets"].filter(c => {
+  const displayCats = ["Flower", "Edibles", "Concentrates", "Vapor", "Topicals", "Tinctures", "Apparel", "Accessories", "Packaging", "MoonRocks", "Pets", "Gift Cards"].filter(c => {
     const prods = productsByCategory[c] || [];
     return prods.some(p => stockFor(p) > 0);
   });
   if (displayCats.length === 0) return null;
 
-  const catIconComponents: Record<string, React.ComponentType<{ className?: string }>> = { Flower: Leaf, Edibles: Candy, Concentrates: Droplets, Vapor: Wind, Topicals: Pipette, Tinctures: Pill, Apparel: Shirt, Accessories: Wrench, Packaging: Box, MoonRocks: Gem, Pets: Dog };
+  const catIconComponents: Record<string, React.ComponentType<{ className?: string }>> = { Flower: Leaf, Edibles: Candy, Concentrates: Droplets, Vapor: Wind, Topicals: Pipette, Tinctures: Pill, Apparel: Shirt, Accessories: Wrench, Packaging: Box, MoonRocks: Gem, Pets: Dog, "Gift Cards": Gift };
 
   const getCategoryImage = (cat: string): string | null => {
     const prods = productsByCategory[cat] || [];
@@ -897,7 +906,7 @@ function ShopByCategory({ productsByCategory, fulfillment }: { categories: strin
             const IconComp = catIconComponents[cat] || Package;
             const catImage = getCategoryImage(cat);
             return (
-            <button key={cat} onClick={() => navigate(`/products/${cat.toLowerCase()}`)} className="bg-[#FFFFFF] rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-all group border border-[#231F20]/15 hover:border-[#B3D335]">
+            <button key={cat} onClick={() => navigate(`/products/${categorySlug(cat)}`)} className="bg-[#FFFFFF] rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-all group border border-[#231F20]/15 hover:border-[#B3D335]">
               {catImage ? (
                 <div className="w-16 h-16 mx-auto mb-3 rounded-xl overflow-hidden">
                   <img src={catImage} alt={cat} className="w-full h-full object-cover" onError={handleImgError} loading="lazy" />
@@ -1759,7 +1768,7 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
   const isSaleFilter = selectedSlug === "sale";
   const isNewFilter = selectedSlug === "new";
   const isOnlineExclusiveFilter = selectedSlug === "online-exclusive";
-  const pageTitle = isSaleFilter ? "Sale Items" : isNewFilter ? "New Items" : isOnlineExclusiveFilter ? "Online Exclusives" : selectedCategory && selectedCategory !== "all" ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : "All Products";
+  const pageTitle = isSaleFilter ? "Sale Items" : isNewFilter ? "New Items" : isOnlineExclusiveFilter ? "Online Exclusives" : selectedCategory && selectedCategory !== "all" ? selectedCategory.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "All Products";
 
   useEffect(() => {
     if (isNewFilter) setSortBy("newest");
@@ -1778,7 +1787,7 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
       if (isFeelingFilter) {
         items = items.filter((p) => getProductEffect(p).label.toLowerCase() === catLower);
       } else {
-        items = items.filter((p) => p.categories.some((c) => c.toLowerCase() === catLower));
+        items = items.filter((p) => p.categories.some((c) => categorySlug(c) === catLower));
       }
     }
     if (thcFilter === "thc") items = items.filter(isThcProduct);
@@ -1828,7 +1837,7 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
         <button onClick={() => navigate("/products/online-exclusive")} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${isOnlineExclusiveFilter ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>Online Exclusives</button>
         {sale?.active && <button onClick={() => navigate("/products/sale")} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${isSaleFilter ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>Sale</button>}
         {categories.map((cat) => (
-          <button key={cat} onClick={() => navigate(`/products/${cat.toLowerCase()}`)} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === cat.toLowerCase() ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>{cat}</button>
+          <button key={cat} onClick={() => navigate(`/products/${categorySlug(cat)}`)} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === categorySlug(cat) ? "bg-[#B3D335] text-[#231F20]" : "bg-[#FFFFFF] text-[#231F20] border border-[#231F20]/15 hover:border-[#B3D335]"}`}>{cat}</button>
         ))}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -3158,7 +3167,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoError, setPromoError] = useState("");
-  const [promoDetail, setPromoDetail] = useState<{ code: string; discount_pct: number | null; discount_amount: number | null } | null>(null);
+  const [promoDetail, setPromoDetail] = useState<{ code: string; discount_pct: number | null; discount_amount: number | null; gift_card?: boolean } | null>(null);
   const [shippingRates, setShippingRates] = useState<Array<{ id: string; provider: string; service_level: string; amount: string; amount_cents: number; estimated_days: number | null; duration_terms: string }>>([]);
   const [selectedRateId, setSelectedRateId] = useState("");
   const [ratesLoading, setRatesLoading] = useState(false);
@@ -3212,18 +3221,29 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
   const promosDisabled = !!(sale && sale.active && sale.promos_disabled);
   const preSubtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const subtotal = preSubtotal - saleDiscount;
+  // Gift cards are emailed: no shipping, no tax, and never discounted.
+  const giftCardSubtotal = cart.reduce((sum, item) => isGiftCard(item.product) ? sum + item.product.price * item.quantity : sum, 0);
+  const giftCardOnly = cart.length > 0 && giftCardSubtotal === preSubtotal;
+  const isGiftCardPayment = !!(promoApplied && promoDetail?.gift_card);
   const rawDiscount = promoApplied && promoDetail
     ? (promoDetail.discount_pct ? Math.round(subtotal * promoDetail.discount_pct) : (promoDetail.discount_amount || 0))
     : 0;
-  const discount = Math.min(rawDiscount, subtotal);
-  const discountedSubtotal = subtotal - discount - volumeDiscountTotal;
+  const promoDiscount = isGiftCardPayment ? 0 : Math.min(rawDiscount, subtotal);
   const selectedRate = shippingRates.find(r => r.id === selectedRateId);
   const isPickup = !!(fulfillment && fulfillment.startsWith("pickup"));
   const isDelivery = fulfillment === "local_delivery";
+  const isEmailOnly = giftCardOnly && !isPickup && !isDelivery;
   const deliveryFee = isDelivery ? (subtotal >= 15000 ? 500 : 1500) : 0;
-  const shippingCost = isPickup ? 0 : isDelivery ? deliveryFee : (selectedRate ? selectedRate.amount_cents : 0);
+  const shippingCost = isPickup || isEmailOnly ? 0 : isDelivery ? deliveryFee : (selectedRate ? selectedRate.amount_cents : 0);
   const taxRate = getTaxRate(form.state, isPickup);
-  const tax = Math.round(discountedSubtotal * taxRate);
+  const tax = Math.round(Math.max(subtotal - promoDiscount - volumeDiscountTotal - giftCardSubtotal, 0) * taxRate);
+  // A gift card is stored value: it pays down the whole order (goods, shipping and tax),
+  // except other gift cards, which must be paid for with a real card.
+  const giftCardApplied = isGiftCardPayment
+    ? Math.max(Math.min(rawDiscount, subtotal - volumeDiscountTotal - giftCardSubtotal + shippingCost + tax), 0)
+    : 0;
+  const discount = isGiftCardPayment ? giftCardApplied : promoDiscount;
+  const discountedSubtotal = subtotal - discount - volumeDiscountTotal;
   // Loyalty rewards may cover the entire product subtotal, but not tax or shipping,
   // and the card charge can never be $0. Rewards worth more than this cap are not
   // redeemable at all, so points are never spent for less than the reward's value.
@@ -3283,9 +3303,9 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
   const [promoLoading, setPromoLoading] = useState(false);
   const applyPromo = async () => {
     const code = promoCode.trim().toUpperCase();
-    if (!code) { setPromoError("Please enter a promo code"); return; }
+    if (!code) { setPromoError("Please enter a promo or gift card code"); return; }
     const email = form.email.trim();
-    if (!email) { setPromoError("Please enter your email first so we can validate the promo code"); return; }
+    if (!email) { setPromoError("Please enter your email first so we can validate the code"); return; }
     setPromoLoading(true);
     setPromoError("");
     try {
@@ -3301,8 +3321,15 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
           setLoyaltyRedeemId(null);
           setLoyaltyDiscount(0);
         }
+        if (data.gift_card && giftCardOnly) {
+          setPromoApplied(false);
+          setPromoDetail(null);
+          setPromoError("Gift cards can't be used to buy other gift cards.");
+          setPromoLoading(false);
+          return;
+        }
         setPromoApplied(true);
-        setPromoDetail({ code: data.code || code, discount_pct: data.discount_pct ?? null, discount_amount: data.discount_amount ?? null });
+        setPromoDetail({ code: data.code || code, discount_pct: data.discount_pct ?? null, discount_amount: data.discount_amount ?? null, gift_card: !!data.gift_card });
         setPromoError("");
       } else {
         setPromoApplied(false);
@@ -3570,21 +3597,22 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
   }
 
   const canProceedInfo = form.firstName && form.lastName && form.email && form.phone;
-  const canProceedShipping = isPickup ? true : isDelivery ? (form.address && form.city && form.state && form.zip && deliveryEligible === true) : (form.address && form.city && form.state && form.zip && selectedRateId);
+  const canProceedShipping = isPickup || isEmailOnly ? true : isDelivery ? (form.address && form.city && form.state && form.zip && deliveryEligible === true) : (form.address && form.city && form.state && form.zip && selectedRateId);
+  const paidByGiftCard = isGiftCardPayment && total <= 0;
 
   const handlePlaceOrder = async () => {
     if (!tosAccepted) {
       setPaymentError("Please accept the Terms of Service to continue.");
       return;
     }
-    if (!cloverRef.current) {
+    if (!cloverRef.current && !paidByGiftCard) {
       setPaymentError("Payment system is still loading. Please wait a moment and try again.");
       return;
     }
 
     // Pre-payment validation: Shipping orders must have a shipping rate selected
     const ft = fulfillment || "shipping";
-    if (ft === "shipping" && !selectedRateId) {
+    if (ft === "shipping" && !selectedRateId && !isEmailOnly) {
       setPaymentError("Please go back and select a shipping rate before placing your order.");
       return;
     }
@@ -3601,20 +3629,24 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
     setPaymentError("");
 
     try {
-      // Step 1: Tokenize the card via Clover SDK
-      const tokenResult = await cloverRef.current.createToken();
+      // Step 1: Tokenize the card via Clover SDK (skipped when a gift card covers the whole order)
+      let paymentToken = "";
+      if (!paidByGiftCard) {
+        const tokenResult = await cloverRef.current.createToken();
 
-      if (tokenResult.errors) {
-        const errorMessages = Object.values(tokenResult.errors).join(", ");
-        setPaymentError(errorMessages || "Please check your card details.");
-        setSubmitting(false);
-        return;
-      }
+        if (tokenResult.errors) {
+          const errorMessages = Object.values(tokenResult.errors).join(", ");
+          setPaymentError(errorMessages || "Please check your card details.");
+          setSubmitting(false);
+          return;
+        }
 
-      if (!tokenResult.token) {
-        setPaymentError("Could not process card. Please try again.");
-        setSubmitting(false);
-        return;
+        if (!tokenResult.token) {
+          setPaymentError("Could not process card. Please try again.");
+          setSubmitting(false);
+          return;
+        }
+        paymentToken = tokenResult.token;
       }
 
       // Step 2: Send token + order data to backend for charge + order creation
@@ -3625,7 +3657,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
         subtotal, discount, volume_discount: volumeDiscountTotal, sale_discount: saleDiscount, loyalty_discount: effectiveLoyaltyDiscount, shipping_cost: shippingCost, tax, total, notes: form.notes,
         shipping_service: isDelivery ? "Local Delivery" : (selectedRate?.service_level || ""),
         promo_code: promoApplied && promoDetail ? promoDetail.code : null,
-        payment_token: tokenResult.token,
+        payment_token: paymentToken,
         loyalty_number: form.loyaltyNumber,
         loyalty_reward_id: loyaltyRedeemId,
         fulfillment_type: fulfillment || "shipping",
@@ -3655,7 +3687,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
 
   const steps: Array<{ key: "info" | "shipping" | "payment"; label: string; icon: typeof Phone }> = [
     { key: "info", label: "Contact", icon: Phone },
-    { key: "shipping", label: isPickup ? "Pickup" : isDelivery ? "Delivery" : "Shipping", icon: isPickup ? MapPin : isDelivery ? Package : Truck },
+    { key: "shipping", label: isPickup ? "Pickup" : isDelivery ? "Delivery" : isEmailOnly ? "Delivery" : "Shipping", icon: isPickup ? MapPin : isDelivery ? Package : isEmailOnly ? Mail : Truck },
     { key: "payment", label: "Payment", icon: CreditCard },
   ];
 
@@ -3700,9 +3732,20 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
 
           {step === "shipping" && (
             <div className="bg-[#FFFFFF] rounded-2xl border border-[#231F20]/20 p-6 sm:p-8">
-              <h2 className="text-xl font-bold text-[#231F20] mb-6">{isPickup ? "Pickup Details" : isDelivery ? "Delivery Address" : "Shipping Address"}</h2>
+              <h2 className="text-xl font-bold text-[#231F20] mb-6">{isPickup ? "Pickup Details" : isDelivery ? "Delivery Address" : isEmailOnly ? "Email Delivery" : "Shipping Address"}</h2>
 
-              {isPickup ? (
+              {isEmailOnly ? (
+                <div className="space-y-4">
+                  <div className="p-5 rounded-xl border-2 border-[#B3D335] bg-[#B3D335]/5">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Mail className="h-5 w-5 text-[#126A44]" />
+                      <h3 className="font-semibold text-[#231F20]">Gift card codes are emailed</h3>
+                    </div>
+                    <p className="text-[#231F20] text-sm">Your gift card code{cart.reduce((n, i) => n + i.quantity, 0) > 1 ? "s" : ""} will be sent to <span className="font-semibold">{form.email}</span> right after payment. Nothing ships, so there's no shipping charge.</p>
+                  </div>
+                  <div><label className={labelClass}>Order Notes (optional)</label><textarea value={form.notes} onChange={(e) => setField("notes", e.target.value)} rows={3} placeholder="Anything we should know?" className={inputClass} /></div>
+                </div>
+              ) : isPickup ? (
                 <div className="space-y-4">
                   <div className="p-5 rounded-xl border-2 border-[#B3D335] bg-[#B3D335]/5">
                     <div className="flex items-center gap-3 mb-2">
@@ -3904,10 +3947,12 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
               {/* Shipping/Pickup summary */}
               <div className="mb-4 p-4 bg-[#FFFFFF] rounded-xl">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold text-[#231F20]">{isPickup ? "Pickup Location" : isDelivery ? "Delivery Address" : "Shipping Address"}</h3>
+                  <h3 className="text-sm font-semibold text-[#231F20]">{isPickup ? "Pickup Location" : isDelivery ? "Delivery Address" : isEmailOnly ? "Delivery" : "Shipping Address"}</h3>
                   <button onClick={() => setStep("shipping")} className="text-xs text-[#B3D335] hover:text-[#126A44]">Edit</button>
                 </div>
-                {isPickup ? (
+                {isEmailOnly ? (
+                  <p className="text-[#231F20] text-sm">Gift card code emailed to <span className="font-medium">{form.email}</span></p>
+                ) : isPickup ? (
                   <>
                     <p className="text-[#231F20] text-sm font-medium">{fulfillment === "pickup_west" ? "West Location" : "East Location"}</p>
                     <p className="text-[#231F20] text-sm">{fulfillment === "pickup_west" ? "6175 Deltona Blvd, Suite 104, Spring Hill, FL 34606" : "14312 Spring Hill Dr, Spring Hill, FL 34609"}</p>
@@ -3949,7 +3994,13 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                   <span className="text-xs text-[#231F20]">Secure</span>
                 </div>
 
-                <div className="space-y-4">
+                {paidByGiftCard && (
+                  <div className="p-4 rounded-xl border-2 border-[#B3D335] bg-[#B3D335]/5 text-sm text-[#231F20] flex items-start gap-3">
+                    <Gift className="h-5 w-5 text-[#126A44] flex-shrink-0 mt-0.5" />
+                    <p>Your gift card covers this whole order — no card needed.</p>
+                  </div>
+                )}
+                <div className={paidByGiftCard ? "hidden" : "space-y-4"}>
                   <div>
                     <label className={labelClass}>Card Number</label>
                     <div id="clover-card-number" className="bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg overflow-hidden" style={{ minHeight: "48px" }}></div>
@@ -4097,7 +4148,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                   className={`px-5 sm:px-8 py-3 rounded-full font-medium text-sm sm:text-base transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${tosAccepted ? "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]" : "bg-[#231F20]/20 text-[#231F20]/50 cursor-not-allowed"}`}
                 >
                   <Lock className="h-4 w-4" />
-                  {submitting ? "Processing Payment..." : `Pay ${formatPrice(total)}`}
+                  {submitting ? "Processing Payment..." : paidByGiftCard ? "Place Order" : `Pay ${formatPrice(total)}`}
                 </button>
               </div>
             </div>
@@ -4128,7 +4179,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
             </div>
             {/* Promo Code */}
             <div className="border-t border-[#231F20]/20 pt-4 mb-4">
-              <label className="block text-sm font-medium text-[#231F20] mb-1.5">Promo Code</label>
+              <label className="block text-sm font-medium text-[#231F20] mb-1.5">Promo or Gift Card Code</label>
               {promosDisabled && (
                 <p className="text-xs text-[#D9A32C] mb-2">{maxSalePercent(sale)}% OFF sale is active — promo codes are disabled. Loyalty rewards can still be redeemed below.</p>
               )}
@@ -4141,7 +4192,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                   value={promoCode}
                   onChange={(e) => { setPromoCode(e.target.value); if (promoError) setPromoError(""); }}
                   onKeyDown={(e) => { if (e.key === "Enter") applyPromo(); }}
-                  placeholder="Enter code"
+                  placeholder="Promo or gift card code"
                   className="flex-1 bg-[#FFFFFF] border border-[#231F20]/20 rounded-lg px-3 py-2 text-sm text-[#231F20] placeholder-[#231F20]/30 focus:outline-none focus:border-[#B3D335] focus:ring-1 focus:ring-[#B3D335] transition-colors"
                   disabled={promoApplied || !!loyaltyRedeemId}
                 />
@@ -4152,14 +4203,16 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                 )}
               </div>
               {promoError && <p className="text-red-500 text-xs mt-1">{promoError}</p>}
-              {promoApplied && promoDetail && <p className="text-[#126A44] text-xs mt-1 font-medium">{promoDetail.code} applied — {promoDetail.discount_pct ? `${Math.round(promoDetail.discount_pct * 100)}% off` : formatPrice(promoDetail.discount_amount || 0) + " off"}!</p>}
+              {promoApplied && promoDetail && (promoDetail.gift_card
+                ? <p className="text-[#126A44] text-xs mt-1 font-medium">Gift card applied — {formatPrice(promoDetail.discount_amount || 0)} balance, {formatPrice(discount)} used on this order{(promoDetail.discount_amount || 0) - discount > 0 ? `, ${formatPrice((promoDetail.discount_amount || 0) - discount)} stays on your card` : ""}.</p>
+                : <p className="text-[#126A44] text-xs mt-1 font-medium">{promoDetail.code} applied — {promoDetail.discount_pct ? `${Math.round(promoDetail.discount_pct * 100)}% off` : formatPrice(promoDetail.discount_amount || 0) + " off"}!</p>)}
             </div>
             <div className="border-t border-[#231F20]/20 pt-4 space-y-2">
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Subtotal</span><span className="text-[#231F20]">{formatPrice(preSubtotal)}</span></div>
               {saleDiscount > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Sale Discount</span><span className="text-[#126A44] font-medium">-{formatPrice(saleDiscount)}</span></div>}
-              {promoApplied && discount > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Discount ({promoDetail?.discount_pct ? `${Math.round(promoDetail.discount_pct * 100)}%` : "promo"})</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
+              {promoApplied && discount > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">{promoDetail?.gift_card ? "Gift Card" : `Discount (${promoDetail?.discount_pct ? `${Math.round(promoDetail.discount_pct * 100)}%` : "promo"})`}</span><span className="text-[#126A44] font-medium">-{formatPrice(discount)}</span></div>}
               {volumeDiscountTotal > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Volume Discount</span><span className="text-[#126A44] font-medium">-{formatPrice(volumeDiscountTotal)}</span></div>}
-              <div className="flex justify-between text-sm"><span className="text-[#231F20]">{isPickup ? "Pickup" : isDelivery ? "Delivery Fee" : `Shipping${selectedRate ? ` (${selectedRate.service_level})` : ""}`}</span><span className="text-[#231F20]">{isPickup ? "FREE" : isDelivery ? formatPrice(deliveryFee) : (selectedRate ? formatPrice(shippingCost) : "Select a rate")}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-[#231F20]">{isPickup ? "Pickup" : isDelivery ? "Delivery Fee" : isEmailOnly ? "Email Delivery" : `Shipping${selectedRate ? ` (${selectedRate.service_level})` : ""}`}</span><span className="text-[#231F20]">{isPickup || isEmailOnly ? "FREE" : isDelivery ? formatPrice(deliveryFee) : (selectedRate ? formatPrice(shippingCost) : "Select a rate")}</span></div>
               <div className="flex justify-between text-sm"><span className="text-[#231F20]">Tax ({(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 2)}%)</span><span className="text-[#231F20]">{formatPrice(tax)}</span></div>
               {effectiveLoyaltyDiscount > 0 && <div className="flex justify-between text-sm"><span className="text-[#126A44]">Rewards Discount</span><span className="text-[#126A44] font-medium">-{formatPrice(effectiveLoyaltyDiscount)}</span></div>}
               <div className="border-t border-[#231F20]/20 pt-3 flex justify-between"><span className="text-[#231F20] font-semibold">Total</span><span className="text-xl font-bold text-[#231F20]">{formatPrice(total)}</span></div>
@@ -5612,7 +5665,7 @@ function App() {
                 <div className="max-w-7xl mx-auto px-4">
                   <div className="flex items-center justify-between mb-8">
                     <h2 className="text-[18px] sm:text-3xl font-semibold sm:font-bold text-[#231F20]">{cat}</h2>
-                    <button onClick={() => navigate(`/products/${cat.toLowerCase()}`)} className="border border-[#231F20] text-[#231F20] hover:bg-[#FFFFFF] px-6 py-2 rounded-full font-medium transition-all duration-300 text-sm">View All</button>
+                    <button onClick={() => navigate(`/products/${categorySlug(cat)}`)} className="border border-[#231F20] text-[#231F20] hover:bg-[#FFFFFF] px-6 py-2 rounded-full font-medium transition-all duration-300 text-sm">View All</button>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                     {displayProducts.map((product) => (
