@@ -88,9 +88,9 @@ const ROUTE_META = {
   },
   "/loyalty": {
     title: "Hemp Rewards - Loyalty Program | The Hemp Dispensary",
-    description: "Hemp Rewards — earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary.",
+    description: "Hemp Rewards — earn points on every purchase, and redeem for discounts. Join the loyalty program at The Hemp Dispensary.",
     h1: "Hemp Rewards Loyalty Program",
-    body: "Join Hemp Rewards and earn points on every purchase at The Hemp Dispensary. Earn 1 point per dollar spent, unlock VIP tiers for bonus multipliers, and redeem points for discounts on future orders. Track your points and tier status through your account. Our loyalty program rewards our most valued customers with exclusive perks, early access to new products, and special member-only promotions.",
+    body: "Join Hemp Rewards and earn points on every purchase at The Hemp Dispensary. Earn 1 point per dollar spent and redeem points for discounts on future orders. Track your points through your account. Our loyalty program rewards our most valued customers with exclusive perks, early access to new products, and special member-only promotions.",
   },
   "/thca": {
     title: "THCA Products | The Hemp Dispensary - Spring Hill, FL",

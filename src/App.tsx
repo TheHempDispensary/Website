@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Award, TrendingUp, Users, Cake, Crown, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, Facebook, FlaskConical, FileText, ExternalLink, Gem, Dog } from "lucide-react";
+import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, TrendingUp, Users, Cake, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, Facebook, FlaskConical, FileText, ExternalLink, Gem, Dog } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -4230,13 +4230,6 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
 interface LoyaltyTransaction { type: string; points: number; description: string; created_at: string; }
 interface LoyaltyCustomer { id: number; first_name: string; last_name: string; phone: string; email: string; points_balance: number; lifetime_points: number; birthday: string; }
 
-const VIP_TIERS = [
-  { name: "Budding", min: 0, max: 249, multiplier: "1x", color: "#B3D335", icon: Leaf, benefits: ["1 point per $1 spent", "Birthday bonus: 100 pts", "Access to all redemptions"] },
-  { name: "Grower", min: 250, max: 499, multiplier: "1.25x", color: "#58BA49", icon: TrendingUp, benefits: ["1.25x points on every purchase", "Birthday bonus: 150 pts", "Early access to new drops"] },
-  { name: "Premium", min: 500, max: 999, multiplier: "1.5x", color: "#3D8C32", icon: Award, benefits: ["1.5x points on every purchase", "Birthday bonus: 250 pts", "Early access + mystery gift"] },
-  { name: "Elite", min: 1000, max: Infinity, multiplier: "2x", color: "#126A44", icon: Crown, benefits: ["2x points on every purchase", "Birthday bonus: 500 pts", "Early access + VIP mystery gift"] },
-];
-
 const REDEMPTION_TIERS_FALLBACK = [
   { points: 100, discount: "$5 Off", minPurchase: 25, desc: "Any purchase $25+" },
 ];
@@ -4255,7 +4248,6 @@ function LoyaltyPage() {
   const [phone, setPhone] = useState("");
   const [customer, setCustomer] = useState<LoyaltyCustomer | null>(null);
   const [transactions, setTransactions] = useState<LoyaltyTransaction[]>([]);
-  const [lifetimeEarned, setLifetimeEarned] = useState(0);
   const [lookupLoading, setLookupLoading] = useState(false);
   const [lookupDone, setLookupDone] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
@@ -4305,7 +4297,6 @@ function LoyaltyPage() {
         if (data.found && data.customer) {
           setCustomer(data.customer);
           setTransactions(data.transactions || []);
-          setLifetimeEarned(data.lifetime_earned || 0);
         }
       }
     } catch { /* timeout or network error */ }
@@ -4362,10 +4353,6 @@ function LoyaltyPage() {
     setReferralLoading(false);
   };
 
-  const currentTier = VIP_TIERS.find(t => lifetimeEarned >= t.min && lifetimeEarned <= t.max) || VIP_TIERS[0];
-  const nextTier = VIP_TIERS[VIP_TIERS.indexOf(currentTier) + 1] || null;
-  const tierProgress = nextTier ? Math.min(100, ((lifetimeEarned - currentTier.min) / (nextTier.min - currentTier.min)) * 100) : 100;
-
   const isBirthdayMonth = () => {
     if (!customer?.birthday) return false;
     const parts = customer.birthday.split("/");
@@ -4388,7 +4375,7 @@ function LoyaltyPage() {
                   <Gift className="h-10 w-10 text-[#231F20]" />
         </div>
         <h1 className="text-4xl font-bold text-[#231F20] mb-3">Hemp Rewards</h1>
-        <p className="text-[#231F20] text-lg max-w-2xl mx-auto">Earn points on every purchase, unlock VIP tiers, and redeem for discounts.</p>
+        <p className="text-[#231F20] text-lg max-w-2xl mx-auto">Earn points on every purchase and redeem for discounts.</p>
       </div>
 
       {/* Sign Up Result Toast */}
@@ -4424,23 +4411,6 @@ function LoyaltyPage() {
             <div className="text-center">
               <p className="text-[#126A44] font-semibold text-lg">Welcome back, {customer.first_name} {customer.last_name}!</p>
               <p className="text-[#231F20] font-bold text-3xl mt-1">{customer.points_balance} <span className="text-base font-normal text-[#231F20]">points</span></p>
-              {/* VIP Tier Progress */}
-              <div className="mt-4 pt-4 border-t border-[#231F20]/10">
-                <div className="flex items-center gap-2 mb-2">
-                  <currentTier.icon className="h-5 w-5" style={{ color: currentTier.color }} />
-                  <span className="text-[#231F20] font-semibold text-sm">{currentTier.name} Member</span>
-                </div>
-                {nextTier ? (
-                  <>
-                    <div className="w-full h-3 bg-[#231F20]/15 rounded-full overflow-hidden mb-2">
-                      <div className="h-full bg-[#B3D335] rounded-full transition-all duration-500" style={{ width: `${tierProgress}%` }} />
-                    </div>
-                    <p className="text-[#231F20] text-sm">Spend <span className="font-bold text-[#231F20]">${nextTier.min - lifetimeEarned} more</span> to reach <span className="font-bold" style={{ color: nextTier.color }}>{nextTier.name}</span> and earn {nextTier.multiplier} points on every purchase.</p>
-                  </>
-                ) : (
-                  <p className="text-[#126A44] text-sm font-medium">You&apos;ve reached the highest tier — {currentTier.multiplier} points on every purchase!</p>
-                )}
-              </div>
               {isBirthdayMonth() && (
                 <div className="mt-3 inline-flex items-center gap-2 bg-[#FFCB08]/20 border border-[#FFCB08]/40 rounded-full px-4 py-1.5">
                   <Cake className="h-4 w-4 text-[#D9A32C]" />
@@ -4455,60 +4425,6 @@ function LoyaltyPage() {
       {/* ===== PROFILE SECTIONS (shown after lookup) ===== */}
       {customer && (
         <div className="space-y-6">
-
-          {/* --- VIP TIER STATUS --- */}
-          <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10">
-            <div className="flex items-center justify-between mb-4 cursor-pointer" onClick={() => toggleSection("vip")}>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: currentTier.color + "20" }}>
-                  <currentTier.icon className="h-5 w-5" style={{ color: currentTier.color }} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-[#231F20]">VIP Tier: {currentTier.name}</h3>
-                  <p className="text-[#231F20] text-sm">{currentTier.multiplier} points multiplier</p>
-                </div>
-              </div>
-              {activeSection === "vip" ? <ChevronUp className="h-5 w-5 text-[#231F20]" /> : <ChevronDown className="h-5 w-5 text-[#231F20]" />}
-            </div>
-
-            {activeSection === "vip" && (
-              <div className="space-y-4">
-                {/* Progress bar */}
-                {nextTier && (
-                  <div>
-                    <div className="flex justify-between text-xs text-[#231F20] mb-1">
-                      <span>{currentTier.name} (${currentTier.min}+)</span>
-                      <span>{nextTier.name} (${nextTier.min}+)</span>
-                    </div>
-                    <div className="w-full h-3 bg-[#231F20]/10 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${tierProgress}%`, backgroundColor: currentTier.color }} />
-                    </div>
-                    <p className="text-xs text-[#231F20] mt-1">${nextTier.min - lifetimeEarned} more in earnings to reach {nextTier.name}</p>
-                  </div>
-                )}
-                {!nextTier && <p className="text-sm text-[#126A44] font-medium">You've reached the highest tier!</p>}
-
-                {/* All tiers */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
-                  {VIP_TIERS.map(tier => {
-                    const TierIcon = tier.icon;
-                    const isActive = tier.name === currentTier.name;
-                    return (
-                      <div key={tier.name} className={`rounded-xl p-4 border text-center ${isActive ? "border-2" : "border border-[#231F20]/10 opacity-60"}`} style={isActive ? { borderColor: tier.color, backgroundColor: tier.color + "10" } : {}}>
-                        <TierIcon className="h-6 w-6 mx-auto mb-2" style={{ color: tier.color }} />
-                        <p className="font-bold text-[#231F20] text-sm">{tier.name}</p>
-                        <p className="text-xs text-[#231F20]">{tier.multiplier} points</p>
-                        <p className="text-xs text-[#231F20] mt-1">${tier.min}{tier.max === Infinity ? "+" : `–$${tier.max}`}</p>
-                        <ul className="mt-2 space-y-0.5">
-                          {tier.benefits.map((b, i) => <li key={i} className="text-[10px] text-[#231F20]">{b}</li>)}
-                        </ul>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
 
           {/* --- POINTS ACTIVITY LOG --- */}
           <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10">
@@ -4689,33 +4605,6 @@ function LoyaltyPage() {
           </div>
         </div>
 
-        {/* --- VIP TIER OVERVIEW (for non-logged-in users) --- */}
-        {!customer && (
-          <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-full bg-[#FFCB08]/20 flex items-center justify-center">
-                <Crown className="h-5 w-5 text-[#D9A32C]" />
-              </div>
-              <h3 className="text-lg font-bold text-[#231F20]">VIP Tiers</h3>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {VIP_TIERS.map(tier => {
-                const TierIcon = tier.icon;
-                return (
-                  <div key={tier.name} className="rounded-xl p-4 border border-[#231F20]/10 text-center">
-                    <TierIcon className="h-6 w-6 mx-auto mb-2" style={{ color: tier.color }} />
-                    <p className="font-bold text-[#231F20] text-sm">{tier.name}</p>
-                    <p className="text-xs text-[#231F20]">{tier.multiplier} points</p>
-                    <p className="text-xs text-[#231F20] mt-1">${tier.min}{tier.max === Infinity ? "+" : `–$${tier.max}`}</p>
-                    <ul className="mt-2 space-y-0.5">
-                      {tier.benefits.map((b, i) => <li key={i} className="text-[10px] text-[#231F20]">{b}</li>)}
-                    </ul>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Sign Up Form */}
@@ -5251,7 +5140,7 @@ const PAGE_META: Record<string, { title: string; description: string }> = {
   "/products/accessories": { title: "Smoking Accessories \u2013 Pipes, Grinders & More | The Hemp Dispensary", description: "Hemp accessories including glass pipes, rolling papers, grinders, storage, and butane. Everything you need in one stop." },
   "/products/packaging": { title: "Packaging Supplies | The Hemp Dispensary", description: "Wholesale packaging supplies \u2014 containers, bags, jars, and more from top manufacturers like Chubby Gorilla. Available at The Hemp Dispensary." },
   "/products/pets": { title: "CBD Pet Products | The Hemp Dispensary", description: "CBD pet tinctures and treats for dogs and cats. Lab-tested, vet-friendly hemp products at The Hemp Dispensary." },
-  "/loyalty": { title: "Hemp Rewards \u2013 Loyalty Program | The Hemp Dispensary", description: "Hemp Rewards \u2014 earn points on every purchase, unlock VIP tiers, and redeem for discounts. Join the loyalty program at The Hemp Dispensary." },
+  "/loyalty": { title: "Hemp Rewards \u2013 Loyalty Program | The Hemp Dispensary", description: "Hemp Rewards \u2014 earn points on every purchase and redeem for discounts. Join the loyalty program at The Hemp Dispensary." },
   "/about": { title: "About Us - Florida Hemp Survivors Since 2019", description: "Founded by two Spring Hill locals. Survived the 2024 FDACS reversal. Two Spring Hill stores still standing." },
   "/contact": { title: "Contact Us | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Get in touch with The Hemp Dispensary. Visit us at our Spring Hill locations, call, email, or reach out online." },
   "/our-locations": { title: "Store Locations | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Find The Hemp Dispensary near you. Two Spring Hill, FL locations with daily hours and 5-minute pickup." },
