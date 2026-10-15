@@ -50,6 +50,12 @@ const ROUTE_META = {
     h1: "Hemp Concentrates",
     body: "Premium hemp concentrates including THCA diamonds, live rosin, badder, sauce, shatter, and wax. Both solventless and hydrocarbon extraction options available. Every concentrate is lab-tested with full panel COAs for cannabinoid potency, residual solvents, heavy metals, and pesticides. Prices start at $30 for 1 gram with volume discounts on larger sizes. Available for in-store pickup at our Spring Hill FL locations or nationwide shipping. Popular options include live rosin from top cultivators, diamond sauce for dabbing, and badder for versatile use. All concentrates are federally compliant hemp products.",
   },
+  "/october-sale": {
+    title: "October Clearance Sale \u2013 All Deals | The Hemp Dispensary",
+    description: "Every deal in The Hemp Dispensary October Clearance Sale at Spring Hill East & West. Sale runs through October 31 or while supplies last.",
+    h1: "October Clearance Sale",
+    body: "The full list of October Clearance Sale deals at The Hemp Dispensary, Spring Hill East and West. Sale runs through October 31 or while supplies last. Prices exclude tax. Must be 21+ with valid ID.",
+  },
   "/about": {
     title: "About Us - Florida Hemp Survivors Since 2019",
     description: "Founded by two Spring Hill locals. Survived the 2024 FDACS reversal. Two Spring Hill stores still standing.",

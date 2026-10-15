@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, TrendingUp, Users, Cake, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, Facebook, FlaskConical, FileText, ExternalLink, Gem, Dog } from "lucide-react";
+import { OCTOBER_SALE_SECTIONS } from "./data/octoberSale";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -5105,6 +5106,71 @@ function AccountPage() {
 
 
 
+function OctoberSalePage() {
+  const total = OCTOBER_SALE_SECTIONS.reduce((n, s) => n + s.items.length, 0);
+  const maxOff = Math.max(...OCTOBER_SALE_SECTIONS.flatMap(s => s.items.map(i => parseInt(i.off, 10) || 0)));
+  const sectionId = (title: string) => "sale-" + title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  return (
+    <div className="bg-[#FFFFFF]">
+      <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+        <div className="relative overflow-hidden rounded-3xl border-4 border-[#FFCB08] bg-gradient-to-br from-[#126A44] via-[#0F5A3A] to-[#0B4A30] text-[#FFFFFF] shadow-xl p-6 sm:p-10">
+          <div className="grid sm:grid-cols-[1fr_auto] gap-6 items-center">
+            <div>
+              <p className="text-[#FFCB08] text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase">Spring Hill East &amp; West</p>
+              <h1 className="mt-2 leading-none">
+                <span className="block text-4xl sm:text-6xl font-black uppercase tracking-tight">October</span>
+                <span className="block text-2xl sm:text-4xl font-black uppercase text-[#FFCB08] mt-1">Clearance Sale</span>
+              </h1>
+              <p className="mt-4 text-sm sm:text-base text-[#FFFFFF]/90">All {total} deals, up to {maxOff}% off. Sale runs through October 31 or while supplies last.</p>
+            </div>
+            <img src="/bud-puppet.webp" alt="Bud, The Hemp Dispensary mascot" width="160" height="160" className="hidden sm:block w-40 h-40 object-contain drop-shadow-xl" />
+          </div>
+        </div>
+
+        <nav aria-label="Sale categories" className="flex flex-wrap gap-2 mt-6">
+          {OCTOBER_SALE_SECTIONS.map(s => (
+            <a key={s.title} href={"#" + sectionId(s.title)} className="px-3 py-1.5 rounded-full border border-[#126A44]/30 text-xs sm:text-sm font-semibold text-[#126A44] hover:bg-[#126A44] hover:text-[#FFFFFF] transition-colors">
+              {s.icon} {s.title} <span className="opacity-60">({s.items.length})</span>
+            </a>
+          ))}
+        </nav>
+
+        {OCTOBER_SALE_SECTIONS.map(s => (
+          <section key={s.title} id={sectionId(s.title)} className="mt-10 scroll-mt-28">
+            <h2 className="flex items-center gap-3 text-xl sm:text-2xl font-bold text-[#126A44]">
+              <span className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-lg" style={{ background: s.color }}>{s.icon}</span>
+              {s.title}
+            </h2>
+            <p className="text-sm text-[#231F20]/60 mt-1 ml-12">{s.blurb}</p>
+            <table className="w-full mt-4 text-sm">
+              <thead>
+                <tr className="text-left text-[10px] sm:text-xs uppercase tracking-wider text-[#231F20]/50 border-b border-[#231F20]/10">
+                  <th className="py-2 pr-2 font-semibold">Product</th>
+                  <th className="py-2 px-2 font-semibold text-right">Was</th>
+                  <th className="py-2 px-2 font-semibold text-right">October</th>
+                  <th className="py-2 pl-2 font-semibold text-right">Off</th>
+                </tr>
+              </thead>
+              <tbody>
+                {s.items.map(i => (
+                  <tr key={i.name} className="border-b border-[#231F20]/5">
+                    <td className="py-2 pr-2 text-[#231F20]">{i.name}</td>
+                    <td className="py-2 px-2 text-right text-[#231F20]/50 line-through whitespace-nowrap">{i.was}</td>
+                    <td className="py-2 px-2 text-right font-bold text-[#126A44] whitespace-nowrap">{i.now}</td>
+                    <td className="py-2 pl-2 text-right whitespace-nowrap"><span className="inline-block px-2 py-0.5 rounded-full bg-[#C0392B] text-[#FFFFFF] text-xs font-bold">{i.off}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        ))}
+
+        <p className="mt-10 pt-6 border-t border-[#231F20]/10 text-xs text-[#231F20]/60">Sale runs through October 31 or while supplies last. Freebies stack with sale prices; one freebie per order. Prices exclude tax. Must be 21+ with valid ID. Not available where prohibited.</p>
+      </div>
+    </div>
+  );
+}
+
 function NotFoundPage() {
   useEffect(() => {
     document.title = "Page Not Found | The Hemp Dispensary";
@@ -5141,6 +5207,7 @@ const PAGE_META: Record<string, { title: string; description: string }> = {
   "/products/packaging": { title: "Packaging Supplies | The Hemp Dispensary", description: "Wholesale packaging supplies \u2014 containers, bags, jars, and more from top manufacturers like Chubby Gorilla. Available at The Hemp Dispensary." },
   "/products/pets": { title: "CBD Pet Products | The Hemp Dispensary", description: "CBD pet tinctures and treats for dogs and cats. Lab-tested, vet-friendly hemp products at The Hemp Dispensary." },
   "/loyalty": { title: "Hemp Rewards \u2013 Loyalty Program | The Hemp Dispensary", description: "Hemp Rewards \u2014 earn points on every purchase and redeem for discounts. Join the loyalty program at The Hemp Dispensary." },
+  "/october-sale": { title: "October Clearance Sale \u2013 All Deals | The Hemp Dispensary", description: "Every deal in The Hemp Dispensary October Clearance Sale at Spring Hill East & West. Sale runs through October 31 or while supplies last." },
   "/about": { title: "About Us - Florida Hemp Survivors Since 2019", description: "Founded by two Spring Hill locals. Survived the 2024 FDACS reversal. Two Spring Hill stores still standing." },
   "/contact": { title: "Contact Us | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Get in touch with The Hemp Dispensary. Visit us at our Spring Hill locations, call, email, or reach out online." },
   "/our-locations": { title: "Store Locations | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Find The Hemp Dispensary near you. Two Spring Hill, FL locations with daily hours and 5-minute pickup." },
@@ -5480,6 +5547,7 @@ function App() {
       : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} sale={activeSale} />);
   }
   if (route === "/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} fulfillment={fulfillment} sale={activeSale} />);
+  if (route === "/october-sale" || route === "/october-sale/") return shell(<OctoberSalePage />);
   if (route === "/about") return shell(<AboutPage />);
   if (route === "/terms") return shell(<TermsPage />);
   if (route === "/privacy") return shell(<PrivacyPage />);
