@@ -237,21 +237,15 @@ function getProductEffect(product: Product): { label: string; color: string; bg:
   return { label: "Relax", color: "#231F20", bg: "#ADD038", icon: "\u{1F60C}" };
 }
 
-function getProductStrength(product: Product): { label: string; color: string } {
-  // Use stored strength from HempVentory if available
-  if (product.strength) {
-    const strengthMap: Record<string, { label: string; color: string }> = {
-      "High": { label: "High", color: "#FFCB08" },
-      "Medium": { label: "Medium", color: "#FFCB08" },
-      "Low": { label: "Low", color: "#B3D335" },
-    };
-    if (strengthMap[product.strength]) return strengthMap[product.strength];
-  }
-  // Fallback: auto-detect from price
-  const price = product.price;
-  if (price >= 5000) return { label: "High", color: "#FFCB08" };
-  if (price >= 2000) return { label: "Medium", color: "#FFCB08" };
-  return { label: "Low", color: "#B3D335" };
+function getProductStrength(product: Product): { label: string; color: string } | null {
+  // Strength comes from HempVentory: set by hand, or from lab-tested total THC.
+  // No lab result means no badge (it used to be guessed from price).
+  const strengthMap: Record<string, { label: string; color: string }> = {
+    "High": { label: "High", color: "#FFCB08" },
+    "Medium": { label: "Medium", color: "#FFCB08" },
+    "Low": { label: "Low", color: "#B3D335" },
+  };
+  return (product.strength && strengthMap[product.strength]) || null;
 }
 
 const LEAFLIFE_KEYWORDS = ["everyday", "premium", "essential", "smalls", "snowcaps"];
@@ -1463,7 +1457,7 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment, sale }: 
             <div className="flex gap-2 mb-4 flex-wrap">
               {isConsumableProduct(product) && <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>{effect.icon} {effect.label}</span>}
               {product.product_type && <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#E8F5E9] text-[#2E7D32]">{product.product_type}</span>}
-              {isConsumableProduct(product) && <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#FFCB08]" style={{ color: "#231F20" }}>Strength: {strength.label}</span>}
+              {isConsumableProduct(product) && strength && <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#FFCB08]" style={{ color: "#231F20" }}>Strength: {strength.label}</span>}
             </div>
 
             <div className="flex items-center gap-3 mb-4">
