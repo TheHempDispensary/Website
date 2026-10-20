@@ -167,7 +167,7 @@ export function WitchHat({ size }: { size: number }) {
       height={w}
       viewBox="0 0 64 64"
       aria-hidden="true"
-      style={{ position: "absolute", left: "50%", top: -size * 0.3, transform: "translateX(-46%) rotate(-10deg)", pointerEvents: "none", overflow: "visible" }}
+      style={{ position: "absolute", left: "50%", top: -size * 0.23, transform: "translateX(-54%) rotate(-6deg)", pointerEvents: "none", overflow: "visible" }}
     >
       <path d="M30 4C38 10 42 24 46 44H18C22 30 22 14 30 4z" fill="#2A123D" />
       <path d="M30 4c4 2 6 4 7 7-3-1-5-3-7-7z" fill="#3B1B55" />
