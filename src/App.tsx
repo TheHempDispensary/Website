@@ -1,6 +1,9 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, TrendingUp, Users, Cake, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, Facebook, FlaskConical, FileText, ExternalLink, Gem, Dog } from "lucide-react";
 import { OCTOBER_SALE_SECTIONS } from "./data/octoberSale";
+import { isHalloweenSeason, HalloweenHeroDecor, HalloweenGarland, HalloweenFooterBand, WitchHat } from "./halloween";
+
+const HALLOWEEN = isHalloweenSeason();
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -667,10 +670,12 @@ function StickyTopBar({ sale }: { sale?: ActiveSaleData | null }) {
     ? (isSelectItemsSale(sale) ? `${saleMonthName(sale)} Sale: Up to ${salePct}% OFF Select Items!` : `${salePct}% OFF SALE TODAY!`)
     : "FIRST10 = 10% Off";
   return (
-    <div className="bg-[#231F20] text-[#FFFFFF] text-center py-2 px-4 text-sm font-medium">
+    <div className={`${HALLOWEEN ? "bg-gradient-to-r from-[#140B1F] via-[#2A123D] to-[#140B1F]" : "bg-[#231F20]"} text-[#FFFFFF] text-center py-2 px-4 text-sm font-medium`}>
+      {HALLOWEEN && <span className="hidden sm:inline" aria-hidden="true">{"\u{1F383}"} </span>}
       <span className="hidden sm:inline">{"\u{1F680}"} Order Online {"\u2013"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | Open Daily | </span>
       <span className="sm:hidden">{"\u{1F680}"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | </span>
-      <span className="text-[#FFCB08] font-bold">{saleLine}</span>
+      <span className={HALLOWEEN ? "text-[#FF7A1A] font-bold" : "text-[#FFCB08] font-bold"}>{saleLine}</span>
+      {HALLOWEEN && <span className="hidden sm:inline" aria-hidden="true"> {"\u{1F987}"}</span>}
     </div>
   );
 }
@@ -681,6 +686,7 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
   const categories = ["FLOWER", "EDIBLES", "CONCENTRATES", "VAPOR", "TOPICALS", "TINCTURES", "APPAREL", "ACCESSORIES", "PACKAGING", "MOONROCKS", "PETS", "GIFT CARDS"];
 
   return (
+    <>
     <header className="bg-[#FFFFFF] sticky top-0 z-50 border-b border-[#231F20]/15 shadow-sm">
       <div className="max-w-7xl mx-auto px-3 sm:px-4">
         <div className="h-14 sm:h-16 flex items-center justify-between relative">
@@ -745,6 +751,8 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
         </div>
       )}
     </header>
+    {HALLOWEEN && <HalloweenGarland />}
+    </>
   );
 }
 
@@ -829,18 +837,20 @@ function HeroSection({ sale }: { sale?: ActiveSaleData | null }) {
     : "First-time customers: 10% OFF with code FIRST10";
   const promoDestination = salePct ? "/products/sale" : "/products";
   return (
-    <section className="bg-[#231F20] relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 py-10 sm:py-20 text-center relative z-10">
+    <section className={`${HALLOWEEN ? "hw-hero-bg" : "bg-[#231F20]"} relative overflow-hidden`}>
+      {HALLOWEEN && <HalloweenHeroDecor />}
+      <div className={`max-w-7xl mx-auto px-4 ${HALLOWEEN ? "pt-10 pb-20 sm:pt-20 sm:pb-28" : "py-10 sm:py-20"} text-center relative z-10`}>
+        {HALLOWEEN && <p className="inline-block mb-4 px-4 py-1 rounded-full border border-[#FF7A1A]/50 bg-[#FF7A1A]/10 text-[#FF7A1A] text-xs sm:text-sm font-semibold tracking-wide uppercase">{"\u{1F383}"} Spooky Season at The Hemp Dispensary</p>}
         <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-[#FFFFFF] mb-3 leading-tight">
           Skip the Line.{" "}<br />
-          <span className="text-[#B3D335]">Get Your Hemp in Minutes.</span>
+          <span className={HALLOWEEN ? "text-[#FF7A1A]" : "text-[#B3D335]"}>Get Your Hemp in Minutes.</span>
         </h1>
         <p className="text-[#FFFFFF]/80 text-base sm:text-xl mb-6 max-w-2xl mx-auto">Fast pickup. Lab-tested. Trusted nationally.</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button onClick={() => navigate("/products")} className="px-8 py-3.5 sm:py-4 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors shadow-lg">Shop All</button>
+          <button onClick={() => navigate("/products")} className={`px-8 py-3.5 sm:py-4 ${HALLOWEEN ? "bg-[#FF7A1A] hover:bg-[#E85D04] text-[#140B1F] hover:text-[#FFFFFF] shadow-[0_0_24px_rgba(255,122,26,0.45)]" : "bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF]"} rounded-full font-bold text-lg transition-colors shadow-lg`}>{HALLOWEEN ? "Shop the Treats" : "Shop All"}</button>
           <button onClick={() => { const el = document.getElementById('locations-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else navigate('/contact'); }} className="px-8 py-3.5 sm:py-4 border-2 border-[#FFFFFF] hover:bg-[#FFFFFF] text-[#FFFFFF] hover:text-[#231F20] rounded-full font-bold text-lg transition-colors">Find Nearest Location</button>
         </div>
-        <button onClick={() => navigate(promoDestination)} className="mt-4 text-[#FFCB08] hover:text-[#B3D335] font-medium text-sm transition-colors">{"\u{1F525}"} {heroPromo}</button>
+        <button onClick={() => navigate(promoDestination)} className="mt-4 text-[#FFCB08] hover:text-[#B3D335] font-medium text-sm transition-colors">{HALLOWEEN ? "\u{1F383}" : "\u{1F525}"} {heroPromo}</button>
       </div>
       {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#231F20]/50 pointer-events-none" />
@@ -2663,6 +2673,7 @@ function WholesalePage({ products }: { products: Product[] }) {
 function SiteFooter() {
   return (
     <footer className="bg-[#231F20] text-[#FFFFFF]">
+      {HALLOWEEN && <HalloweenFooterBand />}
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
           <div className="col-span-2 md:col-span-3 lg:col-span-1">
@@ -2732,6 +2743,7 @@ function BudCharacter({ size = 50, mood = "idle" }: { size?: number; mood?: BudM
   return (
     <div className={`bud-character ${moodClass}`} style={{ width: size, height: size, position: "relative", lineHeight: 0 }}>
       <img src={src} alt="Bud" width={size} height={size} style={{ width: size, height: size, objectFit: "contain" }} draggable={false} />
+      {HALLOWEEN && <WitchHat size={size} />}
       {mood === "sleep" && (
         <div className="bud-zzz-container" style={{ position: "absolute", top: 0, right: 0, pointerEvents: "none" }}>
           <span className="bud-zzz-1" style={{ position: "absolute", right: 0, top: "10%", fontSize: size * 0.12, color: "#B3D335", fontWeight: 700 }}>z</span>
