@@ -1153,19 +1153,24 @@ function WhyChooseUs() {
 
 /* ======================== REVIEWS SECTION ======================== */
 const GOOGLE_REVIEWS_URL = "https://www.google.com/search?q=The+Hemp+Dispensary+Spring+Hill+FL+reviews";
-const ALL_REVIEWS = [
-  { name: "Cindy Clark", rating: 5, text: "Yall are doing it right my grandma is loving your gummies \u2764\uFE0F" },
-  { name: "Charley", rating: 5, text: "Shopping here is always a pleasure, fast shipping as always \u{1F601}" },
-  { name: "Jorge Palms", rating: 5, text: "Had an amazing experience shopping here, will come back. Highly recommended \u{1F60A}" },
-  { name: "Sarah M.", rating: 5, text: "Best hemp products in Spring Hill! Fast pickup and amazing quality." },
-  { name: "Kelly Ann G.", rating: 5, text: "If I could give 10 stars I would. The staff made me feel comfortable straight away. Would recommend!" },
-  { name: "David Ray", rating: 5, text: "10/10, always so helpful whenever I come in and the products are amazing!" },
-  { name: "Maria V.", rating: 5, text: "Excellent help every time I visit. Knowledgeable staff and great selection." },
-  { name: "Louie M.", rating: 5, text: "Great atmosphere, friendly people, and the best prices around. Love this place!" },
-  { name: "Amanda R.", rating: 5, text: "I love this place and the owners are great people. Very attentive to our needs." },
-  { name: "Mike T.", rating: 5, text: "Best dispensary in Spring Hill hands down. Clean store, great staff, quality products." },
-  { name: "Jessica H.", rating: 5, text: "Amazing experience! The staff really knows their stuff and helped me find exactly what I needed." },
-  { name: "Robert P.", rating: 5, text: "Fast service, great products, and the loyalty program is awesome. My go-to shop!" },
+// Real Google reviews, quoted word for word (5-star, from the stores' Google Business Profiles).
+// Only edit by swapping in another review exactly as the customer wrote it.
+const ALL_REVIEWS: { name: string; store: string; rating: number; text: string }[] = [
+  { name: "Nick M.", store: "Spring Hill East", rating: 5, text: "Friendly staff and the products met expectations for the price paid. Drove from 30 minutes away based on previous reviews and wasnt disappointed." },
+  { name: "Christopher S.", store: "Spring Hill West", rating: 5, text: "Super friendly and knowledgeable staff. Quality products consistently. Conveniently located and safe well lit area." },
+  { name: "Kevin K.", store: "Lady Lake", rating: 5, text: "Polite, clean , friendly, helpful and informative. The way all businesses should be run." },
+  { name: "Debbie P.", store: "Spring Hill East", rating: 5, text: "Nice and clean, knowledgeable staff. Always greeted when walking in, staff is always polite and helpful." },
+  { name: "Thomas B.", store: "Crystal River", rating: 5, text: "Awesome experience. Jisenia was absolutely amazing. Definitely worth the stop. Will definitely stop every time in town." },
+  { name: "Miguel R.", store: "Spring Hill West", rating: 5, text: "Just wanted to give a shout out to the staff. Its my 3rd time in the store and all were very helpful. Also the flower is awesome. \u{1F919}" },
+  { name: "Viandria J.", store: "Clearwater", rating: 5, text: "Greg was amazing. He was so informative , nice , and patient. The Hemp has a new loyal customer." },
+  { name: "David R.", store: "Apopka", rating: 5, text: "10/10, always so helpful whenever i come in and the products are amazing!" },
+  { name: "Sharonda S.", store: "Clermont", rating: 5, text: "Easy, effortless experience with knowledgeable, friendly staff!" },
+  { name: "Ruben R.", store: "Tampa", rating: 5, text: "Mike was a great bud tender and helped me immensely today! Definitely will return" },
+  { name: "Jena R.", store: "Tarpon Springs", rating: 5, text: "This place is so great! Great customer service and answered all of my questions." },
+  { name: "Monika B.", store: "Pinellas Park", rating: 5, text: "Ashley was super awesome and her energy is amazing! Very helpful and informative!" },
+  { name: "Bailey F.", store: "Homosassa", rating: 5, text: "Amazing customer service and quality concentrates!! Love coming here!!" },
+  { name: "Jason T.", store: "Hudson", rating: 5, text: "Excellent customer service, the store clerk was very knowledgeable!" },
+  { name: "V. C.", store: "Zephyrhills", rating: 5, text: "Always friendly and very helpful. Would recommend The Hemp Dispensary for your needs." },
 ];
 
 function ReviewsSection() {
@@ -1202,9 +1207,9 @@ function ReviewsSection() {
           <div className="flex items-center justify-center gap-1 mb-2">
             {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-5 w-5 fill-[#FFCB08] text-[#FFCB08]" />)}
           </div>
-          <p className="text-sm text-[#231F20] mb-1">4.8 out of 5 stars across all locations</p>
+          <p className="text-sm text-[#231F20] mb-1">4.8 out of 5 stars across our 15 Florida locations since 2019</p>
           <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-[#126A44] hover:underline transition-colors">
-            6,000+ Five-Star Reviews on Google {"\u2192"}
+            6,000+ Google Reviews {"\u2192"}
           </a>
         </div>
         <div
@@ -1221,10 +1226,11 @@ function ReviewsSection() {
               <div className="flex gap-0.5 mb-3">
                 {Array.from({ length: r.rating }).map((_, j) => <Star key={j} className="h-4 w-4 fill-[#FFCB08] text-[#FFCB08]" />)}
               </div>
-              <p className="text-[#231F20] text-sm mb-3 line-clamp-3">"{r.text}"</p>
+              <p className="text-[#231F20] text-sm mb-3 line-clamp-4">"{r.text}"</p>
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-full bg-[#B3D335] flex items-center justify-center text-[#231F20] text-xs font-bold">{r.name.charAt(0)}</div>
                 <span className="text-sm font-semibold text-[#231F20]">{r.name}</span>
+                <span className="text-xs text-[#231F20]/60">· {r.store} · Google</span>
               </div>
             </div>
           ))}
