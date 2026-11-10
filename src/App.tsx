@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback, type ReactNode } from "react";
 import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, TrendingUp, Users, Cake, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, Facebook, FlaskConical, FileText, ExternalLink, Gem, Dog } from "lucide-react";
 import { OCTOBER_SALE_SECTIONS } from "./data/octoberSale";
 import { isHalloweenSeason, HalloweenHeroDecor, HalloweenGarland, HalloweenFooterBand, WitchHat } from "./halloween";
@@ -386,6 +386,12 @@ function handleImgError(e: React.SyntheticEvent<HTMLImageElement>) {
   if (!img.src.includes("product-placeholder")) {
     img.src = PRODUCT_FALLBACK;
   }
+}
+
+/** Ask the inventory image server for a smaller copy (it resizes on `w=`). Other URLs are returned unchanged. */
+function sizedImage(url: string | null | undefined, w: number): string | undefined {
+  if (!url || !url.includes('/inventory/images/') || /[?&]w=\d/.test(url)) return url || undefined;
+  return `${url}${url.includes('?') ? '&' : '?'}w=${w}`;
 }
 
 function imageSrcSet(url: string | null): string | undefined {
@@ -792,7 +798,7 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear, sale 
               {cart.map((item) => (
                 <div key={item.product.id} className="flex gap-3 bg-[#FFFFFF] rounded-xl p-3 border border-[#231F20]/10">
                   <div className="w-16 h-16 rounded-lg overflow-hidden bg-[#FFFFFF] flex-shrink-0 border border-[#231F20]/10">
-                    <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={handleImgError} />
+                    <img src={sizedImage(item.product.image_url, 200) || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={handleImgError} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-medium text-[#231F20] break-words line-clamp-2">{titleCase(item.product.online_name || item.product.name)}</h3>
@@ -914,7 +920,7 @@ function ShopByCategory({ productsByCategory, fulfillment }: { categories: strin
             <button key={cat} onClick={() => navigate(`/products/${categorySlug(cat)}`)} className="bg-[#FFFFFF] rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-all group border border-[#231F20]/15 hover:border-[#B3D335]">
               {catImage ? (
                 <div className="w-16 h-16 mx-auto mb-3 rounded-xl overflow-hidden">
-                  <img src={catImage} alt={cat} className="w-full h-full object-cover" onError={handleImgError} loading="lazy" />
+                  <img src={sizedImage(catImage, 200)} alt={cat} className="w-full h-full object-cover" onError={handleImgError} loading="lazy" />
                 </div>
               ) : (
                 <IconComp className="h-10 w-10 text-[#3D8C32] mx-auto mb-3" />
@@ -1275,6 +1281,27 @@ function LocationSection() {
 }
 
 
+/** Real <a href> for product links: crawlable by Google and openable in a new tab,
+ *  while a plain left-click still navigates inside the app without a reload. */
+function ProductLink({ slug, className, children, onNavigate }: { slug: string; className?: string; children: ReactNode; onNavigate?: () => void }) {
+  const href = `/products/product/${slug}`;
+  return (
+    <a
+      href={href}
+      className={className}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+        e.preventDefault();
+        navigate(href);
+        onNavigate?.();
+      }}
+    >
+      {children}
+    </a>
+  );
+}
+
 /* ======================== PRODUCT GRID CARD (Floating Design + Quick Add) ======================== */
 function ProductGridCard({ product, onQuickAdd, fulfillment, sale }: { product: Product; onQuickAdd?: (product: Product) => void; fulfillment?: FulfillmentType | null; sale?: ActiveSaleData | null }) {
   const effectiveStock = fulfillment ? getStockForFulfillment(product, fulfillment) : product.stock;
@@ -1287,7 +1314,7 @@ function ProductGridCard({ product, onQuickAdd, fulfillment, sale }: { product: 
     <div className="cursor-pointer group" onClick={() => navigate(`/products/product/${product.slug}`)}>
       <div className="bg-[#FFFFFF] rounded-2xl p-[10px] sm:p-4 transition-all duration-300 hover:shadow-xl relative border border-[#231F20]/35">
         {/* Floating product image */}
-        <div className="flex items-center justify-center mb-2 sm:mb-3 bg-[#FFFFFF] rounded-xl overflow-hidden h-[160px] sm:h-[200px]">
+        <ProductLink slug={product.slug} className="flex items-center justify-center mb-2 sm:mb-3 bg-[#FFFFFF] rounded-xl overflow-hidden h-[160px] sm:h-[200px]">
           <img
             src={product.image_url || placeholderUrl(product.name)}
             alt={product.name}
@@ -1299,7 +1326,7 @@ function ProductGridCard({ product, onQuickAdd, fulfillment, sale }: { product: 
             className="product-card-img transition-transform duration-300 group-hover:scale-105"
             onError={handleImgError}
           />
-        </div>
+        </ProductLink>
         {/* Badges row */}
         <div className="flex items-center gap-1 flex-wrap mb-1.5">
           {isConsumableProduct(product) && <span className="inline-block text-[11px] sm:text-xs font-bold px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full bg-[#D9A32C]/15 text-[#D9A32C] border border-[#D9A32C]/30">21+</span>}
@@ -1312,7 +1339,7 @@ function ProductGridCard({ product, onQuickAdd, fulfillment, sale }: { product: 
           {fulfillment && !isPickup && fulfillment !== "local_delivery" && <span className="inline-block bg-[#3D8C32] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ships 1–2 Days</span>}
           {effectiveStock <= 5 && <span className="inline-block bg-[#ADD038] text-[#231F20] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Only {Math.floor(effectiveStock)} Left</span>}
         </div>
-        <h3 className="text-[#231F20] text-[13px] sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#126A44] transition-colors">{titleCase(product.online_name || product.name)}</h3>
+        <h3 className="text-[#231F20] text-[13px] sm:text-sm font-medium leading-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] mb-1.5 group-hover:text-[#126A44] transition-colors"><ProductLink slug={product.slug}>{titleCase(product.online_name || product.name)}</ProductLink></h3>
         <div className="flex items-center justify-between mb-2">
                     {salePrice !== null && salePercent !== null ? (
                       <span className="flex items-center gap-1.5">
@@ -1390,20 +1417,25 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment, sale }: 
   const effectiveStock = stockFor(product);
   const isEffectivelyAvailable = product.available && effectiveStock > 0;
 
-  // Find related products for "You Might Also Like"
+  // Find size variants for savings badge (e.g., "Apples & Bananas Live Rosin 1 Gram" / "4 Grams")
+  const sizeBase = (p: Product) => (p.online_name || p.name).replace(/\d+(\.\d+)?\s*(gram|grams|g)\b/gi, "").replace(/\s{2,}/g, " ").trim().toLowerCase();
+  const baseName = sizeBase(product);
+
+  // "You Might Also Like": other products in the same category — not this product in another
+  // size (those are already under "Available Sizes"), and only one size per product.
+  const seenBases = new Set<string>([baseName]);
   const related = products
     .filter(p => p.id !== product.id && stockFor(p) > 0 && p.categories.some(c => product.categories.includes(c)))
+    .filter(p => { const b = sizeBase(p); if (seenBases.has(b)) return false; seenBases.add(b); return true; })
     .slice(0, 3);
 
-  // Find size variants for savings badge (e.g., "Apples & Bananas Live Rosin 1 Gram" / "4 Grams")
-  const baseName = (product.online_name || product.name).replace(/\d+\s*(gram|grams|g)\b/gi, "").trim().toLowerCase();
   const sizeVariants = products.filter(p =>
     p.id !== product.id && stockFor(p) > 0 &&
-    (p.online_name || p.name).replace(/\d+\s*(gram|grams|g)\b/gi, "").trim().toLowerCase() === baseName
+    sizeBase(p) === baseName
   );
   const extractGrams = (p: Product): number => {
-    const match = (p.online_name || p.name).match(/(\d+)\s*(gram|grams|g)\b/i);
-    return match ? parseInt(match[1]) : 0;
+    const match = (p.online_name || p.name).match(/(\d+(?:\.\d+)?)\s*(gram|grams|g)\b/i);
+    return match ? parseFloat(match[1]) : 0;
   };
   const currentGrams = extractGrams(product);
   const smallestVariant = [product, ...sizeVariants]
@@ -1679,10 +1711,10 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment, sale }: 
             {related.map((p) => (
               <div key={p.id} className="flex items-center gap-3 bg-[#FFFFFF] rounded-xl p-3 border border-[#231F20]/10 hover:shadow-md transition-all cursor-pointer" onClick={() => navigate(`/products/product/${p.slug}`)}>
                 <div className="w-20 h-20 flex-shrink-0 bg-[#FFFFFF] rounded-lg overflow-hidden flex items-center justify-center">
-                  <img src={p.image_url || placeholderUrl(p.name, 200)} alt={p.name} className="max-h-full max-w-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={handleImgError} />
+                  <img src={sizedImage(p.image_url, 200) || placeholderUrl(p.name, 200)} alt={p.name} className="max-h-full max-w-full object-contain" style={{ backgroundColor: '#FFFFFF' }} onError={handleImgError} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-[#231F20] line-clamp-2 hover:text-[#126A44] transition-colors">{titleCase(p.online_name || p.name)}</h3>
+                  <h3 className="text-sm font-medium text-[#231F20] line-clamp-2 hover:text-[#126A44] transition-colors"><ProductLink slug={p.slug}>{titleCase(p.online_name || p.name)}</ProductLink></h3>
                   <p className="text-[#126A44] font-bold text-sm mt-1">{formatPrice(p.price)}</p>
                 </div>
                 <button onClick={(e) => { e.stopPropagation(); onAddToCart(p, 1); }} className="flex-shrink-0 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-lg px-3 py-2 text-xs font-semibold transition-colors">Add</button>
@@ -1730,7 +1762,7 @@ function SearchOverlay({ open, onClose, products }: { open: boolean; onClose: ()
             <div key={product.id} className="cursor-pointer group" onClick={() => { navigate(`/products/product/${product.slug}`); onClose(); setQuery(""); }}>
               <div className="bg-[#FFFFFF] rounded-xl p-3 transition-all hover:shadow-md">
                 <div className="flex items-center justify-center mb-2 bg-[#FFFFFF] rounded-lg overflow-hidden h-[120px]">
-                  <img src={product.image_url || placeholderUrl(product.name, 200)} alt={product.name} loading="lazy" className="product-card-img" onError={handleImgError} />
+                  <img src={sizedImage(product.image_url, 400) || placeholderUrl(product.name, 200)} alt={product.name} loading="lazy" className="product-card-img" onError={handleImgError} />
                 </div>
                 <h3 className="text-xs font-medium text-[#231F20] line-clamp-2 group-hover:text-[#126A44] transition-colors">{titleCase(product.online_name || product.name)}</h3>
                 <p className="text-[#126A44] font-bold text-sm mt-1">{formatPrice(product.price)}</p>
@@ -2530,7 +2562,7 @@ function WholesalePage({ products }: { products: Product[] }) {
                             const qty = (bundleSelections[bundle.id] || {})[product.sku] || 0;
                             return (
                               <div key={product.id} className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-[#231F20]/5">
-                                <img src={product.image_url || placeholderUrl(product.name)} alt="" className="w-10 h-10 object-contain rounded-lg" onError={handleImgError} />
+                                <img src={sizedImage(product.image_url, 200) || placeholderUrl(product.name)} alt="" className="w-10 h-10 object-contain rounded-lg" onError={handleImgError} />
                                 <span className="flex-1 text-sm text-[#231F20] truncate">{titleCase(product.online_name || product.name)}</span>
                                 <div className="flex items-center gap-1.5">
                                   <button onClick={() => updateSelection(bundle.id, product.sku, qty - 1)}
@@ -3980,7 +4012,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
                   {cart.map((item) => (
                     <div key={item.product.id} className="flex items-center gap-3 p-3 bg-[#FFFFFF] rounded-xl">
                       <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#FFFFFF] flex-shrink-0">
-                        <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={handleImgError} />
+                        <img src={sizedImage(item.product.image_url, 200) || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={handleImgError} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[#231F20] text-sm font-medium break-words line-clamp-2">{titleCase(item.product.online_name || item.product.name)}</p>
@@ -4170,7 +4202,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
               {cart.map((item) => (
                 <div key={item.product.id} className="flex items-center gap-3">
                   <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[#FFFFFF] flex-shrink-0">
-                    <img src={item.product.image_url || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={handleImgError} />
+                    <img src={sizedImage(item.product.image_url, 200) || placeholderUrl(item.product.name, 100)} alt={item.product.name} className="w-full h-full object-contain" width="64" height="64" loading="lazy" onError={handleImgError} />
                     <span className="absolute -top-1 -right-1 bg-[#B3D335] text-[#231F20] text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">{item.quantity}</span>
                   </div>
                   <div className="flex-1 min-w-0">
@@ -5333,19 +5365,49 @@ function App() {
     updateCart([]);
   }, [updateCart]);
 
-  // Dynamic title + meta description per route
+  // Dynamic title + meta description (+ og:title/og:description) per route.
+  // Product and category pages get their own meta, matching scripts/prerender.cjs,
+  // so the client never overwrites a page's pre-rendered meta with the homepage's.
   useEffect(() => {
-    const key = route === "" ? "/" : route;
-    const meta = PAGE_META[key] || PAGE_META["/"];
-    document.title = meta.title;
-    let descEl = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
-    if (!descEl) {
-      descEl = document.createElement("meta");
-      descEl.name = "description";
-      document.head.appendChild(descEl);
+    const key = route === "" ? "/" : route.replace(/\/+$/, "") || "/";
+    let meta: { title: string; description: string } | null = PAGE_META[key] || null;
+    if (!meta && key.startsWith("/products/product/")) {
+      const slug = key.replace("/products/product/", "");
+      const p = products.find((x) => x.slug === slug);
+      if (p) {
+        const name = (p.online_name || p.name).replace(/\s{2,}/g, " ").trim();
+        const cat = (p.categories && p.categories[0]) || "Products";
+        meta = {
+          title: `${name} - ${cat} - The Hemp Dispensary`,
+          description: p.description
+            ? p.description.slice(0, 155).replace(/\s+/g, " ").trim()
+            : `${name} \u2014 lab-tested hemp product at The Hemp Dispensary. Available for pickup or shipping.`,
+        };
+      }
+    } else if (!meta && /^\/products\/[^/]+$/.test(key)) {
+      const slug = key.replace("/products/", "");
+      const label = slug.charAt(0).toUpperCase() + slug.slice(1);
+      meta = {
+        title: `${label} - The Hemp Dispensary FL`,
+        description: `Shop lab-tested ${label.toLowerCase()} at The Hemp Dispensary. Two Spring Hill FL locations, 5-minute pickup, and nationwide shipping.`,
+      };
     }
-    descEl.content = meta.description;
-  }, [route]);
+    // Unknown route (or product data not loaded yet): leave the pre-rendered meta alone.
+    if (!meta) return;
+    const setMeta = (attr: "name" | "property", key: string, value: string) => {
+      let el = document.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null;
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute(attr, key);
+        document.head.appendChild(el);
+      }
+      el.content = value;
+    };
+    document.title = meta.title;
+    setMeta("name", "description", meta.description);
+    setMeta("property", "og:title", meta.title);
+    setMeta("property", "og:description", meta.description);
+  }, [route, products]);
 
   // Dynamic canonical + og:url per route — self-referencing, www, no trailing slash on paths
   // Normalize /shop → /products for canonical URLs since /products is the canonical structure
@@ -5376,25 +5438,6 @@ function App() {
     }
     ogUrl.content = canonical;
 
-    // Update og:title and og:description per route
-    const key = route === "" ? "/" : route;
-    const meta = PAGE_META[key] || PAGE_META["/"];
-
-    let ogTitle = document.querySelector('meta[property="og:title"]') as HTMLMetaElement | null;
-    if (!ogTitle) {
-      ogTitle = document.createElement("meta");
-      ogTitle.setAttribute("property", "og:title");
-      document.head.appendChild(ogTitle);
-    }
-    ogTitle.content = meta.title;
-
-    let ogDesc = document.querySelector('meta[property="og:description"]') as HTMLMetaElement | null;
-    if (!ogDesc) {
-      ogDesc = document.createElement("meta");
-      ogDesc.setAttribute("property", "og:description");
-      document.head.appendChild(ogDesc);
-    }
-    ogDesc.content = meta.description;
   }, [route]);
 
 
