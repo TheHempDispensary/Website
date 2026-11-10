@@ -1903,7 +1903,7 @@ const ABOUT_TIMELINE = [
   { year: "February 2019", text: "The Hemp Dispensary concept born during a trip to Colorado" },
   { year: "December 1, 2019", text: "Spring Hill West opens (6175 Deltona Blvd) \u2014 location #1" },
   { year: "June 16, 2020", text: "Crystal River opens \u2014 location #2" },
-  { year: "2020\u20132021", text: "New Port Richey opens \u2014 location #3" },
+  { year: "September 2020", text: "New Port Richey opens \u2014 location #3" },
   { year: "February 2021", text: "Clearwater opens \u2014 location #4" },
   { year: "2021", text: "Homosassa opens \u2014 location #5" },
   { year: "September 2021", text: "Tarpon Springs opens \u2014 location #6" },
