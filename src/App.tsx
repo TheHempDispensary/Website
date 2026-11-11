@@ -1922,7 +1922,7 @@ const ABOUT_TIMELINE = [
   { year: "2024", text: "6-county same-day delivery + national e-commerce at peak" },
   { year: "February 23, 2024", text: "FDACS reverses course and starts red-tagging our THCA products, beginning in Tampa \u2014 Spring Hill West follows on March 15" },
   { year: "August 2024", text: "The Hemp Dispensary joins DoorDash" },
-  { year: "March 2025", text: "13 stores and the Brooksville HQ close \u2014 we go from 15 locations to 2" },
+  { year: "March 2025", text: "13 stores, the Brooksville HQ, and same-day delivery shut down \u2014 we go from 15 locations to 2" },
   { year: "2025", text: "Rebuilding \u2014 new website, new platform, same mission" },
   { year: "November 2026", text: "New federal hemp law \u2014 we\u2019re ready" },
 ];
