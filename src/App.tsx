@@ -1898,34 +1898,108 @@ function ShopPage({ products, categories, selectedCategory, onAddToCart, fulfill
 
 /* ======================== STATIC PAGES (Light Theme) ======================== */
 
-const ABOUT_TIMELINE = [
-  { year: "April 2018", text: "HEMP (Healing Emotionally Mentally Physically) wholesale company founded by two Spring Hill locals" },
-  { year: "February 2019", text: "The Hemp Dispensary concept born during a trip to Colorado" },
-  { year: "December 1, 2019", text: "Spring Hill West opens (6175 Deltona Blvd) \u2014 location #1" },
-  { year: "June 16, 2020", text: "Crystal River opens \u2014 location #2" },
-  { year: "September 2020", text: "New Port Richey opens" },
-  { year: "February 2021", text: "Clearwater opens" },
-  { year: "February 2021", text: "The NFL sends a cease-and-desist over our Super Bowl LV yard signs around the stadium in Tampa. On Super Bowl morning we cut the team logos off every sign \u2014 hopping out of our trucks in bumper-to-bumper traffic \u2014 and left the signs standing" },
-  { year: "April 2021", text: "Homosassa opens" },
-  { year: "June 2021", text: "Tarpon Springs opens" },
-  { year: "July 2021", text: "Spring Hill East opens (14312 Spring Hill Dr)" },
-  { year: "October 1, 2021", text: "Clermont opens" },
-  { year: "December 2021", text: "Hudson opens" },
-  { year: "January 2022", text: "Lady Lake opens" },
-  { year: "February 2022", text: "The American Red Cross sends a cease-and-desist over the red cross in our original logo" },
-  { year: "March 2022", text: "Brooksville HQ and 8,000 sq ft manufacturing & distribution center opens (2251 Topline Way)" },
-  { year: "April 4, 2022", text: "Pinellas Park opens" },
-  { year: "May 2022", text: "Tampa, Zephyrhills, and Apopka open" },
-  { year: "January 2023", text: "Port Richey opens \u2014 15 locations total" },
-  { year: "March 2023", text: "The Hershey Company sends a cease-and-desist over our peanut butter cup packaging. We pulled it, sent them the stock, and relaunched it with new branding and natural, clean ingredients \u2014 it became and stayed one of our top sellers" },
-  { year: "July 12, 2023", text: "FDACS confirms to us in writing that THCA is legal to sell" },
-  { year: "2024", text: "6-county same-day delivery + national e-commerce at peak" },
-  { year: "February 23, 2024", text: "FDACS reverses course and starts red-tagging our THCA products, beginning in Tampa \u2014 Spring Hill West follows on March 15" },
-  { year: "August 2024", text: "The Hemp Dispensary joins DoorDash" },
-  { year: "March 2025", text: "13 stores, the Brooksville HQ, and same-day delivery shut down \u2014 we go from 15 locations to 2" },
-  { year: "2025", text: "Rebuilding \u2014 new website, new platform, same mission" },
-  { year: "November 2026", text: "New federal hemp law \u2014 we\u2019re ready" },
+type TimelineKind = "store" | "legal" | "fdacs" | "milestone" | "closing";
+const ABOUT_TIMELINE: { date: string; text: string; kind: TimelineKind; store?: number }[] = [
+  { date: "April 2018", kind: "milestone", text: "HEMP (Healing Emotionally Mentally Physically) wholesale company founded by two Spring Hill locals" },
+  { date: "February 2019", kind: "milestone", text: "The Hemp Dispensary concept is born during a trip to Colorado" },
+  { date: "December 1, 2019", kind: "store", store: 1, text: "Spring Hill West opens (6175 Deltona Blvd)" },
+  { date: "June 16, 2020", kind: "store", store: 2, text: "Crystal River opens" },
+  { date: "September 2020", kind: "store", store: 3, text: "New Port Richey opens" },
+  { date: "February 2021", kind: "store", store: 4, text: "Clearwater opens" },
+  { date: "February 2021", kind: "legal", text: "The NFL sends a cease-and-desist over our Super Bowl LV yard signs around the stadium in Tampa. On Super Bowl morning we cut the team logos off every sign \u2014 hopping out of our trucks in bumper-to-bumper traffic \u2014 and left the signs standing" },
+  { date: "April 2021", kind: "store", store: 5, text: "Homosassa opens" },
+  { date: "June 2021", kind: "store", store: 6, text: "Tarpon Springs opens" },
+  { date: "July 2021", kind: "store", store: 7, text: "Spring Hill East opens (14312 Spring Hill Dr)" },
+  { date: "October 1, 2021", kind: "store", store: 8, text: "Clermont opens" },
+  { date: "December 2021", kind: "store", store: 9, text: "Hudson opens" },
+  { date: "January 2022", kind: "store", store: 10, text: "Lady Lake opens" },
+  { date: "February 2022", kind: "legal", text: "The American Red Cross sends a cease-and-desist over the red cross in our original logo" },
+  { date: "March 2022", kind: "milestone", text: "Brooksville HQ and 8,000 sq ft manufacturing & distribution center opens (2251 Topline Way)" },
+  { date: "April 4, 2022", kind: "store", store: 11, text: "Pinellas Park opens" },
+  { date: "May 2022", kind: "store", store: 12, text: "Tampa opens" },
+  { date: "May 2022", kind: "store", store: 13, text: "Zephyrhills opens" },
+  { date: "May 2022", kind: "store", store: 14, text: "Apopka opens" },
+  { date: "January 2023", kind: "store", store: 15, text: "Port Richey opens \u2014 15 locations across Florida" },
+  { date: "March 2023", kind: "legal", text: "The Hershey Company sends a cease-and-desist over our peanut butter cup packaging. We pulled it, sent them the stock, and relaunched it with new branding and natural, clean ingredients \u2014 it became and stayed one of our top sellers" },
+  { date: "July 12, 2023", kind: "fdacs", text: "FDACS confirms to us in writing that THCA is legal to sell" },
+  { date: "February 23, 2024", kind: "fdacs", text: "FDACS reverses course and starts red-tagging our THCA products, beginning in Tampa \u2014 Spring Hill West follows on March 15" },
+  { date: "August 2024", kind: "milestone", text: "In-house 24-hour delivery launches across 6 counties, and we join DoorDash" },
+  { date: "March 2025", kind: "closing", text: "13 stores, the Brooksville HQ, and our delivery service shut down \u2014 we go from 15 locations to 2" },
+  { date: "2025", kind: "milestone", text: "Rebuilding \u2014 new website, new platform, same mission" },
+  { date: "November 2026", kind: "milestone", text: "New federal hemp law \u2014 we\u2019re ready" },
 ];
+
+const TIMELINE_STYLE: Record<TimelineKind, { label: string; dot: string; chip: string }> = {
+  store: { label: "Store opening", dot: "bg-[#126A44] text-[#FFFFFF]", chip: "bg-[#126A44]/10 text-[#126A44]" },
+  legal: { label: "Cease & desist", dot: "bg-[#FFCB08] text-[#231F20]", chip: "bg-[#FFCB08]/25 text-[#7A5D00]" },
+  fdacs: { label: "FDACS", dot: "bg-[#E4572E] text-[#FFFFFF]", chip: "bg-[#E4572E]/10 text-[#B23A16]" },
+  milestone: { label: "Milestone", dot: "bg-[#B3D335] text-[#231F20]", chip: "bg-[#B3D335]/25 text-[#4D5E0A]" },
+  closing: { label: "Closing", dot: "bg-[#231F20] text-[#FFFFFF]", chip: "bg-[#231F20]/10 text-[#231F20]" },
+};
+
+function TimelineIcon({ kind }: { kind: TimelineKind }) {
+  const cls = "w-4 h-4";
+  if (kind === "legal") return <FileText className={cls} />;
+  if (kind === "fdacs") return <AlertCircle className={cls} />;
+  if (kind === "closing") return <X className={cls} />;
+  return <Star className={cls} />;
+}
+
+function AboutTimeline() {
+  const years: { year: string; items: typeof ABOUT_TIMELINE }[] = [];
+  for (const item of ABOUT_TIMELINE) {
+    const y = (item.date.match(/\d{4}/) || [""])[0];
+    const last = years[years.length - 1];
+    if (last && last.year === y) last.items.push(item);
+    else years.push({ year: y, items: [item] });
+  }
+  return (
+    <div>
+      {/* Legend */}
+      <div className="flex flex-wrap justify-center gap-2 mb-10">
+        {(Object.keys(TIMELINE_STYLE) as TimelineKind[]).map((k) => (
+          <span key={k} className={`text-xs font-semibold px-3 py-1 rounded-full ${TIMELINE_STYLE[k].chip}`}>{TIMELINE_STYLE[k].label}</span>
+        ))}
+      </div>
+      <div className="relative">
+        <div className="absolute left-5 sm:left-6 top-2 bottom-2 w-0.5 bg-[#231F20]/10" />
+        {years.map((g) => (
+          <div key={g.year} className="mb-10 last:mb-0">
+            {/* Year marker */}
+            <div className="relative flex items-center mb-5">
+              <span className="relative z-10 ml-0 sm:ml-0.5 px-3 py-1 rounded-full bg-[#231F20] text-[#FFCB08] text-sm font-bold tracking-wide">{g.year}</span>
+            </div>
+            <div className="space-y-4">
+              {g.items.map((item, i) => {
+                const st = TIMELINE_STYLE[item.kind];
+                return (
+                  <div key={i} className="relative pl-14 sm:pl-16">
+                    <div className={`absolute left-0.5 sm:left-1 top-3 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow ring-4 ring-[#FFFFFF] ${st.dot}`}>
+                      {item.kind === "store" ? (
+                        <span className="text-xs sm:text-sm font-extrabold">#{item.store}</span>
+                      ) : (
+                        <TimelineIcon kind={item.kind} />
+                      )}
+                    </div>
+                    <div className="rounded-2xl border border-[#231F20]/10 bg-[#FFFFFF] px-4 py-3 shadow-sm">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <span className="text-sm font-bold text-[#126A44]">{item.date}</span>
+                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${st.chip}`}>
+                          {item.kind === "store" ? `Store #${item.store}` : st.label}
+                        </span>
+                      </div>
+                      <p className="text-[#231F20] text-[15px] leading-relaxed">{item.text}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function AboutPage() {
   return (
@@ -1967,7 +2041,7 @@ function AboutPage() {
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">We built something</h2>
           <p className="text-[#231F20] text-base sm:text-lg leading-relaxed">
-            A few months after opening West, they opened a second location in Crystal River. Then more followed. New Port Richey. Clearwater. Homosassa. Tarpon Springs. Spring Hill East. Clermont. Hudson. Lady Lake. Pinellas Park. Tampa. Zephyrhills. Apopka. Port Richey. By 2024, The Hemp Dispensary had grown to 15 retail locations across Florida, an 8,000 square foot manufacturing and distribution center in Brooksville, an in-house same-day delivery service covering 6 counties, and an e-commerce store shipping nationally and internationally. Along the way they received cease and desist letters from Reese&rsquo;s Peanut Butter, the American Red Cross, and the NFL &mdash; which is how you know you&rsquo;ve built something worth noticing.
+            A few months after opening West, they opened a second location in Crystal River. Then more followed. New Port Richey. Clearwater. Homosassa. Tarpon Springs. Spring Hill East. Clermont. Hudson. Lady Lake. Pinellas Park. Tampa. Zephyrhills. Apopka. Port Richey. By 2024, The Hemp Dispensary had grown to 15 retail locations across Florida, an 8,000 square foot manufacturing and distribution center in Brooksville, an in-house 24-hour delivery service covering 6 counties, and an e-commerce store shipping nationally and internationally. Along the way they received cease and desist letters from Reese&rsquo;s Peanut Butter, the American Red Cross, and the NFL &mdash; which is how you know you&rsquo;ve built something worth noticing.
           </p>
         </div>
       </section>
@@ -1999,21 +2073,9 @@ function AboutPage() {
       {/* Timeline */}
       <section className="bg-[#FFFFFF] py-14 sm:py-20 border-t border-[#231F20]/10">
         <div className="max-w-3xl mx-auto px-4">
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-10 text-center">Our Timeline</h2>
-          <div className="relative">
-            {/* Vertical line */}
-            <div className="absolute left-4 sm:left-6 top-0 bottom-0 w-0.5 bg-[#B3D335]" />
-            <div className="space-y-8">
-              {ABOUT_TIMELINE.map((item, i) => (
-                <div key={i} className="relative pl-12 sm:pl-16">
-                  {/* Dot */}
-                  <div className="absolute left-2.5 sm:left-4.5 top-1 w-3.5 h-3.5 rounded-full bg-[#FFCB08] border-2 border-[#FFFFFF] shadow" />
-                  <p className="text-sm font-bold text-[#126A44] mb-1">{item.year}</p>
-                  <p className="text-[#231F20] text-base leading-relaxed">{item.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-3 text-center">Our Timeline</h2>
+          <p className="text-center text-[#231F20]/70 mb-6">Seven years, 15 stores, and a few fights worth having.</p>
+          <AboutTimeline />
         </div>
       </section>
 
