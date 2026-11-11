@@ -701,6 +701,15 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>}
             </button>
             <button onClick={onSearch} className="p-2 text-[#231F20] hover:text-[#126A44] transition-colors" aria-label="Search products"><Search className="h-5 w-5" /></button>
+            <button
+              onClick={() => window.dispatchEvent(new Event("bud:open"))}
+              className="flex items-center gap-1.5 pl-0.5 pr-1 sm:pr-3 py-0.5 rounded-full hover:bg-[#B3D335]/20 transition-colors"
+              aria-label="Chat with Bud"
+              title="Chat with Bud"
+            >
+              <span className="block w-9 h-9"><BudCharacter size={36} mood="idle" /></span>
+              <span className="hidden lg:inline text-xs font-semibold text-[#231F20]">Ask Bud</span>
+            </button>
           </div>
           <a href="/" onClick={(e) => { e.preventDefault(); navigate("/"); }} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
             <img src="/logo.webp" alt="The Hemp Dispensary" className="h-10 sm:h-12 w-auto object-contain" width="120" height="48" />
@@ -2906,7 +2915,7 @@ function ChatbotBud() {
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [budMood, setBudMood] = useState<BudMood>("idle");
-  const [showHint, setShowHint] = useState(false);
+  const [, setShowHint] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -2915,8 +2924,6 @@ function ChatbotBud() {
   const backdropRef = useRef<HTMLDivElement>(null);
 
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-  const isCheckout = typeof window !== "undefined" && window.location.pathname.startsWith("/checkout");
-  const BUD_IDLE_SIZE = isMobile && isCheckout ? 48 : isMobile ? 110 : 150;
   const BUD_ACTIVE_SIZE = isMobile ? 160 : 220;
   const BUBBLE_MAX_W = isMobile ? "85vw" : "280px";
 
@@ -3114,30 +3121,17 @@ function ChatbotBud() {
     sendMessage(input);
   };
 
-  /* ---------- IDLE STATE (Bud floating in corner) ---------- */
-  if (!open) {
-    return (
-      <div className={`fixed z-50 ${isCheckout && isMobile ? "bottom-1 right-1" : "bottom-4 right-4"}`} style={{ width: BUD_IDLE_SIZE, height: BUD_IDLE_SIZE }}>
-        {/* Idle hint speech bubble */}
-        {showHint && !(isCheckout && isMobile) && (
-          <div
-            className="bud-hint-enter absolute bg-[#FFFFFF] text-[#231F20] text-xs font-semibold px-3 py-2 rounded-xl shadow-lg border border-[#B3D335]/20"
-            style={{ bottom: BUD_IDLE_SIZE - 8, right: 10, whiteSpace: "nowrap", zIndex: 51 }}
-          >
-            Need help finding something? 👋
-            <div className="bud-speech-tail" />
-          </div>
-        )}
-        <button
-          onClick={openChat}
-          aria-label="Chat with Bud"
-          style={{ background: "none", border: "none", padding: 0, cursor: "pointer", width: "100%", height: "100%" }}
-        >
-          <BudCharacter size={BUD_IDLE_SIZE} mood="idle" />
-        </button>
-      </div>
-    );
-  }
+  // Bud lives in the header now: the header button fires "bud:open".
+  const openChatRef = useRef(openChat);
+  openChatRef.current = openChat;
+  useEffect(() => {
+    const onOpen = () => openChatRef.current();
+    window.addEventListener("bud:open", onOpen);
+    return () => window.removeEventListener("bud:open", onOpen);
+  }, []);
+
+  /* ---------- IDLE STATE: nothing floating over the page ---------- */
+  if (!open) return null;
 
   /* ---------- ACTIVE STATE (Bud expanded with speech bubbles) ---------- */
   return (
@@ -5641,7 +5635,7 @@ function App() {
   }, [products, stockForFulfillment]);
 
   const shell = (content: React.ReactNode) => (
-    <div className="min-h-screen bg-[#FFFFFF] overflow-x-hidden">
+    <div className="min-h-screen bg-[#FFFFFF] overflow-x-clip">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-0 focus:top-0 focus:z-[9999] focus:bg-[#FFFFFF] focus:px-4 focus:py-2 focus:text-[#231F20] focus:underline">Skip to main content</a>
       <StickyTopBar sale={activeSale} />
       <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} fulfillment={fulfillment} onFulfillmentClick={() => setShowFulfillmentModal(true)} />
