@@ -1913,7 +1913,7 @@ const ABOUT_TIMELINE = [
   { year: "January 2022", text: "Lady Lake opens" },
   { year: "April 4, 2022", text: "Pinellas Park opens" },
   { year: "May 2022", text: "Tampa, Zephyrhills, and Apopka open" },
-  { year: "2022\u20132023", text: "Port Richey opens \u2014 15 locations total" },
+  { year: "January 2023", text: "Port Richey opens \u2014 15 locations total" },
   { year: "2023", text: "8,000 sq ft manufacturing & distribution center opens in Brooksville" },
   { year: "2024", text: "6-county same-day delivery + national e-commerce at peak" },
   { year: "2024", text: "FDACS THCA reversal \u2014 13 locations closed, warehouse vacated" },
