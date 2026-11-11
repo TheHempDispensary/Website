@@ -1935,7 +1935,9 @@ const ABOUT_TIMELINE: { date: string; text: string; kind: TimelineKind; store?: 
   { date: "August 2024", kind: "milestone", text: "In-house 24-hour delivery launches across 6 counties, and we join DoorDash" },
   { date: "March 2025", kind: "closing", text: "The shutdown begins: 13 stores, the Brooksville HQ, and our delivery service close. We thought we were closing for good, and held a blowout sale to clear out everything in our 8,000 sq ft Brooksville facility" },
   { date: "April 2025", kind: "milestone", text: "We saved it \u2014 The Hemp Dispensary stays open with our two Spring Hill stores" },
+  { date: "2025", kind: "milestone", text: "HQ moves into the back of Spring Hill East \u2014 we get a manufacturing permit there and keep making products and shipping online orders" },
   { date: "2025", kind: "milestone", text: "Rebuilding \u2014 new website, new platform, same mission" },
+  { date: "March 2026", kind: "milestone", text: "New 1,400 sq ft HQ opens in Spring Hill \u2014 where we make our products and ship online orders" },
   { date: "November 2026", kind: "milestone", text: "New federal hemp law \u2014 we\u2019re ready" },
 ];
 
