@@ -124,8 +124,15 @@ function getFulfillmentLabel(f: FulfillmentType): string {
   return "Shipping To Me";
 }
 
+/** Items that can't be shipped (hazmat): in-store pickup only. */
+const PICKUP_ONLY_PATTERN = /\bbutane\b/i;
+function isPickupOnly(product: Product): boolean {
+  return PICKUP_ONLY_PATTERN.test(product.online_name || product.name);
+}
+
 function getStockForFulfillment(product: Product, f: FulfillmentType): number {
   if ((f.startsWith("pickup") || f === "local_delivery") && isLeafLife(product)) return 0; // LeafLife ships from partner — pickup/delivery not available
+  if (f === "ship" && isPickupOnly(product)) return 0; // butane can't ship
   if (f === "pickup_west") return product.stock_west ?? 0;
   if (f === "pickup_east") return product.stock_east ?? 0;
   return product.stock_hq ?? product.stock ?? 0;
@@ -1594,6 +1601,8 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment, sale }: 
               <p className="text-sm font-medium text-[#126A44]">
                 {isLeafLife(product)
                   ? <>{"\u{1F4E6}"} This Product Ships From Our Partner {"\u2013"} Shipping Only</>
+                  : isPickupOnly(product)
+                    ? <>{"\u{1F3EA}"} In-Store Pickup Only {"\u2013"} This Item Can{"\u2019"}t Be Shipped</>
                   : fulfillment === "ship"
                     ? <>{"\u{1F4E6}"} Ships In 1{"\u2013"}2 Business Days</>
                     : <>{"\u26A1"} Ready For Pickup Today In About 5 Minutes</>
