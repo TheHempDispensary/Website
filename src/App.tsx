@@ -1905,7 +1905,7 @@ const ABOUT_TIMELINE = [
   { year: "June 16, 2020", text: "Crystal River opens \u2014 location #2" },
   { year: "September 2020", text: "New Port Richey opens" },
   { year: "February 2021", text: "Clearwater opens" },
-  { year: "2021", text: "Homosassa opens" },
+  { year: "April 2021", text: "Homosassa opens" },
   { year: "July 2021", text: "Spring Hill East opens (14312 Spring Hill Dr)" },
   { year: "September 2021", text: "Tarpon Springs opens" },
   { year: "October 1, 2021", text: "Clermont opens" },
