@@ -1912,6 +1912,7 @@ const ABOUT_TIMELINE = [
   { year: "October 1, 2021", text: "Clermont opens" },
   { year: "December 2021", text: "Hudson opens" },
   { year: "January 2022", text: "Lady Lake opens" },
+  { year: "February 2022", text: "The American Red Cross sends a cease-and-desist over the red cross in our original logo" },
   { year: "April 4, 2022", text: "Pinellas Park opens" },
   { year: "May 2022", text: "Tampa, Zephyrhills, and Apopka open" },
   { year: "January 2023", text: "Port Richey opens \u2014 15 locations total" },
