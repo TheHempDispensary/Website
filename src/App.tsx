@@ -1918,6 +1918,7 @@ const ABOUT_TIMELINE = [
   { year: "May 2022", text: "Tampa, Zephyrhills, and Apopka open" },
   { year: "January 2023", text: "Port Richey opens \u2014 15 locations total" },
   { year: "March 2023", text: "The Hershey Company sends a cease-and-desist over our peanut butter cup packaging. We pulled it, sent them the stock, and relaunched it with new branding and natural, clean ingredients \u2014 it became and stayed one of our top sellers" },
+  { year: "July 12, 2023", text: "FDACS confirms to us in writing that THCA is legal to sell" },
   { year: "2024", text: "6-county same-day delivery + national e-commerce at peak" },
   { year: "2024", text: "FDACS THCA reversal \u2014 13 locations closed, warehouse vacated" },
   { year: "2025", text: "Rebuilding \u2014 new website, new platform, same mission" },
@@ -1974,7 +1975,7 @@ function AboutPage() {
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">We did everything right. Then the rules changed.</h2>
           <p className="text-[#231F20] text-base sm:text-lg leading-relaxed">
-            Florida law around hemp has always been complicated. We&rsquo;ve been targeted more than most because we were one of the biggest brands in the state. When THCA products started appearing everywhere, we stayed on the sideline &mdash; Florida had no clear legal path. Then in 2024, we received a written email from FDACS (Florida Department of Agriculture and Consumer Services) confirming THCA was legal to sell. We invested millions building out a full THCA product line. Months later, FDACS walked into our stores and red-tagged every THCA product. Our competitors continue selling THCA to this day. We cannot. We followed the rules. We paid the price. That decision cost us 13 retail locations, our delivery service, our warehouse, and nearly everything we&rsquo;d built. We went from 15 locations to 2. We went from 64 employees to 9.
+            Florida law around hemp has always been complicated. We&rsquo;ve been targeted more than most because we were one of the biggest brands in the state. When THCA products started appearing everywhere, we stayed on the sideline &mdash; Florida had no clear legal path. Then in July 2023, we received a written email from FDACS (Florida Department of Agriculture and Consumer Services) confirming THCA was legal to sell. We invested millions building out a full THCA product line. Months later, FDACS walked into our stores and red-tagged every THCA product. Our competitors continue selling THCA to this day. We cannot. We followed the rules. We paid the price. That decision cost us 13 retail locations, our delivery service, our warehouse, and nearly everything we&rsquo;d built. We went from 15 locations to 2. We went from 64 employees to 9.
           </p>
         </div>
       </section>
