@@ -1912,7 +1912,7 @@ const ABOUT_TIMELINE = [
   { year: "December 2021", text: "Hudson opens \u2014 location #9" },
   { year: "January 2022", text: "Lady Lake opens \u2014 location #10" },
   { year: "April 4, 2022", text: "Pinellas Park opens \u2014 location #11" },
-  { year: "April 18, 2022", text: "Tampa opens \u2014 location #12" },
+  { year: "May 2022", text: "Tampa opens \u2014 location #12" },
   { year: "May 2022", text: "Zephyrhills (#13) and Apopka (#14) open" },
   { year: "2022\u20132023", text: "Port Richey opens \u2014 location #15" },
   { year: "2023", text: "8,000 sq ft manufacturing & distribution center opens in Brooksville" },
