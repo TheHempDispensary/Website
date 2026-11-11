@@ -10,6 +10,7 @@
  */
 
 const https = require("https");
+const { isPublicProduct } = require("./product-visibility.cjs");
 const fs = require("fs");
 const path = require("path");
 
@@ -443,10 +444,11 @@ async function main() {
     prerendered++;
   }
 
-  // Pre-render ALL live product pages (Netlify rejects deployed filenames
+  // Pre-render every public product page, sold-out items included
+  // (see scripts/product-visibility.cjs) (Netlify rejects deployed filenames
   // containing # or ?, so those slugs are skipped).
   const available = products
-    .filter((p) => p.slug && !/[#?]/.test(p.slug) && p.stock > 0 && p.available !== false)
+    .filter(isPublicProduct)
     .sort((a, b) => (b.price || 0) - (a.price || 0));
 
   console.log(`[prerender] Pre-rendering ${available.length} product pages...`);

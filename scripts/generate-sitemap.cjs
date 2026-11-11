@@ -10,6 +10,7 @@
  */
 
 const https = require("https");
+const { isPublicProduct } = require("./product-visibility.cjs");
 const fs = require("fs");
 const path = require("path");
 
@@ -164,9 +165,7 @@ function fetchProducts() {
       res.on("end", () => {
         try {
           const json = JSON.parse(data);
-          const products = (json.products || []).filter(
-            (p) => p.slug && p.available !== false
-          );
+          const products = (json.products || []).filter(isPublicProduct);
           console.log(
             `[sitemap] Fetched ${products.length} product slugs from API`
           );
