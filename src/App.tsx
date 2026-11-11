@@ -1920,7 +1920,8 @@ const ABOUT_TIMELINE = [
   { year: "March 2023", text: "The Hershey Company sends a cease-and-desist over our peanut butter cup packaging. We pulled it, sent them the stock, and relaunched it with new branding and natural, clean ingredients \u2014 it became and stayed one of our top sellers" },
   { year: "July 12, 2023", text: "FDACS confirms to us in writing that THCA is legal to sell" },
   { year: "2024", text: "6-county same-day delivery + national e-commerce at peak" },
-  { year: "2024", text: "FDACS THCA reversal \u2014 13 locations closed, warehouse vacated" },
+  { year: "February 23, 2024", text: "FDACS reverses course and starts red-tagging our THCA products, beginning in Tampa \u2014 Spring Hill West follows on March 15" },
+  { year: "2024", text: "13 locations closed, warehouse vacated" },
   { year: "2025", text: "Rebuilding \u2014 new website, new platform, same mission" },
   { year: "November 2026", text: "New federal hemp law \u2014 we\u2019re ready" },
 ];
