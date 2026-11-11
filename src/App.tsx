@@ -1933,7 +1933,8 @@ const ABOUT_TIMELINE: { date: string; text: string; kind: TimelineKind; store?: 
   { date: "July 2023", kind: "fdacs", text: "FDACS confirms to us in writing that THCA is legal to sell" },
   { date: "February 2024", kind: "fdacs", text: "FDACS reverses course and starts red-tagging our THCA products, beginning in Tampa \u2014 Spring Hill West follows in March" },
   { date: "August 2024", kind: "milestone", text: "In-house 24-hour delivery launches across 6 counties, and we join DoorDash" },
-  { date: "March 2025", kind: "closing", text: "13 stores, the Brooksville HQ, and our delivery service shut down \u2014 we go from 15 locations to 2" },
+  { date: "March 2025", kind: "closing", text: "The shutdown begins: 13 stores, the Brooksville HQ, and our delivery service close. We thought we were closing for good, and held a blowout sale to clear out everything in our 8,000 sq ft Brooksville facility" },
+  { date: "March 2025", kind: "milestone", text: "We saved it \u2014 The Hemp Dispensary stays open with our two Spring Hill stores" },
   { date: "2025", kind: "milestone", text: "Rebuilding \u2014 new website, new platform, same mission" },
   { date: "November 2026", kind: "milestone", text: "New federal hemp law \u2014 we\u2019re ready" },
 ];
