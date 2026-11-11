@@ -1905,7 +1905,7 @@ const ABOUT_TIMELINE = [
   { year: "June 16, 2020", text: "Crystal River opens \u2014 location #2" },
   { year: "September 2020", text: "New Port Richey opens" },
   { year: "February 2021", text: "Clearwater opens" },
-  { year: "February 2021", text: "Our Super Bowl LV flyer in Tampa draws a cease-and-desist from the NFL" },
+  { year: "February 2021", text: "The NFL sends a cease-and-desist over our Super Bowl LV yard signs around the stadium in Tampa. On Super Bowl morning we cut the team logos off every sign \u2014 hopping out of our trucks in bumper-to-bumper traffic \u2014 and left the signs standing" },
   { year: "April 2021", text: "Homosassa opens" },
   { year: "June 2021", text: "Tarpon Springs opens" },
   { year: "July 2021", text: "Spring Hill East opens (14312 Spring Hill Dr)" },
