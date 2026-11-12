@@ -11,6 +11,7 @@
 
 const https = require("https");
 const { isPublicProduct } = require("./product-visibility.cjs");
+const { seoProductName, seoProductTitle, seoProductDescription, cleanProductText } = require("./product-seo.cjs");
 const fs = require("fs");
 const path = require("path");
 
@@ -261,16 +262,13 @@ function buildCategoryJsonLd(routePath, title) {
 
 function buildProductJsonLd(product) {
   const canonical = `${SITE}/products/product/${product.slug}`;
-  const name =
-    (product.online_name || product.name)
-      .replace(/\s{2,}/g, " ")
-      .trim();
+  const name = seoProductName(product.online_name || product.name);
   const schema = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: name,
     url: canonical,
-    description: (product.description || "").slice(0, 500),
+    description: cleanProductText(product.description).slice(0, 500) || seoProductDescription("", name),
     brand: { "@type": "Brand", name: "The Hemp Dispensary" },
     offers: {
       "@type": "Offer",
@@ -301,7 +299,7 @@ function buildProductJsonLd(product) {
       "@type": "ListItem",
       position: 3,
       name: product.categories[0],
-      item: SITE + "/products/" + product.categories[0].toLowerCase(),
+      item: SITE + "/products/" + product.categories[0].toLowerCase().trim().replace(/\s+/g, "-"),
     });
     breadcrumb.itemListElement.push({
       "@type": "ListItem",
@@ -509,12 +507,10 @@ async function main() {
   for (const product of available) {
     const routePath = `/products/product/${product.slug}`;
     const canonical = SITE + routePath;
-    const name = (product.online_name || product.name).replace(/\s{2,}/g, " ").trim();
+    const name = seoProductName(product.online_name || product.name);
     const cat = (product.categories && product.categories[0]) || "Products";
-    const title = `${name} - ${cat} - The Hemp Dispensary`;
-    const desc = product.description
-      ? product.description.slice(0, 155).replace(/\s+/g, " ").trim()
-      : `${name} — lab-tested hemp product at The Hemp Dispensary. Available for pickup or shipping.`;
+    const title = seoProductTitle(name, cat);
+    const desc = seoProductDescription(product.description, name);
 
     const priceFmt = "$" + (product.price / 100).toFixed(2);
     const body = [
@@ -522,7 +518,7 @@ async function main() {
       `Category: ${cat}`,
       `Price: ${priceFmt}`,
       product.stock > 0 ? "In Stock" : "Out of Stock",
-      product.description || "",
+      cleanProductText(product.description),
       product.lab_results && product.lab_results.length > 0
         ? `COA available — ${product.lab_results.length} lab result(s) on file.`
         : "Lab-tested with Certificate of Analysis available.",
