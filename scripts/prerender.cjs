@@ -51,6 +51,54 @@ const ROUTE_META = {
     h1: "Hemp Concentrates",
     body: "Premium hemp concentrates including THCA diamonds, live rosin, badder, sauce, shatter, and wax. Both solventless and hydrocarbon extraction options available. Every concentrate is lab-tested with full panel COAs for cannabinoid potency, residual solvents, heavy metals, and pesticides. Prices start at $30 for 1 gram with volume discounts on larger sizes. Available for in-store pickup at our Spring Hill FL locations or nationwide shipping. Popular options include live rosin from top cultivators, diamond sauce for dabbing, and badder for versatile use. All concentrates are federally compliant hemp products.",
   },
+  "/products/gift-cards": {
+    title: "Gift Cards | The Hemp Dispensary",
+    description: "The Hemp Dispensary gift cards, good online and at our Spring Hill East and West stores.",
+    h1: "Gift Cards",
+    body: "Give the gift of choice with a Hemp Dispensary gift card. Gift cards can be used online and at both Spring Hill, Florida stores.",
+  },
+  "/products/new": {
+    title: "New Hemp & THCA Products | The Hemp Dispensary",
+    description: "Shop the newest hemp, THCA, CBD, edible, concentrate, and wellness products available from The Hemp Dispensary.",
+    h1: "New Items",
+    body: "The newest arrivals at The Hemp Dispensary: recently added flower, edibles, concentrates, vapes, tinctures, topicals, and accessories. Lab-tested hemp products for pickup at our Spring Hill East and West stores or shipped to you.",
+  },
+  "/products/online-exclusive": {
+    title: "Online Exclusive THCA Products | The Hemp Dispensary",
+    description: "Shop online-exclusive THCA flower, concentrates, and vapes shipped directly from our licensed partner. Not available for in-store pickup.",
+    h1: "Online Exclusives",
+    body: "Online-exclusive products from The Hemp Dispensary, including THCA flower, concentrates, and vapes. These items ship directly from our licensed out-of-state partner and are not available for in-store pickup. Each product page lists its lab results.",
+  },
+  "/products/sale": {
+    title: "Hemp & THCA Products on Sale | The Hemp Dispensary",
+    description: "Shop current discounts on select hemp, THCA, CBD, edible, concentrate, and wellness products from The Hemp Dispensary.",
+    h1: "Sale Items",
+    body: "Current sale prices on select hemp products at The Hemp Dispensary. Discounts change with each sale, so check back for the latest deals on flower, edibles, concentrates, vapes, and more.",
+  },
+  "/products/relax": {
+    title: "Relax - Shop by Effect | The Hemp Dispensary",
+    description: "Browse hemp products our customers choose when they want to unwind. Lab-tested flower, edibles, vapes and more.",
+    h1: "Relax",
+    body: "Browse The Hemp Dispensary's products by effect. This page lists the flower, edibles, vapes, tinctures, and topicals tagged Relax. Effects vary from person to person; each product page lists its lab results.",
+  },
+  "/products/sleep": {
+    title: "Sleep - Shop by Effect | The Hemp Dispensary",
+    description: "Browse hemp products our customers choose for the evening. Lab-tested edibles, tinctures, vapes and more.",
+    h1: "Sleep",
+    body: "Browse The Hemp Dispensary's products by effect. This page lists the edibles, tinctures, vapes, and flower tagged Sleep. Effects vary from person to person; each product page lists its lab results.",
+  },
+  "/products/energy": {
+    title: "Energy - Shop by Effect | The Hemp Dispensary",
+    description: "Browse hemp products our customers choose for daytime. Lab-tested flower, concentrates, vapes and more.",
+    h1: "Energy",
+    body: "Browse The Hemp Dispensary's products by effect. This page lists the flower, concentrates, vapes, and edibles tagged Energy. Effects vary from person to person; each product page lists its lab results.",
+  },
+  "/products/focus": {
+    title: "Focus - Shop by Effect | The Hemp Dispensary",
+    description: "Browse hemp products our customers choose when they want to stay on task. Lab-tested flower, edibles and more.",
+    h1: "Focus",
+    body: "Browse The Hemp Dispensary's products by effect. This page lists the flower, edibles, and tinctures tagged Focus. Effects vary from person to person; each product page lists its lab results.",
+  },
   "/about": {
     title: "About Us - Florida Hemp Survivors Since 2019",
     description: "Founded by two Spring Hill locals. Survived the 2024 FDACS reversal. Two Spring Hill stores still standing.",
@@ -419,7 +467,7 @@ async function main() {
   // covered by ROUTE_META are skipped.
   const prerenderedCategoryRoutes = new Set(Object.keys(ROUTE_META));
   for (const cat of categories) {
-    const slug = String(cat).toLowerCase();
+    const slug = String(cat).toLowerCase().trim().replace(/\s+/g, "-"); // "Gift Cards" -> gift-cards
     const routePath = `/products/${slug}`;
     if (prerenderedCategoryRoutes.has(routePath)) continue;
     const meta = genericCategoryMeta(slug);
