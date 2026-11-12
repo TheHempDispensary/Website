@@ -450,10 +450,10 @@ function imageSrcSet(url: string | null): string | undefined {
 function getProductBenefit(product: Product): string {
   const effect = getProductEffect(product);
   switch (effect.label) {
-    case "Sleep": return "Promotes restful sleep and relaxation";
-    case "Energy": return "Uplifting and energizing for your day";
-    case "Focus": return "Enhances mental clarity and focus";
-    default: return "Calming relief for body and mind";
+    case "Sleep": return "May help you wind down in the evening";
+    case "Energy": return "May feel uplifting and energizing";
+    case "Focus": return "May help you feel clear and focused";
+    default: return "May help you relax and unwind";
   }
 }
 
@@ -5456,8 +5456,8 @@ const PAGE_META: Record<string, { title: string; description: string }> = {
   "/products/edibles": { title: "THC Edibles & Gummies - Florida-Compliant - Hemp Dispensary", description: "\u03949 THC gummies, chocolates & drinks. Lab-tested, FL hemp law compliant. Same-day pickup or nationwide shipping." },
   "/products/concentrates": { title: "Hemp Concentrates: Dabs, Rosin, Diamonds - Hemp Dispensary", description: "THCA diamonds, live rosin, badder & sauce. Lab-tested concentrates from $30. FL hemp dispensary." },
   "/products/vapor": { title: "Vape Cartridges & Disposables | The Hemp Dispensary", description: "CBD and THC vape cartridges, disposables, and 510-thread batteries. Lab-tested hemp vapor products ready for pickup in Spring Hill FL." },
-  "/products/topicals": { title: "Hemp Topicals \u2013 Creams, Balms & Patches | The Hemp Dispensary", description: "Hemp topicals including CBD muscle creams, balms, roll-ons, and transdermal patches. Targeted relief, lab-tested, available in-store and online." },
-  "/products/tinctures": { title: "Hemp Tinctures \u2013 CBD, CBG & CBN Oils | The Hemp Dispensary", description: "CBD, CBG, CBN and full spectrum hemp tinctures. Sublingual oils for sleep, pain, focus, and daily wellness. Lab-tested, fast pickup or shipping." },
+  "/products/topicals": { title: "Hemp Topicals \u2013 Creams, Balms & Patches | The Hemp Dispensary", description: "Hemp topicals including CBD muscle creams, balms, roll-ons, and transdermal patches. Lab-tested and available in-store and online." },
+  "/products/tinctures": { title: "Hemp Tinctures \u2013 CBD, CBG & CBN Oils | The Hemp Dispensary", description: "CBD, CBG, CBN and full spectrum hemp tinctures. Sublingual oils that may support relaxation, focus and your daily routine. Lab-tested, fast pickup or shipping." },
   "/products/apparel": { title: "Hemp Dispensary Apparel | The Hemp Dispensary", description: "Official Hemp Dispensary apparel \u2014 hoodies, tees, and gear. Rep your favorite hemp store." },
   "/products/accessories": { title: "Smoking Accessories \u2013 Pipes, Grinders & More | The Hemp Dispensary", description: "Hemp accessories including glass pipes, rolling papers, grinders, storage, and butane. Everything you need in one stop." },
   "/products/packaging": { title: "Packaging Supplies | The Hemp Dispensary", description: "Wholesale packaging supplies \u2014 containers, bags, jars, and more from top manufacturers like Chubby Gorilla. Available at The Hemp Dispensary." },
