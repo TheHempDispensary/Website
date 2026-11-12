@@ -380,9 +380,50 @@ function cleanProductName(str: string): string {
   return cleaned;
 }
 
+const NAME_UPPER = /\b(CBC|CBD|CBG|CBN|CBT|THC|HHC|OG|GMO|XL|XXL|2XL|THD|LED|UFO|RS11|FF1|MK|CR|XIII|LTR)\b/gi;
+const NAME_SPECIAL: Record<string, string> = { thca: "THCa", thcv: "THCv", thcp: "THCp", cbda: "CBDa" };
+
+/** Display form of a product name (mirrors seoProductName in scripts/product-seo.cjs). */
 function titleCase(str: string): string {
-  const KEEP_UPPER = /\b(CBC|CBD|CBG|CBN|CBT|THC)\b/gi;
-  return cleanProductName(str).toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).replace(KEEP_UPPER, m => m.toUpperCase());
+  let s = cleanProductName(str).toLowerCase().replace(/(^|[\s/(\-"])([a-z])/g, (_m, a: string, b: string) => a + b.toUpperCase());
+  s = s.replace(NAME_UPPER, (m) => m.toUpperCase());
+  s = s.replace(/\b(thca|thcv|thcp|cbda)\b/gi, (m) => NAME_SPECIAL[m.toLowerCase()]);
+  return s.replace(/\b(\d+(?:\.\d+)?)\s?(mg|ml|oz|g|mm|pk|d)\b/gi, (_m, n: string, u: string) => n + u.toLowerCase());
+}
+
+function seoProductTitle(name: string, cat: string): string {
+  const full = `${name} - ${cat} - The Hemp Dispensary`;
+  if (full.length <= 65) return full;
+  const short = `${name} | The Hemp Dispensary`;
+  return short.length <= 70 ? short : name;
+}
+
+function decodeEntities(s: string): string {
+  return s.replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&").replace(/&lt;/gi, "<").replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"').replace(/&#0?39;|&apos;/gi, "'").replace(/&reg;/gi, "\u00AE").replace(/&trade;/gi, "\u2122")
+    .replace(/&#(\d+);/g, (_m, n: string) => String.fromCharCode(Number(n)));
+}
+
+/** Plain text of a product description: no HTML, entities, "Description :" label or leading shipping notice. */
+function cleanProductText(raw: string | null | undefined): string {
+  let s = decodeEntities(decodeEntities(String(raw || "")));
+  s = s.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  s = s.replace(/^\*[^.]*\.(\s*[A-Z][A-Z ,]*\.)*\s*/, "");
+  return s.replace(/^(product\s+)?description\s*:\s*/i, "").trim();
+}
+
+function seoProductDescription(raw: string | null | undefined, name: string): string {
+  let s = cleanProductText(raw);
+  if (s.length > 155) {
+    const cut = s.slice(0, 153);
+    s = cut.slice(0, Math.max(cut.lastIndexOf(" "), 100)).replace(/[\s,;:|\u2013\u2014-]+$/, "") + "\u2026";
+  }
+  if (s.length < 50) {
+    const tail = `${name} at The Hemp Dispensary in Spring Hill, FL. Order for pickup or shipping.`;
+    s = s ? `${s.replace(/[.\s]+$/, "")}. ${tail}` : tail;
+    if (s.length > 160) s = tail;
+  }
+  return s;
 }
 
 const PRODUCT_FALLBACK = "/images/product-placeholder.webp";
@@ -409,10 +450,10 @@ function imageSrcSet(url: string | null): string | undefined {
 function getProductBenefit(product: Product): string {
   const effect = getProductEffect(product);
   switch (effect.label) {
-    case "Sleep": return "Promotes restful sleep and relaxation";
-    case "Energy": return "Uplifting and energizing for your day";
-    case "Focus": return "Enhances mental clarity and focus";
-    default: return "Calming relief for body and mind";
+    case "Sleep": return "May help you wind down in the evening";
+    case "Energy": return "May feel uplifting and energizing";
+    case "Focus": return "May help you feel clear and focused";
+    default: return "May help you relax and unwind";
   }
 }
 
@@ -2145,13 +2186,69 @@ function TermsPage() {
 }
 
 function PrivacyPage() {
+  const H = ({ children }: { children: ReactNode }) => <h2 className="text-2xl font-semibold text-[#231F20] mt-8 mb-3">{children}</h2>;
+  const P = ({ children }: { children: ReactNode }) => <p className="mb-4">{children}</p>;
+  const UL = ({ children }: { children: ReactNode }) => <ul className="list-disc pl-6 mb-4 space-y-1.5">{children}</ul>;
   return (
     <div className="max-w-4xl mx-auto px-4 py-16">
-      <h1 className="text-4xl font-bold text-[#231F20] mb-6">Privacy Policy</h1>
-      <div className="prose prose-lg text-[#231F20]">
-        <p className="mb-4">We respect your privacy and are committed to protecting your personal information. We collect only the information necessary to process your orders and improve your experience.</p>
-        <p className="mb-4">We do not sell or share your personal information with third parties except as necessary to fulfill your orders.</p>
-        <p>Your payment information is processed securely through Clover and is never stored on our servers.</p>
+      <h1 className="text-4xl font-bold text-[#231F20] mb-2">Privacy Policy</h1>
+      <p className="text-sm text-[#231F20]/60 mb-6">Effective November 2026</p>
+      <div className="text-[#231F20] leading-relaxed">
+        <P>This policy explains what information The Hemp Dispensary collects when you use thehempdispensary.com, shop in our Spring Hill, Florida stores, or join our rewards program, and what we do with it.</P>
+
+        <H>Information we collect</H>
+        <UL>
+          <li><strong>Age check.</strong> We ask for your date of birth to confirm you are 21 or older. It is checked in your browser and is not sent to us or saved.</li>
+          <li><strong>Orders.</strong> Your name, email, phone number, the items you order, how you want to receive them, and your shipping or delivery address when you choose shipping or delivery.</li>
+          <li><strong>Payment.</strong> Card payments are processed by Clover. Your card number goes to Clover and is not stored on our servers.</li>
+          <li><strong>Hemp Rewards.</strong> If you join, your name, phone number, email, your birthday month and day if you choose to give it, and your points, purchases and referrals.</li>
+          <li><strong>Chat with Bud.</strong> Messages you send to Bud, our chat assistant, and its replies are stored with a session ID so we can answer you and improve the service. Please don&rsquo;t share sensitive personal or health information in chat.</li>
+          <li><strong>Bulk and wholesale requests.</strong> The contact and business details you enter in the request form.</li>
+          <li><strong>Messages to us.</strong> What you send when you email, call or text us.</li>
+          <li><strong>Saved on your device.</strong> Your cart, your pickup, delivery or shipping choice, a chat session ID, and a copy of our product list are saved in your browser&rsquo;s storage so the site works and loads faster. You can clear them in your browser settings.</li>
+        </UL>
+
+        <H>How we use it</H>
+        <UL>
+          <li>To take, prepare, ship, deliver and support your orders.</li>
+          <li>To run the rewards program, including points, birthday bonuses and referrals.</li>
+          <li>To answer your questions, in chat and otherwise.</li>
+          <li>To prevent fraud and chargebacks and to keep the records the law requires.</li>
+          <li>To improve our products, website and service.</li>
+        </UL>
+
+        <H>Who we share it with</H>
+        <P>We do not sell your personal information. We share it only with companies that help us run the business, and only what they need:</P>
+        <UL>
+          <li>Clover, for payment processing and point of sale.</li>
+          <li>Shipping carriers such as USPS, and delivery services, to get your order to you.</li>
+          <li>Partner suppliers who ship certain online-only products directly to you.</li>
+          <li>The technology providers that host our website and systems and power Bud&rsquo;s chat replies.</li>
+          <li>Authorities, when the law requires it or to protect our customers, staff or business.</li>
+        </UL>
+
+        <H>How long we keep it</H>
+        <P>We keep order and rewards records for as long as your account is active and as needed for tax, legal and business records. Chat conversations are kept so we can review and improve Bud&rsquo;s answers.</P>
+
+        <H>Your choices</H>
+        <UL>
+          <li>Ask us what information we have about you, or ask us to correct or delete it.</li>
+          <li>Leave the rewards program at any time.</li>
+          <li>Opt out of any marketing message by following the instructions in it or by contacting us.</li>
+        </UL>
+        <P>Some records, such as completed orders, may need to be kept to meet legal requirements.</P>
+
+        <H>Age</H>
+        <P>Our website and products are for adults 21 and older. We do not knowingly collect information from anyone under 21.</P>
+
+        <H>Security</H>
+        <P>We use reasonable safeguards to protect your information. No website or system is perfectly secure, so we can&rsquo;t guarantee absolute security.</P>
+
+        <H>Changes</H>
+        <P>If we change this policy, we will post the new version here and update the effective date.</P>
+
+        <H>Contact us</H>
+        <P>Questions or requests about your information: <a href="mailto:Support@TheHempDispensary.com" className="text-[#126A44] underline">Support@TheHempDispensary.com</a> or (352) 842-6185.</P>
       </div>
     </div>
   );
@@ -2336,7 +2433,7 @@ const CANNABINOID_CONFIGS: Record<string, { title: string; heading: string; para
   "delta-8": {
     title: "Delta-8 THC",
     heading: "Delta-8 THC Products",
-    para1: "Delta-8 THC is a naturally occurring cannabinoid found in hemp plants, offering a milder psychoactive experience compared to traditional THC. Many users describe Delta-8 as producing clear-headed, relaxing effects without the intensity or anxiety sometimes associated with Delta-9 THC.",
+    para1: "Delta-8 THC (\u22068THC) is a hemp-derived cannabinoid. It is psychoactive, and many people describe its effects as milder than Delta-9 THC. Effects vary from person to person, so start low and go slow.",
     para2: "At The Hemp Dispensary, our Delta-8 products are derived from federally compliant hemp and available in flower, gummies, vapes, wax, and tinctures. All products are third-party lab tested with certificates of analysis available. Visit either of our Spring Hill locations or order online for home delivery.",
     keywords: ["delta-8", "delta 8", "d8"],
     pageTitle: "Delta-8 THC Products | The Hemp Dispensary \u2013 Spring Hill, FL",
@@ -5359,8 +5456,8 @@ const PAGE_META: Record<string, { title: string; description: string }> = {
   "/products/edibles": { title: "THC Edibles & Gummies - Florida-Compliant - Hemp Dispensary", description: "\u03949 THC gummies, chocolates & drinks. Lab-tested, FL hemp law compliant. Same-day pickup or nationwide shipping." },
   "/products/concentrates": { title: "Hemp Concentrates: Dabs, Rosin, Diamonds - Hemp Dispensary", description: "THCA diamonds, live rosin, badder & sauce. Lab-tested concentrates from $30. FL hemp dispensary." },
   "/products/vapor": { title: "Vape Cartridges & Disposables | The Hemp Dispensary", description: "CBD and THC vape cartridges, disposables, and 510-thread batteries. Lab-tested hemp vapor products ready for pickup in Spring Hill FL." },
-  "/products/topicals": { title: "Hemp Topicals \u2013 Creams, Balms & Patches | The Hemp Dispensary", description: "Hemp topicals including CBD muscle creams, balms, roll-ons, and transdermal patches. Targeted relief, lab-tested, available in-store and online." },
-  "/products/tinctures": { title: "Hemp Tinctures \u2013 CBD, CBG & CBN Oils | The Hemp Dispensary", description: "CBD, CBG, CBN and full spectrum hemp tinctures. Sublingual oils for sleep, pain, focus, and daily wellness. Lab-tested, fast pickup or shipping." },
+  "/products/topicals": { title: "Hemp Topicals \u2013 Creams, Balms & Patches | The Hemp Dispensary", description: "Hemp topicals including CBD muscle creams, balms, roll-ons, and transdermal patches. Lab-tested and available in-store and online." },
+  "/products/tinctures": { title: "Hemp Tinctures \u2013 CBD, CBG & CBN Oils | The Hemp Dispensary", description: "CBD, CBG, CBN and full spectrum hemp tinctures. Sublingual oils that may support relaxation, focus and your daily routine. Lab-tested, fast pickup or shipping." },
   "/products/apparel": { title: "Hemp Dispensary Apparel | The Hemp Dispensary", description: "Official Hemp Dispensary apparel \u2014 hoodies, tees, and gear. Rep your favorite hemp store." },
   "/products/accessories": { title: "Smoking Accessories \u2013 Pipes, Grinders & More | The Hemp Dispensary", description: "Hemp accessories including glass pipes, rolling papers, grinders, storage, and butane. Everything you need in one stop." },
   "/products/packaging": { title: "Packaging Supplies | The Hemp Dispensary", description: "Wholesale packaging supplies \u2014 containers, bags, jars, and more from top manufacturers like Chubby Gorilla. Available at The Hemp Dispensary." },
@@ -5497,14 +5594,9 @@ function App() {
       const slug = key.replace("/products/product/", "");
       const p = products.find((x) => x.slug === slug);
       if (p) {
-        const name = (p.online_name || p.name).replace(/\s{2,}/g, " ").trim();
+        const name = titleCase(p.online_name || p.name);
         const cat = (p.categories && p.categories[0]) || "Products";
-        meta = {
-          title: `${name} - ${cat} - The Hemp Dispensary`,
-          description: p.description
-            ? p.description.slice(0, 155).replace(/\s+/g, " ").trim()
-            : `${name} \u2014 lab-tested hemp product at The Hemp Dispensary. Available for pickup or shipping.`,
-        };
+        meta = { title: seoProductTitle(name, cat), description: seoProductDescription(p.description, name) };
       }
     } else if (!meta && /^\/products\/[^/]+$/.test(key)) {
       const slug = key.replace("/products/", "");
