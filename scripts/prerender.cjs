@@ -99,6 +99,18 @@ const ROUTE_META = {
     h1: "Focus",
     body: "Browse The Hemp Dispensary's products by effect. This page lists the flower, edibles, and tinctures tagged Focus. Effects vary from person to person; each product page lists its lab results.",
   },
+  "/terms": {
+    title: "Terms of Service | The Hemp Dispensary",
+    description: "Terms of Service for The Hemp Dispensary: ordering, age requirements, returns, and policies for our Spring Hill stores and online shop.",
+    h1: "Terms of Service",
+    body: "The terms that apply when you shop with The Hemp Dispensary online or at our Spring Hill, Florida stores, including age requirements, orders, returns, and shipping.",
+  },
+  "/privacy": {
+    title: "Privacy Policy | The Hemp Dispensary",
+    description: "Privacy Policy for The Hemp Dispensary. Learn how we handle the information you share when you shop with us.",
+    h1: "Privacy Policy",
+    body: "How The Hemp Dispensary handles the information you share when you order online, join our rewards program, or contact us.",
+  },
   "/about": {
     title: "About Us - Florida Hemp Survivors Since 2019",
     description: "Founded by two Spring Hill locals. Survived the 2024 FDACS reversal. Two Spring Hill stores still standing.",
@@ -408,7 +420,7 @@ function fetchCatalog() {
 // They must exist as static files (HTTP 200) now that the /* 200
 // catch-all is gone — otherwise a direct hit would 404.
 const SHELL_ROUTES = [
-  "/checkout", "/account", "/terms", "/privacy", "/shipping-policy",
+  "/checkout", "/account", "/shipping-policy",
 ];
 
 function genericCategoryMeta(slug) {

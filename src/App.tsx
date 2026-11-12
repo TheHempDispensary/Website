@@ -5376,6 +5376,8 @@ const PAGE_META: Record<string, { title: string; description: string }> = {
   "/cbg": { title: "CBG Products | The Hemp Dispensary", description: "Shop CBG tinctures, wax, gummies, and flower at The Hemp Dispensary in Spring Hill, FL. The mother cannabinoid, lab-tested and federally compliant." },
   "/cbn": { title: "CBN Products | The Hemp Dispensary", description: "Shop CBN gummies, tinctures, and nighttime blends at The Hemp Dispensary in Spring Hill, FL. Formulated for relaxation and sleep. Lab-tested." },
   "/wholesale": { title: "Bulk Bargains \u2013 Wholesale Pricing | The Hemp Dispensary", description: "Bulk Bargains at The Hemp Dispensary \u2014 wholesale pricing on vape cartridges, edibles, flower, and more. Mix and match flavors, submit your order, and pay via invoice." },
+  "/checkout": { title: "Checkout | The Hemp Dispensary", description: "Secure checkout at The Hemp Dispensary." },
+  "/account": { title: "My Account | The Hemp Dispensary", description: "Sign in to your Hemp Dispensary account to see orders and rewards." },
   "/terms": { title: "Terms of Service | The Hemp Dispensary", description: "Terms of Service for The Hemp Dispensary. Read our policies on orders, shipping, returns, and more." },
   "/privacy": { title: "Privacy Policy | The Hemp Dispensary", description: "Privacy Policy for The Hemp Dispensary. Learn how we handle your personal information." },
   "/shipping": { title: "Shipping & Pickup Info | The Hemp Dispensary", description: "Shipping and pickup information for The Hemp Dispensary. 5-minute in-store pickup, next-day local delivery, and nationwide shipping." },
