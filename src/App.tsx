@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback, type ReactNode } from "react";
 import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, TrendingUp, Users, Cake, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, Facebook, FlaskConical, FileText, ExternalLink, Gem, Dog } from "lucide-react";
-import { OCTOBER_SALE_SECTIONS } from "./data/octoberSale";
 import { isHalloweenSeason, HalloweenHeroDecor, HalloweenGarland, HalloweenFooterBand, WitchHat } from "./halloween";
 
 const HALLOWEEN = isHalloweenSeason();
@@ -1947,7 +1946,6 @@ const ABOUT_TIMELINE: { date: string; text: string; kind: TimelineKind; store?: 
   { date: "2025", kind: "milestone", text: "HQ moves into the back of Spring Hill East \u2014 we get a manufacturing permit there and keep making products and shipping online orders" },
   { date: "2025", kind: "milestone", text: "Rebuilding \u2014 new website, new platform, same mission" },
   { date: "March 2026", kind: "milestone", text: "New 1,400 sq ft HQ opens in Spring Hill \u2014 where we make our products and ship online orders" },
-  { date: "November 2026", kind: "milestone", text: "New federal hemp law \u2014 we\u2019re ready" },
 ];
 
 const TIMELINE_STYLE: Record<TimelineKind, { label: string; dot: string; chip: string }> = {
@@ -2072,7 +2070,7 @@ function AboutPage() {
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">We did everything right. Then the rules changed.</h2>
           <p className="text-[#231F20] text-base sm:text-lg leading-relaxed">
-            Florida law around hemp has always been complicated. We&rsquo;ve been targeted more than most because we were one of the biggest brands in the state. When THCA products started appearing everywhere, we stayed on the sideline &mdash; Florida had no clear legal path. Then in July 2023, we received a written email from FDACS (Florida Department of Agriculture and Consumer Services) confirming THCA was legal to sell. We invested millions building out a full THCA product line. Months later, FDACS walked into our stores and red-tagged every THCA product. Our competitors continue selling THCA to this day. We cannot. We followed the rules. We paid the price. That decision cost us 13 retail locations, our delivery service, our warehouse, and nearly everything we&rsquo;d built. We went from 15 locations to 2. We went from 64 employees to 9.
+            Florida law around hemp has always been complicated. We&rsquo;ve been targeted more than most because we were one of the biggest brands in the state. When THCA products started appearing everywhere, we stayed on the sideline &mdash; Florida had no clear legal path. Then in July 2023, we received a written email from FDACS (Florida Department of Agriculture and Consumer Services) confirming THCA was legal to sell. We invested millions building out a full THCA product line. Months later, FDACS walked into our stores and red-tagged every THCA product. Our competitors continue selling THCA in their Florida stores to this day. We cannot &mdash; Florida told us we can&rsquo;t. Today our THCA is sold online only and ships from our out-of-state partner. We followed the rules. We paid the price. That decision cost us 13 retail locations, our delivery service, our warehouse, and nearly everything we&rsquo;d built. We went from 15 locations to 2. We went from 64 employees to 9.
           </p>
         </div>
       </section>
@@ -2082,7 +2080,7 @@ function AboutPage() {
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">Two locations. Same mission.</h2>
           <p className="text-[#231F20] text-base sm:text-lg leading-relaxed mb-8">
-            Spring Hill West opened December 1, 2019. It&rsquo;s still open. Spring Hill East is still open. We still source the highest quality lab-tested hemp products we can find. We still know most of our customers by name. We&rsquo;re not a corporate chain. We&rsquo;re two guys from Spring Hill who believed in this plant before most people knew what it was &mdash; and we still do. With another federal law change on the horizon, we&rsquo;re facing new challenges again. We&rsquo;ve been here before. We&rsquo;re not going anywhere.
+            Spring Hill West opened December 1, 2019. It&rsquo;s still open. Spring Hill East is still open. We still source the highest quality lab-tested hemp products we can find. We still know most of our customers by name. We&rsquo;re not a corporate chain. We&rsquo;re two guys from Spring Hill who believed in this plant before most people knew what it was &mdash; and we still do. We&rsquo;re not going anywhere.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button onClick={() => navigate("/products")} className="px-8 py-3.5 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] rounded-full font-bold text-lg transition-colors shadow-lg">Shop Now</button>
@@ -2846,6 +2844,7 @@ function SiteFooter() {
             <div className="space-y-2">
               <a href="/about" onClick={(e) => { e.preventDefault(); navigate("/about"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">About Us</a>
               <a href="/contact" onClick={(e) => { e.preventDefault(); navigate("/contact"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Contact</a>
+              <a href="/lab-results" onClick={(e) => { e.preventDefault(); navigate("/lab-results"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Lab Results</a>
               <a href="/our-locations" onClick={(e) => { e.preventDefault(); navigate("/our-locations"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Our Locations</a>
               <a href="/loyalty" onClick={(e) => { e.preventDefault(); navigate("/loyalty"); }} className="block text-[#FFFFFF]/70 hover:text-[#B3D335] text-sm transition-colors">Rewards</a>
                 <a href="/wholesale" onClick={(e) => { e.preventDefault(); navigate("/wholesale"); }} className="block text-[#B3D335] hover:text-[#FFFFFF] text-sm font-semibold transition-colors">Bulk Bargains</a>
@@ -5232,67 +5231,101 @@ function AccountPage() {
 
 
 
-function OctoberSalePage() {
-  const total = OCTOBER_SALE_SECTIONS.reduce((n, s) => n + s.items.length, 0);
-  const maxOff = Math.max(...OCTOBER_SALE_SECTIONS.flatMap(s => s.items.map(i => parseInt(i.off, 10) || 0)));
-  const sectionId = (title: string) => "sale-" + title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+/* ======================== LAB RESULTS PAGE ======================== */
+function labBaseName(p: Product): string {
+  return (p.online_name || p.name).replace(/\d+(\.\d+)?\s*(gram|grams|g|count|ct|oz|ml|mg pack)\b/gi, "").replace(/\s{2,}/g, " ").trim();
+}
+
+function LabResultsPage({ products, loading }: { products: Product[]; loading: boolean }) {
+  const [query, setQuery] = useState("");
+  const [cat, setCat] = useState("All");
+
+  // One row per lab report: sizes of the same product share a COA.
+  const rows = useMemo(() => {
+    const map = new Map<string, { key: string; name: string; category: string; slug: string; batch: string; status: string; date: string; url?: string; sizes: number }>();
+    for (const p of products) {
+      if (!p.lab_results || p.lab_results.length === 0) continue;
+      if (p.stock > 0 && p.available === false) continue; // not sold online: no product page
+      const base = labBaseName(p);
+      for (const lr of p.lab_results) {
+        const key = `${base.toLowerCase()}|${lr.sample_accession}`;
+        const existing = map.get(key);
+        if (existing) { existing.sizes += 1; continue; }
+        map.set(key, {
+          key, name: base, category: (p.categories && p.categories[0]) || "Other", slug: p.slug,
+          batch: lr.batch_no || "", status: lr.sample_status || "", date: lr.coa_approved_date || "", url: lr.coa_pdf_url, sizes: 1,
+        });
+      }
+    }
+    return [...map.values()].sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
+  }, [products]);
+
+  const cats = useMemo(() => ["All", ...Array.from(new Set(rows.map((r) => r.category))).sort()], [rows]);
+  const q = query.trim().toLowerCase();
+  const shown = rows.filter((r) => (cat === "All" || r.category === cat) && (!q || `${r.name} ${r.batch} ${r.category}`.toLowerCase().includes(q)));
+  const fmtDate = (d: string) => {
+    const t = d ? new Date(`${d.slice(0, 10)}T12:00:00`) : null;
+    return t && !isNaN(t.getTime()) ? t.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
+  };
+
   return (
-    <div className="bg-[#FFFFFF]">
-      <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
-        <div className="relative overflow-hidden rounded-3xl border-4 border-[#FFCB08] bg-gradient-to-br from-[#126A44] via-[#0F5A3A] to-[#0B4A30] text-[#FFFFFF] shadow-xl p-6 sm:p-10">
-          <div className="grid sm:grid-cols-[1fr_auto] gap-6 items-center">
-            <div>
-              <p className="text-[#FFCB08] text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase">Spring Hill East &amp; West</p>
-              <h1 className="mt-2 leading-none">
-                <span className="block text-4xl sm:text-6xl font-black uppercase tracking-tight">October</span>
-                <span className="block text-2xl sm:text-4xl font-black uppercase text-[#FFCB08] mt-1">Clearance Sale</span>
-              </h1>
-              <p className="mt-4 text-sm sm:text-base text-[#FFFFFF]/90">All {total} deals, up to {maxOff}% off. Sale runs through October 31 or while supplies last.</p>
-            </div>
-            <img src="/bud-puppet.webp" alt="Bud, The Hemp Dispensary mascot" width="160" height="160" className="hidden sm:block w-40 h-40 object-contain drop-shadow-xl" />
-          </div>
-        </div>
-
-        <nav aria-label="Sale categories" className="flex flex-wrap gap-2 mt-6">
-          {OCTOBER_SALE_SECTIONS.map(s => (
-            <a key={s.title} href={"#" + sectionId(s.title)} className="px-3 py-1.5 rounded-full border border-[#126A44]/30 text-xs sm:text-sm font-semibold text-[#126A44] hover:bg-[#126A44] hover:text-[#FFFFFF] transition-colors">
-              {s.icon} {s.title} <span className="opacity-60">({s.items.length})</span>
-            </a>
-          ))}
-        </nav>
-
-        {OCTOBER_SALE_SECTIONS.map(s => (
-          <section key={s.title} id={sectionId(s.title)} className="mt-10 scroll-mt-28">
-            <h2 className="flex items-center gap-3 text-xl sm:text-2xl font-bold text-[#126A44]">
-              <span className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-lg" style={{ background: s.color }}>{s.icon}</span>
-              {s.title}
-            </h2>
-            <p className="text-sm text-[#231F20]/60 mt-1 ml-12">{s.blurb}</p>
-            <table className="w-full mt-4 text-sm">
-              <thead>
-                <tr className="text-left text-[10px] sm:text-xs uppercase tracking-wider text-[#231F20]/50 border-b border-[#231F20]/10">
-                  <th className="py-2 pr-2 font-semibold">Product</th>
-                  <th className="py-2 px-2 font-semibold text-right">Was</th>
-                  <th className="py-2 px-2 font-semibold text-right">October</th>
-                  <th className="py-2 pl-2 font-semibold text-right">Off</th>
-                </tr>
-              </thead>
-              <tbody>
-                {s.items.map(i => (
-                  <tr key={i.name} className="border-b border-[#231F20]/5">
-                    <td className="py-2 pr-2 text-[#231F20]">{i.name}</td>
-                    <td className="py-2 px-2 text-right text-[#231F20]/50 line-through whitespace-nowrap">{i.was}</td>
-                    <td className="py-2 px-2 text-right font-bold text-[#126A44] whitespace-nowrap">{i.now}</td>
-                    <td className="py-2 pl-2 text-right whitespace-nowrap"><span className="inline-block px-2 py-0.5 rounded-full bg-[#C0392B] text-[#FFFFFF] text-xs font-bold">{i.off}</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        ))}
-
-        <p className="mt-10 pt-6 border-t border-[#231F20]/10 text-xs text-[#231F20]/60">Sale runs through October 31 or while supplies last. Freebies stack with sale prices; one freebie per order. Prices exclude tax. Must be 21+ with valid ID. Not available where prohibited.</p>
+    <div className="max-w-5xl mx-auto px-4 py-10 sm:py-14">
+      <div className="flex items-center gap-3 mb-3">
+        <FlaskConical className="h-8 w-8 text-[#126A44]" />
+        <h1 className="text-3xl sm:text-4xl font-bold text-[#231F20]">Lab Results &amp; COAs</h1>
       </div>
+      <p className="text-[#231F20]/80 mb-6 max-w-3xl">
+        Certificates of Analysis (COAs) from independent labs for our hemp products. Search by product name or batch number, then open the lab report.
+        Don&rsquo;t see the batch on your package? <a href="/contact" onClick={(e) => { e.preventDefault(); navigate("/contact"); }} className="text-[#126A44] font-medium underline">Contact us</a> and we&rsquo;ll send it.
+      </p>
+
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <div className="relative flex-1">
+          <Search className="h-4 w-4 text-[#231F20]/40 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search product or batch number" aria-label="Search lab results"
+            className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-[#231F20]/15 text-sm text-[#231F20] focus:outline-none focus:ring-2 focus:ring-[#B3D335]" />
+        </div>
+      </div>
+      <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
+        {cats.map((c) => (
+          <button key={c} onClick={() => setCat(c)}
+            className={`px-3.5 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${cat === c ? "bg-[#126A44] text-[#FFFFFF]" : "bg-[#231F20]/5 text-[#231F20] hover:bg-[#B3D335]/30"}`}>
+            {c}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <p className="py-16 text-center text-[#231F20]/60">Loading lab results…</p>
+      ) : shown.length === 0 ? (
+        <p className="py-16 text-center text-[#231F20]/60">No lab results match that search.</p>
+      ) : (
+        <>
+          <p className="text-sm text-[#231F20]/60 mb-3">{shown.length} lab report{shown.length === 1 ? "" : "s"}</p>
+          <div className="rounded-2xl border border-[#231F20]/10 divide-y divide-[#231F20]/10 bg-[#FFFFFF]">
+            {shown.map((r) => (
+              <div key={r.key} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 px-4 py-3">
+                <div className="flex-1 min-w-0">
+                  <ProductLink slug={r.slug} className="font-medium text-[#231F20] hover:text-[#126A44]">{titleCase(r.name)}</ProductLink>
+                  <div className="text-xs text-[#231F20]/60 mt-0.5">
+                    {r.category}{r.batch ? ` \u00B7 Batch ${r.batch}` : ""}{fmtDate(r.date) ? ` \u00B7 ${fmtDate(r.date)}` : ""}{r.sizes > 1 ? ` \u00B7 ${r.sizes} sizes` : ""}
+                  </div>
+                </div>
+                {r.status && (
+                  <span className={`self-start sm:self-auto text-xs font-medium px-2 py-0.5 rounded-full ${/pass|complete/i.test(r.status) ? "bg-[#ADD038]/30 text-[#126A44]" : "bg-[#FFCB08]/30 text-[#7A5D00]"}`}>{r.status}</span>
+                )}
+                {r.url ? (
+                  <a href={r.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-[#126A44] hover:text-[#58BA49] whitespace-nowrap">
+                    <FileText className="h-4 w-4" /> View COA <ExternalLink className="h-3 w-3" />
+                  </a>
+                ) : (
+                  <ProductLink slug={r.slug} className="text-sm font-medium text-[#126A44] hover:text-[#58BA49] whitespace-nowrap">See results</ProductLink>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -5333,7 +5366,6 @@ const PAGE_META: Record<string, { title: string; description: string }> = {
   "/products/packaging": { title: "Packaging Supplies | The Hemp Dispensary", description: "Wholesale packaging supplies \u2014 containers, bags, jars, and more from top manufacturers like Chubby Gorilla. Available at The Hemp Dispensary." },
   "/products/pets": { title: "CBD Pet Products | The Hemp Dispensary", description: "CBD pet tinctures and treats for dogs and cats. Lab-tested, vet-friendly hemp products at The Hemp Dispensary." },
   "/loyalty": { title: "Hemp Rewards \u2013 Loyalty Program | The Hemp Dispensary", description: "Hemp Rewards \u2014 earn points on every purchase and redeem for discounts. Join the loyalty program at The Hemp Dispensary." },
-  "/october-sale": { title: "October Clearance Sale \u2013 All Deals | The Hemp Dispensary", description: "Every deal in The Hemp Dispensary October Clearance Sale at Spring Hill East & West. Sale runs through October 31 or while supplies last." },
   "/about": { title: "About Us - Florida Hemp Survivors Since 2019", description: "Founded by two Spring Hill locals. Survived the 2024 FDACS reversal. Two Spring Hill stores still standing." },
   "/contact": { title: "Contact Us | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Get in touch with The Hemp Dispensary. Visit us at our Spring Hill locations, call, email, or reach out online." },
   "/our-locations": { title: "Store Locations | The Hemp Dispensary \u2013 Spring Hill, FL", description: "Find The Hemp Dispensary near you. Two Spring Hill, FL locations with daily hours and 5-minute pickup." },
@@ -5347,7 +5379,7 @@ const PAGE_META: Record<string, { title: string; description: string }> = {
   "/terms": { title: "Terms of Service | The Hemp Dispensary", description: "Terms of Service for The Hemp Dispensary. Read our policies on orders, shipping, returns, and more." },
   "/privacy": { title: "Privacy Policy | The Hemp Dispensary", description: "Privacy Policy for The Hemp Dispensary. Learn how we handle your personal information." },
   "/shipping": { title: "Shipping & Pickup Info | The Hemp Dispensary", description: "Shipping and pickup information for The Hemp Dispensary. 5-minute in-store pickup, next-day local delivery, and nationwide shipping." },
-  "/lab-results": { title: "Lab Results & COAs - Every Product Tested - Hemp Dispensary", description: "Full panel certificates of analysis for every THCA, \u03948, and \u03949 product we sell. Updated weekly." },
+  "/lab-results": { title: "Lab Results & COAs | The Hemp Dispensary", description: "Certificates of analysis (COAs) for our hemp products. Search by product or batch number and open the lab report." },
 };
 
 function App() {
@@ -5684,7 +5716,8 @@ function App() {
       : <ShopPage products={products} categories={categories} selectedCategory={catSlug || "all"} onAddToCart={(p) => addToCart(p, 1)} fulfillment={fulfillment} sale={activeSale} />);
   }
   if (route === "/checkout") return shell(<CheckoutPage cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClear={clearCart} fulfillment={fulfillment} sale={activeSale} />);
-  if (route === "/october-sale" || route === "/october-sale/") return shell(<OctoberSalePage />);
+  if (route === "/october-sale" || route === "/october-sale/") { navigate("/"); return null; }
+  if (route === "/lab-results") return shell(<LabResultsPage products={products} loading={loading} />);
   if (route === "/about") return shell(<AboutPage />);
   if (route === "/terms") return shell(<TermsPage />);
   if (route === "/privacy") return shell(<PrivacyPage />);

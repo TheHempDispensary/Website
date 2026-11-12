@@ -14,6 +14,10 @@
 # Force apex → www
 https://thehempdispensary.com/*  https://www.thehempdispensary.com/:splat  301!
 
+# --- Ended promotions ------------------------------------------------
+/october-sale    /  301!
+/october-sale/*  /  301!
+
 # --- Legacy Square Online catalog IDs (/product/{ID}) → 410 Gone -------
 # ~277 unmappable old Square item IDs. 410 tells Google "deliberately
 # removed" and drops them fastest.

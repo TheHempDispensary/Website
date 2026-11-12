@@ -51,12 +51,6 @@ const ROUTE_META = {
     h1: "Hemp Concentrates",
     body: "Premium hemp concentrates including THCA diamonds, live rosin, badder, sauce, shatter, and wax. Both solventless and hydrocarbon extraction options available. Every concentrate is lab-tested with full panel COAs for cannabinoid potency, residual solvents, heavy metals, and pesticides. Prices start at $30 for 1 gram with volume discounts on larger sizes. Available for in-store pickup at our Spring Hill FL locations or nationwide shipping. Popular options include live rosin from top cultivators, diamond sauce for dabbing, and badder for versatile use. All concentrates are federally compliant hemp products.",
   },
-  "/october-sale": {
-    title: "October Clearance Sale \u2013 All Deals | The Hemp Dispensary",
-    description: "Every deal in The Hemp Dispensary October Clearance Sale at Spring Hill East & West. Sale runs through October 31 or while supplies last.",
-    h1: "October Clearance Sale",
-    body: "The full list of October Clearance Sale deals at The Hemp Dispensary, Spring Hill East and West. Sale runs through October 31 or while supplies last. Prices exclude tax. Must be 21+ with valid ID.",
-  },
   "/about": {
     title: "About Us - Florida Hemp Survivors Since 2019",
     description: "Founded by two Spring Hill locals. Survived the 2024 FDACS reversal. Two Spring Hill stores still standing.",
@@ -64,10 +58,10 @@ const ROUTE_META = {
     body: "The Hemp Dispensary was founded in 2019 by two Spring Hill locals who saw the potential of legal hemp after the 2018 Farm Bill. What started as a road trip idea grew into 15 locations across Florida. In 2024, the FDACS reversal forced us to close 13 stores overnight. But we didn't give up. Today, our two remaining Spring Hill locations — West (6175 Deltona Blvd) and East (14312 Spring Hill Dr) — continue serving the community with the same commitment to quality, transparency, and lab-tested products that built our reputation. We have over 6,000 Google reviews with a 4.8 average rating. Every product we sell comes with a Certificate of Analysis from an independent lab.",
   },
   "/lab-results": {
-    title: "Lab Results & COAs - Every Product Tested - Hemp Dispensary",
-    description: "Full panel certificates of analysis for every THCA, \u03948, and \u03949 product we sell. Updated weekly.",
+    title: "Lab Results & COAs | The Hemp Dispensary",
+    description: "Certificates of analysis (COAs) for our hemp products. Search by product or batch number and open the lab report.",
     h1: "Lab Results & Certificates of Analysis",
-    body: "At The Hemp Dispensary, every product we sell is independently lab-tested with full panel Certificates of Analysis (COAs). Our COAs test for cannabinoid potency (THCA, Delta-8, Delta-9, CBD, CBG, CBN), terpene profiles, heavy metals, pesticides, residual solvents, and microbial contaminants. We update our lab results weekly as new batches arrive. Transparency is central to our business — we believe you deserve to know exactly what's in the products you consume. Click on any product in our store to view its specific COA. If you have questions about our testing standards or need a COA for a specific batch, contact us and we'll provide it.",
+    body: "Find the Certificate of Analysis (COA) for The Hemp Dispensary's hemp products. Lab reports come from independent labs and are listed by product and batch number, covering flower, concentrates, edibles, vapor, tinctures, topicals, and pet products. Search for a product or the batch number on your package, then open the lab report. Each product page also shows its own lab results. If you can't find a batch, contact us and we'll send the COA.",
   },
   "/contact": {
     title: "Contact Us | The Hemp Dispensary - Spring Hill, FL",
