@@ -26,7 +26,7 @@ function isGiftCard(product: Product): boolean {
   return !!product.is_gift_card || product.sku.startsWith("GIFTCARD-");
 }
 const VALID_FEELING_SLUGS = new Set(["relax", "sleep", "energy", "focus"]);
-const VALID_PRODUCT_FILTER_SLUGS = new Set(["sale", "new"]);
+const VALID_PRODUCT_FILTER_SLUGS = new Set(["sale", "new", "online-exclusive"]);
 
 interface CartItem {
   product: Product;
