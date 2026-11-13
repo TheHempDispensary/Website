@@ -116,7 +116,7 @@ const ROUTE_META = {
     title: "About Us - Florida Hemp Survivors Since 2019",
     description: "Founded by two Spring Hill locals. Survived the 2024 FDACS reversal. Two Spring Hill stores still standing.",
     h1: "About Us - Florida Hemp Survivors Since 2019",
-    body: "The Hemp Dispensary was founded in 2019 by two Spring Hill locals who saw the potential of legal hemp after the 2018 Farm Bill. What started as a road trip idea grew into 15 locations across Florida. In 2024, the FDACS reversal forced us to close 13 stores overnight. But we didn't give up. Today, our two remaining Spring Hill locations — West (6175 Deltona Blvd) and East (14312 Spring Hill Dr) — continue serving the community with the same commitment to quality, transparency, and lab-tested products that built our reputation. We have over 6,000 Google reviews with a 4.8 average rating. Every product we sell comes with a Certificate of Analysis from an independent lab.",
+    body: "The Hemp Dispensary was founded in 2019 by two Spring Hill locals who saw the potential of legal hemp after the 2018 Farm Bill. What started as a road trip idea grew into 15 locations across Florida. In February 2024, FDACS reversed course on THCA, and in March 2025 we closed 13 stores. But we didn't give up. Today, our two remaining Spring Hill locations — West (6175 Deltona Blvd) and East (14312 Spring Hill Dr) — continue serving the community with the same commitment to quality, transparency, and lab-tested products that built our reputation. We have over 6,000 Google reviews with a 4.8 average rating. Our products are lab tested, and lab reports are on our Lab Results page.",
   },
   "/lab-results": {
     title: "Lab Results & COAs | The Hemp Dispensary",

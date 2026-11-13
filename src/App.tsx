@@ -1964,7 +1964,7 @@ const ABOUT_TIMELINE: { date: string; text: string; kind: TimelineKind; store?: 
   { date: "June 2020", kind: "store", store: 2, text: "Crystal River opens" },
   { date: "September 2020", kind: "store", store: 3, text: "New Port Richey opens" },
   { date: "February 2021", kind: "store", store: 4, text: "Clearwater opens" },
-  { date: "February 2021", kind: "legal", text: "The NFL sends a cease-and-desist over our Super Bowl LV yard signs around the stadium in Tampa. On Super Bowl morning we cut the team logos off every sign \u2014 hopping out of our trucks in bumper-to-bumper traffic \u2014 and left the signs standing" },
+  { date: "February 2021", kind: "legal", text: "The NFL sends a cease-and-desist over our Super Bowl LV yard signs around the stadium in Tampa" },
   { date: "April 2021", kind: "store", store: 5, text: "Homosassa opens" },
   { date: "June 2021", kind: "store", store: 6, text: "Tarpon Springs opens" },
   { date: "July 2021", kind: "store", store: 7, text: "Spring Hill East opens (14312 Spring Hill Dr)" },
@@ -2081,7 +2081,7 @@ function AboutPage() {
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">It started with a road trip</h2>
           <p className="text-[#231F20] text-base sm:text-lg leading-relaxed">
-            In April 2018, two Spring Hill residents started Healing Emotionally Mentally Physically (HEMP), a wholesale hemp company. Early 2019, sourcing problems pushed them to Colorado. Standing inside a marijuana dispensary in Colorado, they looked at each other and knew exactly what Spring Hill was missing. They came home with one idea: open a Hemp Dispensary.
+            In April 2018, two Spring Hill residents started Healing Emotionally Mentally Physically (HEMP), a wholesale hemp company. In early 2019, sourcing problems pushed them to Colorado. Standing inside a marijuana dispensary in Colorado, they looked at each other and knew exactly what Spring Hill was missing. They came home with one idea: open a Hemp Dispensary.
           </p>
         </div>
       </section>
@@ -2101,7 +2101,7 @@ function AboutPage() {
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">We built something</h2>
           <p className="text-[#231F20] text-base sm:text-lg leading-relaxed">
-            A few months after opening West, they opened a second location in Crystal River. Then more followed. New Port Richey. Clearwater. Homosassa. Tarpon Springs. Spring Hill East. Clermont. Hudson. Lady Lake. Pinellas Park. Tampa. Zephyrhills. Apopka. Port Richey. By 2024, The Hemp Dispensary had grown to 15 retail locations across Florida, an 8,000 square foot manufacturing and distribution center in Brooksville, an in-house 24-hour delivery service covering 6 counties, and an e-commerce store shipping nationally and internationally. Along the way they received cease and desist letters from Reese&rsquo;s Peanut Butter, the American Red Cross, and the NFL &mdash; which is how you know you&rsquo;ve built something worth noticing.
+            A few months after opening West, they opened a second location in Crystal River. Then more followed. New Port Richey. Clearwater. Homosassa. Tarpon Springs. Spring Hill East. Clermont. Hudson. Lady Lake. Pinellas Park. Tampa. Zephyrhills. Apopka. Port Richey. By 2024, The Hemp Dispensary had grown to 15 retail locations across Florida, an 8,000 square foot manufacturing and distribution center in Brooksville, an in-house 24-hour delivery service covering 6 counties, and an e-commerce store shipping nationally and internationally. Along the way they received cease and desist letters from the NFL, the American Red Cross, and The Hershey Company (the maker of Reese&rsquo;s) &mdash; which is how you know you&rsquo;ve built something worth noticing.
           </p>
         </div>
       </section>
@@ -2121,11 +2121,11 @@ function AboutPage() {
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">Two locations. Same mission.</h2>
           <p className="text-[#231F20] text-base sm:text-lg leading-relaxed mb-8">
-            Spring Hill West opened December 1, 2019. It&rsquo;s still open. Spring Hill East is still open. We still source the highest quality lab-tested hemp products we can find. We still know most of our customers by name. We&rsquo;re not a corporate chain. We&rsquo;re two guys from Spring Hill who believed in this plant before most people knew what it was &mdash; and we still do. We&rsquo;re not going anywhere.
+            Spring Hill West opened December 1, 2019. It&rsquo;s still open. Spring Hill East is still open. We make our own products at our Spring Hill HQ and ship online orders from there. We still source the highest quality lab-tested hemp products we can find. We still know most of our customers by name. We&rsquo;re not a corporate chain. We&rsquo;re two guys from Spring Hill who believed in this plant before most people knew what it was &mdash; and we still do. We&rsquo;re not going anywhere.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button onClick={() => navigate("/products")} className="px-8 py-3.5 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] rounded-full font-bold text-lg transition-colors shadow-lg">Shop Now</button>
-            <button onClick={() => { const el = document.getElementById('locations-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else navigate('/contact'); }} className="px-8 py-3.5 border-2 border-[#231F20] text-[#231F20] hover:bg-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors">Visit Us</button>
+            <button onClick={() => { const el = document.getElementById('locations-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else navigate('/our-locations'); }} className="px-8 py-3.5 border-2 border-[#231F20] text-[#231F20] hover:bg-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold text-lg transition-colors">Visit Us</button>
           </div>
         </div>
       </section>
