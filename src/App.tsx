@@ -1984,7 +1984,7 @@ const ABOUT_TIMELINE: { date: string; text: string; kind: TimelineKind; store?: 
   { date: "August 2024", kind: "milestone", text: "In-house 24-hour delivery launches across 6 counties, and we join DoorDash" },
   { date: "March 2025", kind: "closing", text: "The shutdown begins: 13 stores, the Brooksville HQ, and our delivery service close. We thought we were closing for good, and held a blowout sale to clear out everything in our 8,000 sq ft Brooksville facility" },
   { date: "April 2025", kind: "milestone", text: "We saved it \u2014 The Hemp Dispensary stays open with our two Spring Hill stores" },
-  { date: "2025", kind: "milestone", text: "HQ moves into the back of Spring Hill East \u2014 we get a manufacturing permit there and keep making products and shipping online orders" },
+  { date: "April 2025", kind: "milestone", text: "HQ moves into the back of Spring Hill East \u2014 we get a manufacturing permit there and keep making products and shipping online orders" },
   { date: "2025", kind: "milestone", text: "Rebuilding \u2014 new website, new platform, same mission" },
   { date: "March 2026", kind: "milestone", text: "New 1,400 sq ft HQ opens in Spring Hill \u2014 where we make our products and ship online orders" },
 ];
@@ -2081,7 +2081,7 @@ function AboutPage() {
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">It started with a road trip</h2>
           <p className="text-[#231F20] text-base sm:text-lg leading-relaxed">
-            In April 2018, two Spring Hill residents started Healing Emotionally Mentally Physically (HEMP), a wholesale hemp company. In early 2019, sourcing problems pushed them to Colorado. Standing inside a marijuana dispensary in Colorado, they looked at each other and knew exactly what Spring Hill was missing. They came home with one idea: open a Hemp Dispensary.
+            In April 2018, the two of us &mdash; both Spring Hill residents &mdash; started Healing Emotionally Mentally Physically (HEMP), a wholesale hemp company. In early 2019, sourcing problems pushed us to Colorado. Standing inside a marijuana dispensary there, we looked at each other and knew exactly what Spring Hill was missing. We came home with one idea: open a Hemp Dispensary.
           </p>
         </div>
       </section>
@@ -2091,7 +2091,7 @@ function AboutPage() {
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">Nobody would give us a chance</h2>
           <p className="text-[#231F20] text-base sm:text-lg leading-relaxed">
-            One founder was in real estate, the other in landscaping. They spent months searching for a building before they even opened &mdash; landlord after landlord turned them away because they didn&rsquo;t understand what hemp was and assumed it was illegal. Finally, one landlord sat down with them, listened, and took a chance. On December 1, 2019, The Hemp Dispensary opened its doors at 6175 Deltona Blvd, Spring Hill, FL &mdash; the store we still call Spring Hill West. Once the doors were open, the real hustle began. When one had to show a house, the other covered the store. When one had to run a landscaping estimate, the other held things down. They built it shift by shift.
+            One of us was in real estate, the other in landscaping. We spent months searching for a building before we even opened &mdash; landlord after landlord turned us away because they didn&rsquo;t understand what hemp was and assumed it was illegal. Finally, one landlord sat down with us, listened, and took a chance. On December 1, 2019, The Hemp Dispensary opened its doors at 6175 Deltona Blvd, Spring Hill, FL &mdash; the store we still call Spring Hill West. Once the doors were open, the real hustle began. When one had to show a house, the other covered the store. When one had to run a landscaping estimate, the other held things down. We built it shift by shift.
           </p>
         </div>
       </section>
@@ -2101,7 +2101,7 @@ function AboutPage() {
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] mb-6">We built something</h2>
           <p className="text-[#231F20] text-base sm:text-lg leading-relaxed">
-            A few months after opening West, they opened a second location in Crystal River. Then more followed. New Port Richey. Clearwater. Homosassa. Tarpon Springs. Spring Hill East. Clermont. Hudson. Lady Lake. Pinellas Park. Tampa. Zephyrhills. Apopka. Port Richey. By 2024, The Hemp Dispensary had grown to 15 retail locations across Florida, an 8,000 square foot manufacturing and distribution center in Brooksville, an in-house 24-hour delivery service covering 6 counties, and an e-commerce store shipping nationally and internationally. Along the way they received cease and desist letters from the NFL, the American Red Cross, and The Hershey Company (the maker of Reese&rsquo;s) &mdash; which is how you know you&rsquo;ve built something worth noticing.
+            A few months after opening West, we opened a second location in Crystal River. Then more followed. New Port Richey. Clearwater. Homosassa. Tarpon Springs. Spring Hill East. Clermont. Hudson. Lady Lake. Pinellas Park. Tampa. Zephyrhills. Apopka. Port Richey. By 2024, The Hemp Dispensary had grown to 15 retail locations across Florida, an 8,000 square foot manufacturing and distribution center in Brooksville, an in-house 24-hour delivery service covering 6 counties, and an e-commerce store shipping nationally and internationally. Along the way we received cease and desist letters from the NFL, the American Red Cross, and The Hershey Company (the maker of Reese&rsquo;s) &mdash; which is how you know you&rsquo;ve built something worth noticing.
           </p>
         </div>
       </section>
