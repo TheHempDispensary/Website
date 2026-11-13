@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback, type ReactNode } from "react";
-import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, TrendingUp, Users, Cake, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, Facebook, FlaskConical, FileText, ExternalLink, Gem, Dog } from "lucide-react";
+import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Users, Cake, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, FlaskConical, FileText, ExternalLink, Gem, Dog } from "lucide-react";
 import { isHalloweenSeason, HalloweenHeroDecor, HalloweenGarland, HalloweenFooterBand, WitchHat } from "./halloween";
 
 const HALLOWEEN = isHalloweenSeason();
@@ -4457,16 +4457,6 @@ const REDEMPTION_TIERS_FALLBACK = [
   { points: 100, discount: "$5 Off", minPurchase: 25, desc: "Any purchase $25+" },
 ];
 
-const WAYS_TO_EARN = [
-  { label: "Sign Up Bonus", pts: 200, icon: Gift, desc: "Create your free account" },
-  { label: "Every $1 Spent", pts: 1, icon: DollarSign, desc: "In-store & online" },
-  { label: "Follow on Facebook", pts: 25, icon: Facebook, desc: "@TheHempDispensaryFL" },
-  { label: "Email Signup", pts: 30, icon: Mail, desc: "Join our mailing list" },
-  { label: "Google Review", pts: 150, icon: Star, desc: "Pending staff approval" },
-  { label: "Refer a Friend", pts: 500, icon: Users, desc: "After friend's first purchase" },
-  { label: "Birthday Bonus", pts: 100, icon: Cake, desc: "Awarded in your birthday month" },
-];
-
 function LoyaltyPage() {
   const [phone, setPhone] = useState("");
   const [customer, setCustomer] = useState<LoyaltyCustomer | null>(null);
@@ -4781,33 +4771,6 @@ function LoyaltyPage() {
 
       {/* ===== GENERAL SECTIONS (always visible) ===== */}
       <div className="mt-10 space-y-6">
-
-        {/* --- WAYS TO EARN --- */}
-        <div className="bg-[#FFFFFF] rounded-2xl p-6 border border-[#231F20]/10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-full bg-[#ADD038]/20 flex items-center justify-center">
-              <TrendingUp className="h-5 w-5 text-[#3D8C32]" />
-            </div>
-            <h3 className="text-lg font-bold text-[#231F20]">Ways to Earn</h3>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {WAYS_TO_EARN.map(way => {
-              const WayIcon = way.icon;
-              return (
-                <div key={way.label} className="flex items-start gap-3 p-3 rounded-xl border border-[#231F20]/10 hover:border-[#B3D335]/40 transition-colors">
-                  <div className="w-9 h-9 rounded-lg bg-[#B3D335]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <WayIcon className="h-4 w-4 text-[#126A44]" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[#231F20] font-semibold text-sm leading-tight">{way.label}</p>
-                    <p className="text-[#126A44] font-bold text-xs">+{way.pts} pts</p>
-                    <p className="text-[#231F20] text-[11px] leading-tight">{way.desc}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
 
         {/* --- HOW IT WORKS --- */}
         <div className="grid md:grid-cols-3 gap-4">
