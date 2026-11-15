@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback, type ReactNode } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback, Fragment, type ReactNode } from "react";
 import { Search, ShoppingCart, Package, Box, X, ArrowLeft, MapPin, Clock, Phone, Mail, Star, Plus, Minus, Trash2, CheckCircle, Truck, CreditCard, Lock, AlertCircle, User, Gift, ChevronRight, Shield, Zap, Send, Leaf, Candy, Droplets, Wind, Pipette, Pill, Wrench, Users, Cake, ChevronDown, ChevronUp, Calendar, DollarSign, RefreshCw, Shirt, FlaskConical, FileText, ExternalLink, Gem, Dog } from "lucide-react";
 import { isHalloweenSeason, HalloweenHeroDecor, HalloweenGarland, HalloweenFooterBand, WitchHat } from "./halloween";
 
@@ -717,18 +717,36 @@ function FulfillmentSwitchNotification({ removedItems, newLabel, onClose }: { re
 }
 
 /* ======================== STICKY TOP BAR ======================== */
+/** The gold cross from our logo. */
+function GoldCross({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={className}>
+      <path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7z" fill="#FFCB08" stroke="#231F20" strokeWidth="1.6" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function StickyTopBar({ sale }: { sale?: ActiveSaleData | null }) {
   const salePct = maxSalePercent(sale);
   const saleLine = salePct
     ? (isSelectItemsSale(sale) ? `${saleMonthName(sale)} Sale: Up to ${salePct}% OFF Select Items!` : `${salePct}% OFF SALE TODAY!`)
     : "FIRST10 = 10% Off";
+  if (HALLOWEEN) {
+    return (
+      <div className="bg-gradient-to-r from-[#140B1F] via-[#2A123D] to-[#140B1F] text-[#FFFFFF] text-center py-2 px-4 text-sm font-medium">
+        <span className="hidden sm:inline" aria-hidden="true">{"\u{1F383}"} </span>
+        <span className="hidden sm:inline">Order Online {"\u2013"} Ready In 5 Minutes | Spring Hill | Open Daily | </span>
+        <span className="sm:hidden">Ready In 5 Minutes | Spring Hill | </span>
+        <span className="text-[#FF7A1A] font-bold">{saleLine}</span>
+        <span className="hidden sm:inline" aria-hidden="true"> {"\u{1F987}"}</span>
+      </div>
+    );
+  }
   return (
-    <div className={`${HALLOWEEN ? "bg-gradient-to-r from-[#140B1F] via-[#2A123D] to-[#140B1F]" : "bg-[#231F20]"} text-[#FFFFFF] text-center py-2 px-4 text-sm font-medium`}>
-      {HALLOWEEN && <span className="hidden sm:inline" aria-hidden="true">{"\u{1F383}"} </span>}
-      <span className="hidden sm:inline">{"\u{1F680}"} Order Online {"\u2013"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | Open Daily | </span>
-      <span className="sm:hidden">{"\u{1F680}"} Ready In 5 Minutes | {"\u{1F4CD}"} Spring Hill | </span>
-      <span className={HALLOWEEN ? "text-[#FF7A1A] font-bold" : "text-[#FFCB08] font-bold"}>{saleLine}</span>
-      {HALLOWEEN && <span className="hidden sm:inline" aria-hidden="true"> {"\u{1F987}"}</span>}
+    <div className="thd-tape text-center py-1.5 px-4 text-[11px] sm:text-xs whitespace-nowrap overflow-hidden">
+      <span className="hidden sm:inline">Order online, ready in 5 minutes <span aria-hidden="true">///</span> Spring Hill <span aria-hidden="true">///</span> Open daily <span aria-hidden="true">///</span> </span>
+      <span className="sm:hidden">Ready in 5 minutes <span aria-hidden="true">///</span> </span>
+      <span>{saleLine}</span>
     </div>
   );
 }
@@ -740,22 +758,22 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
 
   return (
     <>
-    <header className="bg-[#FFFFFF] sticky top-0 z-50 border-b border-[#231F20]/15 shadow-sm">
+    <header className="bg-[#231F20] sticky top-0 z-50 border-b-2 border-[#B3D335]">
       <div className="max-w-7xl mx-auto px-3 sm:px-4">
         <div className="h-14 sm:h-16 flex items-center justify-between relative">
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-[#231F20] hover:text-[#126A44] transition-colors" aria-label="Open navigation menu">
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-[#FFFFFF] hover:text-[#B3D335] transition-colors" aria-label="Open navigation menu">
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>}
             </button>
-            <button onClick={onSearch} className="p-2 text-[#231F20] hover:text-[#126A44] transition-colors" aria-label="Search products"><Search className="h-5 w-5" /></button>
+            <button onClick={onSearch} className="p-2 text-[#FFFFFF] hover:text-[#B3D335] transition-colors" aria-label="Search products"><Search className="h-5 w-5" /></button>
             <button
               onClick={() => window.dispatchEvent(new Event("bud:open"))}
-              className="flex items-center gap-1.5 pl-0.5 pr-1 sm:pr-3 py-0.5 rounded-full hover:bg-[#B3D335]/20 transition-colors"
+              className="flex items-center gap-1.5 pl-0.5 pr-1 sm:pr-3 py-0.5 rounded-full hover:bg-[#FFFFFF]/10 transition-colors"
               aria-label="Chat with Bud"
               title="Chat with Bud"
             >
               <span className="block w-9 h-9"><BudCharacter size={36} mood="idle" /></span>
-              <span className="hidden lg:inline text-xs font-semibold text-[#231F20]">Ask Bud</span>
+              <span className="hidden lg:inline text-xs font-semibold text-[#B3D335]">Ask Bud</span>
             </button>
           </div>
           <a href="/" onClick={(e) => { e.preventDefault(); navigate("/"); }} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
@@ -764,20 +782,20 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
           <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
             {/* Fulfillment pill */}
             {fulfillment && (
-              <button onClick={onFulfillmentClick} className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#231F20] text-[#B3D335] rounded-full text-xs font-medium hover:bg-[#231F20]/80 transition-colors" title="Change fulfillment method">
+              <button onClick={onFulfillmentClick} className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#B3D335] text-[#231F20] rounded-full text-xs font-bold hover:bg-[#FFCB08] transition-colors" title="Change fulfillment method">
                 {fulfillment.startsWith("pickup") ? <MapPin className="h-3.5 w-3.5" /> : fulfillment === "local_delivery" ? <Package className="h-3.5 w-3.5" /> : <Truck className="h-3.5 w-3.5" />}
                 <span>{getFulfillmentLabel(fulfillment)}</span>
                 <RefreshCw className="h-3 w-3" />
               </button>
             )}
-            <a href="/loyalty" onClick={(e) => { e.preventDefault(); navigate("/loyalty"); }} className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#126A44] transition-colors flex items-center gap-1" title="Hemp Rewards">
+            <a href="/loyalty" onClick={(e) => { e.preventDefault(); navigate("/loyalty"); }} className="p-1.5 sm:p-2 text-[#FFFFFF] hover:text-[#B3D335] transition-colors flex items-center gap-1" title="Hemp Rewards">
               <Gift className="h-5 w-5" />
               <span className="hidden md:inline text-xs font-medium">Rewards</span>
             </a>
-            <a href="/account" onClick={(e) => { e.preventDefault(); navigate("/account"); }} className="p-1.5 sm:p-2 text-[#231F20] hover:text-[#126A44] transition-colors" title="Account" aria-label="My account">
+            <a href="/account" onClick={(e) => { e.preventDefault(); navigate("/account"); }} className="p-1.5 sm:p-2 text-[#FFFFFF] hover:text-[#B3D335] transition-colors" title="Account" aria-label="My account">
               <User className="h-5 w-5" />
             </a>
-            <button onClick={onCartOpen} className="relative p-1.5 sm:p-2 text-[#231F20] hover:text-[#126A44] transition-colors" aria-label="View cart">
+            <button onClick={onCartOpen} className="relative p-1.5 sm:p-2 text-[#FFFFFF] hover:text-[#B3D335] transition-colors" aria-label="View cart">
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && <span className="absolute -top-0.5 -right-0.5 bg-[#B3D335] text-[#231F20] text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">{cartCount}</span>}
             </button>
@@ -786,7 +804,7 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
         {/* Mobile fulfillment pill */}
         {fulfillment && (
           <div className="sm:hidden flex justify-center pb-1.5">
-            <button onClick={onFulfillmentClick} className="flex items-center gap-1.5 px-3 py-1 bg-[#231F20] text-[#B3D335] rounded-full text-[11px] font-medium">
+            <button onClick={onFulfillmentClick} className="flex items-center gap-1.5 px-3 py-1 bg-[#B3D335] text-[#231F20] rounded-full text-[11px] font-bold">
               {fulfillment.startsWith("pickup") ? <MapPin className="h-3 w-3" /> : fulfillment === "local_delivery" ? <Package className="h-3 w-3" /> : <Truck className="h-3 w-3" />}
               <span>{getFulfillmentLabel(fulfillment)}</span>
               <RefreshCw className="h-2.5 w-2.5" />
@@ -794,21 +812,21 @@ function Header({ cartCount, onSearch, onCartOpen, fulfillment, onFulfillmentCli
           </div>
         )}
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center justify-center gap-1 pb-2 overflow-x-auto">
+        <nav className="hidden md:flex items-center justify-start xl:justify-center gap-0.5 pb-2 overflow-x-auto">
           {categories.map((cat) => (
-            <button key={cat} onClick={() => navigate(`/products/${categorySlug(cat)}`)} className="px-3 py-1.5 text-xs font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-full transition-colors whitespace-nowrap">{cat}</button>
+            <button key={cat} onClick={() => navigate(`/products/${categorySlug(cat)}`)} className="px-2 lg:px-2.5 py-1.5 text-xs font-semibold text-[#FFFFFF] hover:text-[#B3D335] hover:bg-[#FFFFFF]/10 rounded-full transition-colors whitespace-nowrap">{cat}</button>
           ))}
-          <button onClick={() => navigate("/wholesale")} className="px-3 py-1.5 text-xs font-bold text-[#126A44] hover:text-[#FFFFFF] hover:bg-[#126A44] rounded-full transition-colors whitespace-nowrap border border-[#126A44]">BULK BARGAINS</button>
+          <button onClick={() => navigate("/wholesale")} className="px-3 py-1.5 text-xs font-bold text-[#FFCB08] hover:text-[#231F20] hover:bg-[#FFCB08] rounded-full transition-colors whitespace-nowrap border border-[#FFCB08]">BULK BARGAINS</button>
         </nav>
       </div>
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#FFFFFF] border-t border-[#231F20]/10 shadow-lg">
+        <div className="md:hidden bg-[#231F20] border-t border-[#FFFFFF]/15 shadow-lg">
           <div className="max-w-7xl mx-auto px-4 py-3 grid grid-cols-2 gap-2">
             {categories.map((cat) => (
-              <button key={cat} onClick={() => { navigate(`/products/${categorySlug(cat)}`); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-medium text-[#231F20] hover:text-[#126A44] hover:bg-[#FFFFFF] rounded-lg transition-colors">{cat}</button>
+              <button key={cat} onClick={() => { navigate(`/products/${categorySlug(cat)}`); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-semibold tracking-wider text-[#FFFFFF] hover:text-[#B3D335] hover:bg-[#FFFFFF]/10 rounded-lg transition-colors">{cat}</button>
             ))}
-            <a href="/wholesale" onClick={(e) => { e.preventDefault(); navigate("/wholesale"); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-bold text-[#126A44] hover:bg-[#126A44] hover:text-[#FFFFFF] rounded-lg transition-colors flex items-center gap-2"><DollarSign className="h-4 w-4" /> Bulk Bargains</a>
+            <a href="/wholesale" onClick={(e) => { e.preventDefault(); navigate("/wholesale"); setMobileMenuOpen(false); }} className="text-left px-3 py-2.5 text-sm font-bold text-[#FFCB08] hover:bg-[#FFCB08] hover:text-[#231F20] rounded-lg transition-colors flex items-center gap-2"><DollarSign className="h-4 w-4" /> Bulk Bargains</a>
           </div>
         </div>
       )}
@@ -892,7 +910,7 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear, sale 
 
 
 /* ======================== HERO SECTION (Dark bg for contrast) ======================== */
-function HeroSection({ sale }: { sale?: ActiveSaleData | null }) {
+function HalloweenHero({ sale }: { sale?: ActiveSaleData | null }) {
   const salePct = maxSalePercent(sale);
   const heroPromo = salePct
     ? (isSelectItemsSale(sale) ? `${saleMonthName(sale)} Sale: Up to ${salePct}% OFF Select Items \u2014 Shop Now!` : `${salePct}% OFF SALE \u2014 Shop Now!`)
@@ -920,6 +938,58 @@ function HeroSection({ sale }: { sale?: ActiveSaleData | null }) {
   );
 }
 
+function HeroSection({ sale }: { sale?: ActiveSaleData | null }) {
+  const salePct = maxSalePercent(sale);
+  if (HALLOWEEN) return <HalloweenHero sale={sale} />;
+  const heroPromo = salePct
+    ? (isSelectItemsSale(sale) ? `${saleMonthName(sale)} Sale: up to ${salePct}% off select items` : `${salePct}% off sale`)
+    : "First order: 10% off with code FIRST10";
+  const promoDestination = salePct ? "/products/sale" : "/products";
+  const facts: [string, string][] = [
+    ["Tested", "Independent lab reports"],
+    ["Source", "Hemp-derived"],
+    ["Pickup", "Ready in 5 minutes"],
+    ["Stores", "2 in Spring Hill"],
+    ["Reviews", "4.8 stars \u00B7 6,000+ on Google"],
+  ];
+  return (
+    <section className="bg-[#231F20] relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 py-12 sm:py-20 flex flex-col lg:flex-row lg:items-center gap-10 lg:gap-14">
+        <div className="flex-1 min-w-0">
+          <p className="thd-mono text-[11px] sm:text-xs text-[#B3D335] flex items-center gap-2 mb-4"><GoldCross className="h-4 w-4 flex-shrink-0" /> Spring Hill, Florida {"\u00B7"} Since 2019 {"\u00B7"} 21+</p>
+          <h1 className="text-[3.25rem] leading-[0.95] sm:text-7xl lg:text-8xl text-[#FFFFFF] mb-5">
+            Skip the line.<br />
+            <span className="text-[#B3D335]">Get your hemp</span><br />
+            in minutes.
+          </h1>
+          <p className="text-[#FFFFFF]/85 text-base sm:text-lg mb-6 max-w-xl">Lab-tested flower, edibles, vapes and more. Order ahead and pick up in five minutes at either Spring Hill store, or have it shipped.</p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button onClick={() => navigate("/products")} className="px-8 py-3.5 sm:py-4 bg-[#B3D335] hover:bg-[#FFCB08] text-[#231F20] rounded-full font-extrabold text-lg transition-colors">Shop Now</button>
+            <button onClick={() => { const el = document.getElementById('locations-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else navigate('/our-locations'); }} className="px-8 py-3.5 sm:py-4 border-2 border-[#FFFFFF] hover:bg-[#FFFFFF] text-[#FFFFFF] hover:text-[#231F20] rounded-full font-extrabold text-lg transition-colors">Find a Store</button>
+          </div>
+          <button onClick={() => navigate(promoDestination)} className="thd-marker mt-6 inline-block text-xl sm:text-2xl text-[#FFCB08] hover:text-[#B3D335] -rotate-2 transition-colors text-left">{heroPromo}</button>
+        </div>
+        <aside className="w-full lg:w-[380px] flex-shrink-0 bg-[#FFFFFF] text-[#231F20] border-2 border-[#231F20] rounded-md thd-hard-shadow-lime lg:rotate-1" aria-label="The Hemp Dispensary at a glance">
+          <div className="flex items-center justify-between px-4 py-3 border-b-2 border-[#231F20]">
+            <span className="flex items-center gap-2 text-sm font-extrabold uppercase tracking-wide"><GoldCross className="h-5 w-5" /> The Hemp Dispensary</span>
+            <span className="thd-mono text-[10px] text-[#231F20]/70">Label</span>
+          </div>
+          <div className="p-4 space-y-3">
+            <p className="thd-display text-4xl">The short version</p>
+            <dl className="thd-mono text-[11px] grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+              {facts.map(([k, v]) => (
+                <Fragment key={k}><dt className="text-[#231F20]/70">{k}</dt><dd className="font-semibold">{v}</dd></Fragment>
+              ))}
+            </dl>
+            <div className="thd-barcode h-10" aria-hidden="true" />
+            <a href="/lab-results" onClick={(e) => { e.preventDefault(); navigate("/lab-results"); }} className="inline-block text-sm font-bold uppercase tracking-wide text-[#126A44] underline">Look up a lab report</a>
+          </div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
 /* ======================== TRUST STRIP ======================== */
 function TrustStrip() {
   const items = [
@@ -931,14 +1001,14 @@ function TrustStrip() {
     { icon: Clock, label: "Open Daily", sub: "East 7am-10pm | West 9am-10pm" },
   ];
   return (
-    <section className="bg-[#FFFFFF] border-b border-[#231F20]/10 cursor-pointer" onClick={() => navigate('/products')}>
+    <section className="bg-[#FFFFFF] border-b-2 border-[#231F20] cursor-pointer" onClick={() => navigate('/products')}>
       <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-4">
           {items.map((item) => (
             <div key={item.label} className="flex flex-col items-center text-center">
-              <item.icon className="h-5 w-5 text-[#3D8C32] mb-1" />
-              <span className="text-xs sm:text-sm font-semibold text-[#231F20] leading-tight">{item.label}</span>
-              <span className="text-[10px] sm:text-xs text-[#3D8C32] hidden sm:block">{item.sub}</span>
+              <span className="mb-1.5 inline-flex h-9 w-9 items-center justify-center bg-[#B3D335] border-2 border-[#231F20] rounded-[4px]"><item.icon className="h-4 w-4 text-[#231F20]" /></span>
+              <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-[#231F20] leading-tight">{item.label}</span>
+              <span className="text-[10px] sm:text-xs text-[#231F20]/70 hidden sm:block">{item.sub}</span>
             </div>
           ))}
         </div>
@@ -967,7 +1037,7 @@ function ShopByCategory({ productsByCategory, fulfillment }: { categories: strin
   return (
     <section className="bg-[#FFFFFF] py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl font-bold text-[#231F20] text-center mb-8">Shop by Category</h2>
+        <h2 className="text-3xl font-bold text-[#231F20] text-center mb-8">Shop the Shelf</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
           {displayCats.map((cat) => {
             const IconComp = catIconComponents[cat] || Package;
@@ -981,8 +1051,8 @@ function ShopByCategory({ productsByCategory, fulfillment }: { categories: strin
               ) : (
                 <IconComp className="h-10 w-10 text-[#3D8C32] mx-auto mb-3" />
               )}
-              <h3 className="text-lg font-semibold text-[#231F20] group-hover:text-[#126A44] transition-colors">{cat}</h3>
-              <p className="text-sm text-[#231F20] mt-1">{(productsByCategory[cat] || []).filter(p => stockFor(p) > 0).length} products</p>
+              <h3 className="thd-display text-xl sm:text-2xl text-[#231F20] group-hover:text-[#126A44] transition-colors">{cat}</h3>
+              <p className="thd-mono text-[10px] text-[#231F20]/70 mt-1">{(productsByCategory[cat] || []).filter(p => stockFor(p) > 0).length} products</p>
             </button>
             );
           })}
@@ -1005,16 +1075,15 @@ function ShopByFeeling({ products }: { products: Product[] }) {
     <section className="bg-[#FFFFFF] py-10 sm:py-14">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-2xl sm:text-3xl font-bold text-[#231F20] text-center mb-2">How Do You Want to Feel?</h2>
-        <p className="text-[#231F20] text-center mb-6 text-sm">Tap to browse products by effect</p>
+        <p className="thd-mono text-[#231F20]/70 text-center mb-6 text-[11px]">Tap to browse by effect {"\u00B7"} effects vary from person to person</p>
         <div className="grid grid-cols-4 gap-3 sm:gap-6">
           {feelings.map((f) => {
             const count = products.filter(p => p.stock > 0 && getProductEffect(p).label === f.label).length;
             return (
               <button key={f.label} onClick={() => navigate(`/products/${f.label.toLowerCase()}`)} className="rounded-2xl p-3 sm:p-6 text-center hover:shadow-lg transition-all group border border-[#231F20]/10 hover:border-[#B3D335]" style={{ backgroundColor: f.bg }}>
-                <span className="text-2xl sm:text-4xl block mb-1 sm:mb-3">{f.icon}</span>
-                <h3 className="text-sm sm:text-lg font-semibold text-[#231F20] group-hover:text-[#126A44] transition-colors">{f.label}</h3>
+                <h3 className="thd-display text-lg sm:text-3xl text-[#231F20] group-hover:text-[#126A44] transition-colors">{f.label}</h3>
                 <p className="text-xs text-[#231F20] mt-0.5 hidden sm:block">{f.desc}</p>
-                {count > 0 && <p className="text-[10px] sm:text-xs text-[#3D8C32] mt-1">{count} items</p>}
+                {count > 0 && <p className="thd-mono text-[9px] sm:text-[10px] text-[#231F20]/70 mt-1">{count} items</p>}
               </button>
             );
           })}
@@ -1168,7 +1237,7 @@ function PromoBanner({ sale }: { sale?: ActiveSaleData | null }) {
     return (
       <section className="bg-[#231F20] py-8 sm:py-10">
         <div className="max-w-3xl mx-auto px-4 text-center">
-          <p className="text-[#FFCB08] font-bold text-lg sm:text-2xl mb-2">{"\u{1F525}"} Don’t Miss the Sale</p>
+          <p className="thd-display text-[#FFCB08] text-3xl sm:text-5xl mb-3">Don’t Miss the Sale</p>
           <p className="text-[#FFFFFF] text-sm sm:text-base mb-4">Up to <span className="text-[#B3D335] font-bold">{salePct}% OFF</span> select items, in store and online{!sale?.promos_disabled && <> — first-time customers still get 10% off with code <span className="bg-[#FFFFFF]/10 px-2 py-0.5 rounded font-mono font-bold">FIRST10</span></>}</p>
           <button onClick={() => navigate('/products/sale')} className="px-8 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold transition-colors">Shop the Sale</button>
         </div>
@@ -1178,7 +1247,7 @@ function PromoBanner({ sale }: { sale?: ActiveSaleData | null }) {
   return (
     <section className="bg-[#231F20] py-8 sm:py-10">
       <div className="max-w-3xl mx-auto px-4 text-center">
-        <p className="text-[#FFCB08] font-bold text-lg sm:text-2xl mb-2">{"\u{1F525}"} First-Time Customer?</p>
+        <p className="thd-display text-[#FFCB08] text-3xl sm:text-5xl mb-3">First-Time Customer?</p>
         <p className="text-[#FFFFFF] text-sm sm:text-base mb-4">Get <span className="text-[#B3D335] font-bold">10% OFF</span> your entire order with code <span className="bg-[#FFFFFF]/10 px-2 py-0.5 rounded font-mono font-bold">FIRST10</span></p>
         <button onClick={() => navigate('/products')} className="px-8 py-3 bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] rounded-full font-bold transition-colors">Shop Now &amp; Save</button>
       </div>
@@ -1198,7 +1267,7 @@ function WhyChooseUs() {
   return (
     <section className="bg-[#FFFFFF] py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl font-bold text-[#231F20] text-center mb-2">{"\u26A1"} Why Shop With Us?</h2>
+        <h2 className="text-3xl font-bold text-[#231F20] text-center mb-2">Why Shop With Us?</h2>
         <p className="text-[#231F20] text-center mb-8">Quality you can trust, speed you can count on</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {reasons.map((r) => (
@@ -1396,6 +1465,7 @@ function ProductGridCard({ product, onQuickAdd, fulfillment, sale }: { product: 
                       {effect.icon} {effect.label}
                     </span>}
           {product.product_type && <span className="inline-block text-[11px] sm:text-xs font-medium px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full bg-[#E8F5E9] text-[#2E7D32]">{product.product_type}</span>}
+          {product.lab_results && product.lab_results.length > 0 && <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-wide px-1.5 sm:px-2 py-0.5 rounded-full border border-[#231F20] text-[#231F20]"><GoldCross className="h-3 w-3" /> Lab tested</span>}
           {fulfillment && isPickup && <span className="inline-block bg-[#58BA49] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ready in 5 min</span>}
           {fulfillment && fulfillment === "local_delivery" && <span className="inline-block bg-[#3D8C32] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">42hr Delivery</span>}
           {fulfillment && !isPickup && fulfillment !== "local_delivery" && <span className="inline-block bg-[#3D8C32] text-[#FFFFFF] text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">Ships 1–2 Days</span>}
@@ -5736,7 +5806,7 @@ function App() {
   }, [products, stockForFulfillment]);
 
   const shell = (content: React.ReactNode) => (
-    <div className="min-h-screen bg-[#FFFFFF] overflow-x-clip">
+    <div className="thd-street min-h-screen bg-[#FFFFFF] overflow-x-clip">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-0 focus:top-0 focus:z-[9999] focus:bg-[#FFFFFF] focus:px-4 focus:py-2 focus:text-[#231F20] focus:underline">Skip to main content</a>
       <StickyTopBar sale={activeSale} />
       <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} fulfillment={fulfillment} onFulfillmentClick={() => setShowFulfillmentModal(true)} />
@@ -5802,7 +5872,7 @@ function App() {
 
   // Homepage
   return (
-    <div className="min-h-screen bg-[#FFFFFF]">
+    <div className="thd-street min-h-screen bg-[#FFFFFF]">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-0 focus:top-0 focus:z-[9999] focus:bg-[#FFFFFF] focus:px-4 focus:py-2 focus:text-[#231F20] focus:underline">Skip to main content</a>
       <StickyTopBar sale={activeSale} />
       <Header cartCount={cartCount} onSearch={() => setSearchOpen(true)} onCartOpen={() => setCartOpen(true)} fulfillment={fulfillment} onFulfillmentClick={() => setShowFulfillmentModal(true)} />
