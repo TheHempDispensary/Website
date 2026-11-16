@@ -958,8 +958,8 @@ function HeroSection({ sale }: { sale?: ActiveSaleData | null }) {
         <div className="flex-1 min-w-0">
           <p className="thd-mono text-[11px] sm:text-xs text-[#B3D335] flex items-center gap-2 mb-4"><GoldCross className="h-4 w-4 flex-shrink-0" /> Spring Hill, Florida {"\u00B7"} Since 2019 {"\u00B7"} 21+</p>
           <h1 className="text-[3.25rem] leading-[0.95] sm:text-7xl lg:text-8xl text-[#FFFFFF] mb-5">
-            Skip the line.<br />
-            <span className="text-[#B3D335]">Get your hemp</span><br />
+            Skip the line.{" "}<br />
+            <span className="text-[#B3D335]">Get your hemp</span>{" "}<br />
             in minutes.
           </h1>
           <p className="text-[#FFFFFF]/85 text-base sm:text-lg mb-6 max-w-xl">Lab-tested flower, edibles, vapes and more. Order ahead and pick up in five minutes at either Spring Hill store, or have it shipped.</p>
@@ -1460,7 +1460,7 @@ function ProductGridCard({ product, onQuickAdd, fulfillment, sale }: { product: 
         </ProductLink>
         {/* Badges row */}
         <div className="flex items-center gap-1 flex-wrap mb-1.5">
-          {isConsumableProduct(product) && <span className="inline-block text-[11px] sm:text-xs font-bold px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full bg-[#D9A32C]/15 text-[#D9A32C] border border-[#D9A32C]/30">21+</span>}
+          {isConsumableProduct(product) && <span className="inline-block text-[11px] sm:text-xs font-bold px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full bg-[#FFCB08]/25 text-[#6B4A00] border border-[#6B4A00]/40">21+</span>}
           {isConsumableProduct(product) && <span className="inline-block text-[11px] sm:text-xs font-medium px-2 sm:px-2 py-[3px] sm:py-0.5 rounded-full" style={{ backgroundColor: effect.bg, color: effect.color }}>
                       {effect.icon} {effect.label}
                     </span>}
@@ -1671,7 +1671,7 @@ function ProductDetail({ productId, products, onAddToCart, fulfillment, sale }: 
 
             {isConsumableProduct(product) && (
             <div className="flex items-center gap-2 mb-4 bg-[#FFCB08]/10 border border-[#FFCB08]/30 rounded-lg px-4 py-2">
-              <span className="text-[#D9A32C] font-bold">21+</span>
+              <span className="text-[#6B4A00] font-bold">21+</span>
               <span className="text-[#231F20] text-sm">Age verification required</span>
             </div>
             )}
@@ -3858,7 +3858,7 @@ function CheckoutPage({ cart, onClear, fulfillment, sale }: { cart: CartItem[]; 
     return (
       <div className="max-w-2xl mx-auto px-4 py-24 text-center">
         <ShoppingCart className="mx-auto h-16 w-16 text-[#231F20] mb-4" />
-        <h1 className="text-2xl font-bold text-[#FFFFFF] mb-2">Your cart is empty</h1>
+        <h1 className="text-2xl font-bold text-[#231F20] mb-2">Your cart is empty</h1>
         <p className="text-[#231F20] mb-6">Add some products before checking out.</p>
         <button onClick={() => navigate("/products")} className="bg-[#B3D335] hover:bg-[#58BA49] text-[#231F20] hover:text-[#FFFFFF] px-8 py-3 rounded-full font-medium transition-colors">Shop Now</button>
       </div>

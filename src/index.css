@@ -267,3 +267,12 @@
 .thd-street h2[class*="text-3xl"] { font-size: clamp(2.25rem, 5vw, 3.5rem); }
 .thd-street h2[class*="text-2xl"]:not([class*="sm:text-3xl"]) { font-size: clamp(1.75rem, 3.5vw, 2.25rem); }
 .thd-street h2[class*="sm:text-3xl"] { font-size: clamp(2rem, 4.5vw, 3rem); }
+/* Full-width action buttons and step pills follow the same squared shape */
+.thd-street :is(button, a)[class*="rounded-full"][class*="w-full"][class*="py-"],
+.thd-street div[class*="rounded-full"][class*="px-"][class*="py-"] {
+  border-radius: 4px;
+}
+.thd-street :is(button, a)[class*="rounded-full"][class*="w-full"][class*="py-"] {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
