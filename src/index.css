@@ -192,3 +192,87 @@
 @media (prefers-reduced-motion: reduce) {
   .hw-bat-1, .hw-bat-2, .hw-bat-3, .hw-bat path, .hw-ghost, .hw-flicker, .hw-swing, .hw-spider { animation: none !important; }
 }
+
+/* ======================== STREET / MEDICAL THEME ========================
+   One layer over the whole site (the shell carries .thd-street): poster
+   lettering for headings, hard-edged cards and buttons, a faint grid on the
+   dark sections, typewriter-style data labels. Remove the class to switch off. */
+.thd-street {
+  font-family: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: #F4F4EF;
+}
+.thd-street :is(h1, h2),
+.thd-display {
+  font-family: 'Anton', Impact, 'Arial Narrow', sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 1.02;
+}
+.thd-mono {
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.thd-marker {
+  font-family: 'Permanent Marker', cursive;
+}
+/* Hard edges: cards and panels */
+.thd-street :is(.rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl) {
+  border-radius: 6px;
+}
+/* Pill buttons and tags become squared */
+.thd-street :is(button, a, span)[class*="rounded-full"][class*="px-"] {
+  border-radius: 4px;
+}
+.thd-street :is(button, a)[class*="rounded-full"][class*="px-"],
+.thd-street :is(button, a)[class*="bg-[#B3D335]"] {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+/* Bordered cards read like labels: solid ink outline */
+.thd-street :is(div, button, a, article)[class~="border"][class*="rounded-"]:not([class*="rounded-full"]) {
+  border-width: 2px;
+  border-color: #231F20;
+}
+.thd-street :is(div, button, a)[class~="border"][class*="rounded-"][class*="hover:shadow"]:hover {
+  box-shadow: 5px 5px 0 #231F20;
+}
+/* Primary (lime) buttons get an ink outline */
+.thd-street :is(button, a)[class*="bg-[#B3D335]"][class*="px-"],
+.thd-street button[class*="bg-[#B3D335]"][class*="w-full"] {
+  border: 2px solid #231F20;
+}
+/* Dark sections: faint grid, like graph paper on asphalt */
+.thd-street :is(section, footer)[class*="bg-[#231F20]"],
+.thd-grid {
+  background-image: linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+/* Caution-tape strip */
+.thd-tape {
+  background: #FFCB08;
+  color: #231F20;
+  border-top: 3px solid #231F20;
+  border-bottom: 3px solid #231F20;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.thd-hard-shadow { box-shadow: 6px 6px 0 #231F20; }
+.thd-hard-shadow-lime { box-shadow: 10px 10px 0 #B3D335; }
+.thd-barcode {
+  background: repeating-linear-gradient(90deg, #231F20 0 3px, transparent 3px 6px, #231F20 6px 7px, transparent 7px 12px, #231F20 12px 16px, transparent 16px 19px);
+}
+.thd-street h2[class*="text-3xl"] { font-size: clamp(2.25rem, 5vw, 3.5rem); }
+.thd-street h2[class*="text-2xl"]:not([class*="sm:text-3xl"]) { font-size: clamp(1.75rem, 3.5vw, 2.25rem); }
+.thd-street h2[class*="sm:text-3xl"] { font-size: clamp(2rem, 4.5vw, 3rem); }
+/* Full-width action buttons and step pills follow the same squared shape */
+.thd-street :is(button, a)[class*="rounded-full"][class*="w-full"][class*="py-"],
+.thd-street div[class*="rounded-full"][class*="px-"][class*="py-"] {
+  border-radius: 4px;
+}
+.thd-street :is(button, a)[class*="rounded-full"][class*="w-full"][class*="py-"] {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
