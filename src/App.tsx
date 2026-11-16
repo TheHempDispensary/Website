@@ -743,9 +743,10 @@ function StickyTopBar({ sale }: { sale?: ActiveSaleData | null }) {
     );
   }
   return (
-    <div className="thd-tape text-center py-1.5 px-4 text-[11px] sm:text-xs whitespace-nowrap overflow-hidden">
+    <div className="thd-tape text-center py-1.5 px-3 sm:px-4 text-[11px] sm:text-xs leading-snug sm:whitespace-nowrap overflow-hidden">
       <span className="hidden sm:inline">Order online, ready in 5 minutes <span aria-hidden="true">///</span> Spring Hill <span aria-hidden="true">///</span> Open daily <span aria-hidden="true">///</span> </span>
-      <span className="sm:hidden">Ready in 5 minutes <span aria-hidden="true">///</span> </span>
+      {/* Phones: during a sale show only the sale (it wraps instead of being cut off). */}
+      {!salePct && <span className="sm:hidden">Ready in 5 minutes <span aria-hidden="true">///</span> </span>}
       <span>{saleLine}</span>
     </div>
   );
